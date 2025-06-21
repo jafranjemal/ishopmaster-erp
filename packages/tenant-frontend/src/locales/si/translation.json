@@ -1,0 +1,98 @@
+{
+  "common": {
+    "buttons": {
+      "save": "සුරකින්න",
+      "saving": "සුරකිමින්...",
+      "cancel": "අවලංගු කරන්න",
+      "delete": "මකන්න",
+      "deleting": "මකමින්...",
+      "confirm": "තහවුරු කරන්න",
+      "edit": "සංස්කරණය කරන්න",
+      "create": "තනන්න",
+      "create_new": "අලුත් එක තනන්න",
+      "apply_filter": "ගාලකය යොදන්න"
+    },
+    "status": {
+      "active": "සක්‍රිය",
+      "inactive": "අක්‍රිය",
+      "paid": "ගෙවූ",
+      "pending": "අපේක්ෂිත"
+    },
+    "loading": "පූරණය වෙමින්...",
+    "error": "දෝෂයක් සිදු විය. නැවත උත්සාහ කරන්න."
+  },
+  "sidebar": {
+    "dashboard": "ඩෑෂ්බෝඩ්",
+    "pos": "විකුණුම් මධ්‍යස්ථානය",
+    "inventory": "ගබඩා",
+    "procurement": "ගෙවීම්",
+    "service": "සේවාව",
+    "crm": "පාරිභෝගික කළමනාකරණය",
+    "accounting": "ගිණුම්කරණය",
+    "reports": "වාර්තා",
+    "settings": "සැකසුම්",
+    "sub_menu": {
+      "products": "නිෂ්පාදන",
+      "adjustments": "තොග සීරුමාරු",
+      "transfers": "තොග මාරු",
+      "purchase_orders": "මිලදී ගැනීම් ඇණවුම්",
+      "suppliers": "සැපයුම්කරුවන්",
+      "tickets": "සේවා ටිකට්පත්",
+      "customers": "පාරිභෝගිකයින්",
+      "general_ledger": "සාමාන්‍ය ලෙජරය",
+      "chart_of_accounts": "ගිණුම් වගුව",
+      "profile": "පැතිකඩ",
+      "locations": "ස්ථාන",
+      "users": "පරිශීලකයින්",
+      "roles_permissions": "භූමිකා හා අවසර",
+      "inventory_settings": "ගබඩා සැකසුම්",
+      "brands": "වෙළඳ නාම",
+      "categories": "වර්ග",
+      "attributes": "ලක්ෂණ",
+      "integrations": "එකතුකිරීම්"
+    }
+  },
+  "login": {
+    "title": "කුලීකරු පෝර්ටල් පිවිසුම",
+    "subtitle": "ඔබේ iShopMaster පෝර්ටලයට පිවිසෙන්න",
+    "subdomain_placeholder": "ඔබේ කඩේ උපඩොමේන්",
+    "email_placeholder": "you@example.com",
+    "email_label": "ඊමේල් ලිපිනය",
+    "password_label": "මුරපදය",
+    "password_required": "මුරපදය අනිවාර්ය වේ",
+    "subdomain_required": "උපඩොමේන් අනිවාර්ය වේ",
+    "email_required": "ඊමේල් අනිවාර්ය වේ",
+    "subdomain_invalid": "වලංගු නොවන උපඩොමේන් ආකෘතිය",
+    "email_invalid": "වලංගු නොවන ඊමේල් ආකෘතිය",
+    "password_placeholder": "••••••••",
+    "sign_in_button": "පිවිසෙන්න",
+    "signing_in": "පිවිසෙමින්..."
+  },
+  "dashboard": {
+    "welcome_message": "නැවත පිළිගනිමු, {{name}}!",
+    "subtitle": "අද දිනයේ ඔබේ ව්‍යාපාරයේ තත්ත්වය: {{date}}."
+  },
+  "roles_page": {
+    "title": "භූමිකා සහ අවසර",
+    "subtitle": "රැකියා භූමිකා සහ ඒවායේ ප්‍රවේශය කළමනාකරණය කරන්න.",
+    "create_button": "භූමිකාව තනන්න",
+    "edit_modal_title": "{{name}} භූමිකාව සංස්කරණය කරන්න",
+    "create_modal_title": "නව භූමිකාව තනන්න"
+  },
+  "users_page": {
+    "title": "පරිශීලක කළමනාකරණය",
+    "subtitle": "ඔබේ පද්ධති පරිශීලකයින් සෑදීම, නැරඹීම සහ කළමනාකරණය.",
+    "add_button": "පරිශීලකයෙක් එක් කරන්න"
+  },
+  "locations_page": {
+    "title": "ස්ථාන කළමනාකරණය",
+    "subtitle": "ඔබේ ශාඛා සහ ගබඩා කළමනාකරණය කරන්න.",
+    "new_warehouse_button": "නව ගබඩාව",
+    "new_branch_button": "නව ශාඛාව"
+  },
+  "accounts_page": {
+    "title": "ගිණුම් වගුව",
+    "subtitle": "ඔබේ ව්‍යාපාරයේ සියලු මූල්‍ය ගිණුම් කළමනාකරණය කරන්න.",
+    "new_account_button": "නව ගිණුම"
+  }
+}

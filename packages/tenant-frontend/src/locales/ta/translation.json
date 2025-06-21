@@ -1,0 +1,98 @@
+{
+  "common": {
+    "buttons": {
+      "save": "சேமிக்க",
+      "saving": "சேமிக்கிறது...",
+      "cancel": "ரத்து செய்ய",
+      "delete": "நீக்கு",
+      "deleting": "நீக்குகிறது...",
+      "confirm": "உறுதி செய்ய",
+      "edit": "தொகு",
+      "create": "உருவாக்கு",
+      "create_new": "புதியது உருவாக்கு",
+      "apply_filter": "வடிகட்டியை பயன்படுத்து"
+    },
+    "status": {
+      "active": "செயலில்",
+      "inactive": "செயலற்றது",
+      "paid": "செலுத்தப்பட்டது",
+      "pending": "நிலுவையில்"
+    },
+    "loading": "ஏற்றுகிறது...",
+    "error": "பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்."
+  },
+  "sidebar": {
+    "dashboard": "டாஷ்போர்ட்",
+    "pos": "விற்பனை மையம்",
+    "inventory": "சரக்கு",
+    "procurement": "கொள்முதல்",
+    "service": "சேவை",
+    "crm": "வாடிக்கையாளர் மேலாண்மை",
+    "accounting": "கணக்கியல்",
+    "reports": "அறிக்கைகள்",
+    "settings": "அமைப்புகள்",
+    "sub_menu": {
+      "products": "தயாரிப்புகள்",
+      "adjustments": "பங்கு சரிசெய்தல்",
+      "transfers": "பங்கு மாற்றங்கள்",
+      "purchase_orders": "கொள்முதல் ஆணைகள்",
+      "suppliers": "வழங்குநர்கள்",
+      "tickets": "சேவை டிக்கெட்டுகள்",
+      "customers": "வாடிக்கையாளர்கள்",
+      "general_ledger": "பொது லெட்ஜர்",
+      "chart_of_accounts": "கணக்கு பட்டியல்",
+      "profile": "சுயவிவரம்",
+      "locations": "இடங்கள்",
+      "users": "பயனர்கள்",
+      "roles_permissions": "பங்கு மற்றும் அனுமதிகள்",
+      "inventory_settings": "சரக்கு அமைப்புகள்",
+      "brands": "பிராண்டுகள்",
+      "categories": "வகைகள்",
+      "attributes": "பண்புகள்",
+      "integrations": "இணைப்புகள்"
+    }
+  },
+  "login": {
+    "title": "வாடகையாளர் போர்டல் உள்நுழைவு",
+    "subtitle": "உங்கள் iShopMaster போர்டலில் உள்நுழைக",
+    "subdomain_placeholder": "உங்கள் கடையின் உப டொமைன்",
+    "email_placeholder": "you@example.com",
+    "email_label": "மின்னஞ்சல் முகவரி",
+    "password_label": "கடவுச்சொல்",
+    "password_required": "கடவுச்சொல் தேவை",
+    "subdomain_required": "உப டொமைன் தேவை",
+    "email_required": "மின்னஞ்சல் தேவை",
+    "subdomain_invalid": "செல்லுபடியாகாத உப டொமைன் வடிவம்",
+    "email_invalid": "செல்லுபடியாகாத மின்னஞ்சல் வடிவம்",
+    "password_placeholder": "••••••••",
+    "sign_in_button": "உள்நுழை",
+    "signing_in": "உள்நுழைகிறது..."
+  },
+  "dashboard": {
+    "welcome_message": "மீண்டும் வருக, {{name}}!",
+    "subtitle": "இன்று உங்கள் வணிகத்தின் நிலை: {{date}}."
+  },
+  "roles_page": {
+    "title": "பங்கு மற்றும் அனுமதிகள்",
+    "subtitle": "வேலை பங்குகள் மற்றும் அனுமதிகளை நிர்வகிக்கவும்.",
+    "create_button": "பங்கு உருவாக்கு",
+    "edit_modal_title": "{{name}} பங்கை தொகுக்க",
+    "create_modal_title": "புதிய பங்கு உருவாக்கு"
+  },
+  "users_page": {
+    "title": "பயனர் மேலாண்மை",
+    "subtitle": "பயனர்களை உருவாக்கவும், பார்வையிடவும் மற்றும் நிர்வகிக்கவும்.",
+    "add_button": "பயனரை சேர்"
+  },
+  "locations_page": {
+    "title": "இட மேலாண்மை",
+    "subtitle": "உங்கள் கிளைகள் மற்றும் கிடங்குகளை நிர்வகிக்கவும்.",
+    "new_warehouse_button": "புதிய கிடங்கு",
+    "new_branch_button": "புதிய கிளை"
+  },
+  "accounts_page": {
+    "title": "கணக்கு பட்டியல்",
+    "subtitle": "உங்கள் வணிகத்திற்கான கணக்குகளை நிர்வகிக்கவும்.",
+    "new_account_button": "புதிய கணக்கு"
+  }
+}

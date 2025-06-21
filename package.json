@@ -1,0 +1,21 @@
+{
+  "name": "ishop-master-2.0",
+  "version": "1.0.0",
+  "description": "Root for the iShop Master monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:admin:backend": "npm run dev --workspace=admin-backend",
+    "dev:admin:frontend": "npm run dev --workspace=admin-frontend",
+    "dev": "concurrently \"npm:dev:admin:backend\" \"npm:dev:admin:frontend\"",
+    "install:all": "npm install -ws"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

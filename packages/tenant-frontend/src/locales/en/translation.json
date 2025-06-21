@@ -1,0 +1,98 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleting": "Deleting...",
+      "confirm": "Confirm",
+      "edit": "Edit",
+      "create": "Create",
+      "create_new": "Create New",
+      "apply_filter": "Apply Filter"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "paid": "Paid",
+      "pending": "Pending"
+    },
+    "loading": "Loading...",
+    "error": "An error occurred. Please try again."
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "pos": "Point of Sale",
+    "inventory": "Inventory",
+    "procurement": "Procurement",
+    "service": "Service",
+    "crm": "CRM",
+    "accounting": "Accounting",
+    "reports": "Reports",
+    "settings": "Settings",
+    "sub_menu": {
+      "products": "Products",
+      "adjustments": "Stock Adjustments",
+      "transfers": "Stock Transfers",
+      "purchase_orders": "Purchase Orders",
+      "suppliers": "Suppliers",
+      "tickets": "Service Tickets",
+      "customers": "Customers",
+      "general_ledger": "General Ledger",
+      "chart_of_accounts": "Chart of Accounts",
+      "profile": "Profile",
+      "locations": "Locations",
+      "users": "Users",
+      "roles_permissions": "Roles & Permissions",
+      "inventory_settings": "Inventory Settings",
+      "brands": "Brands",
+      "categories": "Categories",
+      "attributes": "Attributes",
+      "integrations": "Integrations"
+    }
+  },
+  "login": {
+    "title": "Tenant Portal Login",
+    "subtitle": "Sign in to your iShopMaster Portal",
+    "subdomain_placeholder": "Your Shop's Subdomain",
+    "email_placeholder": "you@example.com",
+    "email_label": "Email Address",
+    "password_label": "Password",
+    "password_required": "Password is required",
+    "subdomain_required": "Subdomain is required",
+    "email_required": "Email is required",
+    "subdomain_invalid": "Invalid subdomain format",
+    "email_invalid": "Invalid email format",
+    "password_placeholder": "••••••••",
+    "sign_in_button": "Sign In",
+    "signing_in": "Signing In..."
+  },
+  "dashboard": {
+    "welcome_message": "Welcome back, {{name}}!",
+    "subtitle": "Here's a snapshot of your business today, {{date}}."
+  },
+  "roles_page": {
+    "title": "Roles & Permissions",
+    "subtitle": "Manage job roles and what each role can access and do.",
+    "create_button": "Create Role",
+    "edit_modal_title": "Edit Role: {{name}}",
+    "create_modal_title": "Create New Role"
+  },
+  "users_page": {
+    "title": "User Management",
+    "subtitle": "Create, view, and manage all of your system users.",
+    "add_button": "Add User"
+  },
+  "locations_page": {
+    "title": "Locations Management",
+    "subtitle": "Manage all your physical branches and warehouses.",
+    "new_warehouse_button": "New Warehouse",
+    "new_branch_button": "New Branch"
+  },
+  "accounts_page": {
+    "title": "Chart of Accounts",
+    "subtitle": "Manage all financial accounts for your business.",
+    "new_account_button": "New Account"
+  }
+}
