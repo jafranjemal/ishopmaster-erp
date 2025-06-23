@@ -11,7 +11,7 @@ class InventoryService {
    * @param {mongoose.ClientSession} session - The Mongoose session for the transaction.
    */
   async increaseStock(models, data, session) {
-    const { ProductVariant, InventoryLot, InventoryItem } = models;
+    const { ProductVariants, InventoryLot, InventoryItem } = models;
     const {
       productVariantId,
       branchId,
@@ -25,7 +25,7 @@ class InventoryService {
       ...refs
     } = data;
 
-    const variant = await ProductVariant.findById(productVariantId)
+    const variant = await ProductVariants.findById(productVariantId)
       .populate("templateId")
       .session(session)
       .lean();

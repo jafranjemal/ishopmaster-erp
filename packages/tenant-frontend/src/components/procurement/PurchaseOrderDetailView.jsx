@@ -1,9 +1,21 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle, Badge } from "ui-library";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Badge,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "ui-library";
 import useAuth from "../../context/useAuth";
 
 const PurchaseOrderDetailView = ({ purchaseOrder }) => {
-  const { formatDate, formatCurrency } = useAuth();
+  const { formatCurrency, formatDate } = useAuth();
   const {
     poNumber,
     supplierId,
@@ -12,6 +24,7 @@ const PurchaseOrderDetailView = ({ purchaseOrder }) => {
     orderDate,
     expectedDeliveryDate,
     totalAmount,
+    items = [],
   } = purchaseOrder;
 
   return (
@@ -25,7 +38,7 @@ const PurchaseOrderDetailView = ({ purchaseOrder }) => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm mb-6">
           <div>
             <h4 className="font-semibold text-slate-300 mb-2">Supplier</h4>
             <p className="text-slate-100">{supplierId.name}</p>
@@ -35,7 +48,6 @@ const PurchaseOrderDetailView = ({ purchaseOrder }) => {
           <div>
             <h4 className="font-semibold text-slate-300 mb-2">Destination</h4>
             <p className="text-slate-100">{destinationBranchId.name}</p>
-            {/* We can add branch address here later */}
           </div>
           <div>
             <h4 className="font-semibold text-slate-300 mb-2">Dates & Value</h4>
@@ -59,6 +71,31 @@ const PurchaseOrderDetailView = ({ purchaseOrder }) => {
             </p>
           </div>
         </div>
+        <h4 className="font-semibold text-slate-300 mb-2">
+          Ordered Items Summary
+        </h4>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Product</TableHead>
+              <TableHead>Ordered</TableHead>
+              <TableHead>Received</TableHead>
+              <TableHead className="text-right">Cost</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item._id}>
+                <TableCell>{item.description}</TableCell>
+                <TableCell>{item.quantityOrdered}</TableCell>
+                <TableCell>{item.quantityReceived}</TableCell>
+                <TableCell className="text-right font-mono">
+                  {formatCurrency(item.costPrice)}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );

@@ -4,8 +4,7 @@ const {
   getAllPurchaseOrders,
   getPurchaseOrderById,
   receiveGoods,
-  // updatePurchaseOrder,
-  // cancelPurchaseOrder
+  receiveGoodsForPO,
 } = require("./purchaseOrder.controller");
 const { protect, authorize } = require("../../../middleware/auth.middleware");
 
@@ -22,11 +21,14 @@ router
 router
   .route("/:id")
   .get(authorize("procurement:po:view"), getPurchaseOrderById);
-// .put(authorize('procurement:po:edit'), updatePurchaseOrder)
-// .delete(authorize('procurement:po:cancel'), cancelPurchaseOrder);
+// .put(authorize('procurement:po:edit'), updatePurchaseOrder) would go here
 
 router
   .route("/:id/receive")
   .post(authorize("procurement:po:receive"), receiveGoods);
+
+// router
+//   .route("/:poId/receive-goods")
+//   .post(authorize("procurement:po:receive"), receiveGoodsForPO);
 
 module.exports = router;

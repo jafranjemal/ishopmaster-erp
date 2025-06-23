@@ -13,9 +13,11 @@ export const formatCurrency = (amount, currencyCode) => {
   const numericAmount = typeof amount === "number" ? amount : 0;
 
   // Use the browser's built-in Internationalization API for robust formatting.
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat(undefined, {
     // Using 'en-US' locale for consistent number format, currency symbol is separate
     style: "currency",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
     currency: currencyCode || "USD", // Fallback to USD if no code is provided
   }).format(numericAmount);
 };

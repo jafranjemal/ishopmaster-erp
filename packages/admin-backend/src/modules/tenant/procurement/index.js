@@ -3,6 +3,7 @@ const supplierSchema = require("./supplier.schema");
 const supplierRoutes = require("./supplier.routes");
 const purchaseOrderSchema = require("./purchaseOrder.schema");
 const purchaseOrderRoutes = require("./purchaseOrder.routes");
+const goodsReceiptNoteSchema = require("./goodsReceiptNote.schema");
 // We will import PurchaseOrder schemas and routes here later
 
 // Create a main router for the entire procurement module
@@ -18,6 +19,7 @@ module.exports = {
   schemas: {
     Supplier: supplierSchema,
     PurchaseOrder: purchaseOrderSchema,
+    GoodsReceiptNote: goodsReceiptNoteSchema,
   },
   router: mainRouter,
 };
