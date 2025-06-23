@@ -468,4 +468,30 @@ export const tenantCurrencyService = {
     api.delete(`/tenant/currencies/rates/${id}`),
 };
 
+// --- NEW UPLOAD SERVICE (Refactored for cleaner code) ---
+export const tenantUploadService = {
+  /**
+   * Gets a secure, temporary signature from the backend for direct-to-cloud uploads.
+   */
+  getCloudinarySignature: async () => {
+    return api.post("/tenant/uploads/signature", {
+      timestamp: Math.round(new Date().getTime() / 1000),
+    });
+  },
+};
+
+// --- NEW RECONCILIATION SERVICE ---
+export const tenantReconciliationService = {
+  /**
+   * Posts the final supplier invoice data to trigger the three-way match.
+   * @param {object} invoiceData - The complete payload for the supplier invoice.
+   */
+  postInvoice: async (invoiceData) => {
+    // We will build this backend API in the next step.
+    // For now, we define the service that will call it.
+    // The endpoint will likely be /tenant/procurement/invoices
+    return api.post("/tenant/procurement/invoices", invoiceData);
+  },
+};
+
 export default api;

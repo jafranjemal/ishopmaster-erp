@@ -25,6 +25,7 @@ import PurchaseOrdersPage from "./pages/procurement/PurchaseOrdersPage";
 import PurchaseOrderDetailPage from "./pages/procurement/PurchaseOrderDetailPage";
 import CurrenciesPage from "./pages/settings/CurrenciesPage";
 import PayablesPage from "./pages/accounting/PayablesPage";
+import ReconciliationPage from "./pages/accounting/ReconciliationPage";
 function App() {
   return (
     <>
@@ -126,6 +127,10 @@ function App() {
                   <Route
                     path="/accounting/payables"
                     element={<PayablesPage />}
+                  />
+                  <Route
+                    path="/accounting/payables/reconcile/:poId"
+                    element={<ReconciliationPage />}
                   />
                 </Routes>
               </Layout>

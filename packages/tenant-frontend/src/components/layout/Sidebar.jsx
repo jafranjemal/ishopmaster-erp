@@ -154,8 +154,9 @@ const Sidebar = () => {
           icon: Library,
           permission: "accounting:chart:manage",
         },
+
         {
-          name: t("sidebar.sub_menu.payables"),
+          name: t("sidebar.sub_menu.payables", "Accounts Payable"),
           href: "/accounting/payables",
           icon: Receipt,
           permission: "accounting:payables:view",
