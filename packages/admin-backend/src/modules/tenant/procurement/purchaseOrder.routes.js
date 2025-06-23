@@ -5,6 +5,7 @@ const {
   getPurchaseOrderById,
   receiveGoods,
   receiveGoodsForPO,
+  getPOsAwaitingInvoice,
 } = require("./purchaseOrder.controller");
 const { protect, authorize } = require("../../../middleware/auth.middleware");
 
@@ -27,8 +28,8 @@ router
   .route("/:id/receive")
   .post(authorize("procurement:po:receive"), receiveGoods);
 
-// router
-//   .route("/:poId/receive-goods")
-//   .post(authorize("procurement:po:receive"), receiveGoodsForPO);
+router
+  .route("/awaiting-invoice")
+  .get(authorize("accounting:payables:view"), getPOsAwaitingInvoice);
 
 module.exports = router;

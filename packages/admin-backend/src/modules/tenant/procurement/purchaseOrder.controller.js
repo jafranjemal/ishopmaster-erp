@@ -169,3 +169,25 @@ exports.receiveGoods = asyncHandler(async (req, res, next) => {
     session.endSession();
   }
 });
+
+// @desc    Get all POs that have received goods but are not yet invoiced
+// @route   GET /api/v1/tenant/procurement/purchase-orders/awaiting-invoice
+// @access  Private (Requires 'accounting:payables:view' permission)
+exports.getPOsAwaitingInvoice = asyncHandler(async (req, res, next) => {
+  const { PurchaseOrder, SupplierInvoice } = req.models;
+
+  // 1. Find all PO IDs that have already been used in a Supplier Invoice.
+  const invoicedPOs = await SupplierInvoice.find({}).distinct(
+    "purchaseOrderId"
+  );
+
+  // 2. Find all POs that are received but whose ID is NOT IN the list of invoiced POs.
+  const awaitingInvoice = await PurchaseOrder.find({
+    status: { $in: ["partially_received", "fully_received"] },
+    _id: { $nin: invoicedPOs },
+  })
+    .populate("supplierId", "name")
+    .sort({ orderDate: 1 }); // Sort oldest first
+
+  res.status(200).json({ success: true, data: awaitingInvoice });
+});
