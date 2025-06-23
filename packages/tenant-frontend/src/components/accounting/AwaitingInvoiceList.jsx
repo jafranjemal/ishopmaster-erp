@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "ui-library";
-import { useAuth } from "../../context/AuthContext";
+import useAuth from "../../context/useAuth";
 
 const AwaitingInvoiceList = ({ purchaseOrders }) => {
   const { formatDate, formatCurrency } = useAuth();

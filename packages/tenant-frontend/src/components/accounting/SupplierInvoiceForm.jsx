@@ -11,8 +11,9 @@ import {
   TableRow,
   Card,
   CardContent,
+  FileUploader,
 } from "ui-library";
-import FileUploader from "ui-library/components/FileUploader"; // Assuming path
+// Assuming path
 import { tenantUploadService } from "../../services/api";
 
 import { AlertTriangle } from "lucide-react";
