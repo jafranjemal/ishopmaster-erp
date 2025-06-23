@@ -1,12 +1,29 @@
-// src/index.js
+// // src/index.js
 
+// export * from "./components/Button";
+// export * from "./components/Card";
+// export * from "./components/Modal";
+// export { default as Modal } from "./components/Modal";
+// export * from "./components/Input";
+// export * from "./components/Label";
+// export * from "./components/Table";
+// export * from "./components/Badge";
+
+// export * from "./lib/utils";
+
+export * from "./components/Badge";
+export { default as Badge } from "./components/Badge";
 export * from "./components/Button";
 export * from "./components/Card";
-export * from "./components/Modal";
-export { default as Modal } from "./components/Modal";
 export * from "./components/Input";
 export * from "./components/Label";
+export * from "./components/Modal";
+export * from "./components/Pagination";
+export * from "./components/FilterBar";
+export { default as Pagination } from "./components/Pagination";
+export { default as FilterBar } from "./components/FilterBar";
+export { default as Modal } from "./components/Modal";
+export { default as AlertModal } from "./components/AlertModal";
 export * from "./components/Table";
-export * from "./components/Badge";
-
-export * from "./lib/utils";
+export * from "./components/AlertModal";
+export * from "./lib/utils"; // Also export our `cn` utility

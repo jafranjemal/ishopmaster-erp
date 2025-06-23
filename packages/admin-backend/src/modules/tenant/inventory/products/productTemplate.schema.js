@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 /**
- * The ProductTemplate represents the abstract concept of a product family.
+ * The ProductTemplates represents the abstract concept of a product family.
  * e.g., "iPhone 15 Pro", "Anker PowerCore 10000 Battery".
  * It holds all information common to all its variations.
  */
@@ -28,9 +28,10 @@ const productTemplateSchema = new mongoose.Schema(
       ref: "AttributeSet",
     },
 
-    // Defines which other products this product is compatible with. Used for accessories and parts.
+    // Defines which other products this product is compatible with.
+    // Used for accessories and spare parts.
     compatibility: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "ProductTemplate" },
+      { type: mongoose.Schema.Types.ObjectId, ref: "ProductTemplates" },
     ],
 
     // General marketing images for the product family.
@@ -40,7 +41,9 @@ const productTemplateSchema = new mongoose.Schema(
         altText: { type: String },
       },
     ],
-
+    // Financials specific to this variant, which can override template defaults.
+    costPrice: { type: Number, default: 0 },
+    sellingPrice: { type: Number, required: true },
     // Defines the type for all variants that will be created from this template.
     type: {
       type: String,
@@ -48,22 +51,13 @@ const productTemplateSchema = new mongoose.Schema(
       enum: ["serialized", "non-serialized", "service", "bundle"],
     },
 
+    // Default SKU prefix for auto-generating variant SKUs
+    skuPrefix: { type: String, trim: true, uppercase: true },
+
     // Accounting links that apply to all variants by default
-    assetAccountId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Account",
-      required: true,
-    },
-    revenueAccountId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Account",
-      required: true,
-    },
-    cogsAccountId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Account",
-      required: true,
-    },
+    assetAccountId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
+    revenueAccountId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
+    cogsAccountId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
 
     isActive: { type: Boolean, default: true },
   },

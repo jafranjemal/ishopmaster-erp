@@ -36,6 +36,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   const payload = {
     id: user._id,
     name: user.name,
+    email: user.email,
     role: user?.role?.name,
     permissions: user?.role?.permissions,
     tenantId: req.tenant._id,
@@ -43,6 +44,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     subdomain: req.tenant.subdomain,
     branchId: user.assignedBranchId, // For later use
     enabledModules: req.tenant.enabledModules,
+    localization: req.tenant.settings.localization,
   };
 
   const token = generateToken(payload);

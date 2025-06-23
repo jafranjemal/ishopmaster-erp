@@ -6,6 +6,7 @@ const {
   updateTemplate,
   deleteTemplate,
   generateVariants,
+  syncVariants,
 } = require("./productTemplate.controller");
 const {
   protect,
@@ -25,5 +26,6 @@ router
   .delete(deleteTemplate);
 
 router.route("/:id/generate-variants").post(generateVariants);
-
+// This is the new, definitive route for creating and managing variants
+router.route("/:id/sync-variants").post(syncVariants);
 module.exports = router;

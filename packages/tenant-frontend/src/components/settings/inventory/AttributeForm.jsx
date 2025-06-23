@@ -1,22 +1,58 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button, Input, Label } from "ui-library";
 
 const AttributeForm = ({ attributeToEdit, onSave, onCancel, isSaving }) => {
-  const initialFormData = { name: "", values: [] };
-  const [formData, setFormData] = useState(initialFormData);
+  const { t } = useTranslation();
+
+  const getInitialFormData = () => ({
+    name: "",
+    key: "", // Add the key field
+    values: [],
+  });
+
+  const [formData, setFormData] = useState(getInitialFormData());
   const [newValue, setNewValue] = useState("");
+  // State to track if the user has manually edited the key
+  const [isKeyManuallyEdited, setIsKeyManuallyEdited] = useState(false);
   const isEditMode = Boolean(attributeToEdit);
 
+  // Effect to populate form when editing
   useEffect(() => {
     if (isEditMode && attributeToEdit) {
       setFormData({
         name: attributeToEdit.name || "",
+        key: attributeToEdit.key || "",
         values: attributeToEdit.values || [],
       });
+      // If editing, assume the key is final and don't auto-generate
+      setIsKeyManuallyEdited(true);
     } else {
-      setFormData(initialFormData);
+      setFormData(getInitialFormData());
+      setIsKeyManuallyEdited(false);
     }
   }, [attributeToEdit, isEditMode]);
+
+  // Effect to auto-generate the key from the name
+  useEffect(() => {
+    if (!isKeyManuallyEdited && !isEditMode) {
+      const newKey = formData.name
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "_") // Replace spaces with underscores
+        .replace(/[^a-z0-9_]/g, ""); // Remove special characters
+      setFormData((prev) => ({ ...prev, key: newKey }));
+    }
+  }, [formData.name, isKeyManuallyEdited, isEditMode]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    // If the user starts editing the key field, disable auto-generation
+    if (name === "key") {
+      setIsKeyManuallyEdited(true);
+    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleValueAdd = () => {
     if (newValue && !formData.values.includes(newValue)) {
@@ -32,28 +68,50 @@ const AttributeForm = ({ attributeToEdit, onSave, onCancel, isSaving }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    await onSave(formData);
+    onSave(formData);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <Label htmlFor="name">Attribute Name</Label>
-        <Input
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          required
-          placeholder="e.g., Color, Storage, RAM"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <Label htmlFor="name">
+            {t("attribute_form.name_label", "Attribute Name")}
+          </Label>
+          <Input
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            placeholder="e.g., Color, Storage"
+          />
+        </div>
+        <div>
+          <Label htmlFor="key">
+            {t("attribute_form.key_label", "Attribute Key")}
+          </Label>
+          <Input
+            id="key"
+            name="key"
+            value={formData.key}
+            onChange={handleChange}
+            required
+            placeholder="e.g., color, storage"
+          />
+        </div>
       </div>
       <div>
-        <Label>Predefined Values (Optional)</Label>
+        <Label>
+          {t("attribute_form.values_label", "Predefined Values (Optional)")}
+        </Label>
         <p className="text-xs text-slate-400 mb-2">
-          Add options if you want this attribute to be a dropdown selector.
+          {t(
+            "attribute_form.values_subtitle",
+            "Add options if you want this to be a dropdown selector."
+          )}
         </p>
         <div className="flex items-center gap-2">
           <Input
@@ -68,7 +126,7 @@ const AttributeForm = ({ attributeToEdit, onSave, onCancel, isSaving }) => {
             }}
           />
           <Button type="button" variant="outline" onClick={handleValueAdd}>
-            Add
+            {t("attribute_form.add_button", "Add")}
           </Button>
         </div>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -82,6 +140,7 @@ const AttributeForm = ({ attributeToEdit, onSave, onCancel, isSaving }) => {
                 type="button"
                 onClick={() => handleValueRemove(val)}
                 className="text-slate-400 hover:text-white"
+                aria-label={`Remove ${val}`}
               >
                 &times;
               </button>
@@ -91,10 +150,12 @@ const AttributeForm = ({ attributeToEdit, onSave, onCancel, isSaving }) => {
       </div>
       <div className="pt-4 flex justify-end space-x-4">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {t("common.buttons.cancel")}
         </Button>
         <Button type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Attribute"}
+          {isSaving
+            ? t("common.buttons.saving")
+            : t("attribute_form.save_button", "Save Attribute")}
         </Button>
       </div>
     </form>

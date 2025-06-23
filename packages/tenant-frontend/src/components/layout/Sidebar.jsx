@@ -34,6 +34,7 @@ import {
   Tag,
   ListTree,
   Beaker,
+  Globe,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -97,6 +98,7 @@ const Sidebar = () => {
           icon: ClipboardList,
           permission: "procurement:po:create",
         },
+
         {
           name: t("sidebar.sub_menu.suppliers"),
           href: "/procurement/suppliers",
@@ -176,6 +178,12 @@ const Sidebar = () => {
           href: "/settings/locations",
           icon: Building2,
           permission: "settings:locations:manage",
+        },
+        {
+          name: t("sidebar.sub_menu.localization"),
+          href: "/settings/localization",
+          icon: Globe,
+          permission: "settings:access",
         },
         {
           name: t("sidebar.sub_menu.users"),

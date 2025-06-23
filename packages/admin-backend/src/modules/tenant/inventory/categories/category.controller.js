@@ -31,17 +31,15 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
 
 // @desc    Delete a category
 exports.deleteCategory = asyncHandler(async (req, res, next) => {
-  const { Category, ProductTemplate } = req.models;
-  const productCount = await ProductTemplate.countDocuments({
+  const { Category, ProductTemplates } = req.models;
+  const productCount = await ProductTemplates.countDocuments({
     categoryId: req.params.id,
   });
   if (productCount > 0) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error: `Cannot delete category. It is assigned to ${productCount} product(s).`,
-      });
+    return res.status(400).json({
+      success: false,
+      error: `Cannot delete category. It is assigned to ${productCount} product(s).`,
+    });
   }
   const category = await Category.findByIdAndDelete(req.params.id);
   if (!category)

@@ -32,19 +32,17 @@ exports.updateBrand = asyncHandler(async (req, res, next) => {
 // @desc    Delete a brand
 // @route   DELETE /api/v1/tenant/inventory/brands/:id
 exports.deleteBrand = asyncHandler(async (req, res, next) => {
-  const { Brand, ProductTemplate } = req.models;
+  const { Brand, ProductTemplates } = req.models;
 
   // Data Integrity Check: Ensure brand is not in use before deleting.
-  const productCount = await ProductTemplate.countDocuments({
+  const productCount = await ProductTemplates.countDocuments({
     brandId: req.params.id,
   });
   if (productCount > 0) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error: `Cannot delete brand. It is currently assigned to ${productCount} product(s).`,
-      });
+    return res.status(400).json({
+      success: false,
+      error: `Cannot delete brand. It is currently assigned to ${productCount} product(s).`,
+    });
   }
 
   const brand = await Brand.findByIdAndDelete(req.params.id);

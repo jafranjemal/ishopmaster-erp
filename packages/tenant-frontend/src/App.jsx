@@ -19,6 +19,10 @@ import SupplierProfilePage from "./pages/procurement/SupplierProfilePage";
 import BrandsPage from "./pages/settings/inventory/BrandsPage";
 import CategoriesPage from "./pages/settings/inventory/CategoriesPage";
 import AttributesPage from "./pages/settings/inventory/AttributesPage";
+import ProductTemplatesPage from "./pages/inventory/ProductTemplatesPage";
+import ProductTemplateDetailPage from "./pages/inventory/ProductTemplateDetailPage";
+import PurchaseOrdersPage from "./pages/procurement/PurchaseOrdersPage";
+import PurchaseOrderDetailPage from "./pages/procurement/PurchaseOrderDetailPage";
 function App() {
   return (
     <>
@@ -38,14 +42,25 @@ function App() {
                   {/* Nested routes that appear inside the Layout */}
                   <Route path="/" element={<DashboardPage />} />
                   <Route path="/login" element={<LoginPage />} />
+                  {/* --- INVENTORY ROUTES --- */}
+                  {/* ➡️ Step 3 */}
+                  <Route
+                    path="/inventory/products"
+                    element={<ProductTemplatesPage />}
+                  />
+                  <Route
+                    path="/inventory/products/templates/:id"
+                    element={<ProductTemplateDetailPage />}
+                  />
+                  {/* This route is for the detail page we already built */}
+                  <Route
+                    path="/inventory/products/templates/:id"
+                    element={<ProductTemplateDetailPage />}
+                  />
                   {/* Settings Module Routes */}
                   <Route
                     path="/settings/locations"
                     element={<LocationsPage />}
-                  />
-                  <Route
-                    path="/settings/localization"
-                    element={<LocalizationPage />}
                   />
                   <Route path="/settings/users" element={<UsersPage />} />{" "}
                   <Route
@@ -65,6 +80,10 @@ function App() {
                   <Route
                     path="/settings/profile"
                     element={<CompanyProfilePage />}
+                  />
+                  <Route
+                    path="/settings/localization"
+                    element={<LocalizationPage />}
                   />
                   {/* --- accounting routes --- */}
                   <Route
@@ -89,6 +108,14 @@ function App() {
                   <Route
                     path="/procurement/suppliers"
                     element={<SuppliersPage />}
+                  />
+                  <Route
+                    path="/procurement/po"
+                    element={<PurchaseOrdersPage />}
+                  />
+                  <Route
+                    path="/procurement/po/:id"
+                    element={<PurchaseOrderDetailPage />}
                   />
                 </Routes>
               </Layout>

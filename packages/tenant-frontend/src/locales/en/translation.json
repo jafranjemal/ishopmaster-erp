@@ -94,5 +94,86 @@
     "title": "Chart of Accounts",
     "subtitle": "Manage all financial accounts for your business.",
     "new_account_button": "New Account"
+  },
+  "variant_selector": {
+    "title": "Step 1: Select Options to Generate Variants",
+    "generate_button": "Generate Variants",
+    "update_button": "Update Variants",
+    "manage_title": "Manage Variants",
+    "manage_subtitle": "Select the options you want to generate variants for."
+  },
+  "variant_editor": {
+    "title": "Step 2: Edit Generated Variants",
+    "table_header_variant": "Variant",
+    "table_header_sku": "SKU",
+    "table_header_cost": "Cost Price",
+    "table_header_selling": "Selling Price",
+    "save_button": "Save All Variants"
+  },
+
+  "product_templates_page": {
+    "title": "Products",
+    "create_button": "Create Product",
+    "edit_modal_title": "Edit Product Template",
+    "create_modal_title": "Create New Product Template",
+    "update_success": "Template updated successfully!",
+    "create_success": "Template created successfully!",
+    "delete_confirm": "Are you sure you want to delete this template? This cannot be undone.",
+    "delete_success": "Template deleted."
+  },
+  "product_templates_list": {
+    "no_templates_title": "No Product Templates Found",
+    "no_templates_subtitle": "Get started by creating a new product template.",
+    "header_name": "Template Name",
+    "header_brand": "Brand",
+    "header_category": "Category",
+    "header_type": "Type",
+    "header_actions": "Actions",
+    "manage_button": "Manage Variants"
+  },
+  "product_detail_page": {
+    "subtitle": "Manage variations for this product template.",
+    "back_button": "Back to Products",
+    "manage_variants_title": "Manage Variants",
+    "add_variant_button": "Manage Variants",
+    "manage_variant_options_title": "Manage Variant Options",
+    "no_attributes_title": "Action Required",
+    "no_attributes_message": "This product does not have an attribute set assigned. Please edit the template to assign one before managing variants.",
+    "no_variants_message": "This product template currently has no variants.",
+    "generate_initial_variants_button": "Generate Initial Variants",
+    "variant_count": "{{count}} Variants",
+    "active_variant_count": "{{count}} active variants",
+    "inactive_variant_count": "{{count}} inactive variants"
+  },
+  "product_template_form": {
+    "name_label": "Template Name",
+    "sku_label": "Base SKU",
+    "type_label": "Product Type",
+    "type_serialized": "Serialized (Unique per item)",
+    "type_non_serialized": "Non-Serialized (Batch tracked)",
+    "type_service": "Service (No stock)",
+    "brand_label": "Brand",
+    "select_brand": "Select a brand...",
+    "category_label": "Category",
+    "select_category": "Select a category...",
+    "attribute_set_label": "Attribute Set",
+    "select_attribute_set": "Select an attribute set..."
+  },
+
+  "messages": {
+    "template_not_found": "Template not found.",
+    "generating_variants": "Generating variants...",
+    "variants_generated_success": "Variants generated successfully!",
+    "saving_variants": "Saving variants...",
+    "variants_saved_success": "Variants saved successfully!",
+    "no_attribute_set": "No attribute set assigned. Edit the template to proceed."
+  },
+  "errors": {
+    "failed_to_load_product_data": "Failed to load product data.",
+
+    "failed_to_load_template": "Failed to load product template.",
+    "could_not_load_data": "Could not load data.",
+    "failed_to_generate_variants": "Failed to generate variants.",
+    "failed_to_save_variants": "Failed to save variants."
   }
 }

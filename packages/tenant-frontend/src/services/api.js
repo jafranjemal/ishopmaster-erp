@@ -181,6 +181,8 @@ export const tenantAccountingService = {
   getLedgerEntries: async (params) => {
     return api.get("/tenant/accounting/ledger", { params });
   },
+
+  getChart: () => api.get("/tenant/accounting/chart"),
 };
 
 // --- NEW CUSTOMER (CRM) SERVICE ---
@@ -250,6 +252,163 @@ export const tenantAttributeService = {
   updateAttributeSet: async (id, data) =>
     api.put(`/tenant/attributes/sets/${id}`, data),
   deleteAttributeSet: async (id) => api.delete(`/tenant/attributes/sets/${id}`),
+};
+
+export const tenantAttributeSetService = {
+  getAll: () => api.get("/tenant/attributes/sets"),
+  create: (data) => api.post("/tenant/attributes/sets", data),
+  update: (id, data) => api.put(`/tenant/attributes/sets/${id}`, data),
+  delete: (id) => api.delete(`/tenant/attributes/sets/${id}`),
+};
+
+export const tenantInventoryService = {
+  /**
+   * Fetches all product templates for the tenant.
+   */
+  getAllTemplates: (queryParams) => {
+    const cleanParams = Object.fromEntries(
+      Object.entries(queryParams).filter(([_, v]) => v != null && v !== "")
+    );
+
+    console.log("Fetching all product templates with params:", cleanParams);
+
+    return api.get(`/tenant/inventory/templates`, { params: cleanParams });
+  },
+
+  /**
+   * Fetches a single product template by its ID.
+   * @param {string} templateId - The ID of the product template.
+   */
+  getTemplateById: (templateId) => {
+    return api.get(`/tenant/inventory/templates/${templateId}`);
+  },
+
+  /**
+   * Creates a new product template.
+   * @param {object} data - The form data for the new template.
+   */
+  createTemplate: (data) => {
+    return api.post("/tenant/inventory/templates", data);
+  },
+
+  /**
+   * Updates an existing product template.
+   * @param {string} templateId - The ID of the template to update.
+   * @param {object} data - The updated data for the template.
+   */
+  updateTemplate: (templateId, data) => {
+    return api.put(`/tenant/inventory/templates/${templateId}`, data);
+  },
+
+  /**
+   * Deletes a product template.
+   * @param {string} templateId - The ID of the template to delete.
+   */
+  deleteTemplate: (templateId) => {
+    return api.delete(`/tenant/inventory/templates/${templateId}`);
+  },
+
+  /**
+   * Fetches all product variants associated with a specific template.
+   * @param {string} templateId - The ID of the product template.
+   */
+  getVariantsForTemplate: (templateId) => {
+    return api.get(`/tenant/inventory/variants?templateId=${templateId}`);
+  },
+
+  /**
+   * Triggers the variant generation process on the backend.
+   * @param {string} templateId - The ID of the product template.
+   * @param {object} options - The selected attribute options.
+   */
+  generateVariants: (templateId, options) => {
+    return api.post(
+      `/tenant/inventory/templates/${templateId}/generate-variants`,
+      { options }
+    );
+  },
+
+  /**
+   * Sends an array of variant data to be updated in a single batch operation.
+   * @param {Array<object>} variants - The array of variant objects to update.
+   */
+  batchUpdateVariants: (variants) => {
+    return api.patch("/tenant/inventory/variants/batch-update", { variants });
+  },
+};
+
+// ---  PRODUCT SERVICE ---
+// This service will house all product-related API calls.
+export const tenantProductService = {
+  // --- TEMPLATE METHODS ---
+  getAllTemplates: async () => api.get("/tenant/inventory/templates"),
+  getTemplateById: async (id) => api.get(`/tenant/inventory/templates/${id}`),
+  createTemplate: async (data) => api.post("/tenant/inventory/templates", data),
+  updateTemplate: async (id, data) =>
+    api.put(`/tenant/inventory/templates/${id}`, data),
+  deleteTemplate: async (id) => api.delete(`/tenant/inventory/templates/${id}`),
+
+  // --- NEW VARIANT GENERATION METHOD ---
+  /**
+   * Calls the backend engine to generate all product variants for a template.
+   * @param {string} templateId - The ID of the parent ProductTemplates.
+   * @param {object} selections - The selected attribute options, e.g., { Color: ['Blue'], Storage: ['256GB'] }.
+   */
+  generateVariants: async (templateId, selections) => {
+    return api.post(
+      `/tenant/inventory/templates/${templateId}/generate-variants`,
+      { selections }
+    );
+  },
+
+  /**
+   * Triggers the variant synchronization process on the backend.
+   * @param {string} templateId - The ID of the product template.
+   * @param {object} options - The selected attribute options from the UI.
+   */
+  syncVariants: (templateId, options) => {
+    return api.post(`/tenant/inventory/templates/${templateId}/sync-variants`, {
+      options,
+    });
+  },
+
+  // --- We will add variant-specific methods here later ---
+  getAllVariantsForTemplate: async (templateId) =>
+    api.get(`/tenant/inventory/products/variants?templateId=${templateId}`), // We need to build this backend route
+  updateVariant: async (variantId, data) =>
+    api.put(`/tenant/inventory/products/variants/${variantId}`, data), // We need to build this backend route
+
+  /**
+   * Performs a bulk update on multiple variants at once.
+   * @param {Array<object>} variantsToUpdate - An array of objects with { _id, sku, sellingPrice, costPrice }.
+   */
+  bulkUpdateVariants: async (variantsToUpdate) => {
+    // We will build this backend endpoint in a later chapter. For now, it's a placeholder.
+    console.log("Calling bulk update with:", variantsToUpdate);
+    //return Promise.resolve({ data: { success: true } });
+    return api.patch("/tenant/inventory/products/variants/bulk-update", {
+      variants: variantsToUpdate,
+    });
+  },
+
+  searchVariants: async (searchTerm) =>
+    api.get(`/tenant/inventory/products/variants?search=${searchTerm}`), // We will build this backend route
+};
+
+// --- PURCHASE ORDER SERVICE ---
+export const tenantPurchaseOrderService = {
+  getAll: async (params) =>
+    api.get("/tenant/procurement/purchase-orders", { params }),
+  getById: async (id) => api.get(`/tenant/procurement/purchase-orders/${id}`),
+  create: async (data) => api.post("/tenant/procurement/purchase-orders", data),
+  // update: async (id, data) => api.put(`/tenant/procurement/purchase-orders/${id}`, data),
+  // delete: async (id) => api.delete(`/tenant/procurement/purchase-orders/${id}`),
+  receiveGoods: async (poId, receivedData) => {
+    return api.post(
+      `/tenant/procurement/purchase-orders/${poId}/receive`,
+      receivedData
+    );
+  },
 };
 
 export default api;

@@ -13,6 +13,7 @@ const BRAND_MASTER_LIST = require("../constants/brand.masterlist"); // <-- 1. Im
 const CATEGORY_MASTER_LIST = require("../constants/category.masterlist"); // <-- 2. Import Categories
 const ATTRIBUTE_SET_MASTER_LIST = require("../constants/attributeSet.masterlist"); // <-- 2. Import Categories
 const ATTRIBUTE_MASTER_LIST = require("../constants/attribute.masterlist"); // <-- 2. Import Categories
+const tenantProvisioningService = require("../../../services/tenantProvisioning.service");
 
 // @desc    Create a new tenant
 // @route   POST /api/v1/tenants
@@ -73,6 +74,82 @@ exports.createTenantOld = asyncHandler(async (req, res, next) => {
 });
 
 exports.createTenant = asyncHandler(async (req, res, next) => {
+  const { tenantInfo, primaryBranch, owner } = req.body;
+
+  // Basic validation
+  if (!tenantInfo || !primaryBranch || !owner) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        error:
+          "Request body must include tenantInfo, primaryBranch, and owner objects.",
+      });
+  }
+
+  const dbName = `tenant_${tenantInfo.subdomain.replace(/-/g, "_")}`;
+  let tenantDbConnection;
+  let newTenant;
+
+  try {
+    // Start DB connection and transaction
+    tenantDbConnection = await getTenantConnection(dbName);
+    const models = getTenantModels(tenantDbConnection);
+    const session = await tenantDbConnection.startSession();
+
+    await session.withTransaction(async () => {
+      // ➡️ Step 2: Delegate all seeding logic to the new service
+
+      // First, create the primary branch within the transaction to get its ID
+      const [createdBranch] = await models.Branch.create(
+        [{ ...primaryBranch, isPrimary: true }],
+        { session }
+      );
+
+      // Pass the created branch ID to the owner data
+      const ownerDataWithBranch = {
+        ...owner,
+        assignedBranchId: createdBranch._id,
+      };
+
+      // Now, provision the rest of the database
+      await tenantProvisioningService.provisionNewTenantDb(models, session, {
+        owner: ownerDataWithBranch,
+      });
+    });
+
+    session.endSession();
+
+    // Only after the transaction is successful, create the tenant record in the Admin DB
+    newTenant = await Tenant.create({ ...tenantInfo, dbName });
+
+    res.status(201).json({
+      success: true,
+      data: newTenant,
+      message: "Tenant created and provisioned successfully.",
+    });
+  } catch (err) {
+    console.error(`CRITICAL: Tenant provisioning failed. Rolling back.`, err);
+
+    // If any error occurs, drop the entire tenant database to ensure a clean slate
+    if (tenantDbConnection) {
+      await tenantDbConnection.db.dropDatabase();
+      await tenantDbConnection.close();
+    }
+
+    // If the tenant record was somehow created before the error, delete it.
+    if (newTenant) {
+      await Tenant.findByIdAndDelete(newTenant._id);
+    }
+
+    return res.status(500).json({
+      success: false,
+      error: `Failed to provision tenant: ${err.message}`,
+    });
+  }
+});
+
+exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
   const { tenantInfo, primaryBranch, owner } = req.body;
 
   if (!tenantInfo || !primaryBranch || !owner) {
@@ -219,6 +296,7 @@ exports.createTenant = asyncHandler(async (req, res, next) => {
 
       const attributeSetsToCreate = ATTRIBUTE_SET_MASTER_LIST.map((set) => ({
         name: set.name,
+        key: set.key || set.name.toLowerCase().replace(/\s+/g, "_"),
         attributes: set.attributeKeys
           .map((key) => attributeIdMap.get(key))
           .filter(Boolean), // Look up IDs from the map

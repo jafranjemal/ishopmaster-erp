@@ -85,12 +85,10 @@ exports.deleteAccount = asyncHandler(async (req, res, next) => {
   });
 
   if (entryCount > 0) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error: `Cannot delete account. It is used in ${entryCount} ledger entries.`,
-      });
+    return res.status(400).json({
+      success: false,
+      error: `Cannot delete account. It is used in ${entryCount} ledger entries.`,
+    });
   }
 
   await account.deleteOne();
@@ -140,4 +138,15 @@ exports.getAllLedgerEntries = asyncHandler(async (req, res, next) => {
     },
     data: entries,
   });
+});
+
+/**
+ * @desc    Get the full chart of accounts for the tenant
+ * @route   GET /api/v1/tenant/accounting/chart
+ * @access  Private (Requires accounting:chart:view permission)
+ */
+exports.getChartOfAccounts = asyncHandler(async (req, res, next) => {
+  const { Account } = req.models;
+  const accounts = await Account.find({}).sort({ name: 1 });
+  res.status(200).json({ success: true, data: accounts });
 });

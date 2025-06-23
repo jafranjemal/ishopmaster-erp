@@ -5,6 +5,7 @@ const {
   updateAccount,
   deleteAccount,
   getAllLedgerEntries,
+  getChartOfAccounts,
 } = require("./accounting.controller");
 
 // Import our security middleware
@@ -34,5 +35,7 @@ router
 router
   .route("/ledger")
   .get(authorize("accounting:ledger:view"), getAllLedgerEntries);
+
+router.route("/chart").get(getChartOfAccounts);
 
 module.exports = router;

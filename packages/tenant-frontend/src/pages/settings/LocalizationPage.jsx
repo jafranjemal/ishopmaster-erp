@@ -14,7 +14,7 @@ import useAuth from "../../context/useAuth";
 
 const LocalizationPage = () => {
   // We get the profile and a function to refresh it from our auth context
-  const { tenantProfile, loadSession, token } = useAuth();
+  const { refreshTenantProfile, tenantProfile, loadSession, token } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async (formData) => {
@@ -26,7 +26,8 @@ const LocalizationPage = () => {
         error: (err) => err.response?.data?.error || "Failed to save settings.",
       });
       // After successful save, refresh the auth context to get the latest data app-wide
-      if (loadSession) await loadSession(token);
+      //if (loadSession) await loadSession(token);
+      await refreshTenantProfile();
     } catch (error) {
       console.error("Save failed:", error);
     } finally {
