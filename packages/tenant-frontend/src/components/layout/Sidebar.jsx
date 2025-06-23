@@ -35,6 +35,7 @@ import {
   ListTree,
   Beaker,
   Globe,
+  Receipt,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -152,6 +153,12 @@ const Sidebar = () => {
           href: "/accounting/chart",
           icon: Library,
           permission: "accounting:chart:manage",
+        },
+        {
+          name: t("sidebar.sub_menu.payables"),
+          href: "/accounting/payables",
+          icon: Receipt,
+          permission: "accounting:payables:view",
         },
       ],
     },

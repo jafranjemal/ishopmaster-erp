@@ -24,6 +24,7 @@ import ProductTemplateDetailPage from "./pages/inventory/ProductTemplateDetailPa
 import PurchaseOrdersPage from "./pages/procurement/PurchaseOrdersPage";
 import PurchaseOrderDetailPage from "./pages/procurement/PurchaseOrderDetailPage";
 import CurrenciesPage from "./pages/settings/CurrenciesPage";
+import PayablesPage from "./pages/accounting/PayablesPage";
 function App() {
   return (
     <>
@@ -121,6 +122,10 @@ function App() {
                   <Route
                     path="/settings/currencies"
                     element={<CurrenciesPage />}
+                  />
+                  <Route
+                    path="/accounting/payables"
+                    element={<PayablesPage />}
                   />
                 </Routes>
               </Layout>

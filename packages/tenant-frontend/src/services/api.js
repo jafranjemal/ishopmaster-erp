@@ -409,6 +409,10 @@ export const tenantPurchaseOrderService = {
       receivedData
     );
   },
+
+  getPOsAwaitingInvoice: async () => {
+    return api.get("/tenant/procurement/purchase-orders/awaiting-invoice");
+  },
 };
 
 export const tenantCurrencyService = {
