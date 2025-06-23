@@ -17,6 +17,12 @@ const DEFAULT_ACCOUNTS_LIST = [
     isSystemAccount: true,
   },
   {
+    name: "Purchase Price Variance",
+    type: "Expense",
+    subType: "COGS",
+    isSystemAccount: true,
+  },
+  {
     name: "Accounts Receivable",
     type: "Asset",
     subType: "Current Asset",
