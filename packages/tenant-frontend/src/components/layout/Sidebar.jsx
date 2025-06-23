@@ -174,6 +174,13 @@ const Sidebar = () => {
           permission: "settings:access",
         },
         {
+          name: t("sidebar.sub_menu.currencies"),
+          href: "/settings/currencies",
+          icon: Landmark,
+          permission: "settings:access",
+        }, // <-- ADD THIS NEW LINK
+
+        {
           name: t("sidebar.sub_menu.locations"),
           href: "/settings/locations",
           icon: Building2,

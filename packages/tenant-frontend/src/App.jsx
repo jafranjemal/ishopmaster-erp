@@ -23,6 +23,7 @@ import ProductTemplatesPage from "./pages/inventory/ProductTemplatesPage";
 import ProductTemplateDetailPage from "./pages/inventory/ProductTemplateDetailPage";
 import PurchaseOrdersPage from "./pages/procurement/PurchaseOrdersPage";
 import PurchaseOrderDetailPage from "./pages/procurement/PurchaseOrderDetailPage";
+import CurrenciesPage from "./pages/settings/CurrenciesPage";
 function App() {
   return (
     <>
@@ -116,6 +117,10 @@ function App() {
                   <Route
                     path="/procurement/po/:id"
                     element={<PurchaseOrderDetailPage />}
+                  />
+                  <Route
+                    path="/settings/currencies"
+                    element={<CurrenciesPage />}
                   />
                 </Routes>
               </Layout>

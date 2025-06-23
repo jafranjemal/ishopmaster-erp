@@ -411,4 +411,57 @@ export const tenantPurchaseOrderService = {
   },
 };
 
+export const tenantCurrencyService = {
+  // === Currency Methods ===
+
+  /**
+   * Fetches all supported currencies for the tenant.
+   */
+  getAllCurrencies: async () => api.get("/tenant/currencies"),
+
+  /**
+   * Creates a new supported currency.
+   * @param {object} currencyData - e.g., { name, code, symbol }
+   */
+  createCurrency: async (currencyData) =>
+    api.post("/tenant/currencies", currencyData),
+
+  /**
+   * Updates a supported currency.
+   * @param {string} id - The ID of the currency to update.
+   * @param {object} currencyData - The updated data.
+   */
+  updateCurrency: async (id, currencyData) =>
+    api.put(`/tenant/currencies/${id}`, currencyData),
+
+  /**
+   * Deletes a supported currency.
+   * @param {string} id - The ID of the currency to delete.
+   */
+  deleteCurrency: async (id) => api.delete(`/tenant/currencies/${id}`),
+
+  // === Exchange Rate Methods ===
+
+  /**
+   * Fetches historical exchange rates with pagination and filtering.
+   * @param {object} params - Query params like { page, limit, startDate, endDate }.
+   */
+  getExchangeRates: async (params) =>
+    api.get("/tenant/currencies/rates", { params }),
+
+  /**
+   * Creates or updates the exchange rate for a specific day.
+   * @param {object} rateData - e.g., { fromCurrency, toCurrency, date, rate }
+   */
+  createOrUpdateExchangeRate: async (rateData) =>
+    api.post("/tenant/currencies/rates", rateData),
+
+  /**
+   * Deletes a specific exchange rate entry.
+   * @param {string} id - The ID of the exchange rate entry to delete.
+   */
+  deleteExchangeRate: async (id) =>
+    api.delete(`/tenant/currencies/rates/${id}`),
+};
+
 export default api;

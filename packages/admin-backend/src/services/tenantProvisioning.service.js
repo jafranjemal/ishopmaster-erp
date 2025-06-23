@@ -5,6 +5,8 @@ const ATTRIBUTE_MASTER_LIST = require("../modules/admin/constants/attribute.mast
 const ATTRIBUTE_SET_MASTER_LIST = require("../modules/admin/constants/attributeSet.masterlist");
 const PRODUCT_TEMPLATE_MASTER_LIST = require("../modules/admin/constants/productTemplate.masterlist");
 const DEFAULT_ACCOUNTS_LIST = require("../modules/admin/constants/account.masterlist");
+const CURRENCY_MASTER_LIST = require("../modules/admin/constants/currency.masterlist");
+const EXCHANGE_RATE_MASTER_LIST = require("../modules/admin/constants/exchangeRate.masterlist");
 
 const customerService = require("./customer.service");
 
@@ -133,6 +135,8 @@ class TenantProvisioningService {
       AttributeSet,
       ProductTemplates,
       Account,
+      Currency,
+      ExchangeRate,
     } = models;
 
     // Seed simple lists
@@ -201,6 +205,14 @@ class TenantProvisioningService {
     if (templateDocs.length > 0) {
       await ProductTemplates.insertMany(templateDocs, { session });
     }
+
+    console.log("Seeding master data: Currencies and Exchange Rates...");
+    await Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true });
+    await ExchangeRate.insertMany(EXCHANGE_RATE_MASTER_LIST, {
+      session,
+      ordered: true,
+    });
+    console.log("Currency data seeded successfully.");
     console.log(`  -> Master Inventory data seeded.`);
   }
 }
