@@ -1,103 +1,140 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { PlusCircle, ShieldAlert } from "lucide-react";
+import {
+  Button,
+  Modal,
+  FilterBar,
+  Pagination,
+  AlertModal,
+  Select,
+  Label,
+} from "ui-library";
+import { PlusCircle, Loader2 } from "lucide-react";
 
-// We will create AccountForm and use it in the modal in a future step
-// import AccountForm from '../../components/accounting/AccountForm';
-import AccountForm from "../components/accounting/AccountForm";
-import { Button, Modal, Card } from "ui-library";
 import { tenantAccountingService } from "../services/api";
 import AccountList from "../components/accounting/AccountList";
+import AccountForm from "../components/accounting/AccountForm";
 
-/**
- * The main "smart" page for managing the Chart of Accounts.
- * This component handles all data fetching, state management, and user actions.
- */
+// A custom hook to parse query params from the URL
+const useQuery = () => new URLSearchParams(useLocation().search);
+
 const ChartOfAccountsPage = () => {
-  // --- STATE MANAGEMENT ---
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const query = useQuery();
+
   const [accounts, setAccounts] = useState([]);
+  const [pagination, setPagination] = useState({});
+  const [filters, setFilters] = useState({
+    page: parseInt(query.get("page")) || 1,
+    limit: 50, // Let's show more accounts by default
+    searchTerm: query.get("searchTerm") || "",
+    type: query.get("type") || "",
+  });
+
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState(null);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleteAlert, setDeleteAlert] = useState({
+    isOpen: false,
+    accountId: null,
+  });
 
-  // --- DATA FETCHING ---
+  // The core data fetching logic. It is wrapped in useCallback for optimization.
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const response = await tenantAccountingService.getAllAccounts();
-      setAccounts(response.data.data);
+      // Create a URL-friendly query string from the filters state
+      const queryParams = new URLSearchParams(filters).toString();
+      const res = await tenantAccountingService.getChartOfAccounts(queryParams);
+
+      setAccounts(res.data.data);
+      setPagination(res.data.pagination);
     } catch (error) {
-      toast.error("Failed to fetch chart of accounts.");
-      console.error(error);
+      toast.error(t("errors.failed_to_load_accounts"));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [filters, t]);
 
-  // useEffect hook to fetch data when the component first mounts.
+  // This effect synchronizes the URL with the filter state and triggers a refetch.
   useEffect(() => {
+    const queryParams = new URLSearchParams(filters).toString();
+    navigate(`?${queryParams}`, { replace: true });
     fetchData();
-  }, [fetchData]);
+  }, [filters, navigate, fetchData]);
 
-  // --- HANDLER FUNCTIONS ---
-  // 2. Implement the handleSave function
+  // Handler for your new controlled FilterBar component
+  const handleFilterChange = (key, value) => {
+    // When a filter changes, we reset to page 1
+    setFilters((prev) => ({ ...prev, page: 1, [key]: value }));
+  };
+
+  const handleClearFilters = () => {
+    setFilters({ page: 1, limit: 50, searchTerm: "", type: "" });
+  };
+
+  // Handler for the Pagination component
+  const handlePageChange = (newPage) => {
+    setFilters((prev) => ({ ...prev, page: newPage }));
+  };
+
+  const handleEdit = (account) => {
+    setEditingAccount(account);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteAlert.accountId) return;
+    const promise = tenantAccountingService.deleteAccount(
+      deleteAlert.accountId
+    );
+    await toast.promise(promise, {
+      loading: t("common.buttons.deleting"),
+      success: t("accounts_page.delete_success"),
+      error: (err) =>
+        err.response?.data?.error || t("errors.failed_to_delete_account"),
+    });
+    setDeleteAlert({ isOpen: false, accountId: null });
+    fetchData(); // Refresh the list
+  };
+
   const handleSave = async (formData) => {
-    const isEditMode = Boolean(editingAccount);
-    const apiCall = isEditMode
+    const promise = editingAccount
       ? tenantAccountingService.updateAccount(editingAccount._id, formData)
       : tenantAccountingService.createAccount(formData);
 
-    try {
-      await toast.promise(apiCall, {
-        loading: "Saving account...",
-        success: `Account "${formData.name}" saved successfully!`,
-        error: (err) => err.response?.data?.error || "Failed to save account.",
-      });
-
-      fetchData(); // Refetch data to show changes
-      setIsModalOpen(false); // Close the modal
-      return null; // Indicate success to the form
-    } catch (err) {
-      // Toast promise handles displaying the error, but we return it so the form can stop its saving state
-      return err.response?.data?.error || "An unexpected error occurred.";
-    }
+    await toast.promise(promise, {
+      loading: t("common.buttons.saving"),
+      success: editingAccount
+        ? t("accounts_page.update_success")
+        : t("accounts_page.create_success"),
+      error: (err) =>
+        err.response?.data?.error || t("errors.failed_to_save_account"),
+    });
+    setIsModalOpen(false);
+    setEditingAccount(null);
+    fetchData();
   };
 
-  const handleDelete = async () => {
-    if (!deleteConfirm) return;
-
-    try {
-      await toast.promise(
-        tenantAccountingService.deleteAccount(deleteConfirm._id),
-        {
-          loading: "Deleting account...",
-          success: `Account "${deleteConfirm.name}" deleted successfully.`,
-          error: (err) =>
-            err.response?.data?.error || "Failed to delete account.",
-        }
-      );
-      // After a successful deletion, refetch the data to update the UI.
-      fetchData();
-    } catch (error) {
-      // Toast promise already shows the error, but we can log it.
-      console.error("Deletion failed:", error);
-    } finally {
-      // Always close the confirmation modal.
-      setDeleteConfirm(null);
-    }
-  };
+  // Options for the custom filter dropdown
+  const accountTypeOptions = [
+    { value: "", label: "All Types" },
+    { value: "Asset", label: "Asset" },
+    { value: "Liability", label: "Liability" },
+    { value: "Equity", label: "Equity" },
+    { value: "Revenue", label: "Revenue" },
+    { value: "Expense", label: "Expense" },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-slate-100">
-            Chart of Accounts
-          </h1>
-          <p className="mt-1 text-slate-400">
-            Manage all financial accounts for your business.
-          </p>
+          <h1 className="text-3xl font-bold">{t("accounts_page.title")}</h1>
+          <p className="mt-1 text-slate-400">{t("accounts_page.subtitle")}</p>
         </div>
         <Button
           onClick={() => {
@@ -106,62 +143,67 @@ const ChartOfAccountsPage = () => {
           }}
         >
           <PlusCircle className="mr-2 h-4 w-4" />
-          New Account
+          {t("accounts_page.new_account_button")}
         </Button>
       </div>
 
-      <Card className="p-0">
+      <FilterBar
+        filterValues={filters}
+        onFilterChange={handleFilterChange}
+        onClearFilters={handleClearFilters}
+        // The onApplyFilters prop is not needed if we filter on every change
+      >
+        {/* We inject our custom dropdown into the FilterBar via its children prop */}
+        <div className="flex-grow min-w-[150px]">
+          <Label>{t("account_list.header_type")}</Label>
+          <Select
+            name="type"
+            value={filters.type}
+            onChange={(e) => handleFilterChange("type", e.target.value)}
+            options={accountTypeOptions}
+          />
+        </div>
+      </FilterBar>
+
+      <div className="bg-slate-800 rounded-lg">
         {isLoading ? (
-          <p className="p-8 text-center">Loading accounts...</p>
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="animate-spin h-8 w-8 text-indigo-400" />
+          </div>
         ) : (
           <AccountList
             accounts={accounts}
-            onEdit={(account) => {
-              setEditingAccount(account);
-              setIsModalOpen(true);
-            }}
-            onDelete={setDeleteConfirm}
+            onEdit={handleEdit}
+            onDelete={(id) => setDeleteAlert({ isOpen: true, accountId: id })}
           />
         )}
-      </Card>
+        {pagination && pagination.total > 0 && (
+          <Pagination {...pagination} onPageChange={handlePageChange} />
+        )}
+      </div>
 
-      {/* 3. Integrate the form into the modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={editingAccount ? "Edit Account" : "Create New Account"}
       >
         <AccountForm
-          accountToEdit={editingAccount}
           onSave={handleSave}
           onCancel={() => setIsModalOpen(false)}
+          accountToEdit={editingAccount}
+          parentAccounts={accounts}
         />
       </Modal>
 
-      <Modal
-        isOpen={Boolean(deleteConfirm)}
-        onClose={() => setDeleteConfirm(null)}
-        title="Confirm Deletion"
-      >
-        <div className="text-center">
-          <ShieldAlert className="mx-auto h-12 w-12 text-red-500" />
-          <p className="mt-4">
-            Are you sure you want to delete account "{deleteConfirm?.name}"?
-          </p>
-          <p className="text-sm text-slate-400 mt-2">
-            This action cannot be undone and is only possible if the account has
-            no transactions.
-          </p>
-        </div>
-        <div className="mt-6 flex justify-end space-x-4">
-          <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
-            Cancel
-          </Button>
-          <Button variant="destructive" onClick={handleDelete}>
-            Delete Account
-          </Button>
-        </div>
-      </Modal>
+      <AlertModal
+        isOpen={deleteAlert.isOpen}
+        onClose={() => setDeleteAlert({ isOpen: false, accountId: null })}
+        onConfirm={handleDeleteConfirm}
+        title={t("accounts_page.delete_title")}
+        message={t("accounts_page.delete_message")}
+        confirmText="Delete"
+        isDestructive
+      />
     </div>
   );
 };

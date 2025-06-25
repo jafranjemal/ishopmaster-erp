@@ -6,10 +6,6 @@ import PermissionForm from "../components/permissions/PermissionForm";
 import { adminPermissionService } from "../services/api";
 import { Button, Modal } from "ui-library";
 
-/**
- * The main page for managing system-wide permissions. This "smart" component
- * handles all state, API calls, and orchestrates the child components.
- */
 const PermissionsPage = () => {
   const [permissions, setPermissions] = useState({});
   const [isLoading, setIsLoading] = useState(true);
@@ -34,8 +30,17 @@ const PermissionsPage = () => {
     fetchData();
   }, [fetchData]);
 
-  const handleOpenCreateModal = () => {
-    setEditingPermission(null);
+  const handleModuleWiseAdd = (moduleName) => {
+    if (moduleName) {
+      setEditingPermission({
+        key: `${moduleName}:`,
+        module: moduleName,
+        description: "",
+      });
+    } else {
+      // fallback: allow full user input
+      setEditingPermission(null);
+    }
     setIsModalOpen(true);
   };
 
@@ -55,8 +60,7 @@ const PermissionsPage = () => {
 
   const handleSave = async (formData) => {
     try {
-      if (editingPermission) {
-        // Update logic
+      if (editingPermission && editingPermission._id) {
         await toast.promise(
           adminPermissionService.update(editingPermission._id, formData),
           {
@@ -66,7 +70,6 @@ const PermissionsPage = () => {
           }
         );
       } else {
-        // Create logic
         await toast.promise(adminPermissionService.create(formData), {
           loading: "Creating...",
           success: "Permission created!",
@@ -87,7 +90,7 @@ const PermissionsPage = () => {
       adminPermissionService.delete(deleteConfirmPermission._id),
       {
         loading: "Deleting permission...",
-        success: `Permission "${deleteConfirmPermission.key}" deleted.`,
+        success: `Permission \\"${deleteConfirmPermission.key}\\" deleted.`,
         error: "Failed to delete permission.",
       }
     );
@@ -106,7 +109,9 @@ const PermissionsPage = () => {
             Define all possible actions that can be assigned to roles.
           </p>
         </div>
-        <Button onClick={handleOpenCreateModal}>
+        <Button onClick={() => handleModuleWiseAdd("")}>
+          {" "}
+          {/* fallback generic */}
           <PlusCircle className="mr-2 h-4 w-4" />
           Create Permission
         </Button>
@@ -119,14 +124,17 @@ const PermissionsPage = () => {
           groupedPermissions={permissions}
           onEdit={handleOpenEditModal}
           onDelete={handleOpenDeleteConfirm}
+          onModuleAdd={handleModuleWiseAdd}
         />
       )}
 
-      {/* Create/Edit Modal */}
       <Modal
+        size="xs"
         isOpen={isModalOpen}
         onClose={handleCloseModals}
-        title={editingPermission ? "Edit Permission" : "Create New Permission"}
+        title={
+          editingPermission?._id ? "Edit Permission" : "Create New Permission"
+        }
       >
         <PermissionForm
           permissionToEdit={editingPermission}
@@ -135,7 +143,6 @@ const PermissionsPage = () => {
         />
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <Modal
         isOpen={Boolean(deleteConfirmPermission)}
         onClose={handleCloseModals}

@@ -112,3 +112,17 @@ exports.bulkUpdateVariants = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+// @desc    Get a single product variant by its ID
+// @route   GET /api/v1/tenant/inventory/products/variants/:id
+exports.getVariantById = asyncHandler(async (req, res, next) => {
+  const { ProductVariants } = req.models;
+  const variant = await ProductVariants.findById(req.params.id).lean();
+
+  if (!variant) {
+    return res
+      .status(404)
+      .json({ success: false, error: "Product Variant not found" });
+  }
+  res.status(200).json({ success: true, data: variant });
+});

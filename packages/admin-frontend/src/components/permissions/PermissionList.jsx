@@ -1,19 +1,13 @@
 import React from "react";
 import { FilePenLine, Trash2 } from "lucide-react";
-import {
-  Button,
-  Badge,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "ui-library";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "ui-library";
 
-/**
- * Renders a list of permissions, grouped by their module.
- * Receives data and action handlers from its parent.
- */
-const PermissionList = ({ groupedPermissions, onEdit, onDelete }) => {
+const PermissionList = ({
+  groupedPermissions,
+  onEdit,
+  onDelete,
+  onModuleAdd,
+}) => {
   const moduleOrder = [
     "inventory",
     "sales",
@@ -24,7 +18,6 @@ const PermissionList = ({ groupedPermissions, onEdit, onDelete }) => {
     "settings",
   ];
 
-  // Sort the module keys according to our preferred order
   const sortedModuleKeys = Object.keys(groupedPermissions).sort((a, b) => {
     return moduleOrder.indexOf(a) - moduleOrder.indexOf(b);
   });
@@ -33,8 +26,15 @@ const PermissionList = ({ groupedPermissions, onEdit, onDelete }) => {
     <div className="space-y-6">
       {sortedModuleKeys.map((moduleName) => (
         <Card key={moduleName}>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="capitalize">{moduleName} Module</CardTitle>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onModuleAdd(moduleName)}
+            >
+              + Add
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="divide-y divide-slate-700">

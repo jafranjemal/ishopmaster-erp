@@ -6,6 +6,7 @@ const purchaseOrderRoutes = require("./purchaseOrder.routes");
 const goodsReceiptNoteSchema = require("./goodsReceiptNote.schema");
 const supplierInvoiceSchema = require("./supplierInvoice.schema");
 const supplierInvoiceRoutes = require("./supplierInvoice.routes"); // <-- 2. IMPORT INVOICE ROUTES
+const goodsReceiptNoteRoutes = require("./goodsReceiptNote.routes"); // <-- 1. IMPORT NEW ROUTES
 
 // Create a main router for the entire procurement module
 const mainRouter = express.Router();
@@ -16,6 +17,8 @@ mainRouter.use("/suppliers", supplierRoutes);
 // Mount the purchase-order-specific routes under the /purchase-orders path
 mainRouter.use("/purchase-orders", purchaseOrderRoutes);
 mainRouter.use("/invoices", supplierInvoiceRoutes);
+mainRouter.use("/grns", goodsReceiptNoteRoutes);
+
 module.exports = {
   schemas: {
     Supplier: supplierSchema,

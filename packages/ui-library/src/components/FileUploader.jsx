@@ -1,141 +1,178 @@
-import React, { useCallback, useState } from "react";
-import { useDropzone } from "react-dropzone";
-import { toast } from "react-hot-toast";
+import React, { useState, useCallback, useRef } from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 import { UploadCloud, File as FileIcon, X, LoaderCircle } from "lucide-react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
+import { useCustomDropzone } from "../hooks/useCustomDropzone";
 
-// In a real application, you would import this from the tenant-frontend's services.
-// For a library component, it's better to pass the function as a prop.
-// async () => { const res = await api.post('/tenant/uploads/signature', ...); return res.data; }
-const FileUploader = ({
+export const FileUploader = ({
   onUploadComplete,
   initialFiles = [],
   getSignatureFunc,
+  accept = ["image/png", "image/jpeg", "application/pdf"],
+  maxSize = 10 * 1024 * 1024,
+  multiple = false,
 }) => {
   const [files, setFiles] = useState(initialFiles);
   const [isUploading, setIsUploading] = useState(false);
+  const inputRef = useRef(null);
 
-  const onDrop = useCallback(
-    async (acceptedFiles) => {
-      const file = acceptedFiles[0];
-      if (!file) return;
+  const uploadFile = useCallback(
+    async (file) => {
+      if (!getSignatureFunc) {
+        throw new Error("getSignatureFunc is required");
+      }
 
+      const toastId = toast.loading(`Uploading ${file.name}...`);
       setIsUploading(true);
-      const uploadToast = toast.loading("Uploading file...");
 
       try {
-        if (!getSignatureFunc) {
-          throw new Error("getSignatureFunc prop is required for uploading.");
+        const _signature = await getSignatureFunc();
+        console.log("Signature data:", _signature?.data);
+        const { signature, timestamp } = _signature?.data;
+
+        if (!signature || !timestamp) {
+          throw new Error("Missing signature or timestamp");
         }
 
-        // 1. Get signature from our backend via the passed-in function
-        const signatureResponse = await getSignatureFunc();
-        const { signature, timestamp } = signatureResponse;
         const apiKey = import.meta.env.VITE_CLOUDINARY_API_KEY;
         const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
         const url = `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`;
 
-        // 2. Upload file directly to Cloudinary
         const formData = new FormData();
         formData.append("file", file);
         formData.append("api_key", apiKey);
         formData.append("timestamp", timestamp);
         formData.append("signature", signature);
 
-        const response = await axios.post(url, formData);
+        const { data } = await axios.post(url, formData);
 
-        const newFile = {
-          name: response.data.original_filename,
-          url: response.data.secure_url,
+        const uploadedFile = {
+          name: data.original_filename,
+          url: data.secure_url,
         };
-        const updatedFiles = [...files, newFile];
-        setFiles(updatedFiles);
-        onUploadComplete(updatedFiles); // Notify parent form of the change
 
-        toast.success("Upload complete!", { id: uploadToast });
+        return uploadedFile;
       } catch (error) {
-        console.error("Upload failed", error);
-        toast.error(error.response?.data?.error || "Upload failed.", {
-          id: uploadToast,
-        });
+        console.error("Upload failed:", error);
+        throw error;
+      } finally {
+        toast.dismiss(toastId);
+        setIsUploading(false);
+      }
+    },
+    [getSignatureFunc]
+  );
+
+  const handleFilesUpload = useCallback(
+    async (acceptedFiles) => {
+      const toastId = toast.loading("Uploading files...");
+      setIsUploading(true);
+
+      try {
+        const uploadedFiles = [];
+        for (const file of acceptedFiles) {
+          const uploaded = await uploadFile(file);
+          uploadedFiles.push(uploaded);
+        }
+
+        const newFiles = multiple
+          ? [...files, ...uploadedFiles]
+          : uploadedFiles;
+        setFiles(newFiles);
+        onUploadComplete?.(newFiles);
+        toast.success("Upload complete", { id: toastId });
+      } catch (error) {
+        toast.error(
+          error?.response?.data?.error?.message ||
+            error.message ||
+            "Upload failed",
+          { id: toastId }
+        );
       } finally {
         setIsUploading(false);
       }
     },
-    [files, onUploadComplete, getSignatureFunc]
+    [uploadFile, files, onUploadComplete, multiple]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      "image/jpeg": [],
-      "image/png": [],
-      "application/pdf": [],
-    },
-    multiple: false,
-    disabled: isUploading,
+  const { getRootProps, getInputProps, isDraggingOver } = useCustomDropzone({
+    onDrop: handleFilesUpload,
+    multiple,
+    acceptedTypes: accept,
+    maxSize,
   });
 
-  const removeFile = (urlToRemove) => {
-    const updatedFiles = files.filter((f) => f.url !== urlToRemove);
+  const removeFile = (url) => {
+    const updatedFiles = files.filter((file) => file.url !== url);
     setFiles(updatedFiles);
-    onUploadComplete(updatedFiles);
+    onUploadComplete?.(updatedFiles);
+  };
+
+  const openFileDialog = () => {
+    if (!isUploading) {
+      inputRef.current?.click();
+    }
   };
 
   return (
     <div>
       <div
         {...getRootProps()}
+        onClick={openFileDialog}
         className={cn(
           "p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-          isDragActive
+          isDraggingOver
             ? "border-indigo-500 bg-indigo-900/10"
             : "border-slate-700 hover:border-indigo-600",
           isUploading && "cursor-wait opacity-50"
         )}
+        aria-disabled={isUploading}
+        role="button"
+        tabIndex={0}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} ref={inputRef} aria-hidden="true" />
         <div className="text-center">
           {isUploading ? (
-            <LoaderCircle className="mx-auto h-12 w-12 text-slate-400 animate-spin" />
+            <LoaderCircle className="mx-auto h-12 w-12 animate-spin text-slate-400" />
           ) : (
             <UploadCloud className="mx-auto h-12 w-12 text-slate-400" />
           )}
           <p className="mt-2 text-sm text-slate-400">
-            {isUploading
-              ? "Uploading..."
-              : "Drag & drop a file here, or click to select"}
+            {isUploading ? "Uploading..." : "Drag & drop or click to upload"}
           </p>
-          <p className="text-xs text-slate-500">PDF, PNG, JPG up to 10MB</p>
+          <p className="text-xs text-slate-500">
+            Max {Math.round(maxSize / (1024 * 1024))}MB
+          </p>
         </div>
       </div>
+
       {files.length > 0 && (
         <div className="mt-4 space-y-2">
-          <p className="text-sm font-medium">Uploaded Files:</p>
           {files.map((file) => (
             <div
               key={file.url}
-              className="flex items-center justify-between p-2 bg-slate-800 rounded-md"
+              className="flex items-center justify-between p-2 bg-slate-800 rounded"
             >
               <div className="flex items-center gap-2 overflow-hidden">
-                <FileIcon className="h-5 w-5 text-slate-500 flex-shrink-0" />
+                <FileIcon className="h-4 w-4 text-slate-500 flex-shrink-0" />
                 <a
                   href={file.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-indigo-400 hover:underline truncate"
+                  className="truncate text-indigo-400 hover:underline"
                   title={file.name}
                 >
                   {file.name}
                 </a>
               </div>
               <Button
-                type="button"
                 size="icon"
                 variant="ghost"
                 onClick={() => removeFile(file.url)}
+                aria-label={`Remove file ${file.name}`}
               >
                 <X className="h-4 w-4 text-slate-400 hover:text-white" />
               </Button>
@@ -148,3 +185,17 @@ const FileUploader = ({
 };
 
 export default FileUploader;
+
+FileUploader.propTypes = {
+  onUploadComplete: PropTypes.func.isRequired,
+  initialFiles: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      url: PropTypes.string.isRequired,
+    })
+  ),
+  getSignatureFunc: PropTypes.func.isRequired,
+  accept: PropTypes.arrayOf(PropTypes.string),
+  maxSize: PropTypes.number,
+  multiple: PropTypes.bool,
+};

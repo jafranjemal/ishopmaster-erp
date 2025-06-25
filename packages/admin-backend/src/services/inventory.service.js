@@ -164,6 +164,7 @@ class InventoryService {
       costPriceInBaseCurrency: data.costPriceInBaseCurrency,
       notes: data.notes,
       userId: data.userId,
+      // relatedPurchaseId: data.refs.relatedPurchaseId,
       ...data.refs,
     }));
 

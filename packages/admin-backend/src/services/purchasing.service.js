@@ -14,10 +14,11 @@ class PurchasingService {
    * @param {string} userId - The ID of the user creating the PO.
    * @param {string} baseCurrency - The tenant's base currency code.
    */
-  async createPurchaseOrder_old(models, poData, userId, baseCurrency) {
+  async createPurchaseOrder(models, poData, userId, baseCurrency) {
     const { PurchaseOrder } = models;
     const { items, transactionCurrency, ...rest } = poData;
-
+    console.log("Creating Purchase Order with data:", poData);
+    console.log("transactionCurrency:", transactionCurrency);
     // 1. Get the exchange rate for the transaction date
     const exchangeRateToBase = await exchangeRateService.getRate(models, {
       fromCurrency: transactionCurrency,
@@ -172,7 +173,9 @@ class PurchasingService {
     const [grniAccount, inventoryAssetAccount] = await Promise.all([
       Account.findOne({
         isSystemAccount: true,
-        name: "Goods Received Not Invoiced",
+        code: "2110", // Assuming this is the code for GRNI
+        name: "Goods Received Not Invoiced (GRNI)",
+        subType: "Current Liability",
       }).session(session),
       Account.findOne({
         isSystemAccount: true,
@@ -230,7 +233,11 @@ class PurchasingService {
           serials: item.serials,
           batchNumber: po.poNumber,
           userId,
-          refs: { purchaseId: po._id, supplierId: po.supplierId },
+          refs: {
+            relatedPurchaseId: po._id,
+            purchaseId: po._id,
+            supplierId: po.supplierId,
+          },
         },
         session
       );

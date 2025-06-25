@@ -49,7 +49,14 @@
       "brands": "Brands",
       "categories": "Categories",
       "attributes": "Attributes",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "payment_methods": "Payment Methods",
+      "cheques": "Cheque Management",
+      "currencies": "Currencies ",
+      "localization": "Localization ",
+      "stock_levels": "Stock Levels ",
+      "invoices": "Invoices ",
+      "all_payments": "All Payments"
     }
   },
   "login": {
@@ -91,6 +98,11 @@
     "new_branch_button": "New Branch"
   },
   "accounts_page": {
+    "delete_title": "Delete Account",
+    "delete_message": "Are you sure? This action cannot be undone.",
+    "delete_success": "Account deleted successfully.",
+    "create_success": "Account created successfully.",
+    "update_success": "Account updated successfully.",
     "title": "Chart of Accounts",
     "subtitle": "Manage all financial accounts for your business.",
     "new_account_button": "New Account"
@@ -159,7 +171,32 @@
     "attribute_set_label": "Attribute Set",
     "select_attribute_set": "Select an attribute set..."
   },
+  "account_list": {
+    "no_accounts_title": "No Accounts Found",
+    "no_accounts_subtitle": "Get started by creating a new financial account.",
+    "header_name": "Account Name",
+    "header_code": "Code",
+    "header_type": "Type",
+    "header_subtype": "Sub-Type",
+    "header_balance": "Balance",
+    "header_actions": "Actions"
+  },
 
+  "ledger_view": {
+    "header_date": "Date",
+    "header_description": "Description",
+    "header_debit": "Debit",
+    "header_credit": "Credit",
+    "header_balance": "Balance"
+  },
+  "ledger_page": {
+    "back_button": "Back to Chart of Accounts",
+    "subtitle": "Showing all transactions for this account.",
+    "current_balance_title": "Current Balance",
+    "transaction_history_title": "Transaction History",
+    "no_transaction_history_title": "No Transaction History Found",
+    "no_transaction_history_subtitle": "Get started by Create Purchasing Order."
+  },
   "messages": {
     "template_not_found": "Template not found.",
     "generating_variants": "Generating variants...",
@@ -170,10 +207,13 @@
   },
   "errors": {
     "failed_to_load_product_data": "Failed to load product data.",
-
+    "failed_to_load_ledger": "Failed to load account ledger.",
     "failed_to_load_template": "Failed to load product template.",
     "could_not_load_data": "Could not load data.",
     "failed_to_generate_variants": "Failed to generate variants.",
-    "failed_to_save_variants": "Failed to save variants."
+    "failed_to_save_variants": "Failed to save variants.",
+    "failed_to_load_accounts": "Failed to load Chart of Accounts.",
+    "failed_to_delete_account": "Failed to delete account.",
+    "failed_to_save_account": "Failed to save account."
   }
 }

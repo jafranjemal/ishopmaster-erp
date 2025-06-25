@@ -36,6 +36,12 @@ import {
   Beaker,
   Globe,
   Receipt,
+  Wallet,
+  Edit,
+  ChartCandlestick,
+  FileText,
+  SwatchBook,
+  SlidersHorizontal,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -74,6 +80,13 @@ const Sidebar = () => {
           permission: "inventory:product:view",
         },
         {
+          name: t("sidebar.sub_menu.stock_levels"),
+          href: "/inventory/stock-levels",
+          icon: SlidersHorizontal,
+          permission: "inventory:product:view",
+        }, // <-- NEW
+
+        {
           name: t("sidebar.sub_menu.adjustments"),
           href: "/inventory/adjustments",
           icon: FileSliders,
@@ -106,6 +119,12 @@ const Sidebar = () => {
           icon: Contact,
           permission: "procurement:supplier:manage",
         },
+        {
+          name: t("sidebar.sub_menu.invoices"),
+          href: "/procurement/invoices",
+          icon: FileText,
+          permission: "accounting:payables:view",
+        }, // <-- NEW LINK
       ],
     },
     {
@@ -161,6 +180,18 @@ const Sidebar = () => {
           icon: Receipt,
           permission: "accounting:payables:view",
         },
+        {
+          name: t("sidebar.sub_menu.cheques"),
+          href: "/accounting/cheques",
+          icon: Edit,
+          permission: "accounting:cheque:view",
+        },
+        {
+          name: t("sidebar.sub_menu.all_payments"),
+          href: "/accounting/payments",
+          icon: SwatchBook,
+          permission: "accounting:payment:view",
+        },
       ],
     },
     {
@@ -184,7 +215,7 @@ const Sidebar = () => {
         {
           name: t("sidebar.sub_menu.currencies"),
           href: "/settings/currencies",
-          icon: Landmark,
+          icon: ChartCandlestick,
           permission: "settings:access",
         }, // <-- ADD THIS NEW LINK
 
@@ -206,6 +237,13 @@ const Sidebar = () => {
           icon: UserCog,
           permission: "setting:user:manage",
         },
+        {
+          name: t("sidebar.sub_menu.payment_methods"),
+          href: "/settings/payment-methods",
+          icon: Wallet,
+          permission: "settings:access",
+        }, // <-- ADD THIS LINK
+
         {
           name: t("sidebar.sub_menu.roles_permissions"),
           href: "/settings/roles",

@@ -25,6 +25,7 @@ export { default as FilterBar } from "./components/FilterBar";
 export { default as Modal } from "./components/Modal";
 export { default as AlertModal } from "./components/AlertModal";
 export * from "./components/Table";
+export * from "./components/Select";
 export * from "./components/AlertModal";
 export * from "./lib/utils"; // Also export our `cn` utility
 export { default as FileUploader } from "./components/FileUploader";

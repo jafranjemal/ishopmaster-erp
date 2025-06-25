@@ -5,6 +5,8 @@ const purchasingService = require("../../../services/purchasing.service");
 // @route   POST /api/v1/tenant/procurement/purchase-orders
 exports.createPurchaseOrder = asyncHandler(async (req, res, next) => {
   const baseCurrency = req.tenant.settings.localization.baseCurrency;
+  console.log("----------\n-----\nCreating Purchase Order-----\n----------");
+  console.log("Base Currency:", baseCurrency);
   const newPO = await purchasingService.createPurchaseOrder(
     req.models,
     req.body,
@@ -21,7 +23,8 @@ exports.getAllPurchaseOrders = asyncHandler(async (req, res, next) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = parseInt(req.query.limit, 10) || 15;
   const skip = (page - 1) * limit;
-
+  console.log("----------\n-----\nFetching Purchase Orders-----\n----------");
+  console.log("Fetching Purchase Orders with filters:", req.query);
   const filters = {};
   if (req.query.status) filters.status = req.query.status;
   if (req.query.searchTerm)
@@ -29,7 +32,15 @@ exports.getAllPurchaseOrders = asyncHandler(async (req, res, next) => {
 
   const [results, total] = await Promise.all([
     PurchaseOrder.find(filters)
-      .populate("supplierId", "name")
+      .populate([
+        { path: "supplierId", select: "name" },
+        { path: "destinationBranchId", select: "name" },
+        { path: "createdBy", select: "name email" },
+        {
+          path: "items.productVariantId",
+          select: "templateId sku sellingPrice costPrice variantName",
+        },
+      ])
       .sort({ orderDate: -1 })
       .skip(skip)
       .limit(limit)
@@ -37,6 +48,8 @@ exports.getAllPurchaseOrders = asyncHandler(async (req, res, next) => {
     PurchaseOrder.countDocuments(filters),
   ]);
 
+  console.log("Total Purchase Orders found:", total);
+  console.log("Purchase Orders on this page:", results);
   res.status(200).json({
     success: true,
     total,
@@ -59,7 +72,7 @@ exports.getPurchaseOrderById = asyncHandler(async (req, res, next) => {
     .populate("destinationBranchId", "name")
     .populate({
       path: "items.productVariantId",
-      select: "variantName sku templateId",
+      select: "variantName sku templateId sellingPrice costPrice",
       populate: {
         path: "templateId",
         select: "type",

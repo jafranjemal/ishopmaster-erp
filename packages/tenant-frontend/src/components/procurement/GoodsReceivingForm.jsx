@@ -353,8 +353,9 @@ import {
   CardTitle,
 } from "ui-library";
 import { CheckCircle } from "lucide-react";
-
+import useAuth from "../../context/useAuth";
 const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
+  const { formatCurrency } = useAuth(); // Adjust import based on your project structure
   const [receivedItems, setReceivedItems] = useState({});
 
   const itemsToReceive = useMemo(
@@ -376,6 +377,7 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
       [poItemId]: {
         productVariantId: poItem.productVariantId._id,
         quantityReceived: validatedQty,
+        type: variant.templateId.type,
         serials:
           variant.templateId.type === "serialized"
             ? Array(validatedQty).fill("")
@@ -405,13 +407,38 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
     }));
   };
 
-  const isFormValid = () => {
+  const isFormValidO = () => {
     return Object.values(receivedItems).every(
       (item) =>
+        item.type === "serialized" ||
         !item.serials ||
         (item.serials.length === item.quantityReceived &&
           item.serials.every((s) => s.trim() !== ""))
     );
+  };
+
+  const isFormValid = () => {
+    return Object.values(receivedItems).every((item, index) => {
+      console.log(`Checking item ${index}:`, item);
+
+      if (!item.serials || item.type !== "serialized") {
+        console.log(`✅ Item ${index}: No serials required.`);
+        return true;
+      }
+
+      const correctLength = item.serials.length === item.quantityReceived;
+      const allFilled = item.serials.every((s) => {
+        const isValid = s.trim() !== "";
+        console.log(`Serial "${s}" trimmed: "${s.trim()}", valid: ${isValid}`);
+        return isValid;
+      });
+
+      console.log(
+        `Item ${index}: serials length valid? ${correctLength}, all filled? ${allFilled}`
+      );
+
+      return correctLength && allFilled;
+    });
   };
 
   const handleSubmit = (e) => {
@@ -444,6 +471,7 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
             <TableBody>
               {itemsToReceive.map((item) => {
                 const currentEntry = receivedItems[item._id];
+                console.log(`Rendering item: ${JSON.stringify(item)}`);
                 const variant = item.productVariantId;
                 return (
                   <React.Fragment key={item._id}>
@@ -471,7 +499,9 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
                         {variant.templateId.type !== "serialized" && (
                           <Input
                             type="number"
-                            placeholder={`Default: ${variant.defaultSellingPrice}`}
+                            placeholder={`Default Selling Price: ${formatCurrency(
+                              variant.sellingPrice
+                            )}`}
                             onChange={(e) =>
                               handlePriceChange(
                                 item._id,

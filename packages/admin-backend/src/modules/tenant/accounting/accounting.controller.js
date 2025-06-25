@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const asyncHandler = require("../../../middleware/asyncHandler");
 
 // @desc    Get all accounts from the Chart of Accounts for the current tenant
@@ -26,6 +27,12 @@ exports.createAccount = asyncHandler(async (req, res, next) => {
   });
 
   res.status(201).json({ success: true, data: newAccount });
+});
+
+exports.getAccountById = asyncHandler(async (req, res, next) => {
+  const { Account } = req.models;
+  let account = await Account.findById(req.params.id);
+  res.status(200).json({ success: true, data: account });
 });
 
 // @desc    Update a user-created account
@@ -149,4 +156,67 @@ exports.getChartOfAccounts = asyncHandler(async (req, res, next) => {
   const { Account } = req.models;
   const accounts = await Account.find({}).sort({ name: 1 });
   res.status(200).json({ success: true, data: accounts });
+});
+
+/**
+ * @desc    Get all ledger entries for a specific account with pagination and date filtering.
+ * @route   GET /api/v1/tenant/accounting/accounts/:accountId/ledger
+ * @access  Private (accounting:ledger:view)
+ */
+exports.getLedgerForAccount = asyncHandler(async (req, res, next) => {
+  const { LedgerEntry } = req.models;
+  const { accountId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(accountId)) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid account ID" });
+  }
+
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 25;
+  const skip = (page - 1) * limit;
+
+  // Build base filter: match either debit or credit for the account
+  const filter = {
+    $or: [
+      { debitAccountId: new mongoose.Types.ObjectId(accountId) },
+      { creditAccountId: new mongoose.Types.ObjectId(accountId) },
+    ],
+  };
+
+  // Add date range filtering if provided
+  if (req.query.startDate || req.query.endDate) {
+    filter.date = {};
+    if (req.query.startDate) {
+      filter.date.$gte = new Date(req.query.startDate);
+    }
+    if (req.query.endDate) {
+      filter.date.$lte = new Date(req.query.endDate);
+    }
+  }
+
+  console.log("LedgerEntry filter:", JSON.stringify(filter, null, 2));
+
+  // Fetch ledger entries + count in parallel
+  const [entries, total] = await Promise.all([
+    LedgerEntry.find(filter)
+      .sort({ date: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    LedgerEntry.countDocuments(filter),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    count: entries.length,
+    pagination: {
+      total,
+      limit,
+      page,
+      pages: Math.ceil(total / limit),
+    },
+    data: entries,
+  });
 });

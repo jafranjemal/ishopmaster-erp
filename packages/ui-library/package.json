@@ -1,6 +1,6 @@
 {
   "name": "ui-library",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "src/index.js",
   "exports": {
@@ -23,6 +23,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "react-dropzone": "^14.3.8"
+    "@radix-ui/react-select": "^2.2.5",
+    "focus-trap-react": "^11.0.4",
+    "framer-motion": "^12.19.1"
   }
 }

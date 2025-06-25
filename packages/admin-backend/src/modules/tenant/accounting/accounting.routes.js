@@ -6,6 +6,8 @@ const {
   deleteAccount,
   getAllLedgerEntries,
   getChartOfAccounts,
+  getLedgerForAccount,
+  getAccountById,
 } = require("./accounting.controller");
 
 // Import our security middleware
@@ -26,8 +28,11 @@ router
   )
   .post(authorize("accounting:chart:manage"), createAccount);
 
+router.route("/accounts/:accountId/ledger").get(getLedgerForAccount);
+
 router
   .route("/accounts/:id")
+  .get(getAccountById)
   .put(authorize("accounting:chart:manage"), updateAccount)
   .delete(authorize("accounting:chart:manage"), deleteAccount);
 

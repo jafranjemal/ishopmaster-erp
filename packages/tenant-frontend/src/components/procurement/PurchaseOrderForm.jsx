@@ -27,6 +27,7 @@ const PurchaseOrderForm = ({
     destinationBranchId: "",
     items: [],
     notes: "",
+    transactionCurrency: "LKR",
   };
   const [poData, setPoData] = useState(initialPoData);
   const [totals, setTotals] = useState({ subTotal: 0, totalAmount: 0 });

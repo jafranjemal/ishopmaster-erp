@@ -183,6 +183,28 @@ export const tenantAccountingService = {
   },
 
   getChart: () => api.get("/tenant/accounting/chart"),
+
+  /**
+   * Fetches the Chart of Accounts with support for pagination and filtering.
+   * @param {string} queryParams - The URL query string (e.g., 'page=1&limit=25&search=cash').
+   */
+  getChartOfAccounts: (queryParams) => {
+    return api.get(`/tenant/accounting/chart?${queryParams}`);
+  },
+
+  getAccountById: (accountId) => {
+    return api.get(`/tenant/accounting/accounts/${accountId}`);
+  },
+  /**
+   * Fetches all ledger entries for a specific account with pagination.
+   * @param {string} accountId - The ID of the account.
+   * @param {string} queryParams - The URL query string for pagination.
+   */
+  getLedgerForAccount: (accountId, queryParams) => {
+    return api.get(
+      `/tenant/accounting/accounts/${accountId}/ledger?${queryParams}`
+    );
+  },
 };
 
 // --- NEW CUSTOMER (CRM) SERVICE ---
@@ -348,6 +370,13 @@ export const tenantProductService = {
     api.put(`/tenant/inventory/templates/${id}`, data),
   deleteTemplate: async (id) => api.delete(`/tenant/inventory/templates/${id}`),
 
+  /**
+   * Fetches a single product variant by its ID.
+   * @param {string} variantId - The ID of the product variant.
+   */
+  getVariantById: async (variantId) =>
+    api.get(`/tenant/inventory/products/variants/${variantId}`),
+
   // --- NEW VARIANT GENERATION METHOD ---
   /**
    * Calls the backend engine to generate all product variants for a template.
@@ -492,6 +521,117 @@ export const tenantReconciliationService = {
     // The endpoint will likely be /tenant/procurement/invoices
     return api.post("/tenant/procurement/invoices", invoiceData);
   },
+};
+
+// ---  GRN SERVICE ---
+export const tenantGrnService = {
+  /**
+   * Fetches only GRNs that have a status of 'pending_invoice'.
+   */
+  getAwaitingInvoice: async () => {
+    return api.get("/tenant/procurement/grns/awaiting-invoice");
+  },
+  /**
+   * Fetches the full details for one or more GRNs to begin reconciliation.
+   * @param {string[]} grnIds - An array of Goods Receipt Note IDs.
+   */
+  getDetailsForReconciliation: async (grnIds) => {
+    return api.post("/tenant/procurement/grns/by-ids", { grnIds });
+  },
+};
+
+// --- PAYMENT METHOD SERVICE ---
+export const tenantPaymentMethodService = {
+  getAll: async () => api.get("/tenant/payments/methods"),
+  create: async (data) => api.post("/tenant/payments/methods", data),
+  update: async (id, data) => api.put(`/tenant/payments/methods/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/payments/methods/${id}`),
+};
+
+export const tenantChequeService = {
+  /**
+   * Fetches all cheques with a 'pending_clearance' status.
+   */
+  getPending: async () => {
+    return api.get("/tenant/payments/cheques/pending");
+  },
+
+  /**
+   * Updates the status of a specific cheque.
+   * @param {string} chequeId - The ID of the cheque to update.
+   * @param {object} statusData - The new status, e.g., { status: 'cleared' }
+   */
+  updateStatus: async (chequeId, statusData) => {
+    return api.patch(`/tenant/payments/cheques/${chequeId}/status`, statusData);
+  },
+};
+
+// --- INVOICE SERVICE ---
+export const tenantInvoiceService = {
+  getAll: async (params) => api.get("/tenant/procurement/invoices", { params }),
+  /**
+   * Fetches the full details of a single Supplier Invoice.
+   * @param {string} invoiceId - The ID of the supplier invoice.
+   */
+  getById: async (invoiceId) => {
+    return api.get(`/tenant/procurement/invoices/${invoiceId}`);
+  },
+
+  /**
+   * Records a payment against a specific Supplier Invoice.
+   * @param {string} invoiceId - The ID of the supplier invoice being paid.
+   * @param {object} paymentData - The payment details from the form.
+   */
+  recordPayment: async (invoiceId, paymentData) => {
+    return api.post(
+      `/tenant/procurement/invoices/${invoiceId}/payments`,
+      paymentData
+    );
+  },
+};
+
+// --- SERVICE for the universal payments list ---
+export const tenantPaymentService = {
+  /**
+   * Fetches all payment transactions with filtering and pagination.
+   * @param {object} params - { page, limit, direction, paymentMethodId, etc. }
+   */
+  getAll: async (params) =>
+    api.get("/tenant/payments/transactions", { params }),
+  /**
+   * Fetches a single payment by its ID with all details.
+   */
+  getById: async (id) => api.get(`/tenant/payments/transactions/${id}`),
+};
+
+// --- STOCK SERVICE ---
+export const tenantStockService = {
+  /**
+   * Fetches an aggregated summary of stock levels with filtering and pagination.
+   * @param {object} params - { page, limit, branchId, searchTerm }.
+   */
+  getStockLevels: async (params) => {
+    return api.get("/tenant/inventory/stock/levels", { params });
+  },
+  /**
+   * Fetches summary KPI metrics for a single product variant.
+   * @param {string} variantId - The ID of the product variant.
+   */
+  getDetails: async (variantId) => {
+    return api.get(`/tenant/inventory/stock/details/${variantId}`);
+  },
+
+  /**
+   * Fetches the paginated movement history for a single product variant.
+   * @param {string} variantId - The ID of the product variant.
+   * @param {object} params - Query params like { page, limit, branchId }.
+   */
+  getMovements: async (variantId, params) => {
+    return api.get(`/tenant/inventory/stock/movements/${variantId}`, {
+      params,
+    });
+  },
+  // getStockDetails and getStockMovements will be added later
 };
 
 export default api;

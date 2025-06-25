@@ -45,3 +45,99 @@ Button.displayName = "Button";
 
 export { Button, buttonVariants };
 export default Button;
+
+// import * as React from "react";
+
+// const styles = {
+//   base: {
+//     display: "inline-flex",
+//     alignItems: "center",
+//     justifyContent: "center",
+//     whiteSpace: "nowrap",
+//     borderRadius: "0.375rem",
+//     fontSize: "0.875rem",
+//     fontWeight: 500,
+//     transition: "background-color 0.2s, color 0.2s",
+//     outline: "none",
+//     pointerEvents: "auto",
+//   },
+//   variants: {
+//     default: {
+//       backgroundColor: "#4f46e5", // indigo-600
+//       color: "#f1f5f9", // slate-100
+//     },
+//     destructive: {
+//       backgroundColor: "#dc2626", // red-600
+//       color: "#f1f5f9",
+//     },
+//     outline: {
+//       border: "1px solid #334155", // slate-700
+//       backgroundColor: "transparent",
+//       color: "#f1f5f9",
+//     },
+//     secondary: {
+//       backgroundColor: "#334155", // slate-700
+//       color: "#f1f5f9",
+//     },
+//     ghost: {
+//       backgroundColor: "transparent",
+//       color: "#f1f5f9",
+//     },
+//     link: {
+//       backgroundColor: "transparent",
+//       color: "#f1f5f9",
+//       textDecoration: "underline",
+//       textUnderlineOffset: "4px",
+//     },
+//   },
+//   sizes: {
+//     default: {
+//       height: "2.5rem", // 10
+//       padding: "0.5rem 1rem",
+//     },
+//     sm: {
+//       height: "2.25rem", // 9
+//       borderRadius: "0.375rem",
+//       padding: "0 0.75rem",
+//     },
+//     lg: {
+//       height: "2.75rem", // 11
+//       borderRadius: "0.375rem",
+//       padding: "0 2rem",
+//     },
+//     icon: {
+//       height: "2.5rem",
+//       width: "2.5rem",
+//     },
+//   },
+// };
+
+// const Button = React.forwardRef(
+//   (
+//     {
+//       style = {},
+//       variant = "default",
+//       size = "default",
+//       asChild = false,
+//       disabled,
+//       ...props
+//     },
+//     ref
+//   ) => {
+//     const Comp = asChild ? "span" : "button";
+//     const combinedStyle = {
+//       ...styles.base,
+//       ...(styles.variants[variant] || styles.variants.default),
+//       ...(styles.sizes[size] || styles.sizes.default),
+//       ...(disabled ? { opacity: 0.5, pointerEvents: "none" } : {}),
+//       ...style,
+//     };
+
+//     return <Comp ref={ref} style={combinedStyle} {...props} />;
+//   }
+// );
+
+// Button.displayName = "Button";
+
+// export { Button };
+// export default Button;

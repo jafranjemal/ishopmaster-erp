@@ -26,6 +26,15 @@ import PurchaseOrderDetailPage from "./pages/procurement/PurchaseOrderDetailPage
 import CurrenciesPage from "./pages/settings/CurrenciesPage";
 import PayablesPage from "./pages/accounting/PayablesPage";
 import ReconciliationPage from "./pages/accounting/ReconciliationPage";
+import IndividualLedgerPage from "./pages/IndividualLedgerPage";
+import PaymentMethodsPage from "./pages/settings/payments/PaymentMethodsPage";
+import ChequeManagementPage from "./pages/accounting/ChequeManagementPage";
+import SupplierInvoiceDetailPage from "./pages/procurement/SupplierInvoiceDetailPage";
+import InvoicesListPage from "./pages/procurement/InvoicesListPage";
+import PaymentsListPage from "./pages/accounting/PaymentsListPage";
+import PaymentDetailPage from "./pages/accounting/PaymentDetailPage";
+import StockLevelsPage from "./pages/inventory/StockLevelsPage";
+import StockDetailPage from "./pages/inventory/StockDetailPage";
 function App() {
   return (
     <>
@@ -129,8 +138,44 @@ function App() {
                     element={<PayablesPage />}
                   />
                   <Route
-                    path="/accounting/payables/reconcile/:poId"
+                    path="/accounting/ledger/:accountId"
+                    element={<IndividualLedgerPage />}
+                  />
+                  <Route
+                    path="/accounting/payables/reconcile"
                     element={<ReconciliationPage />}
+                  />
+                  <Route
+                    path="/settings/payment-methods"
+                    element={<PaymentMethodsPage />}
+                  />
+                  <Route
+                    path="/accounting/cheques"
+                    element={<ChequeManagementPage />}
+                  />{" "}
+                  <Route
+                    path="/procurement/invoices"
+                    element={<InvoicesListPage />}
+                  />
+                  <Route
+                    path="/accounting/payments"
+                    element={<PaymentsListPage />}
+                  />
+                  <Route
+                    path="/procurement/invoices/:id"
+                    element={<SupplierInvoiceDetailPage />}
+                  />
+                  <Route
+                    path="/accounting/payments/:id"
+                    element={<PaymentDetailPage />}
+                  />
+                  <Route
+                    path="/inventory/stock-levels"
+                    element={<StockLevelsPage />}
+                  />
+                  <Route
+                    path="/inventory/stock-details/:variantId"
+                    element={<StockDetailPage />}
                   />
                 </Routes>
               </Layout>

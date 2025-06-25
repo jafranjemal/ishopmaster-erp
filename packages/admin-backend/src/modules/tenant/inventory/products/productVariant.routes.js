@@ -4,6 +4,7 @@ const {
   updateVariant,
   searchVariants,
   bulkUpdateVariants,
+  getVariantById,
 } = require("./productVariant.controller");
 const {
   protect,
@@ -20,7 +21,10 @@ router.use(protect, authorize("inventory:product:view"));
 
 router.route("/").get(getAllVariants);
 router.route("/search").get(searchVariants);
-router.route("/:id").put(authorize("inventory:product:manage"), updateVariant);
+router
+  .route("/:id")
+  .get(protect, authorize("inventory:product:view"), getVariantById)
+  .put(protect, authorize("inventory:product:manage"), updateVariant);
 router.patch(
   "/bulk-update",
   protect,

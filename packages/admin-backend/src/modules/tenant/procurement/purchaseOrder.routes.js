@@ -20,6 +20,10 @@ router
   .post(authorize("procurement:po:create"), createPurchaseOrder);
 
 router
+  .route("/awaiting-invoice")
+  .get(authorize("accounting:payables:view"), getPOsAwaitingInvoice);
+
+router
   .route("/:id")
   .get(authorize("procurement:po:view"), getPurchaseOrderById);
 // .put(authorize('procurement:po:edit'), updatePurchaseOrder) would go here
@@ -27,9 +31,5 @@ router
 router
   .route("/:id/receive")
   .post(authorize("procurement:po:receive"), receiveGoods);
-
-router
-  .route("/awaiting-invoice")
-  .get(authorize("accounting:payables:view"), getPOsAwaitingInvoice);
 
 module.exports = router;

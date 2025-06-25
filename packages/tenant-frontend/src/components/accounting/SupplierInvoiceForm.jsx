@@ -11,13 +11,11 @@ import {
   TableRow,
   Card,
   CardContent,
-  FileUploader,
 } from "ui-library";
-// Assuming path
+import FileUploader from "ui-library/components/FileUploader";
 import { tenantUploadService } from "../../services/api";
-
-import { AlertTriangle } from "lucide-react";
 import useAuth from "../../context/useAuth";
+import { AlertTriangle } from "lucide-react";
 
 const SupplierInvoiceForm = ({
   purchaseOrder,
@@ -29,7 +27,7 @@ const SupplierInvoiceForm = ({
   const { formatCurrency } = useAuth();
 
   useEffect(() => {
-    // Re-initialize form when the initial data from parent changes
+    // This effect ensures the form resets if the parent data changes
     setInvoiceData(initialInvoiceData);
   }, [initialInvoiceData]);
 
@@ -39,7 +37,8 @@ const SupplierInvoiceForm = ({
 
   const handleItemChange = (index, field, value) => {
     const newItems = [...invoiceData.items];
-    newItems[index][field] = Number(value) || 0; // Ensure it's a number
+    // Ensure value is treated as a number for calculations
+    newItems[index][field] = value === "" ? "" : Number(value);
     setInvoiceData((prev) => ({ ...prev, items: newItems }));
   };
 
@@ -52,30 +51,27 @@ const SupplierInvoiceForm = ({
     onPost(invoiceData);
   };
 
-  const { subTotal, totalAmount, totalOriginalCost, purchasePriceVariance } =
-    useMemo(() => {
-      const subTotal = invoiceData.items.reduce(
-        (sum, item) => sum + item.quantityBilled * item.finalCostPrice,
-        0
+  // useMemo for high-performance, real-time calculations.
+  // This will only re-calculate when invoiceData.items or purchaseOrder changes.
+  const { subTotal, totalAmount, purchasePriceVariance } = useMemo(() => {
+    const subTotal = invoiceData.items.reduce(
+      (sum, item) => sum + item.quantityBilled * item.finalCostPrice,
+      0
+    );
+    const totalAmount =
+      subTotal + (invoiceData.taxes || 0) + (invoiceData.shippingCosts || 0);
+
+    const totalOriginalCost = invoiceData.items.reduce((sum, item) => {
+      const poItem = purchaseOrder.items.find(
+        (p) => p.productVariantId === item.productVariantId
       );
-      const totalAmount =
-        subTotal + (invoiceData.taxes || 0) + (invoiceData.shippingCosts || 0);
+      // We use the billed quantity from the invoice, but the original cost from the PO
+      return sum + item.quantityBilled * (poItem?.costPrice || 0);
+    }, 0);
 
-      const totalOriginalCost = purchaseOrder.items.reduce((sum, item) => {
-        const billedItem = invoiceData.items.find(
-          (i) => i.productVariantId === item.productVariantId._id
-        );
-        return sum + (billedItem?.quantityBilled || 0) * item.costPrice;
-      }, 0);
-
-      const purchasePriceVariance = subTotal - totalOriginalCost;
-      return {
-        subTotal,
-        totalAmount,
-        totalOriginalCost,
-        purchasePriceVariance,
-      };
-    }, [invoiceData.items, purchaseOrder.items]);
+    const purchasePriceVariance = subTotal - totalOriginalCost;
+    return { subTotal, totalAmount, purchasePriceVariance };
+  }, [invoiceData.items, purchaseOrder.items]);
 
   return (
     <Card>
@@ -110,7 +106,7 @@ const SupplierInvoiceForm = ({
           <div>
             <Label>Billed Items</Label>
             <p className="text-xs text-slate-400 mb-2">
-              Adjust the Final Cost to match the supplier's bill.
+              Adjust the Final Cost per item to match the supplier's bill.
             </p>
             <Table>
               <TableHeader>
@@ -143,7 +139,7 @@ const SupplierInvoiceForm = ({
                     <TableCell>
                       <Input
                         type="number"
-                        step="any"
+                        step="0.01"
                         value={item.finalCostPrice}
                         onChange={(e) =>
                           handleItemChange(
@@ -166,26 +162,33 @@ const SupplierInvoiceForm = ({
             <FileUploader
               onUploadComplete={handleFileUpload}
               getSignatureFunc={tenantUploadService.getCloudinarySignature}
+              initialFiles={invoiceData.fileAttachments}
             />
           </div>
 
           <div className="p-4 bg-slate-900/50 rounded-lg space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-slate-400">Subtotal</span>
-              <span>{formatCurrency(subTotal)}</span>
+              <span className="font-mono">{formatCurrency(subTotal)}</span>
             </div>
             {Math.abs(purchasePriceVariance) > 0.01 && (
-              <div className="flex justify-between text-sm font-semibold text-amber-300">
+              <div
+                className={`flex justify-between text-sm font-semibold ${
+                  purchasePriceVariance > 0 ? "text-red-400" : "text-green-400"
+                }`}
+              >
                 <span className="flex items-center">
                   <AlertTriangle className="h-4 w-4 mr-2" /> Purchase Price
                   Variance
                 </span>
-                <span>{formatCurrency(purchasePriceVariance)}</span>
+                <span className="font-mono">
+                  {formatCurrency(purchasePriceVariance)}
+                </span>
               </div>
             )}
             <div className="flex justify-between text-lg font-bold border-t border-slate-700 pt-2 mt-2!">
               <span className="text-slate-100">Total Amount</span>
-              <span>{formatCurrency(totalAmount)}</span>
+              <span className="font-mono">{formatCurrency(totalAmount)}</span>
             </div>
           </div>
 

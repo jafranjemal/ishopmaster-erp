@@ -8,7 +8,7 @@ const invoiceItemSchema = new mongoose.Schema(
   {
     productVariantId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ProductVariant",
+      ref: "ProductVariants",
       required: true,
     },
     description: { type: String, required: true },

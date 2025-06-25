@@ -1,71 +1,124 @@
 import React from "react";
-import { FilePenLine, Trash2, Lock } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import {
-  Button,
-  Badge,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
+  Badge,
 } from "ui-library";
+import { Library } from "lucide-react";
+import useAuth from "../../context/useAuth";
 
-/**
- * A presentational component to display the Chart of Accounts.
- * It receives data and action handlers as props.
- */
-const AccountList = ({ accounts, onEdit, onDelete }) => {
+const AccountRow = ({ account, level = 0, formatCurrency }) => {
+  const { t } = useTranslation();
+  const isParent = !account.parentId;
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Account Name</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Sub-Type</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {accounts.map((account) => (
-          <TableRow key={account._id}>
-            <TableCell className="font-medium">{account.name}</TableCell>
-            <TableCell>
-              <Badge variant="outline">{account.type}</Badge>
-            </TableCell>
-            <TableCell className="text-slate-400">{account.subType}</TableCell>
-            <TableCell className="text-right space-x-2">
-              {/* Only allow editing of non-system accounts */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onEdit(account)}
-                disabled={account.isSystemAccount}
-              >
-                {account.isSystemAccount ? (
-                  <Lock className="h-4 w-4 text-slate-500" />
-                ) : (
-                  <FilePenLine className="h-4 w-4" />
-                )}
-              </Button>
-              {/* Only allow deleting of non-system accounts */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onDelete(account)}
-                disabled={account.isSystemAccount}
-              >
-                {account.isSystemAccount ? (
-                  <Lock className="h-4 w-4 text-slate-500" />
-                ) : (
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                )}
-              </Button>
-            </TableCell>
+    <TableRow className={isParent ? "bg-slate-800/50" : ""}>
+      <TableCell style={{ paddingLeft: `${1 + level * 1.5}rem` }}>
+        <Link
+          to={`/accounting/ledger/${account._id}`}
+          className="font-medium text-indigo-400 hover:underline"
+        >
+          {account.name}
+        </Link>
+        {account.isSystemAccount && (
+          <Badge variant="secondary" className="ml-2">
+            System
+          </Badge>
+        )}
+      </TableCell>
+      <TableCell>{account.code}</TableCell>
+      <TableCell>{account.type}</TableCell>
+      <TableCell>{account.subType}</TableCell>
+      <TableCell className="text-right font-mono">
+        {formatCurrency(account.balance)}
+      </TableCell>
+    </TableRow>
+  );
+};
+
+const AccountList = ({ accounts = [] }) => {
+  const { t } = useTranslation();
+  const { formatCurrency } = useAuth();
+
+  // Helper to build a hierarchical structure
+  const buildHierarchy = (accs) => {
+    const accountMap = new Map(
+      accs.map((a) => [a._id, { ...a, children: [] }])
+    );
+    const roots = [];
+
+    for (const account of accs) {
+      if (account.parentId && accountMap.has(account.parentId)) {
+        accountMap
+          .get(account.parentId)
+          .children.push(accountMap.get(account._id));
+      } else {
+        roots.push(accountMap.get(account._id));
+      }
+    }
+    return roots;
+  };
+
+  const hierarchicalAccounts = buildHierarchy(accounts);
+
+  const renderAccountRows = (accs, level = 0) => {
+    return accs.map((account) => (
+      <React.Fragment key={account._id}>
+        <AccountRow
+          account={account}
+          level={level}
+          formatCurrency={formatCurrency}
+        />
+        {account.children.length > 0 &&
+          renderAccountRows(account.children, level + 1)}
+      </React.Fragment>
+    ));
+  };
+
+  if (!accounts || accounts.length === 0) {
+    return (
+      <div className="text-center py-12 text-slate-400">
+        <Library className="mx-auto h-12 w-12" />
+        <h3 className="mt-2 text-lg font-semibold">
+          {t("account_list.no_accounts_title", "No Accounts Found")}
+        </h3>
+        <p className="mt-1 text-sm">
+          {t(
+            "account_list.no_accounts_subtitle",
+            "Get started by creating a new financial account."
+          )}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>
+              {t("account_list.header_name", "Account Name")}
+            </TableHead>
+            <TableHead>{t("account_list.header_code", "Code")}</TableHead>
+            <TableHead>{t("account_list.header_type", "Type")}</TableHead>
+            <TableHead>
+              {t("account_list.header_subtype", "Sub-Type")}
+            </TableHead>
+            <TableHead className="text-right">
+              {t("account_list.header_balance", "Balance")}
+            </TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>{renderAccountRows(hierarchicalAccounts)}</TableBody>
+      </Table>
+    </div>
   );
 };
 

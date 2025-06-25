@@ -7,6 +7,7 @@ const PRODUCT_TEMPLATE_MASTER_LIST = require("../modules/admin/constants/product
 const DEFAULT_ACCOUNTS_LIST = require("../modules/admin/constants/account.masterlist");
 const CURRENCY_MASTER_LIST = require("../modules/admin/constants/currency.masterlist");
 const EXCHANGE_RATE_MASTER_LIST = require("../modules/admin/constants/exchangeRate.masterlist");
+const PAYMENT_METHOD_MASTER_LIST = require("../modules/admin/constants/paymentMethod.masterlist");
 
 const customerService = require("./customer.service");
 
@@ -137,6 +138,7 @@ class TenantProvisioningService {
       Account,
       Currency,
       ExchangeRate,
+      PaymentMethod,
     } = models;
 
     // Seed simple lists
@@ -205,6 +207,19 @@ class TenantProvisioningService {
     if (templateDocs.length > 0) {
       await ProductTemplates.insertMany(templateDocs, { session });
     }
+
+    // Seed Payment Methods, linking them to the correct accounts
+    const paymentMethodsToCreate = PAYMENT_METHOD_MASTER_LIST.map((method) => ({
+      ...method,
+      linkedAccountId: accountMap.get(method.linkedAccountName),
+      holdingAccountId: method.holdingAccountName
+        ? accountMap.get(method.holdingAccountName)
+        : null,
+    }));
+    await PaymentMethod.insertMany(paymentMethodsToCreate, {
+      session,
+      ordered: true,
+    });
 
     console.log("Seeding master data: Currencies and Exchange Rates...");
     await Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true });
