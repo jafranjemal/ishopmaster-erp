@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { tenantCustomerService } from "../../services/api";
+import {
+  tenantCustomerService,
+  tenantInstallmentService,
+} from "../../services/api";
 
 // We will build these components in the next steps
 
@@ -9,6 +12,14 @@ import LedgerView from "../../components/accounting/LedgerView";
 import { Card, CardContent, CardHeader, CardTitle } from "ui-library";
 import CustomerProfileHeader from "../../components/crm/CustomerProfileHeader";
 import CustomerFinancialSummary from "../../components/crm/CustomerFinancialSummary";
+import InstallmentPlanList from "../../components/payments/InstallmentPlanList";
+import {
+  Tabs,
+  List,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@radix-ui/react-tabs";
 
 /**
  * A "smart" page component that orchestrates the entire customer profile view.
@@ -21,6 +32,7 @@ const CustomerProfilePage = () => {
   const [ledger, setLedger] = useState({ entries: [], pagination: null });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [installmentPlans, setInstallmentPlans] = useState([]); // <-- 2. ADD NEW STATE
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -30,11 +42,14 @@ const CustomerProfilePage = () => {
       setError(null);
 
       // Fetch customer details and their ledger transactions in parallel for performance
-      const [customerResponse, ledgerResponse] = await Promise.all([
-        tenantCustomerService.getById(id), // Assuming getById exists in your service
-        tenantCustomerService.getCustomerLedger(id, { page: 1, limit: 15 }),
-      ]);
+      const [customerResponse, ledgerResponse, plansResponse] =
+        await Promise.all([
+          tenantCustomerService.getById(id), // Assuming getById exists in your service
+          tenantCustomerService.getCustomerLedger(id, { page: 1, limit: 15 }),
+          tenantInstallmentService.getAllForCustomer(id),
+        ]);
 
+      setInstallmentPlans(plansResponse.data.data);
       if (customerResponse.data.success) {
         setCustomer(customerResponse.data.data);
       } else {
@@ -100,7 +115,50 @@ const CustomerProfilePage = () => {
         />
       </div>
 
-      <Card>
+      <Tabs defaultValue="transactions">
+        <TabsList className="flex border-b border-slate-700">
+          <TabsTrigger
+            value="transactions"
+            className="px-4 py-2 ui-tabs-trigger"
+          >
+            Transaction History
+          </TabsTrigger>
+          <TabsTrigger
+            value="installments"
+            className="px-4 py-2 ui-tabs-trigger"
+          >
+            Installment Plans
+          </TabsTrigger>
+        </TabsList>
+        <div className="pt-6">
+          <TabsContent value="transactions">
+            <Card>
+              <CardHeader>
+                <CardTitle>Ledger History</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <LedgerView
+                  entries={ledger.entries}
+                  pagination={ledger.pagination}
+                  onPageChange={handlePageChange}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value="installments">
+            <Card>
+              <CardHeader>
+                <CardTitle>Active Installment Plans</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <InstallmentPlanList plans={installmentPlans} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </div>
+      </Tabs>
+
+      {/* <Card>
         <CardHeader>
           <CardTitle>Transaction History</CardTitle>
         </CardHeader>
@@ -115,7 +173,7 @@ const CustomerProfilePage = () => {
             />
           )}
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 };

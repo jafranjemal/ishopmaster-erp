@@ -35,6 +35,15 @@ import PaymentsListPage from "./pages/accounting/PaymentsListPage";
 import PaymentDetailPage from "./pages/accounting/PaymentDetailPage";
 import StockLevelsPage from "./pages/inventory/StockLevelsPage";
 import StockDetailPage from "./pages/inventory/StockDetailPage";
+import StockAdjustmentsPage from "./pages/inventory/StockAdjustmentsPage";
+import AdjustmentHistoryPage from "./pages/inventory/AdjustmentHistoryPage";
+import StockTransfersPage from "./pages/inventory/StockTransfersPage";
+import StockTransferDetailPage from "./pages/inventory/StockTransferDetailPage";
+import GoodsReceiptsPage from "./pages/procurement/GoodsReceiptsPage";
+import GRNDetailPage from "./pages/procurement/GRNDetailPage";
+import InstallmentPlanDetailPage from "./pages/accounting/InstallmentPlanDetailPage";
+import PrintingPage from "./pages/settings/PrintingPage";
+import LabelDesignerPage from "./pages/settings/LabelDesignerPage";
 function App() {
   return (
     <>
@@ -177,6 +186,46 @@ function App() {
                     path="/inventory/stock-details/:variantId"
                     element={<StockDetailPage />}
                   />
+                  <Route
+                    path="/inventory/adjustments"
+                    element={<StockAdjustmentsPage />}
+                  />{" "}
+                  <Route
+                    path="/inventory/adjustments-history"
+                    element={<AdjustmentHistoryPage />}
+                  />{" "}
+                  <Route
+                    path="/inventory/transfers"
+                    element={<StockTransfersPage />}
+                  />{" "}
+                  {/* <-- 2. ADD NEW ROUTE */}
+                  <Route
+                    path="/inventory/transfers/:id"
+                    element={<StockTransferDetailPage />}
+                  />{" "}
+                  <Route
+                    path="/procurement/receipts"
+                    element={<GoodsReceiptsPage />}
+                  />
+                  <Route
+                    path="/procurement/receipts/:id"
+                    element={<GRNDetailPage />}
+                  />
+                  <Route
+                    path="/accounting/installments/:id"
+                    element={<InstallmentPlanDetailPage />}
+                  />{" "}
+                  <Route path="/settings/printing" element={<PrintingPage />} />{" "}
+                  <Route
+                    path="/settings/printing/new"
+                    element={<LabelDesignerPage />}
+                  />{" "}
+                  {/* <-- 2. ADD ROUTE */}
+                  <Route
+                    path="/settings/printing/:id"
+                    element={<LabelDesignerPage />}
+                  />{" "}
+                  {/* <-- 2. ADD ROUTE */}
                 </Routes>
               </Layout>
             </ProtectedRoute>

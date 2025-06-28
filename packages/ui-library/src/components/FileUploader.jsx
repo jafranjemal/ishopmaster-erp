@@ -6,6 +6,7 @@ import { UploadCloud, File as FileIcon, X, LoaderCircle } from "lucide-react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
 import { useCustomDropzone } from "../hooks/useCustomDropzone";
+import { useEffect } from "react";
 
 export const FileUploader = ({
   onUploadComplete,
@@ -15,9 +16,13 @@ export const FileUploader = ({
   maxSize = 10 * 1024 * 1024,
   multiple = false,
 }) => {
-  const [files, setFiles] = useState(initialFiles);
+  const [files, setFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    setFiles(initialFiles);
+  }, [initialFiles]);
 
   const uploadFile = useCallback(
     async (file) => {
@@ -150,32 +155,28 @@ export const FileUploader = ({
       </div>
 
       {files.length > 0 && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {files.map((file) => (
             <div
               key={file.url}
-              className="flex items-center justify-between p-2 bg-slate-800 rounded"
+              className="relative group rounded overflow-hidden border border-slate-700 bg-slate-800"
             >
-              <div className="flex items-center gap-2 overflow-hidden">
-                <FileIcon className="h-4 w-4 text-slate-500 flex-shrink-0" />
-                <a
-                  href={file.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="truncate text-indigo-400 hover:underline"
-                  title={file.name}
-                >
-                  {file.name}
-                </a>
+              <img
+                src={file.url}
+                alt={file.name || "Uploaded image"}
+                className="object-cover w-full h-40"
+              />
+              <div className="p-2 text-xs text-slate-300 truncate text-center">
+                {file.name || "Unnamed"}
               </div>
-              <Button
-                size="icon"
-                variant="ghost"
+
+              <button
                 onClick={() => removeFile(file.url)}
-                aria-label={`Remove file ${file.name}`}
+                className="absolute top-1 right-1 bg-slate-900/60 rounded-full p-1 hover:bg-red-600 transition"
+                aria-label={`Remove ${file.name || "image"}`}
               >
-                <X className="h-4 w-4 text-slate-400 hover:text-white" />
-              </Button>
+                <X className="h-4 w-4 text-white" />
+              </button>
             </div>
           ))}
         </div>

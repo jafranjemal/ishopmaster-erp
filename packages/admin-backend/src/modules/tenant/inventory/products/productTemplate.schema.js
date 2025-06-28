@@ -27,6 +27,10 @@ const productTemplateSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "AttributeSet",
     },
+    alertQty: {
+      type: Number,
+      default: 5,
+    },
 
     // Defines which other products this product is compatible with.
     // Used for accessories and spare parts.

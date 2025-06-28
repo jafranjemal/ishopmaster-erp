@@ -7,6 +7,7 @@ const {
   deleteTemplate,
   generateVariants,
   syncVariants,
+  getTemplatesSummary,
 } = require("./productTemplate.controller");
 const {
   protect,
@@ -19,6 +20,7 @@ router.use(protect, authorize("inventory:product:manage"));
 
 router.route("/").get(getAllTemplates).post(createTemplate);
 
+router.get("/summary", getTemplatesSummary);
 router
   .route("/:id")
   .get(getTemplateById)

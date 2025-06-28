@@ -79,6 +79,8 @@ exports.getPurchaseOrderById = asyncHandler(async (req, res, next) => {
       },
     });
 
+  console.log("############### PO ####################\n\n");
+  console.log(po);
   if (!po)
     return res
       .status(404)

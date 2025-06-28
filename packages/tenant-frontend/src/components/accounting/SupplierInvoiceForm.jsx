@@ -12,7 +12,7 @@ import {
   Card,
   CardContent,
 } from "ui-library";
-import FileUploader from "ui-library/components/FileUploader";
+import { FileUploader } from "ui-library";
 import { tenantUploadService } from "../../services/api";
 import useAuth from "../../context/useAuth";
 import { AlertTriangle } from "lucide-react";

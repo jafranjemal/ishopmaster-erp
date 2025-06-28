@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "ui-library";
 import StockLevelsList from "../../components/inventory/StockLevelsList";
+import StockLevelsHeader from "../../components/inventory/StockLevelsHeader"; // <-- Import the new header
 
 const StockLevelsPage = () => {
   const [stockLevels, setStockLevels] = useState([]);
@@ -21,27 +22,23 @@ const StockLevelsPage = () => {
   const [filters, setFilters] = useState({ searchTerm: "", branchId: "" });
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [summary, setSummary] = useState(null); // State for the KPI data
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
       const params = { page: currentPage, limit: 25, ...filters };
       Object.keys(params).forEach((key) => !params[key] && delete params[key]);
 
-      const response = await tenantStockService.getStockLevels(params);
-      setStockLevels(response.data.data);
-      console.log(response.data.data);
-      // Note: Backend aggregation doesn't support pagination easily yet.
-      // We will mock pagination data on the frontend for now.
-      // This would be fixed in a backend refactor.
-      setPaginationData({
-        currentPage,
-        total: response.data.data.length,
-        totalPages: 1,
-        limit: 25,
-        count: response.data.data.length,
-      });
+      const [summaryRes, levelsRes] = await Promise.all([
+        tenantStockService.getSummary(params),
+        tenantStockService.getStockLevels(params),
+      ]);
+
+      setSummary(summaryRes.data.data);
+      setStockLevels(levelsRes.data.data);
+      setPaginationData(levelsRes.data.pagination);
     } catch (error) {
+      console.log(error);
       toast.error("Failed to fetch stock levels.");
     } finally {
       setIsLoading(false);
@@ -68,6 +65,14 @@ const StockLevelsPage = () => {
     else fetchData();
   };
 
+  const onBranchChange = (data) => {
+    console.log("branch changed ", data);
+    setFilters({
+      ...filters,
+      branchId: data,
+    });
+  };
+
   const handleClearFilters = () => {
     const cleared = { searchTerm: "", branchId: "" };
     if (JSON.stringify(filters) !== JSON.stringify(cleared)) {
@@ -84,6 +89,17 @@ const StockLevelsPage = () => {
           View and manage real-time inventory levels across all locations.
         </p>
       </div>
+
+      {/* Render the new header component */}
+      {isLoading && !summary ? (
+        <p>Loading summary...</p>
+      ) : (
+        <StockLevelsHeader
+          onBranchChange={onBranchChange}
+          branches={branches}
+          summary={summary}
+        />
+      )}
 
       <FilterBar
         filterValues={filters}

@@ -363,12 +363,16 @@ export const tenantInventoryService = {
 // This service will house all product-related API calls.
 export const tenantProductService = {
   // --- TEMPLATE METHODS ---
-  getAllTemplates: async () => api.get("/tenant/inventory/templates"),
+  getAllTemplates: async (params) =>
+    api.get("/tenant/inventory/templates", { params }),
+
   getTemplateById: async (id) => api.get(`/tenant/inventory/templates/${id}`),
   createTemplate: async (data) => api.post("/tenant/inventory/templates", data),
   updateTemplate: async (id, data) =>
     api.put(`/tenant/inventory/templates/${id}`, data),
   deleteTemplate: async (id) => api.delete(`/tenant/inventory/templates/${id}`),
+
+  getSummary: async () => api.get("/tenant/inventory/templates/summary"),
 
   /**
    * Fetches a single product variant by its ID.
@@ -538,6 +542,14 @@ export const tenantGrnService = {
   getDetailsForReconciliation: async (grnIds) => {
     return api.post("/tenant/procurement/grns/by-ids", { grnIds });
   },
+  /**
+   * Fetches the full details of a single Goods Receipt Note.
+   * @param {string} grnId - The ID of the GRN.
+   */
+  getById: async (grnId) => {
+    return api.get(`/tenant/procurement/grns/${grnId}`);
+  },
+  getAll: async (params) => api.get("/tenant/procurement/grns", { params }),
 };
 
 // --- PAYMENT METHOD SERVICE ---
@@ -621,6 +633,18 @@ export const tenantStockService = {
     return api.get(`/tenant/inventory/stock/details/${variantId}`);
   },
 
+  getSummary: async (params) => {
+    return api.get("/tenant/inventory/stock/summary", { params });
+  },
+
+  /**
+   * Fetches the paginated history of manual stock adjustments.
+   * @param {object} params - { page, limit, branchId, userId, startDate, endDate }.
+   */
+  getAdjustmentHistory: async (params) => {
+    return api.get("/tenant/inventory/adjustments/history", { params });
+  },
+
   /**
    * Fetches the paginated movement history for a single product variant.
    * @param {string} variantId - The ID of the product variant.
@@ -631,7 +655,146 @@ export const tenantStockService = {
       params,
     });
   },
+
+  /**
+   * Submits a manual stock adjustment.
+   * @param {object} adjustmentData - { productVariantId, branchId, quantityChange, notes, reason }
+   */
+  createAdjustment: async (adjustmentData) => {
+    return api.post("/tenant/inventory/stock/adjustments", adjustmentData);
+  },
+
   // getStockDetails and getStockMovements will be added later
+};
+
+// --- Transfer Service ---
+export const tenantTransferService = {
+  /**
+   * Creates a new stock transfer order.
+   * @param {object} transferData - The data for the new transfer order.
+   */
+  create: async (transferData) => {
+    return api.post("/tenant/inventory/stock/transfers", transferData);
+  },
+
+  /**
+   * Fetches all stock transfers with optional filtering and pagination.
+   * @param {object} params - Query params like { page, limit, status }.
+   */
+  getAll: async (params) => {
+    return api.get("/tenant/inventory/stock/transfers", { params });
+  },
+
+  /**
+   * Fetches the details of a single stock transfer.
+   * @param {string} transferId - The ID of the transfer.
+   */
+  getById: async (transferId) => {
+    return api.get(`/tenant/inventory/stock/transfers/${transferId}`);
+  },
+
+  /**
+   * Dispatches the items for a transfer order.
+   * @param {string} transferId - The ID of the transfer to dispatch.
+   */
+  dispatch: async (transferId) => {
+    return api.post(`/tenant/inventory/stock/transfers/${transferId}/dispatch`);
+  },
+
+  /**
+   * Confirms receipt of items for a transfer order.
+   * @param {string} transferId - The ID of the transfer to receive.
+   */
+  receive: async (transferId) => {
+    return api.post(`/tenant/inventory/stock/transfers/${transferId}/receive`);
+  },
+};
+
+// --- Installment Service ---
+export const tenantInstallmentService = {
+  /**
+   * Creates a new installment plan.
+   * @param {object} planData - Data to create the plan (totalAmount, installments, etc.).
+   */
+  create: async (planData) => {
+    return api.post("/tenant/payments/installments", planData);
+  },
+
+  getAllForCustomer: async (customerId) => {
+    return api.get("/tenant/payments/installments", { params: { customerId } });
+  },
+
+  /**
+   * Fetches the full details of a single installment plan.
+   * @param {string} planId - The ID of the installment plan.
+   */
+  getById: async (planId) => {
+    return api.get(`/tenant/payments/installments/${planId}`);
+  },
+
+  /**
+   * Applies a payment to a specific line item within an installment plan.
+   * @param {string} planId - The ID of the installment plan.
+   * @param {string} lineId - The ID of the specific installment line being paid.
+   * @param {object} paymentData - The universal payment data from the PaymentForm.
+   */
+  applyPayment: async (planId, lineId, paymentData) => {
+    return api.post(
+      `/tenant/payments/installments/${planId}/lines/${lineId}/pay`,
+      paymentData
+    );
+  },
+};
+
+// --- Label SERVICE ---
+
+export const tenantLabelTemplateService = {
+  /**
+   * Fetches all saved label templates for the tenant.
+   */
+  getAll: async () => api.get("/tenant/printing/label-templates"),
+
+  /**
+   * Fetches a single label template by its ID.
+   * @param {string} id - The ID of the template.
+   */
+  getById: async (id) => api.get(`/tenant/printing/label-templates/${id}`),
+
+  /**
+   * Creates a new label template.
+   * @param {object} templateData - The data for the new template design.
+   */
+  create: async (templateData) =>
+    api.post("/tenant/printing/label-templates", templateData),
+
+  /**
+   * Updates an existing label template.
+   * @param {string} id - The ID of the template to update.
+   * @param {object} templateData - The updated template design.
+   */
+  update: async (id, templateData) =>
+    api.put(`/tenant/printing/label-templates/${id}`, templateData),
+
+  /**
+   * Deletes a label template.
+   * @param {string} id - The ID of the template to delete.
+   */
+  delete: async (id) => api.delete(`/tenant/printing/label-templates/${id}`),
+};
+
+export const tenantPrintService = {
+  /**
+   * Calls the backend to generate print-ready HTML for labels.
+   * @param {string} templateId - The ID of the label template to use.
+   * @param {Array<object>} items - The list of items to print labels for.
+   */
+  generateLabels: async (templateId, items, isPreview) => {
+    return api.post("/tenant/inventory/print/labels", {
+      templateId,
+      items,
+      isPreview,
+    });
+  },
 };
 
 export default api;

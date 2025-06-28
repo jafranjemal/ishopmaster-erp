@@ -6,6 +6,8 @@ import { AuthContext } from "./AuthContext"; // ✅ Import the separated context
 import {
   formatCurrency as formatCurrencyUtil,
   formatDate,
+  formatNumber,
+  formatCurrencyCompact as formatCurrencyCompactUtil,
 } from "../lib/formatters";
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() =>
@@ -93,6 +95,12 @@ export const AuthProvider = ({ children }) => {
       return formatCurrencyUtil(amount, currencyCode);
     };
 
+    const formatCurrencyCompactForTenant = (amount, digits = 1) => {
+      const currencyCode =
+        tenantProfile?.settings?.localization?.baseCurrency || "USD";
+      return formatCurrencyCompactUtil(amount, currencyCode, digits);
+    };
+
     return {
       token,
       user,
@@ -102,8 +110,10 @@ export const AuthProvider = ({ children }) => {
       isLoadingSession,
       isAuthenticated: !!token && !!tenantProfile,
       formatCurrency: formatCurrencyForTenant, // <-- 3. EXPOSE THE FUNCTION
+      formatCurrencyCompact: formatCurrencyCompactForTenant, // <-- 3. EXPOSE THE FUNCTION
       refreshTenantProfile,
       formatDate,
+      formatNumber,
     };
   }, [token, user, tenantProfile, isLoadingSession, refreshTenantProfile]);
 

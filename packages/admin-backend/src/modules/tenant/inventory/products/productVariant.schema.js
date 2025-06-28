@@ -28,6 +28,10 @@ const productVariantSchema = new mongoose.Schema(
       type: Map,
       of: String,
     },
+    alertQty: {
+      type: Number,
+      default: 5,
+    },
 
     // Variant-specific images that override the template's images.
     images: [

@@ -15,7 +15,7 @@ const cartesian = (...arrays) => {
 
 // @desc    Get all product templates
 // @route   GET /api/v1/tenant/inventory/products/templates
-exports.getAllTemplates = asyncHandler(async (req, res, next) => {
+exports.getAllTemplatesOld = asyncHandler(async (req, res, next) => {
   const { ProductTemplates } = req.models;
 
   console.log("req.query ------\n-----\n", req.query);
@@ -78,6 +78,156 @@ exports.getAllTemplates = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Get all product templates with their variant counts (paginated)
+// @route   GET /api/v1/tenant/inventory/products/templates
+// @desc    Get all product templates with their variant counts (paginated, searchable, deeply populated)
+// @route   GET /api/v1/tenant/inventory/products/templates
+
+exports.getAllTemplates = asyncHandler(async (req, res, next) => {
+  const { ProductTemplates } = req.models;
+  const { page = 1, limit = 25, search = "" } = req.query;
+  const skip = (page - 1) * limit;
+
+  // Build search filter
+  let matchStage = {};
+
+  // Search by name
+  if (search && search.trim() !== "") {
+    const escapedSearch = search.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+    matchStage.baseName = { $regex: escapedSearch, $options: "i" };
+  }
+
+  // Exact-match filters (only if value is not empty string)
+  if (req.query.brandId && req.query.brandId !== "") {
+    matchStage.brandId = req.query.brandId;
+  }
+
+  if (req.query.categoryId && req.query.categoryId !== "") {
+    matchStage.categoryId = req.query.categoryId;
+  }
+
+  if (req.query.type && req.query.type !== "") {
+    matchStage.type = req.query.type;
+  }
+
+  if (req.query.isActive !== undefined && req.query.isActive !== "") {
+    matchStage.isActive = req.query.isActive === "true";
+  }
+
+  const basePipeline = [
+    // Optional match stage for search filtering
+    { $match: matchStage },
+
+    // Lookup variants to count
+    {
+      $lookup: {
+        from: "productvariants",
+        localField: "_id",
+        foreignField: "templateId",
+        as: "variants",
+      },
+    },
+    {
+      $addFields: {
+        variantCount: { $size: "$variants" },
+      },
+    },
+
+    // Lookup brand
+    {
+      $lookup: {
+        from: "brands",
+        localField: "brandId",
+        foreignField: "_id",
+        as: "brand",
+      },
+    },
+    {
+      $unwind: { path: "$brand", preserveNullAndEmptyArrays: true },
+    },
+
+    // Lookup category
+    {
+      $lookup: {
+        from: "categories",
+        localField: "categoryId",
+        foreignField: "_id",
+        as: "category",
+      },
+    },
+    {
+      $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
+    },
+
+    // Lookup and deeply populate attributeSetId
+    {
+      $lookup: {
+        from: "attributesets",
+        localField: "attributeSetId",
+        foreignField: "_id",
+        as: "attributeSet",
+      },
+    },
+    { $unwind: { path: "$attributeSet", preserveNullAndEmptyArrays: true } },
+
+    {
+      $lookup: {
+        from: "attributes",
+        localField: "attributeSet.attributes",
+        foreignField: "_id",
+        as: "attributeSet.attributesPopulated",
+      },
+    },
+
+    // Final shape
+    {
+      $project: {
+        baseName: 1,
+        skuPrefix: 1,
+        type: 1,
+        isActive: 1,
+        brandName: "$brand.name",
+        categoryName: "$category.name",
+        brandId: "$brand",
+        categoryId: "$category",
+        variantCount: 1,
+        createdAt: 1,
+        attributeSetId: {
+          _id: "$attributeSet._id",
+          name: "$attributeSet.name",
+          attributes: "$attributeSet.attributesPopulated",
+        },
+      },
+    },
+    { $sort: { baseName: 1 } },
+  ];
+
+  const results = await ProductTemplates.aggregate([
+    {
+      $facet: {
+        data: [...basePipeline, { $skip: skip }, { $limit: Number(limit) }],
+        totalCount: [...basePipeline, { $count: "total" }],
+      },
+    },
+  ]);
+
+  const data = results[0].data;
+  const total = results[0].totalCount[0]?.total || 0;
+
+  res.status(200).json({
+    success: true,
+    total,
+    data,
+    pagination: {
+      currentPage: Number(page),
+      totalPages: Math.ceil(total / limit),
+      total, // total number of records
+      limit: Number(limit),
+      count: data.length, // how many items in this current page
+    },
+  });
+});
+
 // @desc    Get a single product template and its attribute set details
 // @route   GET /api/v1/tenant/inventory/products/templates/:id
 exports.getTemplateById = asyncHandler(async (req, res, next) => {
@@ -86,11 +236,15 @@ exports.getTemplateById = asyncHandler(async (req, res, next) => {
   const template = await ProductTemplates.findById(req.params.id)
     .populate("brandId", "name")
     .populate("categoryId", "name")
+    // --- THE FIX: DEEPLY POPULATE ALL REQUIRED DATA ---
     .populate({
       path: "attributeSetId",
       select: "name attributes",
-      populate: { path: "attributes", select: "name values key" }, // Populate attributes within the set
+      populate: { path: "attributes", select: "name values" },
     })
+    .populate("assetAccountId", "name")
+    .populate("revenueAccountId", "name")
+    .populate("cogsAccountId", "name")
     .lean();
 
   if (!template)
@@ -98,6 +252,25 @@ exports.getTemplateById = asyncHandler(async (req, res, next) => {
       .status(404)
       .json({ success: false, error: "Product Template not found" });
   res.status(200).json({ success: true, data: template });
+});
+
+// @desc    Get summary KPIs for product templates
+// @route   GET /api/v1/tenant/inventory/products/templates/summary
+exports.getTemplatesSummary = asyncHandler(async (req, res, next) => {
+  const { ProductTemplates, ProductVariants } = req.models;
+
+  const [templateCount, variantCount] = await Promise.all([
+    ProductTemplates.countDocuments({}),
+    ProductVariants.countDocuments({}),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: {
+      totalTemplates: templateCount,
+      totalVariants: variantCount,
+    },
+  });
 });
 
 // @desc    Create a new product template
@@ -446,6 +619,7 @@ exports.syncVariants = asyncHandler(async (req, res, next) => {
         sku: skuParts.join("-"),
         attributes,
         sellingPrice: template.sellingPrice,
+        costPrice: template.costPrice,
       });
     } else if (!existing.isActive) {
       // It exists but is inactive, so we should reactivate it.

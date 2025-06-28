@@ -7,6 +7,8 @@ import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthProvider.jsx";
 import "./i18n";
+import "react-contexify/dist/ReactContexify.css";
+
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <Suspense

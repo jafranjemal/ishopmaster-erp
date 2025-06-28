@@ -1,3 +1,4 @@
+import { Library } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import {
@@ -10,6 +11,19 @@ import {
 } from "ui-library";
 
 const StockLevelsList = ({ stockLevels }) => {
+  if (!stockLevels || stockLevels.length === 0) {
+    return (
+      <div className="text-center py-12 text-slate-400">
+        <Library className="mx-auto h-12 w-12" />
+        <h3 className="mt-2 text-lg font-semibold">Stock Not Found</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          No stock records are available yet. Start by adding products to your
+          inventory to see them here.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <Table>
       <TableHeader>

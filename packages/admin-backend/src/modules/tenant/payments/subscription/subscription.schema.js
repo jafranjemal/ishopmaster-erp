@@ -9,7 +9,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     productVariantId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ProductVariant",
+      ref: "ProductVariants",
       required: true,
     },
     amount: { type: Number, required: true },

@@ -7,6 +7,7 @@ const subscriptionSchema = require("./subscription/subscription.schema");
 const paymentMethodRoutes = require("./paymentMethod/paymentMethod.routes"); // <-- 1. IMPORT NEW ROUTES
 const chequeRoutes = require("./cheque/cheque.routes"); // To be added later
 const paymentRoutes = require("./transactions/payment.routes"); // <-- 1. IMPORT
+const installmentRoutes = require("./paymentPlan/installment.routes"); // <-- 1. IMPORT
 
 /**
  * Manifest file for the Universal Payments module.
@@ -16,6 +17,7 @@ const mainRouter = express.Router();
 mainRouter.use("/methods", paymentMethodRoutes);
 mainRouter.use("/cheques", chequeRoutes);
 mainRouter.use("/transactions", paymentRoutes);
+mainRouter.use("/installments", installmentRoutes);
 
 module.exports = {
   schemas: {

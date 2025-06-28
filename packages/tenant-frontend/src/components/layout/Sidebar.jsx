@@ -42,6 +42,7 @@ import {
   FileText,
   SwatchBook,
   SlidersHorizontal,
+  ClipboardCheck,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -111,6 +112,12 @@ const Sidebar = () => {
           href: "/procurement/po",
           icon: ClipboardList,
           permission: "procurement:po:create",
+        },
+        {
+          name: "Goods Receipts",
+          href: "/procurement/receipts",
+          icon: ClipboardCheck,
+          permission: "procurement:po:view",
         },
 
         {
@@ -273,6 +280,12 @@ const Sidebar = () => {
               href: "/settings/inventory/attributes",
               icon: Beaker,
               permission: "inventory:product:manage",
+            },
+            {
+              name: t("sidebar.sub_menu.label_templates"),
+              href: "/settings/printing",
+              icon: Printer,
+              permission: "settings:printing:manage",
             },
           ],
         },

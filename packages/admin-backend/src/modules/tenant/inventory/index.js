@@ -11,7 +11,10 @@ const productVariantRoutes = require("./products/productVariant.routes");
 const inventoryLotSchema = require("./stock/inventoryLot.schema");
 const inventoryItemSchema = require("./stock/inventoryItem.schema");
 const stockMovementSchema = require("./stock/stockMovement.schema");
+const stockTransferSchema = require("./stock/stockTransfer.schema");
 const stockRoutes = require("./stock/stock.routes"); // <-- 1. IMPORT NEW ROUTES
+const stockAdjustmentRoutes = require("./adjustments/stockAdjustment.routes"); // <-- 1. IMPORT NEW ROUTES
+const printRoutes = require("./print/print.routes"); // <-- IMPORT
 
 const mainRouter = express.Router();
 
@@ -26,7 +29,8 @@ productsRouter.use("/variants", productVariantRoutes); // <-- 2. MOUNT NEW ROUTE
 
 mainRouter.use("/products", productsRouter); // Mount the sub-router
 mainRouter.use("/stock", stockRoutes); // <-- 2. MOUNT NEW ROUTES
-
+mainRouter.use("/adjustments", stockAdjustmentRoutes); // <-- 2. MOUNT NEW ROUTES
+mainRouter.use("/print", printRoutes);
 module.exports = {
   schemas: {
     ProductTemplates: productTemplateSchema,
@@ -36,6 +40,8 @@ module.exports = {
     InventoryLot: inventoryLotSchema,
     InventoryItem: inventoryItemSchema,
     StockMovement: stockMovementSchema,
+
+    StockTransfer: stockTransferSchema,
   },
   router: mainRouter,
 };
