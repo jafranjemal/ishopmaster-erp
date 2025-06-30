@@ -206,8 +206,7 @@ exports.getStockDetails_old = asyncHandler(async (req, res, next) => {
 // @desc    Get summary KPI metrics for a single product variant
 // @route   GET /api/v1/tenant/inventory/stock/details/:variantId
 exports.getStockDetails = asyncHandler(async (req, res, next) => {
-  const { InventoryLot, InventoryItem, StockMovement, ProductVariants } =
-    req.models;
+  const { InventoryLot, InventoryItem, StockMovement, ProductVariants } = req.models;
   const variantId = new mongoose.Types.ObjectId(req.params.variantId);
 
   const [variant, stockData, movementData] = await Promise.all([
@@ -244,10 +243,7 @@ exports.getStockDetails = asyncHandler(async (req, res, next) => {
     ]),
   ]);
 
-  if (!variant)
-    return res
-      .status(404)
-      .json({ success: false, error: "Product Variant not found" });
+  if (!variant) return res.status(404).json({ success: false, error: "Product Variant not found" });
 
   const stockResult = stockData[0] || { totalInStock: 0, totalValue: 0 };
   const movementResult = movementData[0] || {
@@ -268,9 +264,7 @@ exports.getStockDetails = asyncHandler(async (req, res, next) => {
     totalValue: stockResult.totalValue, // Note: This doesn't include serialized item value yet
     unitsSold: movementResult.unitsSold,
     averageCost:
-      movementResult.unitsSold > 0
-        ? movementResult.totalCostOfSales / movementResult.unitsSold
-        : 0,
+      movementResult.unitsSold > 0 ? movementResult.totalCostOfSales / movementResult.unitsSold : 0,
   };
 
   res.status(200).json({ success: true, data: kpis });
@@ -325,9 +319,7 @@ exports.getStockSummary = asyncHandler(async (req, res, next) => {
   const branchId = req.query.branchId;
 
   // If branchId given, convert to ObjectId, else null
-  const branchObjectId = branchId
-    ? new mongoose.Types.ObjectId(branchId)
-    : null;
+  const branchObjectId = branchId ? new mongoose.Types.ObjectId(branchId) : null;
 
   // Step 1: Start aggregation from ProductVariants
   const summaryAgg = await ProductVariants.aggregate([
@@ -373,11 +365,7 @@ exports.getStockSummary = asyncHandler(async (req, res, next) => {
           ],
         },
         effectiveSelling: {
-          $cond: [
-            { $ifNull: ["$sellingPrice", false] },
-            "$sellingPrice",
-            "$template.sellingPrice",
-          ],
+          $cond: [{ $ifNull: ["$sellingPrice", false] }, "$sellingPrice", "$template.sellingPrice"],
         },
       },
     },
@@ -557,10 +545,7 @@ exports.getTransferById = asyncHandler(async (req, res, next) => {
       populate: { path: "templateId", select: "type" },
     });
 
-  if (!transfer)
-    return res
-      .status(404)
-      .json({ success: false, error: "Transfer not found." });
+  if (!transfer) return res.status(404).json({ success: false, error: "Transfer not found." });
   res.status(200).json({ success: true, data: transfer });
 });
 
@@ -711,4 +696,25 @@ exports.getAvailableSerials = asyncHandler(async (req, res, next) => {
     },
     data: serials,
   });
+});
+
+// @desc    Get all available stock lots for a specific non-serialized variant at a branch
+// @route   GET /api/v1/tenant/inventory/stock/lots-for-variant?productVariantId=...&branchId=...
+exports.getLotsForVariant = asyncHandler(async (req, res, next) => {
+  const { InventoryLot } = req.models;
+  const { productVariantId, branchId } = req.query;
+
+  if (!productVariantId || !branchId) {
+    return res
+      .status(400)
+      .json({ success: false, error: "Product Variant ID and Branch ID are required." });
+  }
+
+  const lots = await InventoryLot.find({
+    productVariantId: new mongoose.Types.ObjectId(productVariantId),
+    branchId: new mongoose.Types.ObjectId(branchId),
+    quantityInStock: { $gt: 0 }, // Only find lots that actually have stock
+  }).sort({ createdAt: 1 }); // Sort by FIFO by default
+
+  res.status(200).json({ success: true, data: lots });
 });

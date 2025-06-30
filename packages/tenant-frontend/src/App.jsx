@@ -46,6 +46,8 @@ import PrintingPage from "./pages/settings/PrintingPage";
 import LabelDesignerPage from "./pages/settings/LabelDesignerPage";
 import PrintHubPage from "./pages/inventory/PrintHubPage";
 import MyProfilePage from "./pages/settings/MyProfilePage";
+import ShiftManagementPage from "./pages/pos/ShiftManagementPage";
+import PosPage from "./pages/pos/PosPage";
 function App() {
   return (
     <>
@@ -114,6 +116,9 @@ function App() {
                   <Route path="/procurement/receipts/:id" element={<GRNDetailPage />} />
                   <Route path="/accounting/installments/:id" element={<InstallmentPlanDetailPage />} />{" "}
                   <Route path="/inventory/print-hub" element={<PrintHubPage />} />
+                  {/* POS */}
+                  <Route path="/pos" element={<PosPage />} />
+                  <Route path="/shifts" element={<ShiftManagementPage />} /> {/* <-- 2. ADD THE NEW ROUTE */}
                 </Routes>
               </Layout>
             </ProtectedRoute>

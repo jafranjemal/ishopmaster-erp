@@ -44,6 +44,7 @@ import {
   SlidersHorizontal,
   ClipboardCheck,
   Building,
+  Clock,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -63,11 +64,17 @@ const Sidebar = () => {
       icon: LayoutDashboard,
       permission: null,
     },
+
     {
-      name: t("sidebar.pos"),
+      name: t("sidebar.pos_parent"), // e.g., "Point of Sale"
       href: "/pos",
       icon: ShoppingCart,
       permission: "sales:pos:access",
+      children: [
+        { name: t("sidebar.sub_menu.pos_terminal"), href: "/pos", icon: ShoppingCart, permission: "sales:pos:access" },
+        // --- ADD THE NEW LINK TO THE SUB-MENU ---
+        { name: t("sidebar.sub_menu.shifts"), href: "/shifts", icon: Clock, permission: "sales:pos:access" },
+      ],
     },
     {
       name: t("sidebar.inventory"),

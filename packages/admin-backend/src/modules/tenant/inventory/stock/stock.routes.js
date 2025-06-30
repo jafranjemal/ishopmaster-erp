@@ -13,11 +13,9 @@ const {
   cancelTransfer,
   getLotQuantityForVariant,
   getAvailableSerials,
+  getLotsForVariant,
 } = require("./stock.controller");
-const {
-  protect,
-  authorize,
-} = require("../../../../middleware/auth.middleware");
+const { protect, authorize } = require("../../../../middleware/auth.middleware");
 
 const router = express.Router();
 
@@ -27,23 +25,11 @@ router.use(protect, authorize("inventory:product:view"));
 // Stock Viewing Routes
 router.get("/summary", authorize("inventory:product:view"), getStockSummary);
 router.get("/levels", authorize("inventory:product:view"), getStockLevels);
-router.get(
-  "/details/:variantId",
-  authorize("inventory:product:view"),
-  getStockDetails
-);
-router.get(
-  "/movements/:variantId",
-  authorize("inventory:product:view"),
-  getStockMovements
-);
+router.get("/details/:variantId", authorize("inventory:product:view"), getStockDetails);
+router.get("/movements/:variantId", authorize("inventory:product:view"), getStockMovements);
 
 // Stock Adjustment Route
-router.post(
-  "/adjustments",
-  authorize("inventory:stock:adjust"),
-  createStockAdjustment
-);
+router.post("/adjustments", authorize("inventory:stock:adjust"), createStockAdjustment);
 
 // Stock Transfer Routes
 router
@@ -51,35 +37,19 @@ router
   .get(authorize("inventory:stock:transfer"), getAllTransfers)
   .post(authorize("inventory:stock:transfer"), createTransfer);
 
-router.get(
-  "/lot-quantity",
-  authorize("inventory:product:view"),
-  getLotQuantityForVariant
-);
-router.get(
-  "/available-serials",
-  authorize("inventory:product:view"),
-  getAvailableSerials
-);
+router.get("/lot-quantity", authorize("inventory:product:view"), getLotQuantityForVariant);
+router.get("/available-serials", authorize("inventory:product:view"), getAvailableSerials);
 
-router
-  .route("/transfers/:id")
-  .get(authorize("inventory:stock:transfer"), getTransferById);
+router.get("/lots-for-variant", authorize("sales:pos:access"), getLotsForVariant);
+
+router.route("/transfers/:id").get(authorize("inventory:stock:transfer"), getTransferById);
 
 router.post(
   "/transfers/:id/dispatch",
   authorize("inventory:stock:transfer"),
   dispatchTransferOrder
 );
-router.post(
-  "/transfers/:id/receive",
-  authorize("inventory:stock:transfer"),
-  receiveTransferOrder
-);
-router.patch(
-  "/transfers/:id/cancel",
-  authorize("inventory:stock:transfer"),
-  cancelTransfer
-);
+router.post("/transfers/:id/receive", authorize("inventory:stock:transfer"), receiveTransferOrder);
+router.patch("/transfers/:id/cancel", authorize("inventory:stock:transfer"), cancelTransfer);
 
 module.exports = router;

@@ -23,7 +23,8 @@
   },
   "sidebar": {
     "dashboard": "Dashboard",
-    "pos": "Point of Sale",
+    "pos_parent": "Point of Sale",
+
     "inventory": "Inventory",
     "procurement": "Procurement",
     "service": "Service",
@@ -57,7 +58,9 @@
       "stock_levels": "Stock Levels ",
       "invoices": "Invoices ",
       "label_templates": "Label & Print Settings",
-      "all_payments": "All Payments"
+      "all_payments": "All Payments",
+      "pos_terminal": "POS Terminal",
+      "shifts": "Shift Management"
     }
   },
   "login": {

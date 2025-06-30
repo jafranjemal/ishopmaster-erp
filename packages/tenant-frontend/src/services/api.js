@@ -234,6 +234,9 @@ export const tenantAccountingService = {
 export const tenantCustomerService = {
   getAll: async () => api.get("/tenant/crm/customers"),
   getById: async (id) => api.get(`/tenant/crm/customers/${id}`),
+  getByName: async (name) => {
+    return api.get("/tenant/crm/customers", { params: { name: name, limit: 1 } });
+  },
   create: async (data) => api.post("/tenant/crm/customers", data),
   update: async (id, data) => api.put(`/tenant/crm/customers/${id}`, data),
   delete: async (id) => api.delete(`/tenant/crm/customers/${id}`),
@@ -678,6 +681,13 @@ export const tenantStockService = {
       params: { productVariantId, branchId, ...params },
     });
   },
+
+  getLotsForVariant: async (productVariantId, branchId) => {
+    return api.get("/tenant/inventory/stock/lots-for-variant", {
+      params: { productVariantId, branchId },
+    });
+  },
+
   // getStockDetails and getStockMovements will be added later
 };
 
@@ -817,6 +827,32 @@ export const tenantPrintService = {
       itemData: itemData,
     });
   },
+};
+
+export const tenantShiftService = {
+  /**
+   * Gets the current user's currently open shift, if any.
+   */
+  getActive: async () => api.get("/tenant/sales/shifts/active"),
+
+  /**
+   * Opens a new shift for the current user.
+   * @param {object} data - { openingFloat }
+   */
+  openShift: async (data) => api.post("/tenant/sales/shifts/open", data),
+
+  /**
+   * Closes a specific shift and performs reconciliation.
+   * @param {string} shiftId - The ID of the shift to close.
+   * @param {object} data - { closingFloat }
+   */
+  closeShift: async (shiftId, data) => api.patch(`/tenant/sales/shifts/${shiftId}/close`, data),
+
+  /**
+   * Gets a paginated history of closed shifts.
+   * @param {object} params - { page, limit }
+   */
+  getHistory: async (params) => api.get("/tenant/sales/shifts/history", { params }),
 };
 
 export default api;
