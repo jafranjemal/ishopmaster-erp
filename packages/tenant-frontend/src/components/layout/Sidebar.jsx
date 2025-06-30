@@ -43,6 +43,7 @@ import {
   SwatchBook,
   SlidersHorizontal,
   ClipboardCheck,
+  Building,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -98,6 +99,12 @@ const Sidebar = () => {
           href: "/inventory/transfers",
           icon: ArrowRightLeft,
           permission: "inventory:stock:transfer",
+        },
+        {
+          name: "Print Hub",
+          href: "/inventory/print-hub",
+          icon: Printer, // Assuming Printer icon from lucide-react
+          permission: "inventory:product:view",
         },
       ],
     },
@@ -213,12 +220,15 @@ const Sidebar = () => {
       icon: Settings,
       permission: "settings:access",
       children: [
+        { name: "Company Profile", href: "/settings/company-profile", icon: Building, permission: "settings:company:manage" },
+
         {
           name: t("sidebar.sub_menu.profile"),
           href: "/settings/profile",
           icon: ProfileIcon,
           permission: "settings:access",
         },
+
         {
           name: t("sidebar.sub_menu.currencies"),
           href: "/settings/currencies",
@@ -319,16 +329,11 @@ const Sidebar = () => {
     <div className="w-64 bg-slate-800 text-slate-100 flex-shrink-0 flex flex-col">
       <div className="flex items-center justify-center h-20 border-b border-slate-700 flex-shrink-0 px-4">
         <ShieldCheck className="h-8 w-8 text-indigo-400 flex-shrink-0" />
-        <span
-          className="ml-3 text-lg font-bold truncate"
-          title={tenant?.companyName || "iShopMaster"}
-        >
+        <span className="ml-3 text-lg font-bold truncate" title={tenant?.companyName || "iShopMaster"}>
           {tenant?.companyName || "iShopMaster"}
         </span>
       </div>
-      <nav className="flex-1 mt-6 px-4 space-y-1 overflow-y-auto">
-        {renderNavItems(navItems, user, location, openMenus, handleMenuToggle)}
-      </nav>
+      <nav className="flex-1 mt-6 px-4 space-y-1 overflow-y-auto">{renderNavItems(navItems, user, location, openMenus, handleMenuToggle)}</nav>
       <div className="p-4 text-center text-xs text-slate-400 border-t border-slate-700 flex-shrink-0">
         <div>{t("sidebar.footer_title")}</div>
         <div>v1.0.0</div>
@@ -343,17 +348,9 @@ const Sidebar = () => {
  * A recursive function to render navigation items.
  * Handles nested children and permission checks.
  */
-const renderNavItems = (
-  items,
-  user,
-  location,
-  openMenus,
-  handleMenuToggle,
-  parentKey = ""
-) => {
+const renderNavItems = (items, user, location, openMenus, handleMenuToggle, parentKey = "") => {
   return items.map((item) => {
-    const hasPermission =
-      !item.permission || user?.permissions?.includes(item.permission);
+    const hasPermission = !item.permission || user?.permissions?.includes(item.permission);
     if (!hasPermission) return null;
 
     const itemKey = parentKey ? `${parentKey}.${item.name}` : item.name;
@@ -373,26 +370,14 @@ const renderNavItems = (
           aria-expanded={isMenuOpen}
           className={cn(
             "w-full flex items-center justify-between p-3 rounded-lg text-sm transition-colors",
-            isParentActive
-              ? "bg-slate-700/50 text-white"
-              : "text-slate-300 hover:bg-slate-700"
+            isParentActive ? "bg-slate-700/50 text-white" : "text-slate-300 hover:bg-slate-700"
           )}
         >
           <div className="flex items-center">
-            {item.icon && (
-              <item.icon
-                className="h-5 w-5 mr-3 flex-shrink-0"
-                strokeWidth={1.5}
-              />
-            )}
+            {item.icon && <item.icon className="h-5 w-5 mr-3 flex-shrink-0" strokeWidth={1.5} />}
             <span className="truncate">{item.name}</span>
           </div>
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 transition-transform",
-              isMenuOpen && "rotate-180"
-            )}
-          />
+          <ChevronDown className={cn("h-4 w-4 transition-transform", isMenuOpen && "rotate-180")} />
         </button>
         {isMenuOpen && (
           <div className="mt-1 pl-6 space-y-1 border-l-2 border-slate-700 ml-[0.6875rem]">
@@ -419,9 +404,7 @@ const NavItemLink = ({ item, isActive }) => (
     to={item.href}
     className={cn(
       "flex items-center p-3 rounded-lg text-sm transition-colors",
-      isActive
-        ? "bg-indigo-600/20 text-indigo-300 font-semibold"
-        : "text-slate-300 hover:bg-slate-700"
+      isActive ? "bg-indigo-600/20 text-indigo-300 font-semibold" : "text-slate-300 hover:bg-slate-700"
     )}
   >
     <item.icon className="h-5 w-5 mr-3 flex-shrink-0" strokeWidth={1.5} />

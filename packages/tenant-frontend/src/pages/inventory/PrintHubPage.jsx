@@ -8,7 +8,6 @@ import {
 } from "../../services/api";
 import {
   Button,
-  Modal,
   Card,
   CardContent,
   CardHeader,
@@ -18,76 +17,96 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
+  Label,
 } from "ui-library";
-import { Printer, QrCode, Barcode, Plus } from "lucide-react";
+import { Printer, QrCode, Barcode, HelpCircle } from "lucide-react";
 import PrintQueue from "../../components/inventory/printing/PrintQueue";
-import ProductVariantSearch from "../../components/inventory/ProductVariantSearch";
+import AddFromGRN from "../../components/inventory/printing/AddFromGRN";
+import AddAdhoc from "../../components/inventory/printing/AddAdhoc";
+import SerialSelectorModal from "../../components/inventory/printing/SerialSelectorModal";
 
 const PrintHubPage = () => {
   const [printMode, setPrintMode] = useState(null); // 'barcode' or 'qrcode'
   const [labelTemplates, setLabelTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [grns, setGrns] = useState([]);
-  const [selectedGrnId, setSelectedGrnId] = useState("");
   const [printQueue, setPrintQueue] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPrinting, setIsPrinting] = useState(false);
 
-  // Fetch initial data
+  const [serialModalState, setSerialModalState] = useState({
+    isOpen: false,
+    item: null,
+  });
+
+  // Fetch initial data for dropdowns
   useEffect(() => {
+    setIsLoading(true);
     Promise.all([
       tenantLabelTemplateService.getAll(),
-      tenantGrnService.getAll({ status: "fully_received" }),
+      tenantGrnService.getAll({ limit: 50, status: "fully_received" }), // Get recent 50 received GRNs
     ])
       .then(([templatesRes, grnsRes]) => {
         setLabelTemplates(templatesRes.data.data);
         setGrns(grnsRes.data.data);
       })
-      .catch(() => toast.error("Failed to load initial data."));
+      .catch(() => toast.error("Failed to load initial data for Print Hub."))
+      .finally(() => setIsLoading(false));
   }, []);
 
-  const handleAddToQueue = (items) => {
-    const newItems = items
-      .map((item) => ({
-        ...item,
-        key: `${item.productVariantId}-${
-          item.serials ? item.serials.join("") : item.batchNumber
-        }`,
-      }))
-      .filter(
-        (newItem) => !printQueue.some((qItem) => qItem.key === newItem.key)
-      );
-    setPrintQueue((prev) => [...prev, ...newItems]);
-  };
+  const handleAddToQueue = useCallback(
+    (itemsToAdd) => {
+      const newItems = itemsToAdd
+        .map((item) => ({
+          ...item,
+          key: `${item.productVariantId}-${
+            item.batchNumber || (item.serials && item.serials[0]) || Date.now()
+          }`,
+        }))
+        .filter(
+          (newItem) => !printQueue.some((qItem) => qItem.key === newItem.key)
+        );
+      setPrintQueue((prev) => [...prev, ...newItems]);
+    },
+    [printQueue]
+  );
 
-  const handleGrnSelect = async (grnId) => {
-    setSelectedGrnId(grnId);
-    // In a real app, you'd fetch the GRN details here to get items
-    toast.success("Items from GRN added to queue (mocked).");
-  };
+  const handleAdhocAdd = useCallback(
+    (itemToAdd) => handleAddToQueue([itemToAdd]),
+    [handleAddToQueue]
+  );
 
-  const handleAdhocAdd = (variant) => {
-    handleAddToQueue([
-      {
-        variantName: variant.variantName,
-        sku: variant.sku,
-        productVariantId: variant._id,
-        quantity: 1,
-        isSerialized: variant.templateId?.type === "serialized",
-        // ... more data needed from a full variant fetch
-      },
-    ]);
-  };
-
-  const handleQueueQuantityChange = (key, newQuantity) => {
-    setPrintQueue((queue) =>
-      queue.map((item) =>
-        item.key === key ? { ...item, quantity: Number(newQuantity) } : item
-      )
+  const handleQueueQuantityChange = useCallback((key, newQuantity) => {
+    setPrintQueue((q) =>
+      q.map((i) => (i.key === key ? { ...i, quantity: newQuantity } : i))
     );
-  };
+  }, []);
 
-  const handleRemoveFromQueue = (key) => {
-    setPrintQueue((queue) => queue.filter((item) => item.key !== key));
-  };
+  const handleRemoveFromQueue = useCallback((key) => {
+    setPrintQueue((q) => q.filter((item) => item.key !== key));
+  }, []);
+
+  const handleEditSerials = useCallback((item) => {
+    setSerialModalState({ isOpen: true, item: item });
+  }, []);
+
+  const handleSerialsConfirm = useCallback(
+    (selectedSerials) => {
+      setPrintQueue((q) =>
+        q.map((i) =>
+          i.key === serialModalState.item.key
+            ? {
+                ...i,
+                serials: selectedSerials,
+                quantity: selectedSerials.length,
+              }
+            : i
+        )
+      );
+      setSerialModalState({ isOpen: false, item: null });
+    },
+    [serialModalState.item]
+  );
 
   const handlePrint = async () => {
     if (!selectedTemplateId || printQueue.length === 0) {
@@ -95,42 +114,68 @@ const PrintHubPage = () => {
         "Please select a template and add items to the queue."
       );
     }
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(
-      "<html><head><title>Printing Labels...</title></head><body>Generating...</body></html>"
-    );
+    setIsPrinting(true);
+    const printToast = toast.loading("Generating print document...");
+
     try {
+      // Prepare the payload for the API
+      const itemsToPrint = printQueue.map((item) => ({
+        productVariantId: item.productVariantId,
+        quantity: item.isSerialized ? item.serials.length : item.quantity,
+        serials: item.isSerialized ? item.serials : undefined,
+      }));
+
       const res = await tenantPrintService.generateLabels(
         selectedTemplateId,
-        printQueue
+        itemsToPrint
       );
-      printWindow.document.open();
-      printWindow.document.write(res.data.html);
+
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        toast.error("Please allow popups for this site to print.", {
+          id: printToast,
+        });
+        setIsPrinting(false);
+        return;
+      }
+      printWindow.document.write(res.data);
       printWindow.document.close();
-      printWindow.print();
+      // Delay print command slightly to allow assets to load
+      setTimeout(() => {
+        printWindow.print();
+        toast.success("Print document generated!", { id: printToast });
+      }, 500);
     } catch (error) {
-      toast.error("Failed to generate labels.");
-      printWindow.close();
+      toast.error(error.response?.data?.error || "Failed to generate labels.", {
+        id: printToast,
+      });
+    } finally {
+      setIsPrinting(false);
     }
   };
+
+  if (isLoading)
+    return <div className="p-8 text-center">Loading Print Hub...</div>;
 
   if (!printMode) {
     return (
       <div className="text-center p-8">
         <h1 className="text-3xl font-bold mb-4">Print Hub</h1>
-        <p className="text-slate-400 mb-8">What would you like to print?</p>
+        <p className="text-slate-400 mb-8">
+          What would you like to print today?
+        </p>
         <div className="flex justify-center gap-8">
           <Button
             onClick={() => setPrintMode("barcode")}
-            className="h-24 w-48 text-lg"
+            className="h-24 w-48 text-lg flex-col gap-2"
           >
-            <Barcode className="mr-2" /> Barcodes
+            <Barcode className="h-8 w-8" /> Barcodes
           </Button>
           <Button
             onClick={() => setPrintMode("qrcode")}
-            className="h-24 w-48 text-lg"
+            className="h-24 w-48 text-lg flex-col gap-2"
           >
-            <QrCode className="mr-2" /> QR Codes
+            <QrCode className="h-8 w-8" /> QR Codes
           </Button>
         </div>
       </div>
@@ -141,13 +186,22 @@ const PrintHubPage = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">
-          Print Hub: {printMode === "barcode" ? "Barcodes" : "QR Codes"}
+          Print Hub:{" "}
+          <span
+            onClick={() => setPrintMode(null)}
+            className="capitalize text-indigo-400"
+          >
+            {printMode}s
+          </span>
         </h1>
         <Button
           onClick={handlePrint}
-          disabled={!selectedTemplateId || printQueue.length === 0}
+          disabled={
+            isPrinting || !selectedTemplateId || printQueue.length === 0
+          }
         >
-          <Printer className="mr-2 h-4 w-4" /> Generate & Print
+          <Printer className="mr-2 h-4 w-4" />
+          {isPrinting ? "Generating..." : "Generate & Print"}
         </Button>
       </div>
 
@@ -164,7 +218,7 @@ const PrintHubPage = () => {
             <SelectContent>
               {labelTemplates.map((t) => (
                 <SelectItem key={t._id} value={t._id}>
-                  {t.name}
+                  {t.name} ({t.labelWidth}mm x {t.labelHeight}mm)
                 </SelectItem>
               ))}
             </SelectContent>
@@ -172,58 +226,53 @@ const PrintHubPage = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="grn" className="w-full">
-        <Tabs.TabsList className="grid w-full grid-cols-2">
+      <Tabs.Root defaultValue="grn" className="w-full">
+        <Tabs.List className="grid w-full grid-cols-2">
           <Tabs.Trigger value="grn" className="ui-tabs-trigger">
-            Add from Received Goods (GRN)
+            Add from Received Goods
           </Tabs.Trigger>
           <Tabs.Trigger value="adhoc" className="ui-tabs-trigger">
             Add Ad-hoc Item
           </Tabs.Trigger>
-        </Tabs.TabsList>
+        </Tabs.List>
         <Tabs.Content
           value="grn"
           className="p-4 border border-t-0 border-slate-700 rounded-b-md"
         >
-          <div className="flex items-end gap-2">
-            <div className="flex-grow">
-              <Label>Select a Goods Receipt Note</Label>
-              <Select onValueChange={handleGrnSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a recent delivery..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {grns.map((g) => (
-                    <SelectItem key={g._id} value={g._id}>
-                      {g.grnNumber} - {g.supplierId.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <Button>Add All Items</Button>
-          </div>
+          <AddFromGRN grns={grns} onAddItems={handleAddToQueue} />
         </Tabs.Content>
         <Tabs.Content
           value="adhoc"
           className="p-4 border border-t-0 border-slate-700 rounded-b-md"
         >
-          <ProductVariantSearch onProductSelect={handleAdhocAdd} />
+          <AddAdhoc onAddItem={handleAdhocAdd} />
         </Tabs.Content>
-      </Tabs>
+      </Tabs.Root>
 
       <Card>
         <CardHeader>
-          <CardTitle>Print Queue</CardTitle>
+          <CardTitle>Print Queue ({printQueue.length} items)</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <PrintQueue
             queue={printQueue}
             onQuantityChange={handleQueueQuantityChange}
             onRemoveItem={handleRemoveFromQueue}
+            onEditSerials={handleEditSerials}
           />
         </CardContent>
       </Card>
+
+      {serialModalState.isOpen && (
+        <SerialSelectorModal
+          isOpen={true}
+          onClose={() => setSerialModalState({ isOpen: false, item: null })}
+          onConfirm={handleSerialsConfirm}
+          productVariantId={serialModalState.item.productVariantId}
+          branchId={serialModalState.item.branchId} // This needs to be passed in the queue item
+          initialSelection={serialModalState.item.serials}
+        />
+      )}
     </div>
   );
 };

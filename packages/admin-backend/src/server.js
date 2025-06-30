@@ -11,6 +11,7 @@ const tenantResolver = require("./middleware/tenantResolver");
 const cron = require("node-cron");
 const { backupTenantDatabase } = require("./services/backup.service.js");
 const databaseService = require("./services/database.service"); // Our registry service
+const licenseCheck = require("./middleware/licenseCheck.middleware"); // <-- 1. IMPORT NEW MIDDLEWARE
 
 // Route files
 const adminTenantRoutes = require("./modules/admin/tenants/tenant.routes.js");
@@ -98,7 +99,7 @@ app.use("/api/v1/backups", backupRoutes);
 
 // === Tenant Specific Routes ===
 // All routes below this line will have tenant context
-app.use("/api/v1/tenant", tenantResolver, tenantRouter); // IMPORTANT: Resolver runs first
+app.use("/api/v1/tenant", tenantResolver, licenseCheck, tenantRouter); // IMPORTANT: Resolver runs first
 
 // Now we mount the actual tenant business logic routes after the resolver.
 // app.use("/api/v1/tenant/auth", tenantAuthRoutes);
@@ -139,7 +140,5 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
-  console.log(
-    `Admin server running in ${process.env.NODE_ENV} mode on port ${PORT}`
-  );
+  console.log(`Admin server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
 });

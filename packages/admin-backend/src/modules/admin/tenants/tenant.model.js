@@ -17,14 +17,23 @@ const tenantSchema = new mongoose.Schema(
   {
     companyProfile: {
       address: {
-        street: String,
-        city: String,
-        state: String,
-        postalCode: String,
+        street: { type: String, trim: true },
+        city: { type: String, trim: true },
+        state: { type: String, trim: true },
+        postalCode: { type: String, trim: true },
+        country: { type: String, trim: true },
       },
+      registrationNumber: { type: String, trim: true },
       phone: { type: String, trim: true },
       email: { type: String, trim: true, lowercase: true },
-      registrationNumber: { type: String, trim: true },
+      taxId: { type: String, trim: true }, // e.g., VAT, GST, or other business registration number
+      logoUrl: { type: String, trim: true },
+      socialHandles: {
+        facebook: { type: String, trim: true },
+        instagram: { type: String, trim: true },
+        x_twitter: { type: String, trim: true },
+        linkedin: { type: String, trim: true },
+      },
     },
 
     companyName: {
@@ -38,10 +47,7 @@ const tenantSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      match: [
-        /^[a-z0-9-]+$/,
-        "Subdomain can only contain lowercase letters, numbers, and hyphens",
-      ],
+      match: [/^[a-z0-9-]+$/, "Subdomain can only contain lowercase letters, numbers, and hyphens"],
     },
     dbName: {
       type: String,

@@ -1,4 +1,5 @@
 import axios from "axios";
+import toast from "react-hot-toast";
 
 // The baseURL is now dynamically set from the .env file (for local dev)
 // or from the environment variables set on the hosting platform (for production).
@@ -10,6 +11,31 @@ const api = axios.create({
     "Content-Type": "application/json",
   },
 });
+// We need a way to communicate this back to the context. An event emitter is a clean way.
+export const authEvents = new EventTarget();
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      // Standard session expiry
+      if (error.response.status === 401) {
+        if (window.location.pathname !== "/login") {
+          toast.error("Your session has expired. Please log in again.");
+          authEvents.dispatchEvent(new Event("logout"));
+        }
+      }
+      // --- NEW LOGIC ---
+      // Specific license expiry error
+      else if (error.response.status === 403 && error.response.data?.error === "LICENSE_EXPIRED") {
+        // Fire a custom event that our AuthContext will listen for
+        authEvents.dispatchEvent(new Event("license_expired"));
+        // We still reject the promise so the original component knows the API call failed
+      }
+      // --- END OF NEW LOGIC ---
+    }
+    return Promise.reject(error);
+  }
+);
 
 // For tenant-specific role management
 export const tenantRoleService = {
@@ -115,18 +141,14 @@ export const tenantLocationService = {
   // --- Branch Methods ---
   getAllBranches: async () => api.get("/tenant/locations/branches"),
   createBranch: async (data) => api.post("/tenant/locations/branches", data),
-  updateBranch: async (id, data) =>
-    api.put(`/tenant/locations/branches/${id}`, data),
+  updateBranch: async (id, data) => api.put(`/tenant/locations/branches/${id}`, data),
   deleteBranch: async (id) => api.delete(`/tenant/locations/branches/${id}`),
 
   // --- Warehouse Methods ---
   getAllWarehouses: async () => api.get("/tenant/locations/warehouses"),
-  createWarehouse: async (data) =>
-    api.post("/tenant/locations/warehouses", data),
-  updateWarehouse: async (id, data) =>
-    api.put(`/tenant/locations/warehouses/${id}`, data),
-  deleteWarehouse: async (id) =>
-    api.delete(`/tenant/locations/warehouses/${id}`),
+  createWarehouse: async (data) => api.post("/tenant/locations/warehouses", data),
+  updateWarehouse: async (id, data) => api.put(`/tenant/locations/warehouses/${id}`, data),
+  deleteWarehouse: async (id) => api.delete(`/tenant/locations/warehouses/${id}`),
 };
 
 export const tenantUserService = {
@@ -134,6 +156,9 @@ export const tenantUserService = {
   create: async (userData) => api.post("/tenant/users", userData),
   update: async (id, userData) => api.put(`/tenant/users/${id}`, userData),
   delete: async (id) => api.delete(`/tenant/users/${id}`), // This is the deactivate route
+  adminResetPassword: async (userId, newPassword) => {
+    return api.patch(`/tenant/users/${userId}/reset-password`, newPassword);
+  },
 };
 
 // --- NEW ACCOUNTING SERVICE ---
@@ -201,9 +226,7 @@ export const tenantAccountingService = {
    * @param {string} queryParams - The URL query string for pagination.
    */
   getLedgerForAccount: (accountId, queryParams) => {
-    return api.get(
-      `/tenant/accounting/accounts/${accountId}/ledger?${queryParams}`
-    );
+    return api.get(`/tenant/accounting/accounts/${accountId}/ledger?${queryParams}`);
   },
 };
 
@@ -230,8 +253,7 @@ export const tenantSupplierService = {
   getAll: async () => api.get("/tenant/procurement/suppliers"),
   getById: async (id) => api.get(`/tenant/procurement/suppliers/${id}`),
   create: async (data) => api.post("/tenant/procurement/suppliers", data),
-  update: async (id, data) =>
-    api.put(`/tenant/procurement/suppliers/${id}`, data),
+  update: async (id, data) => api.put(`/tenant/procurement/suppliers/${id}`, data),
   delete: async (id) => api.delete(`/tenant/procurement/suppliers/${id}`),
   getSupplierLedger: async (id, params) => {
     return api.get(`/tenant/procurement/suppliers/${id}/ledger`, { params });
@@ -240,9 +262,14 @@ export const tenantSupplierService = {
 
 export const tenantProfileService = {
   getMyProfile: async () => api.get("/tenant/profile"),
-  updateMyProfile: async (data) => api.put("/tenant/profile", data), // For company info
-  updateLocalization: async (data) =>
-    api.put("/tenant/profile/localization", data), // <-- NEW
+  updateLocalization: async (data) => api.put("/tenant/profile/localization", data),
+  updateMyProfile: async (data) => api.put("/tenant/profile/me", data),
+  updateCompanyProfile: async (profileData) => {
+    return api.put("/tenant/profile/company", profileData);
+  },
+  adminResetPassword: async (userId, newPassword) => {
+    return api.patch(`/tenant/users/${userId}/reset-password`, newPassword);
+  },
 };
 
 // --- NEW METADATA SERVICES ---
@@ -256,8 +283,7 @@ export const tenantBrandService = {
 export const tenantCategoryService = {
   getAll: async () => api.get("/tenant/inventory/categories"),
   create: async (data) => api.post("/tenant/inventory/categories", data),
-  update: async (id, data) =>
-    api.put(`/tenant/inventory/categories/${id}`, data),
+  update: async (id, data) => api.put(`/tenant/inventory/categories/${id}`, data),
   delete: async (id) => api.delete(`/tenant/inventory/categories/${id}`),
 };
 
@@ -265,14 +291,12 @@ export const tenantAttributeService = {
   // Methods for individual Attributes
   getAllAttributes: async () => api.get("/tenant/attributes"),
   createAttribute: async (data) => api.post("/tenant/attributes", data),
-  updateAttribute: async (id, data) =>
-    api.put(`/tenant/attributes/${id}`, data),
+  updateAttribute: async (id, data) => api.put(`/tenant/attributes/${id}`, data),
   deleteAttribute: async (id) => api.delete(`/tenant/attributes/${id}`),
   // Methods for Attribute Sets
   getAllAttributeSets: async () => api.get("/tenant/attributes/sets"),
   createAttributeSet: async (data) => api.post("/tenant/attributes/sets", data),
-  updateAttributeSet: async (id, data) =>
-    api.put(`/tenant/attributes/sets/${id}`, data),
+  updateAttributeSet: async (id, data) => api.put(`/tenant/attributes/sets/${id}`, data),
   deleteAttributeSet: async (id) => api.delete(`/tenant/attributes/sets/${id}`),
 };
 
@@ -288,9 +312,7 @@ export const tenantInventoryService = {
    * Fetches all product templates for the tenant.
    */
   getAllTemplates: (queryParams) => {
-    const cleanParams = Object.fromEntries(
-      Object.entries(queryParams).filter(([_, v]) => v != null && v !== "")
-    );
+    const cleanParams = Object.fromEntries(Object.entries(queryParams).filter(([_, v]) => v != null && v !== ""));
 
     console.log("Fetching all product templates with params:", cleanParams);
 
@@ -344,10 +366,7 @@ export const tenantInventoryService = {
    * @param {object} options - The selected attribute options.
    */
   generateVariants: (templateId, options) => {
-    return api.post(
-      `/tenant/inventory/templates/${templateId}/generate-variants`,
-      { options }
-    );
+    return api.post(`/tenant/inventory/templates/${templateId}/generate-variants`, { options });
   },
 
   /**
@@ -363,13 +382,11 @@ export const tenantInventoryService = {
 // This service will house all product-related API calls.
 export const tenantProductService = {
   // --- TEMPLATE METHODS ---
-  getAllTemplates: async (params) =>
-    api.get("/tenant/inventory/templates", { params }),
+  getAllTemplates: async (params) => api.get("/tenant/inventory/templates", { params }),
 
   getTemplateById: async (id) => api.get(`/tenant/inventory/templates/${id}`),
   createTemplate: async (data) => api.post("/tenant/inventory/templates", data),
-  updateTemplate: async (id, data) =>
-    api.put(`/tenant/inventory/templates/${id}`, data),
+  updateTemplate: async (id, data) => api.put(`/tenant/inventory/templates/${id}`, data),
   deleteTemplate: async (id) => api.delete(`/tenant/inventory/templates/${id}`),
 
   getSummary: async () => api.get("/tenant/inventory/templates/summary"),
@@ -378,8 +395,7 @@ export const tenantProductService = {
    * Fetches a single product variant by its ID.
    * @param {string} variantId - The ID of the product variant.
    */
-  getVariantById: async (variantId) =>
-    api.get(`/tenant/inventory/products/variants/${variantId}`),
+  getVariantById: async (variantId) => api.get(`/tenant/inventory/products/variants/${variantId}`),
 
   // --- NEW VARIANT GENERATION METHOD ---
   /**
@@ -388,10 +404,7 @@ export const tenantProductService = {
    * @param {object} selections - The selected attribute options, e.g., { Color: ['Blue'], Storage: ['256GB'] }.
    */
   generateVariants: async (templateId, selections) => {
-    return api.post(
-      `/tenant/inventory/templates/${templateId}/generate-variants`,
-      { selections }
-    );
+    return api.post(`/tenant/inventory/templates/${templateId}/generate-variants`, { selections });
   },
 
   /**
@@ -406,10 +419,8 @@ export const tenantProductService = {
   },
 
   // --- We will add variant-specific methods here later ---
-  getAllVariantsForTemplate: async (templateId) =>
-    api.get(`/tenant/inventory/products/variants?templateId=${templateId}`), // We need to build this backend route
-  updateVariant: async (variantId, data) =>
-    api.put(`/tenant/inventory/products/variants/${variantId}`, data), // We need to build this backend route
+  getAllVariantsForTemplate: async (templateId) => api.get(`/tenant/inventory/products/variants?templateId=${templateId}`), // We need to build this backend route
+  updateVariant: async (variantId, data) => api.put(`/tenant/inventory/products/variants/${variantId}`, data), // We need to build this backend route
 
   /**
    * Performs a bulk update on multiple variants at once.
@@ -424,23 +435,18 @@ export const tenantProductService = {
     });
   },
 
-  searchVariants: async (searchTerm) =>
-    api.get(`/tenant/inventory/products/variants?search=${searchTerm}`), // We will build this backend route
+  searchVariants: async (searchTerm) => api.get(`/tenant/inventory/products/variants?search=${searchTerm}`), // We will build this backend route
 };
 
 // --- PURCHASE ORDER SERVICE ---
 export const tenantPurchaseOrderService = {
-  getAll: async (params) =>
-    api.get("/tenant/procurement/purchase-orders", { params }),
+  getAll: async (params) => api.get("/tenant/procurement/purchase-orders", { params }),
   getById: async (id) => api.get(`/tenant/procurement/purchase-orders/${id}`),
   create: async (data) => api.post("/tenant/procurement/purchase-orders", data),
   // update: async (id, data) => api.put(`/tenant/procurement/purchase-orders/${id}`, data),
   // delete: async (id) => api.delete(`/tenant/procurement/purchase-orders/${id}`),
   receiveGoods: async (poId, receivedData) => {
-    return api.post(
-      `/tenant/procurement/purchase-orders/${poId}/receive`,
-      receivedData
-    );
+    return api.post(`/tenant/procurement/purchase-orders/${poId}/receive`, receivedData);
   },
 
   getPOsAwaitingInvoice: async () => {
@@ -460,16 +466,14 @@ export const tenantCurrencyService = {
    * Creates a new supported currency.
    * @param {object} currencyData - e.g., { name, code, symbol }
    */
-  createCurrency: async (currencyData) =>
-    api.post("/tenant/currencies", currencyData),
+  createCurrency: async (currencyData) => api.post("/tenant/currencies", currencyData),
 
   /**
    * Updates a supported currency.
    * @param {string} id - The ID of the currency to update.
    * @param {object} currencyData - The updated data.
    */
-  updateCurrency: async (id, currencyData) =>
-    api.put(`/tenant/currencies/${id}`, currencyData),
+  updateCurrency: async (id, currencyData) => api.put(`/tenant/currencies/${id}`, currencyData),
 
   /**
    * Deletes a supported currency.
@@ -483,22 +487,19 @@ export const tenantCurrencyService = {
    * Fetches historical exchange rates with pagination and filtering.
    * @param {object} params - Query params like { page, limit, startDate, endDate }.
    */
-  getExchangeRates: async (params) =>
-    api.get("/tenant/currencies/rates", { params }),
+  getExchangeRates: async (params) => api.get("/tenant/currencies/rates", { params }),
 
   /**
    * Creates or updates the exchange rate for a specific day.
    * @param {object} rateData - e.g., { fromCurrency, toCurrency, date, rate }
    */
-  createOrUpdateExchangeRate: async (rateData) =>
-    api.post("/tenant/currencies/rates", rateData),
+  createOrUpdateExchangeRate: async (rateData) => api.post("/tenant/currencies/rates", rateData),
 
   /**
    * Deletes a specific exchange rate entry.
    * @param {string} id - The ID of the exchange rate entry to delete.
    */
-  deleteExchangeRate: async (id) =>
-    api.delete(`/tenant/currencies/rates/${id}`),
+  deleteExchangeRate: async (id) => api.delete(`/tenant/currencies/rates/${id}`),
 };
 
 // --- NEW UPLOAD SERVICE (Refactored for cleaner code) ---
@@ -549,7 +550,14 @@ export const tenantGrnService = {
   getById: async (grnId) => {
     return api.get(`/tenant/procurement/grns/${grnId}`);
   },
+  getGrnByPoId: async (grnId) => {
+    return api.get(`/tenant/procurement/grns/${grnId}`);
+  },
   getAll: async (params) => api.get("/tenant/procurement/grns", { params }),
+
+  generatePrintJob: async (templateId, items) => {
+    return api.post("/tenant/inventory/print/labels", { templateId, items });
+  },
 };
 
 // --- PAYMENT METHOD SERVICE ---
@@ -595,10 +603,7 @@ export const tenantInvoiceService = {
    * @param {object} paymentData - The payment details from the form.
    */
   recordPayment: async (invoiceId, paymentData) => {
-    return api.post(
-      `/tenant/procurement/invoices/${invoiceId}/payments`,
-      paymentData
-    );
+    return api.post(`/tenant/procurement/invoices/${invoiceId}/payments`, paymentData);
   },
 };
 
@@ -608,8 +613,7 @@ export const tenantPaymentService = {
    * Fetches all payment transactions with filtering and pagination.
    * @param {object} params - { page, limit, direction, paymentMethodId, etc. }
    */
-  getAll: async (params) =>
-    api.get("/tenant/payments/transactions", { params }),
+  getAll: async (params) => api.get("/tenant/payments/transactions", { params }),
   /**
    * Fetches a single payment by its ID with all details.
    */
@@ -664,6 +668,16 @@ export const tenantStockService = {
     return api.post("/tenant/inventory/stock/adjustments", adjustmentData);
   },
 
+  getLotQuantity: async (productVariantId, branchId) => {
+    return api.get("/tenant/inventory/stock/lot-quantity", {
+      params: { productVariantId, branchId },
+    });
+  },
+  getAvailableSerials: async (productVariantId, branchId, params) => {
+    return api.get("/tenant/inventory/stock/available-serials", {
+      params: { productVariantId, branchId, ...params },
+    });
+  },
   // getStockDetails and getStockMovements will be added later
 };
 
@@ -739,10 +753,7 @@ export const tenantInstallmentService = {
    * @param {object} paymentData - The universal payment data from the PaymentForm.
    */
   applyPayment: async (planId, lineId, paymentData) => {
-    return api.post(
-      `/tenant/payments/installments/${planId}/lines/${lineId}/pay`,
-      paymentData
-    );
+    return api.post(`/tenant/payments/installments/${planId}/lines/${lineId}/pay`, paymentData);
   },
 };
 
@@ -764,16 +775,14 @@ export const tenantLabelTemplateService = {
    * Creates a new label template.
    * @param {object} templateData - The data for the new template design.
    */
-  create: async (templateData) =>
-    api.post("/tenant/printing/label-templates", templateData),
+  create: async (templateData) => api.post("/tenant/printing/label-templates", templateData),
 
   /**
    * Updates an existing label template.
    * @param {string} id - The ID of the template to update.
    * @param {object} templateData - The updated template design.
    */
-  update: async (id, templateData) =>
-    api.put(`/tenant/printing/label-templates/${id}`, templateData),
+  update: async (id, templateData) => api.put(`/tenant/printing/label-templates/${id}`, templateData),
 
   /**
    * Deletes a label template.
@@ -793,6 +802,19 @@ export const tenantPrintService = {
       templateId,
       items,
       isPreview,
+    });
+  },
+  generatePrintJob: async (templateId, items, isPreview) => {
+    return api.post("/tenant/inventory/print/labels", {
+      templateId,
+      items,
+      isPreview,
+    });
+  },
+  generateLabelPreview: async (templateData, itemData) => {
+    return api.post("/tenant/inventory/print/label-preview", {
+      template: templateData,
+      itemData: itemData,
     });
   },
 };

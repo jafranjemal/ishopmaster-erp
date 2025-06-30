@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 
 import PurchaseOrderDetailView from "../../components/procurement/PurchaseOrderDetailView";
 import GoodsReceivingForm from "../../components/procurement/GoodsReceivingForm";
+import PrintModal from "../../components/inventory/printing/PrintModal"; // <-- 1. IMPORT NEW COMPONENT
 
 const PurchaseOrderDetailPage = () => {
   const { id: poId } = useParams();
@@ -14,6 +15,8 @@ const PurchaseOrderDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false); // <-- 2. ADD NEW STATE
+  const [itemsToPrint, setItemsToPrint] = useState([]);
 
   const fetchData = useCallback(async () => {
     if (!poId) return;
@@ -54,6 +57,24 @@ const PurchaseOrderDetailPage = () => {
       );
       // After success, refetch the PO data to show its updated status
       await fetchData();
+
+      const printQueueItems = receivedData.receivedItems.map((item) => {
+        const poItem = purchaseOrder.items.find(
+          (pi) => pi.productVariantId._id === item.productVariantId
+        );
+        return {
+          productVariantId: item.productVariantId,
+          variantName: poItem.description,
+          sku: poItem.productVariantId.sku,
+          quantity: item.quantityReceived,
+          isSerialized:
+            poItem.productVariantId.templateId?.type === "serialized",
+          serials: item.serials || [],
+          batchNumber: purchaseOrder.poNumber,
+        };
+      });
+      setItemsToPrint(printQueueItems);
+      setIsPrintModalOpen(true);
     } catch (error) {
       console.error("Receipt failed:", error);
     } finally {
@@ -93,6 +114,12 @@ const PurchaseOrderDetailPage = () => {
           isSaving={isSaving}
         />
       )}
+
+      <PrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        itemsToPrint={itemsToPrint}
+      />
     </div>
   );
 };

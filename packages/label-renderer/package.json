@@ -1,0 +1,21 @@
+{
+  "name": "label-renderer",
+  "version": "1.0.0",
+  "description": "A shared utility to generate print-ready HTML for iShopMaster labels.",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "bwip-js": "^4.6.0",
+    "canvas": "^3.1.2",
+    "konva": "^9.3.20",
+    "react-konva": "^19.0.6",
+    "use-image": "^1.1.4"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}

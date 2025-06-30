@@ -7,100 +7,93 @@ import {
   Transformer,
 } from "react-konva";
 import { useDrop } from "react-dnd";
-import JsBarcode from "jsbarcode";
-import { QRCodeCanvas } from "qrcode.react";
-import { Menu, Item, useContextMenu } from "react-contexify";
-import ContentLayersPanel from "./ContentLayersPanel";
+import { generateCodeSvg } from "label-renderer"; // Assuming this is your bwip-js helper
 
-const ELEMENT_MENU_ID = "element-menu";
-const CANVAS_MENU_ID = "canvas-menu";
-const MM_TO_PX = 3.7795;
+// --- Constants for Unit Conversion ---
+// Assumes a standard 96 DPI screen resolution for calculations.
+const MM_TO_PX = 96 / 25.4; // Approximately 3.7795
+const PT_TO_PX = 96 / 72; // Approximately 1.3333
 
-const generateBarcodeImage = (text, options = {}) => {
-  const canvas = document.createElement("canvas");
-  JsBarcode(canvas, text || "NO-DATA", {
-    format: "CODE128",
-    displayValue: false,
-    height: options.barcodeHeight || 40,
-    width: options.barcodeWidth || 1.5,
-    margin: 0,
+// --- Helper Functions for Conversion ---
+const mmToPx = (mm) => mm * MM_TO_PX;
+const pxToMm = (px) => px / MM_TO_PX;
+const ptToPx = (pt) => pt * PT_TO_PX;
+const pxToPt = (px) => px / PT_TO_PX;
+
+/**
+ * A single, consistent function to generate barcode or QR code images for Konva.
+ * It now uses your industry-standard 'generateCodeSvg' for both types.
+ * @param {object} element - The element configuration.
+ * @param {object} itemData - The data to encode.
+ * @returns {Promise<Image>} A DOM Image object ready for the Konva canvas.
+ */
+const generateKonvaImage = (element, itemData) => {
+  return new Promise((resolve, reject) => {
+    // Generate the SVG using the same renderer as the final print
+    generateCodeSvg(element, itemData)
+      .then((dataUrl) => {
+        if (!dataUrl) {
+          // Handle cases where data is missing or generation fails
+          reject(new Error(`SVG generation failed for element: ${element.id}`));
+          return;
+        }
+        const img = new window.Image();
+        img.src = dataUrl;
+        img.onload = () => resolve(img);
+        img.onerror = (err) => reject(err);
+      })
+      .catch((err) => reject(err));
   });
-  const img = new window.Image();
-  img.src = canvas.toDataURL("image/png");
-  return img;
 };
 
-const QrCodeGenerator = ({ content }) => (
-  <div style={{ display: "none" }}>
-    {content
-      .filter((el) => el.type === "qrcode")
-      .map((el) => (
-        <QRCodeCanvas
-          id={`qr-canvas-${el.id}`}
-          value={el.dataField || "no-data"}
-          size={256}
-          level="H"
-          key={el.id}
-        />
-      ))}
-  </div>
-);
-
-const getQRCodeDataURL = (elementId) => {
-  const canvas = document.getElementById(`qr-canvas-${elementId}`);
-  return canvas ? canvas.toDataURL("image/png") : null;
-};
-
+/**
+ * A single element on the Konva canvas.
+ * Handles rendering, selection, transformation, and unit conversions.
+ */
 const CanvasElement = ({ element, isSelected, onSelect, onChange }) => {
   const shapeRef = useRef();
   const trRef = useRef();
   const [konvaImage, setKonvaImage] = useState(null);
+  const [error, setError] = useState(false);
 
+  // When selected, attach the transformer
   useEffect(() => {
-    if (isSelected && trRef.current && shapeRef.current) {
+    if (isSelected && trRef.current) {
       trRef.current.nodes([shapeRef.current]);
-      trRef.current.getLayer().batchDraw();
+      trRef.current.getLayer()?.batchDraw();
     }
   }, [isSelected]);
 
+  // Load image for barcodes or QR codes
   useEffect(() => {
-    let img = null;
-    if (element.type === "barcode") {
-      img = generateBarcodeImage(element.dataField, {
-        barcodeHeight: element.barcodeHeight,
-        barcodeWidth: element.barcodeWidth,
-      });
-    } else if (element.type === "qrcode") {
-      const canvas = document.getElementById(`qr-canvas-${element.id}`);
-      if (canvas) {
-        img = new window.Image();
-        img.src = canvas.toDataURL("image/png");
-      }
+    let isMounted = true;
+    if (element.type === "barcode" || element.type === "qrcode") {
+      setError(false);
+      generateKonvaImage(element, { sku: "SKU12345", variantName: "Sample" })
+        .then((img) => {
+          if (isMounted) setKonvaImage(img);
+        })
+        .catch((err) => {
+          console.error("Konva image loading error:", err);
+          if (isMounted) setError(true);
+        });
     }
-    if (img) {
-      img.onload = () => setKonvaImage(img);
-    } else {
-      setKonvaImage(null);
-    }
+    return () => {
+      isMounted = false;
+    };
   }, [
-    element.dataField,
+    element,
     element.type,
-    element.id,
+    element.dataField,
     element.barcodeHeight,
     element.barcodeWidth,
-  ]);
-
-  const { show } = useContextMenu({ id: ELEMENT_MENU_ID });
-  const handleContextMenu = (e) => {
-    e.evt.preventDefault();
-    onSelect();
-    show({ event: e.evt });
-  };
+  ]); // Re-run if barcode props change
 
   const commonProps = {
     id: element.id,
-    x: element.x,
-    y: element.y,
+    // Convert mm to px for rendering
+    x: mmToPx(element.x || 0),
+    y: mmToPx(element.y || 0),
     rotation: element.rotation || 0,
     draggable: true,
     onClick: (e) => {
@@ -111,79 +104,108 @@ const CanvasElement = ({ element, isSelected, onSelect, onChange }) => {
       e.cancelBubble = true;
       onSelect();
     },
-    onDragEnd: (e) =>
-      onChange({ ...element, x: e.target.x(), y: e.target.y() }),
+    // Convert px back to mm on drag end before saving
+    onDragEnd: (e) => {
+      onChange({
+        ...element,
+        x: pxToMm(e.target.x()),
+        y: pxToMm(e.target.y()),
+      });
+    },
     onTransformEnd: () => {
       const node = shapeRef.current;
+      if (!node) return;
       const scaleX = node.scaleX();
       const scaleY = node.scaleY();
       node.scaleX(1);
       node.scaleY(1);
+
+      // Convert px back to mm/pt on transform end
       onChange({
         ...element,
-        x: node.x(),
-        y: node.y(),
-        width: Math.max(5, node.width() * scaleX),
-        height: Math.max(5, node.height() * scaleY),
+        x: pxToMm(node.x()),
+        y: pxToMm(node.y()),
         rotation: node.rotation(),
+        // For text, we adjust fontSize. For images, we adjust width/height.
+        ...(element.type === "text"
+          ? { fontSize: pxToPt(node.height() * scaleY) }
+          : {
+              width: pxToMm(node.width() * scaleX),
+              height: pxToMm(node.height() * scaleY),
+            }),
       });
     },
-    onContextMenu: handleContextMenu,
   };
 
-  let renderedElement;
-  if (element.type === "text") {
-    renderedElement = (
+  if (error) {
+    return (
       <Text
-        ref={shapeRef}
         {...commonProps}
-        text={element.text || element.dataField}
-        fontSize={element.fontSize || 12}
-        fill={element.fill || "black"}
-        fontWeight={element.fontWeight}
+        text="⚠️ Error"
+        fontSize={12}
+        fill="red"
+        fontFamily="Arial"
       />
     );
-  } else if (
-    (element.type === "barcode" || element.type === "qrcode") &&
-    konvaImage
-  ) {
-    renderedElement = (
-      <KonvaImage
-        ref={shapeRef}
-        {...commonProps}
-        image={konvaImage}
-        width={element.width || 120}
-        height={element.height || 40}
-      />
-    );
-  } else return null;
+  }
 
-  return (
-    <>
-      {renderedElement}
-      {isSelected && (
-        <Transformer
-          ref={trRef}
-          boundBoxFunc={(oldBox, newBox) => newBox}
-          rotationSnaps={[0, 90, 180, 270]}
+  if (element.type === "text") {
+    const isPrice = element.dataField === "sellingPrice";
+    return (
+      <>
+        <Text
+          ref={shapeRef}
+          {...commonProps}
+          text={element.text || `[${element.dataField}]`}
+          align={isPrice ? "right" : element.align || "left"}
+          // Convert pt to px for rendering
+          fontSize={ptToPx(element.fontSize || 12)}
+          // Set industry-standard font family
+          fontFamily="'OCR-B', 'Courier New', monospace"
+          fontWeight={element.fontWeight || "normal"}
+          fill="black"
         />
-      )}
-    </>
-  );
+        {isSelected && (
+          <Transformer ref={trRef} boundBoxFunc={(oldBox, newBox) => newBox} />
+        )}
+      </>
+    );
+  }
+
+  if ((element.type === "barcode" || element.type === "qrcode") && konvaImage) {
+    return (
+      <>
+        <KonvaImage
+          ref={shapeRef}
+          {...commonProps}
+          image={konvaImage}
+          // Convert mm to px for rendering
+          width={mmToPx(element.width || 30)}
+          height={mmToPx(element.height || 15)}
+        />
+        {isSelected && (
+          <Transformer ref={trRef} boundBoxFunc={(oldBox, newBox) => newBox} />
+        )}
+      </>
+    );
+  }
+
+  return null; // Render nothing if image is loading or type is unknown
 };
 
+/**
+ * The main Canvas component.
+ * Manages the stage and layers, converting label dimensions to pixels.
+ */
 const LabelCanvas = ({
-  width,
-  height,
+  width, // in mm
+  height, // in mm
   content,
   onContentChange,
   selectedElementId,
   onSelectElement,
-  onDeleteElement,
-  onClearAll,
 }) => {
   const stageRef = useRef();
-  const { show: showCanvasMenu } = useContextMenu({ id: CANVAS_MENU_ID });
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "TOOL",
@@ -196,9 +218,13 @@ const LabelCanvas = ({
       const newElement = {
         id: `el_${Date.now()}`,
         ...item,
-        x: pointer.x,
-        y: pointer.y,
-        text: item.label,
+        // Convert drop position from px to mm for storing in state
+        x: pxToMm(pointer.x),
+        y: pxToMm(pointer.y),
+        // Sensible defaults in physical units
+        ...(item.type === "text" && { fontSize: 10 }), // 10pt
+        ...(item.type === "barcode" && { width: 40, height: 15 }), // 40mm x 15mm
+        ...(item.type === "qrcode" && { width: 25, height: 25 }), // 25mm x 25mm
       };
 
       onContentChange([...content, newElement]);
@@ -213,35 +239,34 @@ const LabelCanvas = ({
   };
 
   const handleDeselect = (e) => {
-    if (e.target === e.target.getStage()) onSelectElement(null);
+    if (e.target === e.target.getStage()) {
+      onSelectElement(null);
+    }
   };
 
-  console.log(
-    "LabelCanvas content keys:",
-    content.map((el) => el)
-  );
+  // Convert label dimensions from mm to px for the stage
+  const stageWidthPx = mmToPx(width);
+  const stageHeightPx = mmToPx(height);
 
   return (
-    <div className="flex gap-4">
-      {/* Left: Label Designer Canvas */}
+    <div className="w-full flex-col">
+      <span className="text-white font-semibold text-sm">
+        Preview: {width}mm × {height}mm
+      </span>
       <div
         ref={drop}
-        className="bg-white shadow-lg"
+        className="bg-white shadow-lg mt-2"
         style={{
-          width: width * MM_TO_PX,
-          height: height * MM_TO_PX,
+          width: stageWidthPx,
+          height: stageHeightPx,
           border: isOver ? "2px solid #4f46e5" : "1px solid #94a3b8",
         }}
       >
         <Stage
-          width={width * MM_TO_PX}
-          height={height * MM_TO_PX}
+          width={stageWidthPx}
+          height={stageHeightPx}
           ref={stageRef}
           onMouseDown={handleDeselect}
-          onContextMenu={(e) => {
-            e.evt.preventDefault();
-            showCanvasMenu({ event: e.evt });
-          }}
         >
           <Layer>
             {content.map((el) => (
@@ -255,65 +280,8 @@ const LabelCanvas = ({
             ))}
           </Layer>
         </Stage>
-      </div>
-
-      {/* Right: Photoshop-style Layers Panel */}
-      <div className="w-64">
-        <ContentLayersPanel
-          content={content}
-          selectedId={selectedElementId}
-          onSelect={onSelectElement}
-          onDelete={(id) =>
-            onContentChange(content.filter((el) => el.id !== id))
-          }
-        />
       </div>
     </div>
-  );
-  return (
-    <>
-      <QrCodeGenerator content={content} />
-      <div
-        ref={drop}
-        className="bg-white shadow-lg"
-        style={{
-          width: width * MM_TO_PX,
-          height: height * MM_TO_PX,
-          border: isOver ? "2px solid #4f46e5" : "1px solid #94a3b8",
-        }}
-      >
-        <Stage
-          width={width * MM_TO_PX}
-          height={height * MM_TO_PX}
-          ref={stageRef}
-          onMouseDown={handleDeselect}
-          onContextMenu={(e) => {
-            e.evt.preventDefault();
-            showCanvasMenu({ event: e.evt });
-          }}
-        >
-          <Layer>
-            {content.map((el) => (
-              <CanvasElement
-                key={el.id}
-                element={el}
-                isSelected={el.id === selectedElementId}
-                onSelect={() => onSelectElement(el.id)}
-                onChange={updateElement}
-              />
-            ))}
-          </Layer>
-        </Stage>
-      </div>
-      <Menu id={ELEMENT_MENU_ID} theme="dark">
-        <Item onClick={() => onDeleteElement(selectedElementId)}>
-          Delete Element
-        </Item>
-      </Menu>
-      <Menu id={CANVAS_MENU_ID} theme="dark">
-        <Item onClick={onClearAll}>Clear All Elements</Item>
-      </Menu>
-    </>
   );
 };
 

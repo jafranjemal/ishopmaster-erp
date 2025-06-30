@@ -29,8 +29,7 @@ exports.getUserById = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id)
     .populate("role", "name")
     .populate("assignedBranchId", "name");
-  if (!user)
-    return res.status(404).json({ success: false, error: "User not found" });
+  if (!user) return res.status(404).json({ success: false, error: "User not found" });
   res.status(200).json({ success: true, data: user });
 });
 
@@ -46,8 +45,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/tenant/users/:id
 exports.updateUser = asyncHandler(async (req, res, next) => {
   const { User } = req.models;
-  const { name, email, phone, address, role, assignedBranchId, isActive } =
-    req.body;
+  const { name, email, phone, address, role, assignedBranchId, isActive } = req.body;
   // Password changes MUST happen via a separate, dedicated endpoint for security.
   const fieldsToUpdate = {
     name,
@@ -59,13 +57,11 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     isActive,
   };
 
-  const updatedUser = await User.findByIdAndUpdate(
-    req.params.id,
-    fieldsToUpdate,
-    { new: true, runValidators: true }
-  );
-  if (!updatedUser)
-    return res.status(404).json({ success: false, error: "User not found" });
+  const updatedUser = await User.findByIdAndUpdate(req.params.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updatedUser) return res.status(404).json({ success: false, error: "User not found" });
   res.status(200).json({ success: true, data: updatedUser });
 });
 
@@ -74,14 +70,33 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
 exports.deactivateUser = asyncHandler(async (req, res, next) => {
   const { User } = req.models;
   // Instead of deleting, we set the user to inactive.
-  const user = await User.findByIdAndUpdate(
-    req.params.id,
-    { isActive: false },
-    { new: true }
-  );
-  if (!user)
-    return res.status(404).json({ success: false, error: "User not found" });
+  const user = await User.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+  if (!user) return res.status(404).json({ success: false, error: "User not found" });
+  res.status(200).json({ success: true, data: {}, message: "User has been deactivated." });
+});
+
+// @desc    Reset a user's password (by an admin)
+// @route   PATCH /api/v1/tenant/users/:id/reset-password
+// @access  Private (Requires 'hr:employee:manage_credentials' permission)
+exports.adminResetUserPassword = asyncHandler(async (req, res, next) => {
+  const { User } = req.models;
+  const { newPassword } = req.body;
+
+  if (!newPassword || newPassword.length < 6) {
+    return res
+      .status(400)
+      .json({ success: false, error: "New password must be at least 6 characters." });
+  }
+
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ success: false, error: "User not found." });
+  }
+
+  user.password = newPassword;
+  await user.save();
+
   res
     .status(200)
-    .json({ success: true, data: {}, message: "User has been deactivated." });
+    .json({ success: true, data: { message: `Password for ${user.name} has been reset.` } });
 });

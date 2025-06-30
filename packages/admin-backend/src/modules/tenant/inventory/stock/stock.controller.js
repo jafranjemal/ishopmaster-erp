@@ -629,14 +629,86 @@ exports.cancelTransfer = asyncHandler(async (req, res, next) => {
   const { StockTransfer } = req.models;
   const transfer = await StockTransfer.findById(req.params.id);
   if (!transfer || transfer.status !== "pending") {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error: "Only pending transfers can be cancelled.",
-      });
+    return res.status(400).json({
+      success: false,
+      error: "Only pending transfers can be cancelled.",
+    });
   }
   transfer.status = "cancelled";
   await transfer.save();
   res.status(200).json({ success: true, data: transfer });
+});
+
+// @desc    Get total available quantity for a non-serialized variant at a branch
+// @route   GET /api/v1/tenant/inventory/stock/lot-quantity?productVariantId=...&branchId=...
+exports.getLotQuantityForVariant = asyncHandler(async (req, res, next) => {
+  const { InventoryLot } = req.models;
+  const { productVariantId, branchId } = req.query;
+
+  if (!productVariantId || !branchId) {
+    return res.status(400).json({
+      success: false,
+      error: "Product Variant ID and Branch ID are required.",
+    });
+  }
+
+  const result = await InventoryLot.aggregate([
+    {
+      $match: {
+        productVariantId: new mongoose.Types.ObjectId(productVariantId),
+        branchId: new mongoose.Types.ObjectId(branchId),
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalQuantity: { $sum: "$quantityInStock" },
+      },
+    },
+  ]);
+
+  const availableQuantity = result[0]?.totalQuantity || 0;
+  res.status(200).json({ success: true, data: { availableQuantity } });
+});
+
+// @desc    Get available serial numbers for a serialized variant at a branch
+// @route   GET /api/v1/tenant/inventory/stock/available-serials?productVariantId=...&branchId=...
+exports.getAvailableSerials = asyncHandler(async (req, res, next) => {
+  const { InventoryItem } = req.models;
+  const { productVariantId, branchId, page = 1, limit = 100 } = req.query;
+  const skip = (page - 1) * limit;
+
+  if (!productVariantId || !branchId) {
+    return res.status(400).json({
+      success: false,
+      error: "Product Variant ID and Branch ID are required.",
+    });
+  }
+
+  const query = {
+    productVariantId: new mongoose.Types.ObjectId(productVariantId),
+    branchId: new mongoose.Types.ObjectId(branchId),
+    status: "in_stock",
+  };
+
+  console.log(query);
+  const [serials, total] = await Promise.all([
+    InventoryItem.find(query)
+      .select("serialNumber")
+      .sort({ serialNumber: 1 })
+      .skip(skip)
+      .limit(Number(limit))
+      .lean(),
+    InventoryItem.countDocuments(query),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    total,
+    pagination: {
+      currentPage: Number(page),
+      totalPages: Math.ceil(total / limit),
+    },
+    data: serials,
+  });
 });

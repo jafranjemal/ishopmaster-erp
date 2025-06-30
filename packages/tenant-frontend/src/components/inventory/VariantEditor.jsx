@@ -12,8 +12,9 @@ import {
 } from "ui-library";
 import { toast } from "react-hot-toast";
 import { tenantProductService } from "../../services/api";
+import { Barcode } from "lucide-react";
 
-const VariantEditor = ({ variants }) => {
+const VariantEditor = ({ variants, onPrint }) => {
   const [editedVariants, setEditedVariants] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -64,6 +65,8 @@ const VariantEditor = ({ variants }) => {
             <TableHead>SKU</TableHead>
             <TableHead>Cost Price</TableHead>
             <TableHead>Selling Price</TableHead>
+            <TableHead className="text-center">Qty in Stock</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -122,6 +125,24 @@ const VariantEditor = ({ variants }) => {
                   }
                   className="h-8"
                 />
+              </TableCell>
+              <TableCell className="text-center font-bold">
+                {variant.quantityInStock || 0}
+              </TableCell>
+
+              <TableCell className="text-right">
+                {/* --- THE DEFINITIVE FIX --- */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onPrint(variant)}
+                  aria-label="Print Barcode"
+                  disabled={
+                    !variant.quantityInStock || variant.quantityInStock <= 0
+                  } // Button is disabled if stock is 0
+                >
+                  <Barcode className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}

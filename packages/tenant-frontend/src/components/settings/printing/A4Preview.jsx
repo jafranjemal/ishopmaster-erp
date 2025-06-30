@@ -1,11 +1,14 @@
 import React from "react";
 
 /**
- * Renders a scaled-down preview of a full A4 sheet of labels.
+ * Renders a scaled-down, high-fidelity preview of a full A4 sheet of labels.
+ * It uses CSS Grid to perfectly lay out the labels based on the template's dimensions.
+ * @param {object} props
+ * @param {object} props.template - The full label template object with all dimensions.
+ * @param {string} props.singleLabelHtml - The raw HTML string for a single rendered label.
  */
 const A4Preview = ({ template, singleLabelHtml }) => {
   const {
-    paperSize,
     labelWidth,
     labelHeight,
     horizontalGap,
@@ -34,15 +37,21 @@ const A4Preview = ({ template, singleLabelHtml }) => {
     gap: `${verticalGap}mm ${horizontalGap}mm`,
     alignContent: "start",
     backgroundColor: "white",
+    boxSizing: "border-box",
   };
 
   const labelStyle = {
-    // The background is set by the CSS in the generated HTML
+    width: `${labelWidth}mm`,
+    height: `${labelHeight}mm`,
+    outline: "1px dashed #cccccc", // A faint outline for visual separation
+    overflow: "hidden",
   };
 
   return (
-    <div className="bg-slate-900 p-4 rounded-lg">
-      <h4 className="text-lg font-semibold mb-4">A4 Sheet Preview</h4>
+    <div className="bg-slate-900/50 p-8 rounded-lg flex flex-col items-center">
+      <h4 className="text-lg font-semibold mb-4 text-white">
+        A4 Sheet Preview
+      </h4>
       <div
         className="mx-auto shadow-lg"
         style={{

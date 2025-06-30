@@ -94,3 +94,22 @@ export const adminPermissionService = {
     return response.data;
   },
 };
+
+export const adminTenantService = {
+  /**
+   * Fetches all tenants with filtering and pagination.
+   * @param {object} params - { page, limit, isActive, searchTerm }
+   */
+  getAll: async (params) => {
+    return api.get("/admin/tenants", { params });
+  },
+
+  /**
+   * Updates a tenant's details (license, active status).
+   * @param {string} id - The ID of the tenant to update.
+   * @param {object} data - The data to update.
+   */
+  update: async (id, data) => {
+    return api.put(`/admin/tenants/${id}`, data);
+  },
+};

@@ -9,29 +9,20 @@ exports.login = asyncHandler(async (req, res, next) => {
   const { User, Role } = req.models;
 
   if (!email || !password) {
-    return res
-      .status(400)
-      .json({ success: false, error: "Please provide email and password" });
+    return res.status(400).json({ success: false, error: "Please provide email and password" });
   }
 
   // Find user in their specific tenant database and explicitly include the password
-  const user = await User.findOne({ email })
-    .select("+password")
-    .populate("role");
+  const user = await User.findOne({ email }).select("+password").populate("role");
 
   if (!user || !(await user.comparePassword(password))) {
-    return res
-      .status(401)
-      .json({ success: false, error: "Invalid credentials" });
+    return res.status(401).json({ success: false, error: "Invalid credentials" });
   }
 
   if (!user.isActive) {
-    return res
-      .status(403)
-      .json({ success: false, error: "Your account is disabled." });
+    return res.status(403).json({ success: false, error: "Your account is disabled." });
   }
 
-  console.log(JSON.stringify(user?.role?.permissions)); // Debugging line to inspect user object
   // Prepare the JWT payload with all necessary info for the frontend
   const payload = {
     id: user._id,

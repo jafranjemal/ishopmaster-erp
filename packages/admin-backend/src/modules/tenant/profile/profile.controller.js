@@ -8,15 +8,8 @@ exports.getMyProfile_old = asyncHandler(async (req, res, next) => {
   // The `tenantResolver` middleware has already done the work of finding
   // and validating the tenant. We just need to return it.
   // We explicitly exclude sensitive or large fields we don't need on the frontend.
-  const {
-    _id,
-    companyName,
-    subdomain,
-    licenseExpiry,
-    isActive,
-    settings,
-    enabledModules,
-  } = req.tenant;
+  const { _id, companyName, subdomain, licenseExpiry, isActive, settings, enabledModules } =
+    req.tenant;
 
   const profile = {
     _id,
@@ -46,9 +39,7 @@ exports.getMyProfile = asyncHandler(async (req, res, next) => {
   const freshTenant = await Tenant.findById(tenantId).lean();
 
   if (!freshTenant) {
-    return res
-      .status(404)
-      .json({ success: false, error: "Tenant profile could not be found." });
+    return res.status(404).json({ success: false, error: "Tenant profile could not be found." });
   }
 
   // 3. We explicitly destructure the fields to create a clean profile object,
@@ -84,7 +75,7 @@ exports.getMyProfile = asyncHandler(async (req, res, next) => {
 // @desc    Update the profile of the currently authenticated tenant
 // @route   PUT /api/v1/tenant/profile
 // @access  Private (Tenant users with permission)
-exports.updateMyProfile = asyncHandler(async (req, res, next) => {
+exports.updateMyProfile_o = asyncHandler(async (req, res, next) => {
   // Whitelist of fields a tenant is allowed to change.
   const fieldsToUpdate = {
     companyName: req.body.companyName,
@@ -92,16 +83,13 @@ exports.updateMyProfile = asyncHandler(async (req, res, next) => {
   };
 
   // Find the tenant record in the Admin DB using the ID from the resolver.
-  const updatedTenant = await Tenant.findByIdAndUpdate(
-    req.tenant._id,
-    fieldsToUpdate,
-    { new: true, runValidators: true }
-  );
+  const updatedTenant = await Tenant.findByIdAndUpdate(req.tenant._id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!updatedTenant) {
-    return res
-      .status(404)
-      .json({ success: false, error: "Tenant profile not found." });
+    return res.status(404).json({ success: false, error: "Tenant profile not found." });
   }
 
   res.status(200).json({ success: true, data: updatedTenant });
@@ -116,8 +104,7 @@ exports.updateLocalizationSettings = asyncHandler(async (req, res, next) => {
   const tenantId = req.tenant._id;
 
   // Whitelist the specific fields from the request body.
-  const { baseCurrency, supportedCurrencies, defaultLanguage, timezone } =
-    req.body;
+  const { baseCurrency, supportedCurrencies, defaultLanguage, timezone } = req.body;
 
   // Use MongoDB's dot notation to perform a targeted update on the nested object.
   // This is a professional pattern that prevents overwriting other settings.
@@ -140,20 +127,11 @@ exports.updateLocalizationSettings = asyncHandler(async (req, res, next) => {
   ).lean(); // Use lean for a plain JS object
 
   if (!updatedTenant) {
-    return res
-      .status(404)
-      .json({ success: false, error: "Tenant profile not found." });
+    return res.status(404).json({ success: false, error: "Tenant profile not found." });
   }
 
-  const {
-    _id,
-    companyName,
-    subdomain,
-    licenseExpiry,
-    isActive,
-    settings,
-    enabledModules,
-  } = updatedTenant;
+  const { _id, companyName, subdomain, licenseExpiry, isActive, settings, enabledModules } =
+    updatedTenant;
   const profile = {
     _id,
     companyName,
@@ -167,4 +145,71 @@ exports.updateLocalizationSettings = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: profile });
 
   // Note: We return the updated profile without sensitive fields like password.
+});
+
+exports.updateCompanyProfile = asyncHandler(async (req, res, next) => {
+  const { companyName, companyProfile } = req.body;
+
+  const fieldsToUpdate = {};
+  if (companyName) fieldsToUpdate.companyName = companyName;
+
+  // This logic handles all nested fields in companyProfile safely
+  if (companyProfile) {
+    for (const [key, value] of Object.entries(companyProfile)) {
+      if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+        // Handle nested objects like address and socialHandles
+        for (const [nestedKey, nestedValue] of Object.entries(value)) {
+          fieldsToUpdate[`companyProfile.${key}.${nestedKey}`] = nestedValue;
+        }
+      } else {
+        fieldsToUpdate[`companyProfile.${key}`] = value;
+      }
+    }
+  }
+
+  const updatedTenant = await Tenant.findByIdAndUpdate(
+    req.tenant._id,
+    { $set: fieldsToUpdate },
+    { new: true, runValidators: true }
+  ).lean();
+
+  res.status(200).json({ success: true, data: updatedTenant });
+});
+
+// @desc    Update the logged-in user's own profile (name, password)
+// @route   PUT /api/v1/tenant/profile/me
+// @access  Private (Any authenticated user)
+exports.updateMyProfile = asyncHandler(async (req, res, next) => {
+  const { User } = req.models;
+  const { name, currentPassword, newPassword } = req.body;
+
+  // Find the current user and select their password for comparison
+  const user = await User.findById(req.user.id).select("+password");
+
+  if (!user) {
+    return res.status(404).json({ success: false, error: "User not found." });
+  }
+
+  if (name) {
+    user.name = name;
+  }
+
+  // Handle password change only if both fields are provided
+  if (currentPassword && newPassword) {
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, error: "Incorrect current password." });
+    }
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ success: false, error: "New password must be at least 6 characters." });
+    }
+    user.password = newPassword; // The pre-save hook on the User model will handle hashing
+  }
+
+  await user.save();
+  res
+    .status(200)
+    .json({ success: true, data: { message: "Your profile has been updated successfully." } });
 });

@@ -29,3 +29,4 @@ export * from "./components/Select";
 export * from "./components/AlertModal";
 export * from "./lib/utils"; // Also export our `cn` utility
 export { default as FileUploader } from "./components/FileUploader";
+export { Checkbox } from "./components/Checkbox";

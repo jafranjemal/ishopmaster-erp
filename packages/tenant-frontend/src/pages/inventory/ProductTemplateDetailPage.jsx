@@ -18,6 +18,8 @@ import {
   Badge,
 } from "ui-library";
 import { ArrowLeft, Loader2, PlusCircle } from "lucide-react";
+import PrintModal from "../../components/inventory/printing/PrintModal";
+import PrintConfigModal from "../../components/inventory/printing/PrintConfigModal";
 
 const ProductTemplateDetailPage = () => {
   const { t } = useTranslation();
@@ -30,6 +32,12 @@ const ProductTemplateDetailPage = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [itemsToPrint, setItemsToPrint] = useState([]);
+  const [configModalState, setConfigModalState] = useState({
+    isOpen: false,
+    variant: null,
+  });
 
   const [isAddVariantModalOpen, setIsAddVariantModalOpen] = useState(false);
   const [alertState, setAlertState] = useState({
@@ -124,6 +132,17 @@ const ProductTemplateDetailPage = () => {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // --- 3. IMPLEMENT `onPrint` HANDLER ---
+  const handlePrintSingleVariant = (variant) => {
+    setConfigModalState({ isOpen: true, variant: variant });
+  };
+  // --- END OF `onPrint` HANDLER ---
+
+  const handleAddToPrintQueue = (configuredItem) => {
+    setItemsToPrint([configuredItem]); // Set the queue with the single, configured item
+    setIsPrintModalOpen(true); // Now, open the FINAL print modal
   };
 
   if (isLoading) {
@@ -246,9 +265,24 @@ const ProductTemplateDetailPage = () => {
             variants={variants}
             onSave={handleSaveVariants}
             isSaving={isSaving}
+            onPrint={handlePrintSingleVariant}
           />
         </div>
       )}
+
+      {/* The Configuration Modal */}
+      <PrintConfigModal
+        isOpen={configModalState.isOpen}
+        onClose={() => setConfigModalState({ isOpen: false, variant: null })}
+        variant={configModalState.variant}
+        onConfirm={handleAddToPrintQueue}
+      />
+
+      <PrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        itemsToPrint={itemsToPrint}
+      />
 
       <Modal
         isOpen={isAddVariantModalOpen}

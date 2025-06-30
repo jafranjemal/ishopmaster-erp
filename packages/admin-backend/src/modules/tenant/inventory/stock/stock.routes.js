@@ -11,6 +11,8 @@ const {
   getAllTransfers,
   getTransferById,
   cancelTransfer,
+  getLotQuantityForVariant,
+  getAvailableSerials,
 } = require("./stock.controller");
 const {
   protect,
@@ -48,6 +50,17 @@ router
   .route("/transfers")
   .get(authorize("inventory:stock:transfer"), getAllTransfers)
   .post(authorize("inventory:stock:transfer"), createTransfer);
+
+router.get(
+  "/lot-quantity",
+  authorize("inventory:product:view"),
+  getLotQuantityForVariant
+);
+router.get(
+  "/available-serials",
+  authorize("inventory:product:view"),
+  getAvailableSerials
+);
 
 router
   .route("/transfers/:id")

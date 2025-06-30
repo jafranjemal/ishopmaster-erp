@@ -5,6 +5,7 @@ import { tenantTransferService } from "../../services/api";
 import { ArrowLeft, Truck, CheckCircle } from "lucide-react";
 import { Button, Modal } from "ui-library";
 import TransferDetailView from "../../components/inventory/transfers/TransferDetailView";
+import PrintModal from "../../components/inventory/printing/PrintModal";
 
 const StockTransferDetailPage = () => {
   const { id: transferId } = useParams();
@@ -14,6 +15,8 @@ const StockTransferDetailPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null); // 'dispatch' or 'receive'
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [itemsToPrint, setItemsToPrint] = useState([]);
 
   const fetchData = useCallback(async () => {
     if (!transferId) return;
@@ -44,6 +47,7 @@ const StockTransferDetailPage = () => {
       fetchData(); // Refresh data
     } catch (error) {
       /* handled by toast */
+      console.log(error);
     } finally {
       setIsActionLoading(false);
       setConfirmAction(null);
@@ -59,18 +63,33 @@ const StockTransferDetailPage = () => {
         error: "Receive failed.",
       });
       fetchData(); // Refresh data
+
+      // 1. Prepare the precise list of items for the print job from the transfer data.
+      const printQueueItems = transfer.items.map((item) => ({
+        productVariantId: item.productVariantId._id,
+        variantName: item.productVariantId.variantName,
+        sku: item.productVariantId.sku,
+        isSerialized: item.productVariantId.templateId?.type === "serialized",
+        // The quantity for the print job is now correctly determined
+        quantity: item.isSerialized ? item.serials.length : item.quantity,
+        serials: item.isSerialized ? item.serials : [],
+        batchNumber: transfer.transferId, // Use transfer ID as the batch ref
+        branchId: transfer.toBranchId._id, // The destination branch
+      }));
+
+      // 2. Set the state to open the modal with this specific, correctly formatted data.
+      setItemsToPrint(printQueueItems);
+      setIsPrintModalOpen(true);
     } catch (error) {
-      /* handled by toast */
+      console.log(error);
     } finally {
       setIsActionLoading(false);
       setConfirmAction(null);
     }
   };
 
-  if (isLoading)
-    return <div className="p-8 text-center">Loading Transfer Details...</div>;
-  if (!transfer)
-    return <div className="p-8 text-center">Transfer not found.</div>;
+  if (isLoading) return <div className="p-8 text-center">Loading Transfer Details...</div>;
+  if (!transfer) return <div className="p-8 text-center">Transfer not found.</div>;
 
   const renderActionButtons = () => {
     if (transfer.status === "pending") {
@@ -113,23 +132,27 @@ const StockTransferDetailPage = () => {
         title={`Confirm ${confirmAction}`}
       >
         <p>
-          Are you sure you want to {confirmAction} this transfer? This action
-          will update stock levels and cannot be easily undone.
+          Are you sure you want to {confirmAction} this transfer? This action will update stock
+          levels and cannot be easily undone.
         </p>
         <div className="mt-6 flex justify-end space-x-4">
           <Button variant="outline" onClick={() => setConfirmAction(null)}>
             Cancel
           </Button>
           <Button
-            onClick={
-              confirmAction === "dispatch" ? handleDispatch : handleReceive
-            }
+            onClick={confirmAction === "dispatch" ? handleDispatch : handleReceive}
             disabled={isActionLoading}
           >
             {isActionLoading ? "Processing..." : `Confirm ${confirmAction}`}
           </Button>
         </div>
       </Modal>
+
+      <PrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        itemsToPrint={itemsToPrint}
+      />
     </div>
   );
 };

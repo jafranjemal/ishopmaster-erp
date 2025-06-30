@@ -1,64 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 import { toast } from "react-hot-toast";
-import { tenantProfileService } from "../services/api";
 
 import CompanyProfileForm from "../components/settings/CompanyProfileForm";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "ui-library";
+import { tenantProfileService } from "../services/api";
 import useAuth from "../context/useAuth";
 
 const CompanyProfilePage = () => {
-  // We get the initial profile data from our auth context
-  const { tenantProfile, refreshSession } = useAuth(); // Assume refreshSession exists to update context
+  const { tenantProfile, refreshTenantProfile } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async (formData) => {
-    // formData here would contain companyName and the companyProfile object
+    setIsSaving(true);
     try {
-      await toast.promise(tenantProfileService.updateMyProfile(formData), {
-        loading: "Saving profile...",
-        success: "Company profile updated successfully!",
+      await toast.promise(tenantProfileService.updateCompanyProfile(formData), {
+        loading: "Saving company profile...",
+        success: "Profile updated successfully!",
         error: (err) => err.response?.data?.error || "Failed to save profile.",
       });
-      // After successful save, refresh the auth context to get the latest data
-      if (refreshSession) await refreshSession();
+      // After a successful save, refresh the global context to get the new data
+      await refreshTenantProfile();
     } catch (error) {
-      console.error("Save failed:", error);
+      console.log(error);
+      // Error is handled by the toast
+    } finally {
+      setIsSaving(false);
     }
   };
 
   if (!tenantProfile) {
-    return <p>Loading profile...</p>;
+    return <div className="p-8 text-center">Loading company profile...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Company Profile & Settings</h1>
-        <p className="mt-1 text-slate-400">
-          Manage your main business information and branding.
-        </p>
+        <h1 className="text-3xl font-bold">Company Profile</h1>
+        <p className="mt-1 text-slate-400">Manage your business's legal name, address, logo, and other details.</p>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Business Information</CardTitle>
-          <CardDescription>
-            This information may appear on your invoices and receipts.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CompanyProfileForm
-            currentProfile={tenantProfile}
-            onSave={handleSave}
-          />
-        </CardContent>
-      </Card>
+      <CompanyProfileForm profile={tenantProfile} onSave={handleSave} isSaving={isSaving} />
     </div>
   );
 };
-
 export default CompanyProfilePage;

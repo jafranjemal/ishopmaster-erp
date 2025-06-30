@@ -1,27 +1,43 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { PlusCircle, ShieldAlert } from "lucide-react";
-import {
-  tenantUserService,
-  tenantRoleService,
-  tenantLocationService,
-} from "../services/api";
+
+// Import all necessary services
+import { tenantUserService, tenantRoleService, tenantLocationService } from "./../services/api";
+
+// Import UI library and local components
 import { Button, Modal, Card, CardContent } from "ui-library";
+import PasswordResetForm from "../components/settings/users/PasswordResetForm";
 import UserList from "../components/users/UserList";
 import UserForm from "../components/users/UserForm";
-
+/**
+ * The definitive "smart" container page for managing users.
+ * It orchestrates all data fetching, state management, and actions for
+ * creating, editing, deleting, and resetting passwords for users.
+ */
 const UsersPage = () => {
+  // --- STATE MANAGEMENT ---
+  // Data state
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [branches, setBranches] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-  const [confirmDeactivate, setConfirmDeactivate] = useState(null);
 
+  // UI control state
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Modal states
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [resettingUser, setResettingUser] = useState(null);
+
+  // --- DATA FETCHING ---
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
+      // Fetch all prerequisite data in parallel for performance
       const [usersRes, rolesRes, branchesRes] = await Promise.all([
         tenantUserService.getAll(),
         tenantRoleService.getAll(),
@@ -31,7 +47,6 @@ const UsersPage = () => {
       setRoles(rolesRes.data.data);
       setBranches(branchesRes.data.data);
     } catch (error) {
-      console.error("Error loading user management data:", error);
       toast.error("Failed to load user management data.");
     } finally {
       setIsLoading(false);
@@ -42,107 +57,137 @@ const UsersPage = () => {
     fetchData();
   }, [fetchData]);
 
-  const handleSave = async (formData) => {
+  // --- HANDLER FUNCTIONS ---
+  const handleOpenCreateModal = () => {
+    setEditingUser(null); // Ensure we are in "create" mode
+    setIsUserModalOpen(true);
+  };
+
+  const handleOpenEditModal = (userToEdit) => {
+    setEditingUser(userToEdit);
+    setIsUserModalOpen(true);
+  };
+
+  const handleOpenResetModal = (userToReset) => {
+    setResettingUser(userToReset);
+    setIsResetModalOpen(true);
+  };
+
+  // A single function to close all possible modals and reset state
+  const handleCloseModals = () => {
+    setIsUserModalOpen(false);
+    setIsResetModalOpen(false);
+    setDeleteConfirm(null);
+    setEditingUser(null);
+    setResettingUser(null);
+  };
+
+  const handleSaveUser = async (formData) => {
+    setIsSaving(true);
     const isEditMode = Boolean(editingUser);
-    const apiCall = isEditMode
-      ? tenantUserService.update(editingUser._id, formData)
-      : tenantUserService.create(formData);
+    const apiCall = isEditMode ? tenantUserService.update(editingUser._id, formData) : tenantUserService.create(formData);
+
     try {
       await toast.promise(apiCall, {
-        loading: "Saving user...",
+        loading: isEditMode ? "Updating user..." : "Creating user...",
         success: `User "${formData.name}" saved successfully!`,
         error: (err) => err.response?.data?.error || "Failed to save user.",
       });
-      fetchData();
-      setIsModalOpen(false);
-      return null;
-    } catch (err) {
-      return err.response?.data?.error;
+      fetchData(); // Refresh list on success
+      handleCloseModals();
+    } catch (error) {
+      // Error is handled by the toast promise
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleToggleActive = async () => {
-    if (!confirmDeactivate) return;
-    const dataToUpdate = { isActive: !confirmDeactivate.isActive };
-    await toast.promise(
-      tenantUserService.update(confirmDeactivate._id, dataToUpdate),
-      {
-        loading: "Updating status...",
-        success: `User "${confirmDeactivate.name}" has been ${
-          dataToUpdate.isActive ? "activated" : "deactivated"
-        }.`,
-        error: "Failed to update status.",
-      }
-    );
-    fetchData();
-    setConfirmDeactivate(null);
+  const handleDeleteUser = async () => {
+    if (!deleteConfirm) return;
+    try {
+      await toast.promise(tenantUserService.delete(deleteConfirm._id), {
+        loading: `Deleting user "${deleteConfirm.name}"...`,
+        success: "User deleted successfully.",
+        error: (err) => err.response?.data?.error || "Failed to delete user.",
+      });
+      fetchData(); // Refresh list on success
+      handleCloseModals();
+    } catch (error) {
+      // Error is handled by toast
+    }
+  };
+
+  const handlePasswordReset = async (passwordData) => {
+    if (!resettingUser) return;
+    setIsSaving(true);
+    try {
+      await toast.promise(tenantUserService.adminResetPassword(resettingUser._id, passwordData), {
+        loading: `Resetting password for ${resettingUser.name}...`,
+        success: "Password has been reset successfully.",
+        error: (err) => err.response?.data?.error || "Failed to reset password.",
+      });
+      handleCloseModals();
+    } catch (error) {
+      // Error is handled by toast
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">User Management</h1>
-        <Button
-          onClick={() => {
-            setEditingUser(null);
-            setIsModalOpen(true);
-          }}
-        >
-          <PlusCircle className="mr-2 h-4 w-4" /> Add User
+        <div>
+          <h1 className="text-3xl font-bold">User Management</h1>
+          <p className="mt-1 text-slate-400">Manage employee accounts, roles, and permissions.</p>
+        </div>
+        <Button onClick={handleOpenCreateModal}>
+          <PlusCircle className="mr-2 h-4 w-4" /> New User
         </Button>
       </div>
+
       <Card>
         <CardContent className="p-0">
           {isLoading ? (
-            <p className="p-4">Loading users...</p>
+            <p className="p-8 text-center text-slate-400">Loading users...</p>
           ) : (
-            <UserList
-              users={users}
-              onEdit={(user) => {
-                setEditingUser(user);
-                setIsModalOpen(true);
-              }}
-              onToggleActive={setConfirmDeactivate}
-            />
+            <UserList users={users} onEdit={handleOpenEditModal} onDelete={setDeleteConfirm} onResetPassword={handleOpenResetModal} />
           )}
         </CardContent>
       </Card>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title={editingUser ? "Edit User" : "Create New User"}
-      >
+      {/* Create/Edit User Modal */}
+      <Modal isOpen={isUserModalOpen} onClose={handleCloseModals} title={editingUser ? "Edit User" : "Create New User"}>
         <UserForm
           userToEdit={editingUser}
           roles={roles}
           branches={branches}
-          onSave={handleSave}
-          onCancel={() => setIsModalOpen(false)}
+          onSave={handleSaveUser}
+          onCancel={handleCloseModals}
+          isSaving={isSaving}
         />
       </Modal>
 
-      <Modal
-        isOpen={Boolean(confirmDeactivate)}
-        onClose={() => setConfirmDeactivate(null)}
-        title="Confirm Status Change"
-      >
-        <p>
-          Are you sure you want to{" "}
-          {confirmDeactivate?.isActive ? "deactivate" : "activate"} the user "
-          {confirmDeactivate?.name}"?
-        </p>
+      {/* Delete Confirmation Modal */}
+      <Modal isOpen={Boolean(deleteConfirm)} onClose={handleCloseModals} title="Confirm Deletion">
+        <div className="text-center">
+          <ShieldAlert className="mx-auto h-12 w-12 text-red-500" />
+          <p className="mt-4">Are you sure you want to delete the user "{deleteConfirm?.name}"?</p>
+          <p className="text-sm text-slate-400 mt-2">This action cannot be undone.</p>
+        </div>
         <div className="mt-6 flex justify-end space-x-4">
-          <Button variant="outline" onClick={() => setConfirmDeactivate(null)}>
+          <Button variant="outline" onClick={handleCloseModals}>
             Cancel
           </Button>
-          <Button
-            variant={confirmDeactivate?.isActive ? "destructive" : "success"}
-            onClick={handleToggleActive}
-          >
-            Confirm
+          <Button variant="destructive" onClick={handleDeleteUser}>
+            Delete User
           </Button>
         </div>
+      </Modal>
+
+      {/* Password Reset Modal */}
+      <Modal isOpen={isResetModalOpen} onClose={handleCloseModals} title={`Reset Password for ${resettingUser?.name}`}>
+        <PasswordResetForm onSave={handlePasswordReset} onCancel={handleCloseModals} isSaving={isSaving} />
       </Modal>
     </div>
   );

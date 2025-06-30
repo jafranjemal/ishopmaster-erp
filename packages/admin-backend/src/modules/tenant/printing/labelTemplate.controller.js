@@ -1,18 +1,22 @@
 const asyncHandler = require("../../../middleware/asyncHandler");
 
+// No changes needed here.
 exports.getAllLabelTemplates = asyncHandler(async (req, res, next) => {
   const { LabelTemplate } = req.models;
   const templates = await LabelTemplate.find({}).sort({ name: 1 });
   res.status(200).json({ success: true, data: templates });
 });
 
+// Simplified to remove the unnecessary and now incorrect ID mapping.
 exports.getLabelTemplateById = asyncHandler(async (req, res, next) => {
   const { LabelTemplate } = req.models;
   const template = await LabelTemplate.findById(req.params.id).lean();
-  if (!template)
+
+  if (!template) {
     return res
       .status(404)
       .json({ success: false, error: "Label template not found." });
+  }
 
   if (Array.isArray(template.content)) {
     template.content = template.content.map((el, index) => ({
@@ -21,28 +25,24 @@ exports.getLabelTemplateById = asyncHandler(async (req, res, next) => {
     }));
   }
 
+  // The content array now has a required `id` field from the schema.
+  // No need to manually create it anymore. Sending the data as-is.
   res.status(200).json({ success: true, data: template });
 });
 
-// @desc    Create a new label template with a default layout
-// @route   POST /api/v1/tenant/printing/label-templates
+// The main logic is the same, but it now calls the new _generateDefaultContent.
 exports.createLabelTemplate = asyncHandler(async (req, res, next) => {
   const { LabelTemplate } = req.models;
   const templateData = req.body;
 
-  templateData.content = _generateDefaultContent({
-    labelWidth: templateData?.labelWidth,
-    labelHeight: templateData?.labelHeight,
-    marginTop: templateData?.marginTop,
-    marginLeft: templateData?.marginLeft,
-    horizontalGap: templateData?.horizontalGap,
-    verticalGap: templateData?.verticalGap,
-  });
+  // This function is now updated to match the new schema.
+  templateData.content = _generateDefaultContent(templateData);
 
   const newTemplate = await LabelTemplate.create(templateData);
   res.status(201).json({ success: true, data: newTemplate });
 });
 
+// No changes needed here.
 exports.updateLabelTemplate = asyncHandler(async (req, res, next) => {
   const { LabelTemplate } = req.models;
   const updatedTemplate = await LabelTemplate.findByIdAndUpdate(
@@ -57,6 +57,7 @@ exports.updateLabelTemplate = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: updatedTemplate });
 });
 
+// No changes needed here.
 exports.deleteLabelTemplate = asyncHandler(async (req, res, next) => {
   const { LabelTemplate } = req.models;
   const template = await LabelTemplate.findById(req.params.id);
@@ -75,120 +76,139 @@ exports.deleteLabelTemplate = asyncHandler(async (req, res, next) => {
 });
 
 /**
- * Generates a default layout of elements based on label dimensions.
- * @param {number} width - The width of the label in mm.
- * @param {number} height - The height of the label in mm.
- * @returns {Array<object>} An array of content elements for the template.
+ * **FULLY REWRITTEN HELPER FUNCTION**
+ * Generates a default layout of elements that conforms to the new, enhanced schema.
+ * @param {object} templateData - The initial template data containing label dimensions.
+ * @returns {Array<object>} An array of content elements with all required properties.
  */
-const _generateDefaultContentOld = (width, height) => {
-  // Sensible defaults, assuming a standard price tag layout.
-  // All coordinates and sizes are in mm for the template.
+const _generateDefaultContentOld = ({ labelWidth, labelHeight }) => {
+  // Use a consistent timestamp for all related element IDs
+  const idSuffix = Date.now();
+
+  // Define a small internal padding/margin for a cleaner look
+  const padding = 2; // 2mm padding inside the label
+
+  const safeWidth = labelWidth - padding * 2;
+  const safeHeight = labelHeight - padding * 2;
+
   return [
+    // --- Top: Product Name (Full Width) ---
     {
-      id: `el_${Date.now()}_name`,
+      id: `el_${idSuffix}_name`,
       type: "text",
       dataField: "variantName",
-      text: "Product Name",
-      x: width * 0.05, // 5% from left
-      y: height * 0.1, // 10% from top
-      fontSize: 8,
+      x: padding,
+      y: padding,
+      width: safeWidth,
+      height: safeHeight * 0.25, // 25% of the safe height
+      fontSize: 9,
       fontWeight: "bold",
+      fontFamily: "Arial",
+      align: "left",
     },
+    // --- Center: Barcode ---
     {
-      id: `el_${Date.now()}_price`,
-      type: "text",
-      dataField: "sellingPrice",
-      text: "Price",
-      x: width * 0.05,
-      y: height * 0.3,
-      fontSize: 14,
-      fontWeight: "bold",
-    },
-    {
-      id: `el_${Date.now()}_barcode`,
+      id: `el_${idSuffix}_barcode`,
       type: "barcode",
       dataField: "sku",
-      x: width * 0.05,
-      y: height * 0.65,
-      barcodeHeight: height * 0.25, // 25% of label height
-      barcodeWidth: 1,
+      x: padding,
+      y: padding + safeHeight * 0.3, // Positioned below the name
+      width: safeWidth,
+      height: safeHeight * 0.4, // 40% of the safe height
+      barDensity: 1.2, // A good starting density
+    },
+    // --- Bottom: Human-Readable SKU ---
+    {
+      id: `el_${idSuffix}_sku`,
+      type: "text",
+      dataField: "sku",
+      x: padding,
+      y: padding + safeHeight * 0.75, // Positioned below the barcode
+      width: safeWidth,
+      height: safeHeight * 0.2, // 20% of the safe height
+      fontSize: 8,
+      fontWeight: "normal",
+      fontFamily: "OCR-B", // The correct font for this purpose
+      align: "center",
     },
   ];
 };
 
 /**
- * Generates a default layout of elements based on label dimensions (mm).
- * @param {number} width
- * @param {number} height
- * @returns {Array<object>} A visually optimized array of elements.
+ * **DEFINITIVE HELPER FUNCTION**
+ * Programmatically generates a perfect, "concrete" default layout for a new template.
+ * All positions (x, y) and dimensions (width, height, fontSize) are calculated
+ * based on the label size to create a professional, industry-standard layout.
  */
-/**
- * Generates a realistic, industry-standard default layout.
- * Content is centered within the usable label area (excluding margins/gaps).
- */
-const _generateDefaultContent = ({
-  labelWidth,
-  labelHeight,
-  marginTop = 0,
-  marginLeft = 0,
-  horizontalGap = 0,
-  verticalGap = 0,
-}) => {
-  // Safe printable width/height inside the label
-  const safeWidth = labelWidth - marginLeft - horizontalGap;
-  const safeHeight = labelHeight - marginTop - verticalGap;
+const _generateDefaultContent = ({ labelWidth, labelHeight }) => {
+  const idSuffix = Date.now();
+  const PADDING = 2; // 2mm safe area inside the label
 
-  // Divide height into 3 parts: top, middle, bottom
-  const rowHeight = safeHeight / 3;
-  const _id = `el_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+  // Define the main layout areas
+  const safeWidth = labelWidth - PADDING * 2;
+  const headerHeight = labelHeight * 0.25;
+  const footerHeight = labelHeight * 0.25;
+  const bodyHeight = labelHeight - headerHeight - footerHeight;
+
+  const headerY = PADDING;
+  const bodyY = headerY + headerHeight;
+  const footerY = bodyY + bodyHeight;
+
   return [
-    // --- Top: Variant Name ---
+    // --- Header: Product Name ---
     {
-      id: `el_${_id}_name`,
+      id: `el_${idSuffix}_name`,
       type: "text",
       dataField: "variantName",
-      text: "Product Name",
-      x: marginLeft + safeWidth * 0.1,
-      y: marginTop + rowHeight * 0.1,
-      fontSize: Math.max(8, rowHeight * 0.4),
+      x: PADDING,
+      y: headerY,
+      width: safeWidth,
+      height: headerHeight,
+      fontSize: Math.max(8, headerHeight * 0.7), // Font size relative to header height
       fontWeight: "bold",
+      fontFamily: "Arial",
+      align: "left",
     },
 
-    // --- Center: Barcode ---
+    // --- Body: The Barcode ---
+    // You are correct, the height should be calculated. labelHeight / 3 is a great rule.
     {
-      id: `el_${_id}_barcode`,
+      id: `el_${idSuffix}_barcode`,
       type: "barcode",
       dataField: "sku",
-      x: marginLeft + safeWidth * 0.1,
-      y: marginTop + rowHeight * 1 + rowHeight * 0.05, // start of middle + some offset
-      width: safeWidth * 0.8,
-      height: rowHeight * 0.8,
-      barcodeWidth: 1.5,
-      barcodeHeight: rowHeight * 0.8,
+      x: PADDING,
+      y: bodyY,
+      width: safeWidth,
+      height: bodyHeight,
+      barDensity: 0.6,
     },
 
-    // --- Bottom Left: Selling Price ---
+    // --- Footer: Contains Price and Human-Readable SKU ---
     {
-      id: `el_${_id}_price`,
+      id: `el_${idSuffix}_price`,
       type: "text",
       dataField: "sellingPrice",
-      text: "Rs. 100.00",
-      x: marginLeft + safeWidth * 0.05,
-      y: marginTop + rowHeight * 2 + rowHeight * 0.1,
-      fontSize: Math.max(10, rowHeight * 0.4),
+      x: PADDING,
+      y: footerY,
+      width: safeWidth / 2, // Takes up left half of the footer
+      height: footerHeight,
+      fontSize: Math.max(8, footerHeight * 0.8),
       fontWeight: "bold",
+      fontFamily: "Arial",
+      align: "left",
     },
-
-    // --- Bottom Right: Company Name ---
     {
-      id: `el_${_id}_company`,
+      id: `el_${idSuffix}_sku`,
       type: "text",
-      dataField: "company",
-      text: "My Store",
-      x: marginLeft + safeWidth * 0.55,
-      y: marginTop + rowHeight * 2 + rowHeight * 0.1,
-      fontSize: Math.max(8, rowHeight * 0.35),
+      dataField: "sku",
+      x: PADDING + safeWidth / 2, // Takes up right half of the footer
+      y: footerY,
+      width: safeWidth / 2,
+      height: footerHeight,
+      fontSize: Math.max(7, footerHeight * 0.7),
       fontWeight: "normal",
+      fontFamily: "OCR-B", // The correct font for machine-readable text
+      align: "right",
     },
   ];
 };

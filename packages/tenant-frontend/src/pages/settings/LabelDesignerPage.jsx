@@ -5,16 +5,18 @@ import {
   tenantLabelTemplateService,
   tenantPrintService,
 } from "../../services/api";
-import { Button, Input } from "ui-library";
+import { Button, Input, Modal } from "ui-library";
 import { Save, ArrowLeft, Eye } from "lucide-react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import LabelCanvas from "../../components/settings/printing/LabelCanvas";
-import Toolbox from "../../components/settings/printing/Toolbox";
+import LabelCanvas from "../../components/settings/printing/LabelCanvas_old";
+
 import PropertiesPanel from "../../components/settings/printing/PropertiesPanel";
 import LayoutMetadataEditor from "../../components/settings/printing/LayoutMetadataEditor";
 import RollPreview from "../../components/settings/printing/RollPreview";
 import A4Preview from "../../components/settings/printing/A4Preview";
+import Toolbox from "../../components/settings/printing/Toolbox";
+import useLabelTemplate from "../../hooks/useLabelTemplate";
 
 const LabelDesignerPage = () => {
   const location = useLocation();
@@ -22,73 +24,53 @@ const LabelDesignerPage = () => {
   const navigate = useNavigate();
   const isNew = location.pathname === "/settings/printing/new";
 
-  const [template, setTemplate] = useState(null);
+  const [template, updateTemplateProperty, setRawTemplate] =
+    useLabelTemplate(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedElementId, setSelectedElementId] = useState(null);
   const [previewHtml, setPreviewHtml] = useState(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [tempPreview, setTempTemplate] = useState(null);
 
-  // --- 2. ADD NEW HANDLER FOR GENERATING THE PREVIEW ---
   const handleGeneratePreview = async () => {
     if (!template) return;
     setIsPreviewLoading(true);
     try {
-      // Create a single dummy item for the preview
-      const dummyItem = {
-        variantName: "Sample Product Name",
-        sku: "SKU12345",
-        sellingPrice: 19999.99,
-        companyName: "JJSOFT GLOBAL",
-      };
-
-      const response = await tenantPrintService.generateLabels(
-        templateId,
-        [dummyItem],
-        {
-          isPreview: true,
-        }
-      );
-
-      console.log("genearte response ", response);
-      // We just need the HTML for a single label
-      const singleLabelMatch = response.data.match(
-        /(<div class="label"[\s\S]*?<\/div>)/ // Match the full label div
-      );
-      if (singleLabelMatch && singleLabelMatch[1]) {
-        setPreviewHtml(singleLabelMatch[1]);
-      }
+      const response = await tenantPrintService.generateLabelPreview(template);
+      setPreviewHtml(response.data);
     } catch (error) {
       toast.error("Failed to generate preview.");
     } finally {
       setIsPreviewLoading(false);
     }
   };
+
   useEffect(() => {
     const fetchOrInitTemplate = async () => {
       setIsLoading(true);
-      if (isNew) {
-        setTemplate({
-          name: "Untitled Label Template",
-          paperType: "sheet",
-          paperSize: "A4",
-          labelWidth: 50,
-          labelHeight: 25,
-          horizontalGap: 5,
-          verticalGap: 5,
-          marginTop: 10,
-          marginLeft: 10,
-          columns: 4,
-          rows: 11,
-          content: [],
-        });
-        setIsLoading(false);
-        return;
-      }
-
       try {
-        const response = await tenantLabelTemplateService.getById(templateId);
-        setTemplate(response.data.data);
+        if (isNew) {
+          // For a new template, initialize with default data using the raw setter.
+          setRawTemplate({
+            name: "Untitled Label Template",
+            paperType: "sheet",
+            paperSize: "A4",
+            labelWidth: 50,
+            labelHeight: 25,
+            horizontalGap: 5,
+            verticalGap: 5,
+            marginTop: 10,
+            marginLeft: 10,
+            columns: 4,
+            rows: 11,
+            content: [],
+          });
+        } else {
+          // For an existing template, fetch from API and load it using the raw setter.
+          const response = await tenantLabelTemplateService.getById(templateId);
+          setRawTemplate(response.data.data);
+        }
       } catch (error) {
         toast.error("Failed to load label template.");
         navigate("/settings/printing");
@@ -98,12 +80,11 @@ const LabelDesignerPage = () => {
     };
 
     fetchOrInitTemplate();
-  }, [isNew, templateId, navigate]);
+  }, [isNew, templateId, navigate, setRawTemplate]);
 
   const handleSaveTemplate = async () => {
     if (!template) return;
     setIsSaving(true);
-
     const apiCall = isNew
       ? tenantLabelTemplateService.create(template)
       : tenantLabelTemplateService.update(templateId, template);
@@ -125,28 +106,28 @@ const LabelDesignerPage = () => {
       setIsSaving(false);
     }
   };
+  const handleUpdate = (field, value, elementId = null) => {
+    updateTemplateProperty(field, value, elementId);
+  };
 
-  const updateTemplateField = (field, value) => {
-    setTemplate((prev) => (prev ? { ...prev, [field]: value } : null));
+  const updateTemplateField = (elementId, field, value) => {
+    updateTemplateProperty(elementId, field, value);
   };
 
   const updateContent = (newContent) => {
-    setTemplate((prev) => (prev ? { ...prev, content: newContent } : null));
+    setRawTemplate((prev) => (prev ? { ...prev, content: newContent } : null));
   };
 
-  const selectedElement = template?.content.find(
-    (el) => el.id === selectedElementId
-  );
-
   const handleDeleteElement = (elementId) => {
-    if (!elementId) return;
-    updateContent(template.content.filter((el) => el.id !== elementId));
+    if (!elementId || !template) return;
+    const newContent = template.content.filter((el) => el.id !== elementId);
+    handleUpdate("content", newContent); // Update the whole content array
     setSelectedElementId(null);
   };
 
   const handleClearAllElements = () => {
     if (window.confirm("Are you sure you want to remove all elements?")) {
-      updateContent([]);
+      handleUpdate("content", []);
       setSelectedElementId(null);
     }
   };
@@ -159,9 +140,12 @@ const LabelDesignerPage = () => {
     updateContent(updatedContent);
   };
 
+  const selectedElement = template?.content.find(
+    (el) => el.id === selectedElementId
+  );
+
   if (isLoading)
     return <div className="p-8 text-center">Loading Label Designer...</div>;
-
   if (!template)
     return (
       <div className="p-8 text-center text-red-400">
@@ -208,16 +192,23 @@ const LabelDesignerPage = () => {
             <h3 className="font-semibold mb-4 text-lg">Properties Panel</h3>
             <PropertiesPanel
               selectedElement={selectedElement}
-              onUpdate={updateElementProperty}
+              onUpdate={(field, value) =>
+                handleUpdate(field, value, selectedElementId)
+              }
+              labelWidth={template.labelWidth}
+              labelHeight={template.labelHeight}
             />
           </div>
 
           <div className="col-span-6 bg-black rounded-lg flex items-center justify-center p-4 overflow-auto">
             <LabelCanvas
+              template={template}
               width={template.labelWidth}
               height={template.labelHeight}
               content={template.content}
-              onContentChange={updateContent}
+              onContentChange={(newContent) =>
+                handleUpdate("content", newContent)
+              }
               selectedElementId={selectedElementId}
               onSelectElement={setSelectedElementId}
               onDeleteElement={handleDeleteElement}
@@ -229,27 +220,39 @@ const LabelDesignerPage = () => {
           <div className="col-span-3 bg-slate-800 rounded-lg p-4 overflow-y-auto">
             <h3 className="font-semibold mb-4 text-lg">Toolbox</h3>
             <Toolbox />
+
+            {tempPreview && (
+              <div dangerouslySetInnerHTML={{ __html: tempPreview }} />
+            )}
           </div>
         </div>
 
-        {JSON.stringify(previewHtml)}
         {/* --- 3. RENDER THE PREVIEW SECTION --- */}
         <div className="flex-shrink-0 p-4 border-t border-slate-700">
           <LayoutMetadataEditor
             template={template}
-            onUpdateField={updateTemplateField}
+            onUpdateField={(field, value) => handleUpdate(field, value)}
           />
 
-          {previewHtml && template.paperType === "sheet" && (
-            <div className="mt-8">
-              <A4Preview template={template} singleLabelHtml={previewHtml} />
+          <Modal
+            isOpen={!!previewHtml}
+            onClose={() => setPreviewHtml(null)}
+            title="Print Preview"
+            description="This is a scaled representation of the final printed output."
+            className="max-w-4xl" // Use a wider modal for previews
+          >
+            <div className="max-h-[70vh] overflow-y-auto bg-slate-600 p-8 rounded-md">
+              {template.paperType === "sheet" && (
+                <A4Preview template={template} singleLabelHtml={previewHtml} />
+              )}
+              {template.paperType === "roll" && (
+                <RollPreview
+                  template={template}
+                  singleLabelHtml={previewHtml}
+                />
+              )}
             </div>
-          )}
-          {previewHtml && template.paperType === "roll" && (
-            <div className="mt-8">
-              <RollPreview template={template} singleLabelHtml={previewHtml} />
-            </div>
-          )}
+          </Modal>
         </div>
       </div>
     </DndProvider>

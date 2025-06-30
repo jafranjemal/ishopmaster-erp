@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
 import * as Tabs from "@radix-ui/react-tabs";
-import {
-  tenantTransferService,
-  tenantLocationService,
-} from "../../services/api";
+import { tenantTransferService, tenantLocationService } from "../../services/api";
 import { Button, Modal, Card, CardContent } from "ui-library";
 import { PlusCircle } from "lucide-react";
 import TransferList from "../../components/inventory/transfers/TransferList";
 import StockTransferForm from "../../components/inventory/transfers/StockTransferForm";
-// import StockTransferForm from '../../components/inventory/transfers/StockTransferForm';
+import SerialSelectorModal from "../../components/inventory/printing/SerialSelectorModal";
 
 const StockTransfersPage = () => {
   const [allTransfers, setAllTransfers] = useState([]);
@@ -17,6 +14,15 @@ const StockTransfersPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  const initialFormState = { fromBranchId: "", toBranchId: "", items: [], notes: "" };
+  const [formData, setFormData] = useState(initialFormState);
+  const [serialModalState, setSerialModalState] = useState({
+    isOpen: false,
+    itemKey: null,
+    variantId: null,
+    initialSelection: [],
+  });
 
   const fetchData = useCallback(async () => {
     try {
@@ -28,6 +34,7 @@ const StockTransfersPage = () => {
       setAllTransfers(transfersRes.data.data);
       setBranches(branchesRes.data.data);
     } catch (error) {
+      console.log(error);
       toast.error("Failed to load transfer data.");
     } finally {
       setIsLoading(false);
@@ -37,6 +44,10 @@ const StockTransfersPage = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const handleFormChange = (fieldName, value) => {
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+  };
 
   const handleSave = async (formData) => {
     setIsSaving(true);
@@ -49,10 +60,30 @@ const StockTransfersPage = () => {
       fetchData();
       setIsModalOpen(false);
     } catch (err) {
+      console.log(err);
       /* handled by toast */
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleEditSerials = (item) => {
+    setSerialModalState({
+      isOpen: true,
+      itemKey: item.key,
+      variantId: item.productVariantId,
+      initialSelection: item.serials || [],
+    });
+  };
+
+  const handleSerialsConfirm = (selectedSerials) => {
+    handleFormChange(
+      "items",
+      formData.items.map((item) =>
+        item.key === serialModalState.itemKey ? { ...item, serials: selectedSerials } : item
+      )
+    );
+    setSerialModalState({ isOpen: false, itemKey: null, variantId: null, initialSelection: [] });
   };
 
   const filteredTransfers = useMemo(
@@ -83,10 +114,7 @@ const StockTransfersPage = () => {
           <Tabs.Trigger value="pending" className="px-4 py-2 ui-tabs-trigger">
             Pending ({filteredTransfers.pending.length})
           </Tabs.Trigger>
-          <Tabs.Trigger
-            value="in_transit"
-            className="px-4 py-2 ui-tabs-trigger"
-          >
+          <Tabs.Trigger value="in_transit" className="px-4 py-2 ui-tabs-trigger">
             In Transit ({filteredTransfers.in_transit.length})
           </Tabs.Trigger>
           <Tabs.Trigger value="completed" className="px-4 py-2 ui-tabs-trigger">
@@ -136,12 +164,25 @@ const StockTransfersPage = () => {
         title="Create New Stock Transfer Order"
       >
         <StockTransferForm
+          formData={formData}
+          onFormChange={handleFormChange}
           branches={branches}
           onSave={handleSave}
           onCancel={() => setIsModalOpen(false)}
           isSaving={isSaving}
+          onEditSerials={handleEditSerials}
         />
       </Modal>
+      {serialModalState.isOpen && (
+        <SerialSelectorModal
+          isOpen={true}
+          onClose={() => setSerialModalState({ isOpen: false, itemKey: null, variantId: null })}
+          onConfirm={handleSerialsConfirm} // This needs to be passed to the form to update its internal state
+          productVariantId={serialModalState.variantId}
+          branchId={formData.fromBranchId}
+          initialSelection={serialModalState.initialSelection}
+        />
+      )}
     </div>
   );
 };

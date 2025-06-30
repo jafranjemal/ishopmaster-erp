@@ -1,8 +1,9 @@
+const { default: mongoose } = require("mongoose");
 const asyncHandler = require("../../../../middleware/asyncHandler");
 
 // @desc    Get all product variants, with optional filtering
 // @route   GET /api/v1/tenant/inventory/products/variants
-exports.getAllVariants = asyncHandler(async (req, res, next) => {
+exports.getAllVariants_old = asyncHandler(async (req, res, next) => {
   const { ProductVariants } = req.models;
 
   let query = {};
@@ -24,6 +25,101 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: sortedVariants });
 });
 
+// @desc    Get all product variants with optional search, templateId, and server-side pagination
+// @route   GET /api/v1/tenant/inventory/products/variants?templateId=&search=&page=1&limit=20
+exports.getAllVariants = asyncHandler(async (req, res, next) => {
+  const { ProductVariants } = req.models;
+
+  // Parse query params safely
+  const templateId = req.query.templateId || null;
+  const search = req.query.search?.trim() || "";
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 20;
+  const skip = (page - 1) * limit;
+
+  // Build match stage
+  const matchStage = { isActive: true };
+
+  if (templateId) {
+    try {
+      matchStage.templateId = new mongoose.Types.ObjectId(templateId);
+    } catch {
+      return res.status(400).json({ success: false, error: "Invalid templateId format." });
+    }
+  }
+
+  if (search) {
+    const regex = new RegExp(search, "i");
+    matchStage.$or = [{ variantName: regex }, { sku: regex }, { barcode: regex }];
+  }
+
+  // Count total matching documents for pagination meta
+  const totalCountPipeline = [{ $match: matchStage }, { $count: "total" }];
+  const countResult = await ProductVariants.aggregate(totalCountPipeline);
+  const total = countResult[0]?.total || 0;
+
+  // Aggregation with pagination
+  const variants = await ProductVariants.aggregate([
+    { $match: matchStage },
+
+    // Non-serialized stock lookup
+    {
+      $lookup: {
+        from: "inventorylots",
+        localField: "_id",
+        foreignField: "productVariantId",
+        as: "lots",
+      },
+    },
+
+    // Serialized stock lookup
+    {
+      $lookup: {
+        from: "inventoryitems",
+        localField: "_id",
+        foreignField: "productVariantId",
+        pipeline: [{ $match: { status: "in_stock" } }],
+        as: "items",
+      },
+    },
+
+    // Add calculated stock
+    {
+      $addFields: {
+        quantityInStock: {
+          $add: [{ $sum: "$lots.quantityInStock" }, { $size: "$items" }],
+        },
+      },
+    },
+
+    // Clean response
+    {
+      $project: {
+        lots: 0,
+        items: 0,
+      },
+    },
+
+    // Sort by variant name
+    { $sort: { variantName: 1 } },
+
+    // Pagination
+    { $skip: skip },
+    { $limit: limit },
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: variants,
+    pagination: {
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit),
+    },
+  });
+});
+
 // @desc    Update a single product variant
 // @route   PUT /api/v1/tenant/inventory/products/variants/:id
 exports.updateVariant = asyncHandler(async (req, res, next) => {
@@ -32,15 +128,12 @@ exports.updateVariant = asyncHandler(async (req, res, next) => {
   const { sku, sellingPrice, costPrice, isActive } = req.body;
   const fieldsToUpdate = { sku, sellingPrice, costPrice, isActive };
 
-  const updatedVariant = await ProductVariants.findByIdAndUpdate(
-    req.params.id,
-    fieldsToUpdate,
-    { new: true, runValidators: true }
-  );
+  const updatedVariant = await ProductVariants.findByIdAndUpdate(req.params.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  });
   if (!updatedVariant)
-    return res
-      .status(404)
-      .json({ success: false, error: "Product Variant not found" });
+    return res.status(404).json({ success: false, error: "Product Variant not found" });
   res.status(200).json({ success: true, data: updatedVariant });
 });
 
@@ -72,9 +165,7 @@ exports.bulkUpdateVariants = asyncHandler(async (req, res, next) => {
   const { variants } = req.body; // Expect an array of variant objects
 
   if (!Array.isArray(variants) || variants.length === 0) {
-    return res
-      .status(400)
-      .json({ success: false, error: "An array of variants is required." });
+    return res.status(400).json({ success: false, error: "An array of variants is required." });
   }
 
   // Construct the array of update operations for bulkWrite
@@ -120,9 +211,7 @@ exports.getVariantById = asyncHandler(async (req, res, next) => {
   const variant = await ProductVariants.findById(req.params.id).lean();
 
   if (!variant) {
-    return res
-      .status(404)
-      .json({ success: false, error: "Product Variant not found" });
+    return res.status(404).json({ success: false, error: "Product Variant not found" });
   }
   res.status(200).json({ success: true, data: variant });
 });

@@ -1,8 +1,5 @@
 const asyncHandler = require("../../../middleware/asyncHandler"); // Import our new service
-const {
-  getTenantConnection,
-  getTenantModels,
-} = require("../../../services/database.service");
+const { getTenantConnection, getTenantModels } = require("../../../services/database.service");
 const Module = require("../modules/Module");
 const Tenant = require("./tenant.model");
 const Permission = require("../permissions/permission.model");
@@ -26,9 +23,7 @@ exports.createTenantOld = asyncHandler(async (req, res, next) => {
 
   // Step 2: Provision the new database for this tenant.
   try {
-    console.log(
-      `Attempting to provision database for tenant: ${tenant.companyName}`
-    );
+    console.log(`Attempting to provision database for tenant: ${tenant.companyName}`);
 
     // The act of creating a connection will implicitly create the DB in MongoDB.
     const tenantDbConnection = await getTenantConnection(tenant.dbName);
@@ -40,9 +35,7 @@ exports.createTenantOld = asyncHandler(async (req, res, next) => {
       throw new Error("Could not ping the newly created tenant database.");
     }
 
-    console.log(
-      `Database ${tenant.dbName} provisioned and connected successfully.`
-    );
+    console.log(`Database ${tenant.dbName} provisioned and connected successfully.`);
 
     // Once the connection is established, you could proceed to seed the database
     // with initial collections and data, like a 'users' collection with a default admin.
@@ -52,10 +45,7 @@ exports.createTenantOld = asyncHandler(async (req, res, next) => {
     // In later chapters, other services will manage connections for API requests.
     await tenantDbConnection.close();
   } catch (err) {
-    console.error(
-      `Failed to provision database for tenant ${tenant._id}. Rolling back.`,
-      err
-    );
+    console.error(`Failed to provision database for tenant ${tenant._id}. Rolling back.`, err);
     // This is a critical failure. Roll back the tenant creation to avoid an inconsistent state.
     await Tenant.findByIdAndDelete(tenant._id);
     // Pass a specific error to the error handler.
@@ -78,13 +68,10 @@ exports.createTenant = asyncHandler(async (req, res, next) => {
 
   // Basic validation
   if (!tenantInfo || !primaryBranch || !owner) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error:
-          "Request body must include tenantInfo, primaryBranch, and owner objects.",
-      });
+    return res.status(400).json({
+      success: false,
+      error: "Request body must include tenantInfo, primaryBranch, and owner objects.",
+    });
   }
 
   const dbName = `tenant_${tenantInfo.subdomain.replace(/-/g, "_")}`;
@@ -101,10 +88,9 @@ exports.createTenant = asyncHandler(async (req, res, next) => {
       // ➡️ Step 2: Delegate all seeding logic to the new service
 
       // First, create the primary branch within the transaction to get its ID
-      const [createdBranch] = await models.Branch.create(
-        [{ ...primaryBranch, isPrimary: true }],
-        { session }
-      );
+      const [createdBranch] = await models.Branch.create([{ ...primaryBranch, isPrimary: true }], {
+        session,
+      });
 
       // Pass the created branch ID to the owner data
       const ownerDataWithBranch = {
@@ -155,21 +141,15 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
   if (!tenantInfo || !primaryBranch || !owner) {
     return res.status(400).json({
       success: false,
-      error:
-        "Request body must include tenantInfo, primaryBranch, and owner objects.",
+      error: "Request body must include tenantInfo, primaryBranch, and owner objects.",
     });
   }
   if (!tenantInfo.enabledModules || !Array.isArray(tenantInfo.enabledModules)) {
-    return res
-      .status(400)
-      .json({ success: false, error: "enabledModules array is required." });
+    return res.status(400).json({ success: false, error: "enabledModules array is required." });
   }
 
   const existingTenant = await Tenant.findOne({
-    $or: [
-      { subdomain: tenantInfo.subdomain },
-      { companyName: tenantInfo.companyName },
-    ],
+    $or: [{ subdomain: tenantInfo.subdomain }, { companyName: tenantInfo.companyName }],
   });
   if (existingTenant) {
     return res.status(400).json({
@@ -192,10 +172,9 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
       await accountingService.seedDefaultAccounts(models, session);
 
       // 2. Create the Primary Branch
-      const branches = await models.Branch.create(
-        [{ ...primaryBranch, isPrimary: true }],
-        { session }
-      );
+      const branches = await models.Branch.create([{ ...primaryBranch, isPrimary: true }], {
+        session,
+      });
       const createdBranch = branches[0];
 
       // 3. Fetch master permissions list
@@ -214,22 +193,14 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
         {
           name: "Manager",
           description: "Manages most aspects of the shop.",
-          permissions: [
-            "inventory:product:view",
-            "sales:invoice:view_all",
-            "settings:user:manage",
-          ],
+          permissions: ["inventory:product:view", "sales:invoice:view_all", "settings:user:manage"],
           isDeletable: false,
           isSystemRole: true,
         },
         {
           name: "Cashier",
           description: "Performs sales and manages their shift.",
-          permissions: [
-            "sales:pos:access",
-            "sales:invoice:view_own",
-            "crm:customer:manage",
-          ],
+          permissions: ["sales:pos:access", "sales:invoice:view_own", "crm:customer:manage"],
           isDeletable: false,
           isSystemRole: true,
         },
@@ -243,8 +214,7 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
       });
       const adminRole = createdRoles.find((r) => r.name === "Super Admin");
 
-      if (!adminRole)
-        throw new Error("Could not find Super Admin role after seeding.");
+      if (!adminRole) throw new Error("Could not find Super Admin role after seeding.");
 
       // 5. Seed the Owner's user account
       // Using create with a single-item array is the correct syntax for transactions.
@@ -285,10 +255,10 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
         CATEGORY_MASTER_LIST.map((c) => ({ name: c.name })),
         { session, ordered: true }
       );
-      const createdAttributes = await models.Attribute.insertMany(
-        ATTRIBUTE_MASTER_LIST,
-        { session, ordered: true }
-      );
+      const createdAttributes = await models.Attribute.insertMany(ATTRIBUTE_MASTER_LIST, {
+        session,
+        ordered: true,
+      });
       const attributeIdMap = new Map();
       createdAttributes.forEach((attr) => {
         attributeIdMap.set(attr.key, attr._id);
@@ -297,14 +267,12 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
       const attributeSetsToCreate = ATTRIBUTE_SET_MASTER_LIST.map((set) => ({
         name: set.name,
         key: set.key || set.name.toLowerCase().replace(/\s+/g, "_"),
-        attributes: set.attributeKeys
-          .map((key) => attributeIdMap.get(key))
-          .filter(Boolean), // Look up IDs from the map
+        attributes: set.attributeKeys.map((key) => attributeIdMap.get(key)).filter(Boolean), // Look up IDs from the map
       }));
-      const createdAttributeSets = await models.AttributeSet.insertMany(
-        attributeSetsToCreate,
-        { session, ordered: true }
-      );
+      const createdAttributeSets = await models.AttributeSet.insertMany(attributeSetsToCreate, {
+        session,
+        ordered: true,
+      });
 
       const categoryUpdatePromises = [];
       const categoryMap = new Map(
@@ -315,8 +283,7 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
       );
       const attributeSetMap = new Map(
         createdAttributeSets.map((as) => [
-          ATTRIBUTE_SET_MASTER_LIST.find((asm) => asm.name === as.name)
-            .categoryKey,
+          ATTRIBUTE_SET_MASTER_LIST.find((asm) => asm.name === as.name).categoryKey,
           as._id,
         ])
       );
@@ -340,9 +307,7 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
     });
 
     session.endSession();
-    console.log(
-      `Tenant DB ${dbName} provisioned successfully within a transaction.`
-    );
+    console.log(`Tenant DB ${dbName} provisioned successfully within a transaction.`);
 
     // 6. ONLY after the tenant DB is successfully provisioned, create the tenant record in the Admin DB.
     newTenant = await Tenant.create({ ...tenantInfo, dbName });
@@ -353,10 +318,7 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
       message: "Tenant created and provisioned successfully.",
     });
   } catch (err) {
-    console.error(
-      `CRITICAL: Failed during provisioning. Full cleanup required.`,
-      err
-    );
+    console.error(`CRITICAL: Failed during provisioning. Full cleanup required.`, err);
 
     if (tenantDbConnection) {
       await tenantDbConnection.db.dropDatabase();
@@ -376,12 +338,42 @@ exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
 // @desc    Get all tenants
 // @route   GET /api/v1/tenants
 // @access  Private
+// @desc    Get all tenants with pagination and filtering
+// @route   GET /api/v1/admin/tenants
+// @access  Private (Super Admin)
+//
+
 exports.getAllTenants = asyncHandler(async (req, res, next) => {
-  const tenants = await Tenant.find({});
+  const { page = 1, limit = 25, isActive, searchTerm } = req.query;
+  const skip = (page - 1) * limit;
+
+  // Dynamically build the filter object based on query params
+  const filters = {};
+  if (isActive) {
+    filters.isActive = isActive === "true";
+  }
+  if (searchTerm) {
+    const regex = new RegExp(searchTerm, "i"); // Case-insensitive search
+    filters.$or = [{ companyName: regex }, { subdomain: regex }];
+  }
+
+  // Execute queries for data and total count in parallel for efficiency
+  const [tenants, total] = await Promise.all([
+    Tenant.find(filters).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
+    Tenant.countDocuments(filters),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
 
   res.status(200).json({
     success: true,
-    count: tenants.length,
+    total,
+    pagination: {
+      currentPage: Number(page),
+      totalPages,
+      limit: Number(limit),
+      count: tenants.length,
+    },
     data: tenants,
   });
 });
@@ -445,10 +437,7 @@ exports.deleteTenant = asyncHandler(async (req, res, next) => {
       message: `Tenant "${tenant.companyName}" and all associated data have been permanently deleted.`,
     });
   } catch (error) {
-    console.error(
-      `Failed to delete tenant database for ${tenant.companyName}:`,
-      error
-    );
+    console.error(`Failed to delete tenant database for ${tenant.companyName}:`, error);
     return res.status(500).json({
       success: false,
       error:
@@ -501,9 +490,7 @@ exports.updateTenantModules = asyncHandler(async (req, res, next) => {
 
   // Basic validation
   if (!Array.isArray(modules)) {
-    return res
-      .status(400)
-      .json({ success: false, error: "Modules must be provided as an array." });
+    return res.status(400).json({ success: false, error: "Modules must be provided as an array." });
   }
 
   // --- NEW VALIDATION STEP ---

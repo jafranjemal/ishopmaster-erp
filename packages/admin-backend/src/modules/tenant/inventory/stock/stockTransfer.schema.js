@@ -8,6 +8,12 @@ const transferItemSchema = new mongoose.Schema(
       required: true,
     },
     quantity: { type: Number, required: true, min: 1 },
+    // --- THE DEFINITIVE FIX ---
+    // This array will hold the specific serial numbers for serialized items.
+    serials: {
+      type: [String],
+      default: [],
+    },
   },
   { _id: false }
 );
@@ -44,9 +50,7 @@ const stockTransferSchema = new mongoose.Schema(
 
 stockTransferSchema.pre("validate", async function (next) {
   if (this.isNew) {
-    const lastTransfer = await this.constructor
-      .findOne()
-      .sort({ createdAt: -1 });
+    const lastTransfer = await this.constructor.findOne().sort({ createdAt: -1 });
     let lastNumber = 0;
     if (lastTransfer && lastTransfer.transferId) {
       lastNumber = parseInt(lastTransfer.transferId.split("-")[1]);
