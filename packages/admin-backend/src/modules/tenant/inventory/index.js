@@ -15,6 +15,10 @@ const stockTransferSchema = require("./stock/stockTransfer.schema");
 const stockRoutes = require("./stock/stock.routes"); // <-- 1. IMPORT NEW ROUTES
 const stockAdjustmentRoutes = require("./adjustments/stockAdjustment.routes"); // <-- 1. IMPORT NEW ROUTES
 const printRoutes = require("./print/print.routes"); // <-- IMPORT
+const deviceSchema = require("./devices/device.schema");
+const repairTypeSchema = require("./repairs/repairType.schema");
+const deviceRoutes = require("./devices/device.routes");
+const repairTypeRoutes = require("./repairs/repairType.routes");
 
 const mainRouter = express.Router();
 
@@ -25,12 +29,15 @@ mainRouter.use("/templates", productTemplateRoutes);
 // Create a sub-router for all product-catalog related items
 const productsRouter = express.Router();
 productsRouter.use("/templates", productTemplateRoutes);
-productsRouter.use("/variants", productVariantRoutes); // <-- 2. MOUNT NEW ROUTES
+productsRouter.use("/variants", productVariantRoutes);
 
 mainRouter.use("/products", productsRouter); // Mount the sub-router
-mainRouter.use("/stock", stockRoutes); // <-- 2. MOUNT NEW ROUTES
-mainRouter.use("/adjustments", stockAdjustmentRoutes); // <-- 2. MOUNT NEW ROUTES
+mainRouter.use("/stock", stockRoutes);
+mainRouter.use("/adjustments", stockAdjustmentRoutes);
 mainRouter.use("/print", printRoutes);
+mainRouter.use("/devices", deviceRoutes);
+mainRouter.use("/repairs", repairTypeRoutes);
+
 module.exports = {
   schemas: {
     ProductTemplates: productTemplateSchema,
@@ -40,8 +47,9 @@ module.exports = {
     InventoryLot: inventoryLotSchema,
     InventoryItem: inventoryItemSchema,
     StockMovement: stockMovementSchema,
-
+    Device: deviceSchema,
     StockTransfer: stockTransferSchema,
+    RepairType: repairTypeSchema,
   },
   router: mainRouter,
 };

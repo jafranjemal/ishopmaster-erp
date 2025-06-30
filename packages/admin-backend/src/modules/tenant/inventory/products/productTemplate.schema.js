@@ -5,6 +5,25 @@ const mongoose = require("mongoose");
  * e.g., "iPhone 15 Pro", "Anker PowerCore 10000 Battery".
  * It holds all information common to all its variations.
  */
+
+// --- NEW SUB-SCHEMA FOR BUNDLE ITEMS ---
+const bundleItemSchema = new mongoose.Schema(
+  {
+    productVariantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ProductVariants",
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: 1,
+      default: 1,
+    },
+  },
+  { _id: false }
+);
+
 const productTemplateSchema = new mongoose.Schema(
   {
     baseName: {
@@ -14,12 +33,12 @@ const productTemplateSchema = new mongoose.Schema(
       trim: true,
     },
     description: { type: String, trim: true },
-
+    bundleItems: [bundleItemSchema],
     brandId: { type: mongoose.Schema.Types.ObjectId, ref: "Brand" },
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      required: true,
+      required: false,
     },
 
     // The set of attributes that defines this product's variations (e.g., "Smartphone Specs")
@@ -34,9 +53,7 @@ const productTemplateSchema = new mongoose.Schema(
 
     // Defines which other products this product is compatible with.
     // Used for accessories and spare parts.
-    compatibility: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "ProductTemplates" },
-    ],
+    compatibility: [{ type: mongoose.Schema.Types.ObjectId, ref: "ProductTemplates" }],
 
     // General marketing images for the product family.
     images: [
@@ -67,5 +84,16 @@ const productTemplateSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Add a validator to ensure bundleItems only exists for bundle-type products
+productTemplateSchema.pre("validate", function (next) {
+  if (this.type !== "bundle" && this.bundleItems.length > 0) {
+    this.bundleItems = []; // Clear bundle items if not a bundle type
+  }
+  if (this.type === "bundle" && this.bundleItems.length === 0) {
+    // We will handle this validation more gracefully in the service/controller layer upon save
+  }
+  next();
+});
 
 module.exports = productTemplateSchema;

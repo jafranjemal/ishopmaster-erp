@@ -12,6 +12,18 @@ const productVariantSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    // For service-type products, these fields link them to specific models and repairs.
+    deviceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Device",
+      default: null,
+    },
+    repairTypeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RepairType",
+      default: null,
+    },
+
     // The full, generated name for display purposes, e.g., "iPhone 15 Pro - 256GB - Blue"
     variantName: { type: String, required: true },
 

@@ -20,7 +20,8 @@ const categorySchema = new mongoose.Schema(
     parentCategory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      default: null,
+      default: null, // A null parent means it's a top-level category
+      index: true,
     },
   },
   { timestamps: true }
