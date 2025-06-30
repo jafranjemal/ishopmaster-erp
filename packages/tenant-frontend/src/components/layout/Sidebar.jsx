@@ -45,6 +45,7 @@ import {
   ClipboardCheck,
   Building,
   Clock,
+  Combine,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -88,6 +89,8 @@ const Sidebar = () => {
           icon: Package,
           permission: "inventory:product:view",
         },
+        { name: "Kitting & Assembly", href: "/inventory/assembly", icon: Combine, permission: "inventory:assembly:create" },
+
         {
           name: t("sidebar.sub_menu.stock_levels"),
           href: "/inventory/stock-levels",

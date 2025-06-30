@@ -32,18 +32,16 @@ exports.updateRepairType = asyncHandler(async (req, res, next) => {
 // @desc    Delete a repair type
 // @route   DELETE /api/v1/tenant/inventory/repairs/:id
 exports.deleteRepairType = asyncHandler(async (req, res, next) => {
-  const { RepairType, ProductVariant } = req.models;
+  const { RepairType, ProductVariants } = req.models;
   const repairTypeId = req.params.id;
 
   // Integrity Check
-  const variantCount = await ProductVariant.countDocuments({ repairTypeId: repairTypeId });
+  const variantCount = await ProductVariants.countDocuments({ repairTypeId: repairTypeId });
   if (variantCount > 0) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error: `Cannot delete. This repair type is linked to ${variantCount} service(s).`,
-      });
+    return res.status(400).json({
+      success: false,
+      error: `Cannot delete. This repair type is linked to ${variantCount} service(s).`,
+    });
   }
 
   const repairType = await RepairType.findByIdAndDelete(repairTypeId);

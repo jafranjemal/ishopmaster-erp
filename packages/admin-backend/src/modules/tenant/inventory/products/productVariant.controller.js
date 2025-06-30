@@ -27,8 +27,10 @@ exports.getAllVariants_old = asyncHandler(async (req, res, next) => {
 
 // @desc    Get all product variants with optional search, templateId, and server-side pagination
 // @route   GET /api/v1/tenant/inventory/products/variants?templateId=&search=&page=1&limit=20
+
 exports.getAllVariants = asyncHandler(async (req, res, next) => {
   const { ProductVariants } = req.models;
+  const mongoose = require("mongoose");
 
   // Parse query params safely
   const templateId = req.query.templateId || null;
@@ -58,11 +60,11 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
   const countResult = await ProductVariants.aggregate(totalCountPipeline);
   const total = countResult[0]?.total || 0;
 
-  // Aggregation with pagination
+  // Main aggregation with deep bundleItems population
   const variants = await ProductVariants.aggregate([
     { $match: matchStage },
 
-    // Non-serialized stock lookup
+    // Lookup inventory lots (non-serialized stock)
     {
       $lookup: {
         from: "inventorylots",
@@ -72,7 +74,7 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
       },
     },
 
-    // Serialized stock lookup
+    // Lookup inventory items (serialized stock)
     {
       $lookup: {
         from: "inventoryitems",
@@ -83,7 +85,7 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
       },
     },
 
-    // Add calculated stock
+    // Add calculated stock quantity
     {
       $addFields: {
         quantityInStock: {
@@ -92,7 +94,70 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
       },
     },
 
-    // Clean response
+    // --- Template Lookup with deep bundleItems.productVariantId population ---
+    {
+      $lookup: {
+        from: "producttemplates",
+        localField: "templateId",
+        foreignField: "_id",
+        pipeline: [
+          // Step 1: Lookup bundleItems.productVariantId (variants)
+          {
+            $lookup: {
+              from: "productvariants",
+              localField: "bundleItems.productVariantId",
+              foreignField: "_id",
+              pipeline: [
+                // Step 2: For each variant, lookup its templateId with only _id and type
+                {
+                  $lookup: {
+                    from: "producttemplates",
+                    localField: "templateId",
+                    foreignField: "_id",
+                    pipeline: [{ $project: { _id: 1, type: 1 } }],
+                    as: "templateId",
+                  },
+                },
+                {
+                  $unwind: {
+                    path: "$templateId",
+                    preserveNullAndEmptyArrays: true,
+                  },
+                },
+              ],
+              as: "bundleItemsVariants",
+            },
+          },
+          // Step 3: Merge bundleItems array with populated bundleItemsVariants array by index
+          {
+            $addFields: {
+              bundleItems: {
+                $map: {
+                  input: { $range: [0, { $size: "$bundleItems" }] },
+                  as: "idx",
+                  in: {
+                    $mergeObjects: [
+                      { $arrayElemAt: ["$bundleItems", "$$idx"] },
+                      { $arrayElemAt: ["$bundleItemsVariants", "$$idx"] },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          { $project: { bundleItemsVariants: 0 } },
+        ],
+        as: "templateId",
+      },
+    },
+    {
+      $unwind: {
+        path: "$templateId",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+
+    // Remove intermediate arrays from response
     {
       $project: {
         lots: 0,
@@ -100,7 +165,7 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
       },
     },
 
-    // Sort by variant name
+    // Sort by variantName ascending
     { $sort: { variantName: 1 } },
 
     // Pagination
@@ -153,7 +218,11 @@ exports.searchVariants = asyncHandler(async (req, res, next) => {
     $or: [{ variantName: { $regex: regex } }, { sku: { $regex: regex } }],
   };
 
-  const variants = await ProductVariants.find(query).limit(10).lean();
+  const variants = await ProductVariants.find(query)
+    .limit(10)
+    .populate("templateId", "type name")
+    .lean();
+  console.log({ variants });
   res.status(200).json({ success: true, data: variants });
 });
 

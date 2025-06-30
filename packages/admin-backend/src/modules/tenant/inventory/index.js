@@ -19,6 +19,7 @@ const deviceSchema = require("./devices/device.schema");
 const repairTypeSchema = require("./repairs/repairType.schema");
 const deviceRoutes = require("./devices/device.routes");
 const repairTypeRoutes = require("./repairs/repairType.routes");
+const assemblyRoutes = require("./assemblies/assembly.routes"); // <-- 1. IMPORT NEW ROUTES
 
 const mainRouter = express.Router();
 
@@ -37,6 +38,7 @@ mainRouter.use("/adjustments", stockAdjustmentRoutes);
 mainRouter.use("/print", printRoutes);
 mainRouter.use("/devices", deviceRoutes);
 mainRouter.use("/repairs", repairTypeRoutes);
+mainRouter.use("/assemblies", assemblyRoutes);
 
 module.exports = {
   schemas: {

@@ -277,7 +277,7 @@ exports.getTemplatesSummary = asyncHandler(async (req, res, next) => {
 
 // @desc    Create a new product template
 exports.createTemplate = asyncHandler(async (req, res, next) => {
-  const { ProductTemplates } = req.models;
+  const { ProductTemplates, ProductVariants } = req.models;
   const templateData = req.body;
 
   // --- THE FIX: Conditional Validation Logic ---
@@ -295,6 +295,12 @@ exports.createTemplate = asyncHandler(async (req, res, next) => {
   if (templateData.categoryId === "") templateData.categoryId = null;
 
   const newTemplate = await ProductTemplates.create(templateData);
+
+  // --- THE DEFINITIVE FIX: DELEGATE TO THE MODEL'S STATIC METHOD ---
+  // The controller's job is just to orchestrate.
+  await ProductVariants.createDefaultVariant(newTemplate);
+  // --- END OF FIX ---
+
   res.status(201).json({ success: true, data: newTemplate });
 });
 

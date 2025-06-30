@@ -59,4 +59,24 @@ const productVariantSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+/**
+ * @desc When a new ProductTemplate is created, if it's a 'bundle' or 'service'
+ * (i.e., it has no attributeSetId), this static method should be called to
+ * automatically create its single, default ProductVariants.
+ */
+productVariantSchema.statics.createDefaultVariant = async function (template) {
+  if (template.type === "bundle" || template.type === "service") {
+    console.log(`Creating default variant for ${template.type}: ${template.baseName}`);
+    return this.create({
+      templateId: template._id, // Correct field name
+      variantName: template.baseName,
+      sku: template.skuPrefix || `${template.type.substring(0, 4).toUpperCase()}-${Date.now()}`,
+      attributes: new Map(), // Bundles/services have no attributes
+      costPrice: template.costPrice || 0,
+      sellingPrice: template.sellingPrice || 0,
+    });
+  }
+  return null; // Return null if no action was taken
+};
+
 module.exports = productVariantSchema;

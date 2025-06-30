@@ -52,18 +52,16 @@ exports.updateDevice = asyncHandler(async (req, res, next) => {
 // @desc    Delete a device
 // @route   DELETE /api/v1/tenant/inventory/devices/:id
 exports.deleteDevice = asyncHandler(async (req, res, next) => {
-  const { Device, ProductVariant } = req.models;
+  const { Device, ProductVariants } = req.models;
   const deviceId = req.params.id;
 
   // Integrity Check: Prevent deleting if any product variant is linked to this device
-  const variantCount = await ProductVariant.countDocuments({ deviceId: deviceId });
+  const variantCount = await ProductVariants.countDocuments({ deviceId: deviceId });
   if (variantCount > 0) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error: `Cannot delete. This device is linked to ${variantCount} product(s) or service(s).`,
-      });
+    return res.status(400).json({
+      success: false,
+      error: `Cannot delete. This device is linked to ${variantCount} product(s) or service(s).`,
+    });
   }
 
   const device = await Device.findByIdAndDelete(deviceId);

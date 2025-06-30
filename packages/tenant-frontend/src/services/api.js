@@ -855,4 +855,14 @@ export const tenantShiftService = {
   getHistory: async (params) => api.get("/tenant/sales/shifts/history", { params }),
 };
 
+export const tenantAssemblyService = {
+  /**
+   * Creates a new assembly job.
+   * @param {object} assemblyData - The data for the assembly job.
+   */
+  create: async (assemblyData) => {
+    return api.post("/tenant/inventory/assemblies", assemblyData);
+  },
+};
+
 export default api;

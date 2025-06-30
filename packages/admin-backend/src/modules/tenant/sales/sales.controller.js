@@ -25,3 +25,56 @@ exports.createSale = asyncHandler(async (req, res, next) => {
     session.endSession();
   }
 });
+
+// @desc    Save a sale as a draft
+// @route   POST /api/v1/tenant/sales/drafts
+exports.createDraft = asyncHandler(async (req, res, next) => {
+  const draft = await salesService.createQuoteOrDraft(req.models, {
+    ...req.body,
+    status: "draft",
+    userId: req.user._id,
+    branchId: req.user.assignedBranchId,
+  });
+  res.status(201).json({ success: true, data: draft });
+});
+
+// @desc    Save a sale as a quotation
+// @route   POST /api/v1/tenant/sales/quotations
+exports.createQuotation = asyncHandler(async (req, res, next) => {
+  const quote = await salesService.createQuoteOrDraft(req.models, {
+    ...req.body,
+    status: "quotation",
+    userId: req.user._id,
+    branchId: req.user.assignedBranchId,
+  });
+  res.status(201).json({ success: true, data: quote });
+});
+
+// @desc    Get all sales currently on hold for the user's branch
+// @route   GET /api/v1/tenant/sales/held
+exports.getHeldSales = asyncHandler(async (req, res, next) => {
+  const { SalesInvoice } = req.models;
+  const heldSales = await SalesInvoice.find({
+    branchId: req.user.assignedBranchId,
+    status: "on_hold",
+  }).populate("customerId", "name");
+  res.status(200).json({ success: true, data: heldSales });
+});
+
+// @desc    Update a sale's status (e.g., to 'on_hold' or back to 'draft')
+// @route   PATCH /api/v1/tenant/sales/:id/status
+exports.updateSaleStatus = asyncHandler(async (req, res, next) => {
+  const { SalesInvoice } = req.models;
+  const { status, holdReason } = req.body;
+  const sale = await SalesInvoice.findById(req.params.id);
+
+  if (!sale) return res.status(404).json({ success: false, error: "Sale not found." });
+
+  // Add business logic validation here, e.g., only a 'draft' can be put 'on_hold'
+
+  sale.status = status;
+  if (holdReason) sale.holdReason = holdReason;
+
+  await sale.save();
+  res.status(200).json({ success: true, data: sale });
+});

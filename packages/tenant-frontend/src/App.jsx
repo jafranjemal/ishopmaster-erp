@@ -48,6 +48,7 @@ import PrintHubPage from "./pages/inventory/PrintHubPage";
 import MyProfilePage from "./pages/settings/MyProfilePage";
 import ShiftManagementPage from "./pages/pos/ShiftManagementPage";
 import PosPage from "./pages/pos/PosPage";
+import AssemblyPage from "./pages/inventory/AssemblyPage";
 function App() {
   return (
     <>
@@ -68,10 +69,9 @@ function App() {
                   <Route path="/" element={<DashboardPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   {/* --- INVENTORY ROUTES --- */}
-                  {/* ➡️ Step 3 */}
                   <Route path="/inventory/products" element={<ProductTemplatesPage />} />
                   <Route path="/inventory/products/templates/:id" element={<ProductTemplateDetailPage />} />
-                  {/* This route is for the detail page we already built */}
+                  <Route path="/inventory/assembly" element={<AssemblyPage />} />
                   <Route path="/inventory/products/templates/:id" element={<ProductTemplateDetailPage />} />
                   {/* Settings Module Routes */}
                   <Route path="/settings/locations" element={<LocationsPage />} />

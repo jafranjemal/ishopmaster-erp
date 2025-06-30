@@ -111,7 +111,7 @@ class InventoryService {
         path: "templateId",
         populate: {
           path: "bundleItems.productVariantId",
-          model: "ProductVariant",
+          model: "ProductVariants",
         },
       })
       .lean();

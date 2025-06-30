@@ -2,30 +2,23 @@ const mongoose = require("mongoose");
 
 /**
  * Defines a single line item within a Sales Invoice.
- * This is the core record for profit calculation.
  */
 const saleItemSchema = new mongoose.Schema(
   {
     productVariantId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ProductVariant",
+      ref: "ProductVariants",
       required: true,
     },
-    description: { type: String, required: true }, // Denormalized for historical accuracy
+    description: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 },
-
-    // Pricing at the moment of sale
-    unitPrice: { type: Number, required: true }, // The "sticker price" before discounts
+    unitPrice: { type: Number, required: true },
     discount: {
       type: { type: String, enum: ["percentage", "fixed"] },
       value: { type: Number },
     },
-    finalPrice: { type: Number, required: true }, // The final price for this line item after discounts
-
-    // Costing for profitability reporting
+    finalPrice: { type: Number, required: true },
     costPriceInBaseCurrency: { type: Number, required: true },
-
-    // Audit trail link back to the physical stock
     inventoryLotId: { type: mongoose.Schema.Types.ObjectId, ref: "InventoryLot" },
     inventoryItemId: { type: mongoose.Schema.Types.ObjectId, ref: "InventoryItem" },
   },
@@ -33,7 +26,7 @@ const saleItemSchema = new mongoose.Schema(
 );
 
 /**
- * Defines the main Sales Invoice document.
+ * Defines the main Sales Invoice document, now upgraded for advanced workflows.
  */
 const salesInvoiceSchema = new mongoose.Schema(
   {
@@ -41,19 +34,48 @@ const salesInvoiceSchema = new mongoose.Schema(
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
 
+    // --- UPGRADED STATUS ENUM ---
     status: {
       type: String,
       required: true,
-      enum: ["draft", "completed", "partially_refunded", "fully_refunded", "cancelled"],
-      default: "completed",
+      enum: [
+        "draft",
+        "on_hold",
+        "quotation",
+        "completed",
+        "partially_refunded",
+        "fully_refunded",
+        "cancelled",
+      ],
+      default: "draft",
+      index: true,
     },
+
+    // --- NEW FIELDS FOR ADVANCED WORKFLOWS ---
+    type: {
+      type: String,
+      required: true,
+      enum: ["direct_sale", "quotation_sale"],
+      default: "direct_sale",
+    },
+    expiryDate: {
+      // Primarily for quotations
+      type: Date,
+    },
+    holdReason: {
+      // For putting sales on hold
+      type: String,
+      trim: true,
+    },
+    // --- END OF NEW FIELDS ---
+
     items: [saleItemSchema],
 
     // Financial Totals
-    subTotal: { type: Number, required: true }, // Sum of (unitPrice * quantity)
+    subTotal: { type: Number, required: true },
     totalDiscount: { type: Number, default: 0 },
     totalTax: { type: Number, default: 0 },
-    totalAmount: { type: Number, required: true }, // Final amount charged
+    totalAmount: { type: Number, required: true },
 
     // Link to payments
     amountPaid: { type: Number, default: 0 },
