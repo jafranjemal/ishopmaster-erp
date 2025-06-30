@@ -49,6 +49,10 @@ import MyProfilePage from "./pages/settings/MyProfilePage";
 import ShiftManagementPage from "./pages/pos/ShiftManagementPage";
 import PosPage from "./pages/pos/PosPage";
 import AssemblyPage from "./pages/inventory/AssemblyPage";
+import RepairTicketIntakePage from "./pages/service/RepairTicketIntakePage";
+import ServiceKanbanPage from "./pages/service/ServiceKanbanPage";
+import RepairTicketDetailPage from "./pages/service/RepairTicketDetailPage";
+
 function App() {
   return (
     <>
@@ -119,6 +123,10 @@ function App() {
                   {/* POS */}
                   <Route path="/pos" element={<PosPage />} />
                   <Route path="/shifts" element={<ShiftManagementPage />} /> {/* <-- 2. ADD THE NEW ROUTE */}
+                  {/* SERVICE */}
+                  <Route path="/service/dashboard" element={<ServiceKanbanPage />} />
+                  <Route path="/service/tickets/new" element={<RepairTicketIntakePage />} />
+                  <Route path="/service/tickets/:id" element={<RepairTicketDetailPage />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

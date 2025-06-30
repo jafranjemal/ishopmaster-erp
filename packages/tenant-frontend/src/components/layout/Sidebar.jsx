@@ -46,6 +46,8 @@ import {
   Building,
   Clock,
   Combine,
+  FilePlus2,
+  Hammer,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -152,17 +154,13 @@ const Sidebar = () => {
       ],
     },
     {
-      name: t("sidebar.service"),
-      href: "/service",
-      icon: Wrench,
-      permission: "service:ticket:view",
+      name: t("sidebar.service_parent"), // e.g., "Service & Repairs"
+      href: "/service/dashboard",
+      icon: Hammer,
+      permission: "service:ticket:view", // A general permission for the module
       children: [
-        {
-          name: t("sidebar.sub_menu.tickets"),
-          href: "/service/tickets",
-          icon: Ticket,
-          permission: "service:ticket:create",
-        },
+        { name: t("sidebar.sub_menu.service_dashboard"), icon: LayoutDashboard, href: "/service/dashboard", permission: "service:ticket:view" },
+        { name: t("sidebar.sub_menu.new_repair_ticket"), icon: FilePlus2, href: "/service/tickets/new", permission: "service:ticket:create" },
       ],
     },
     {

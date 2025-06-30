@@ -865,4 +865,13 @@ export const tenantAssemblyService = {
   },
 };
 
+export const tenantRepairService = {
+  getAll: async (params) => api.get("/tenant/service/tickets", { params }),
+  getById: async (ticketId) => api.get(`/tenant/service/tickets/${ticketId}`),
+  createTicket: async (ticketData) => api.post("/tenant/service/tickets", ticketData),
+  updateTicketStatus: async (ticketId, statusData) => api.patch(`/tenant/service/tickets/${ticketId}/status`, statusData),
+  addItemToJobSheet: async (ticketId, itemData) => api.post(`/tenant/service/tickets/${ticketId}/jobsheet`, itemData),
+  removeJobSheetItem: async (ticketId, itemId) => api.delete(`/tenant/service/tickets/${ticketId}/jobsheet/${itemId}`),
+};
+
 export default api;

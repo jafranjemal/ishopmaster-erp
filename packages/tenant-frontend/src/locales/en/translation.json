@@ -24,6 +24,7 @@
   "sidebar": {
     "dashboard": "Dashboard",
     "pos_parent": "Point of Sale",
+    "service_parent": "Service",
 
     "inventory": "Inventory",
     "procurement": "Procurement",
@@ -33,6 +34,8 @@
     "reports": "Reports",
     "settings": "Settings",
     "sub_menu": {
+      "service_dashboard": "Service Dashboard",
+      "new_repair_ticket": "New Repair Ticket",
       "products": "Products",
       "adjustments": "Stock Adjustments",
       "transfers": "Stock Transfers",

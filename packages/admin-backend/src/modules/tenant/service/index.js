@@ -3,7 +3,7 @@ const repairRoutes = require("./repair.routes");
 
 const express = require("express");
 const mainRoute = express.Router();
-mainRoute.use("/service", repairRoutes);
+mainRoute.use("/tickets", repairRoutes);
 module.exports = {
   schemas: {
     RepairTicket: repairTicketSchema,
