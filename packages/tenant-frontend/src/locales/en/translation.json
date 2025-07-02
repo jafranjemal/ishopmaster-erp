@@ -25,7 +25,7 @@
     "dashboard": "Dashboard",
     "pos_parent": "Point of Sale",
     "service_parent": "Service",
-
+    "hr_parent": "Human Resources",
     "inventory": "Inventory",
     "procurement": "Procurement",
     "service": "Service",
@@ -34,6 +34,8 @@
     "reports": "Reports",
     "settings": "Settings",
     "sub_menu": {
+      "payroll": "Payroll",
+      "employees": "Employees",
       "service_dashboard": "Service Dashboard",
       "new_repair_ticket": "New Repair Ticket",
       "products": "Products",

@@ -64,6 +64,14 @@ const DEFAULT_ACCOUNTS_LIST = [
       "Money the business owes to its suppliers for approved and invoiced goods or services.",
   },
   {
+    name: "Salaries Payable",
+    code: "2300", // Use next available code in 2000-2999 range
+    type: "Liability",
+    subType: "Current Liability",
+    isSystemAccount: true,
+    description: "Tracks salaries owed to employees that are accrued but not yet paid.",
+  },
+  {
     name: "Cheques Payable",
     code: "2200",
     type: "Liability",
@@ -99,8 +107,7 @@ const DEFAULT_ACCOUNTS_LIST = [
     type: "Equity",
     subType: "Capital",
     isSystemAccount: true,
-    description:
-      "Initial investment and subsequent capital contributions by the owner.",
+    description: "Initial investment and subsequent capital contributions by the owner.",
   },
   {
     name: "Owner's Drawings",
@@ -108,8 +115,7 @@ const DEFAULT_ACCOUNTS_LIST = [
     type: "Equity",
     subType: "Drawings",
     isSystemAccount: true,
-    description:
-      "Funds the owner withdraws from the business for personal use.",
+    description: "Funds the owner withdraws from the business for personal use.",
   },
   {
     name: "Retained Earnings",
@@ -155,8 +161,7 @@ const DEFAULT_ACCOUNTS_LIST = [
     type: "Revenue",
     subType: "Contra Revenue",
     isSystemAccount: true,
-    description:
-      "A contra-revenue account to track returns from customers. Reduces total revenue.",
+    description: "A contra-revenue account to track returns from customers. Reduces total revenue.",
   },
 
   //======================================================================
@@ -182,13 +187,12 @@ const DEFAULT_ACCOUNTS_LIST = [
   },
   // --- Operating Expenses (The costs of running the business) ---
   {
-    name: "Salaries & Wages",
+    name: "Salaries Expense",
     code: "6100",
     type: "Expense",
     subType: "Operating Expense",
     isSystemAccount: true,
-    description:
-      "Payments to all employees, including salaries, commissions, and benefits.",
+    description: "Payments to all employees, including salaries, commissions, and benefits.",
   },
   {
     name: "Rent Expense",
@@ -212,8 +216,7 @@ const DEFAULT_ACCOUNTS_LIST = [
     type: "Expense",
     subType: "Operating Expense",
     isSystemAccount: true,
-    description:
-      "Costs for promoting the business (e.g., social media ads, flyers).",
+    description: "Costs for promoting the business (e.g., social media ads, flyers).",
   },
   {
     name: "Bank Fees & Charges",
@@ -221,8 +224,7 @@ const DEFAULT_ACCOUNTS_LIST = [
     type: "Expense",
     subType: "Operating Expense",
     isSystemAccount: true,
-    description:
-      "Monthly fees, transaction fees, and other charges from the bank.",
+    description: "Monthly fees, transaction fees, and other charges from the bank.",
   },
   {
     name: "Repairs & Maintenance",
@@ -230,8 +232,7 @@ const DEFAULT_ACCOUNTS_LIST = [
     type: "Expense",
     subType: "Operating Expense",
     isSystemAccount: true,
-    description:
-      "Costs for maintaining shop equipment and fixtures (not for customer repairs).",
+    description: "Costs for maintaining shop equipment and fixtures (not for customer repairs).",
   },
 ];
 

@@ -6,7 +6,7 @@ const errorHandler = (err, req, res, next) => {
   console.error(err.stack);
 
   // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
+  if (err.name === "CastError") {
     const message = `Resource not found with id of ${err.value}`;
     return res.status(404).json({ success: false, error: message });
   }
@@ -19,14 +19,17 @@ const errorHandler = (err, req, res, next) => {
   }
 
   // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const message = Object.values(err.errors).map(val => val.message).join(', ');
+  if (err.name === "ValidationError") {
+    const message = Object.values(err.errors)
+      .map((val) => val.message)
+      .join(", ");
     return res.status(400).json({ success: false, error: message });
   }
 
   res.status(error.statusCode || 500).json({
     success: false,
-    error: error.message || 'Server Error',
+    error: error.message || "Server Error",
+    ...(error.errorCode && { errorCode: error.errorCode }),
   });
 };
 

@@ -1,5 +1,6 @@
 /**
  * Centralized utility module for data formatting in ERP or dashboard apps.
+ * filepath : packages/tenant-frontend/src/lib/formatter.js
  */
 
 /**
@@ -50,11 +51,7 @@ export const formatNumber = (num, digits = 1) => {
  * @param {number} digits - Decimal places (default 1)
  * @returns {string}
  */
-export const formatCurrencyCompact = (
-  amount,
-  currencyCode = "LKR",
-  digits = 1
-) => {
+export const formatCurrencyCompact = (amount, currencyCode = "LKR", digits = 1) => {
   const numericAmount = typeof amount === "number" ? amount : 0;
 
   if (numericAmount < 1000) {

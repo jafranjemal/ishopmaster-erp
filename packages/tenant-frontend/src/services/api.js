@@ -290,6 +290,20 @@ export const tenantCategoryService = {
   delete: async (id) => api.delete(`/tenant/inventory/categories/${id}`),
 };
 
+export const tenantDeviceService = {
+  getAll: async (params) => api.get("/tenant/inventory/devices", { params }),
+  create: async (data) => api.post("/tenant/inventory/devices", data),
+  update: async (id, data) => api.put(`/tenant/inventory/devices/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/inventory/devices/${id}`),
+};
+
+export const tenantRepairTypeService = {
+  getAll: async () => api.get("/tenant/inventory/repairs"),
+  create: async (data) => api.post("/tenant/inventory/repairs", data),
+  update: async (id, data) => api.put(`/tenant/inventory/repairs/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/inventory/repairs/${id}`),
+};
+
 export const tenantAttributeService = {
   // Methods for individual Attributes
   getAllAttributes: async () => api.get("/tenant/attributes"),
@@ -872,6 +886,74 @@ export const tenantRepairService = {
   updateTicketStatus: async (ticketId, statusData) => api.patch(`/tenant/service/tickets/${ticketId}/status`, statusData),
   addItemToJobSheet: async (ticketId, itemData) => api.post(`/tenant/service/tickets/${ticketId}/jobsheet`, itemData),
   removeJobSheetItem: async (ticketId, itemId) => api.delete(`/tenant/service/tickets/${ticketId}/jobsheet/${itemId}`),
+};
+
+export const tenantHrService = {
+  /**
+   * Fetches all employees with pagination, and a list of unassigned users.
+   * @param {object} params - e.g., { page, limit }
+   */
+  getAllEmployees: async (params) => {
+    return api.get("/tenant/hr/employees", { params });
+  },
+  getEmployeeById: async (id) => {
+    return api.get(`/tenant/hr/employees/${id}`);
+  },
+
+  /**
+   * Creates a new employee record.
+   * @param {object} employeeData - The data for the new employee.
+   */
+  createEmployee: async (employeeData) => {
+    return api.post("/tenant/hr/employees", employeeData);
+  },
+
+  /**
+   * Updates an existing employee's details.
+   * @param {string} id - The ID of the employee to update.
+   * @param {object} employeeData - The updated data.
+   */
+  updateEmployee: async (id, employeeData) => {
+    return api.put(`/tenant/hr/employees/${id}`, employeeData);
+  },
+
+  /**
+   * Deletes an employee record.
+   * @param {string} id - The ID of the employee to delete.
+   */
+  deleteEmployee: async (id) => {
+    return api.delete(`/tenant/hr/employees/${id}`);
+  },
+};
+
+export const tenantPayrollService = {
+  /**
+   * Triggers a payroll run for a specific date range.
+   * @param {object} dateRange - { startDate, endDate }
+   */
+  runPayroll: async (dateRange) => {
+    return api.post("/tenant/hr/payroll/run", dateRange);
+  },
+  getHistory: async (params) => {
+    return api.get("/tenant/hr/payroll/history", { params });
+  },
+  getRunById: async (runId) => {
+    return api.get(`/tenant/hr/payroll/history/${runId}`);
+  },
+  getPayslipById: async (payslipId) => {
+    return api.get(`/tenant/hr/payroll/payslips/${payslipId}`);
+  },
+  printRunById: async (runId) => {
+    // In a real implementation, this would expect a PDF blob.
+    // For now, it will get a JSON response.
+    return api.get(`/tenant/hr/payroll/history/${runId}/print`);
+    /*
+    // The definitive implementation will look like this:
+    return api.get(`/tenant/hr/payroll/history/${runId}/print`, {
+        responseType: 'blob', // Tell axios to expect a file
+    });
+    */
+  },
 };
 
 export default api;

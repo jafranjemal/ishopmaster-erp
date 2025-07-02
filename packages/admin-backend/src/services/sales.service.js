@@ -41,7 +41,7 @@ class SalesService {
     { cartData, paymentData, customerId, branchId, userId },
     baseCurrency
   ) {
-    const { SalesInvoice, Account, Customer } = models;
+    const { SalesInvoice, Account, Customer, Employee, Commission } = models;
 
     let totalCostOfGoodsSold = 0;
     const saleItems = [];
@@ -133,6 +133,26 @@ class SalesService {
       );
     }
 
+    // 5. Log commission if applicable
+    const employee = await Employee.findOne({ userId: userId });
+    if (
+      employee &&
+      employee.compensation.type === "commission_based" &&
+      employee.compensation.commissionRate > 0
+    ) {
+      const commissionAmount =
+        salesInvoice.totalAmount * (employee.compensation.commissionRate / 100);
+
+      await Commission.create([
+        {
+          employeeId: employee._id,
+          salesInvoiceId: salesInvoice._id,
+          commissionAmount: parseFloat(commissionAmount.toFixed(2)),
+          saleDate: salesInvoice.createdAt,
+          status: "pending",
+        },
+      ]);
+    }
     return salesInvoice;
   }
 }

@@ -52,6 +52,12 @@ import AssemblyPage from "./pages/inventory/AssemblyPage";
 import RepairTicketIntakePage from "./pages/service/RepairTicketIntakePage";
 import ServiceKanbanPage from "./pages/service/ServiceKanbanPage";
 import RepairTicketDetailPage from "./pages/service/RepairTicketDetailPage";
+import HierarchyManagementPage from "./pages/settings/hierarchy/HierarchyManagementPage";
+import EmployeesPage from "./pages/hr/EmployeesPage";
+import PayrollPage from "./pages/accounting/PayrollPage";
+import EmployeeDetailPage from "./pages/hr/EmployeeDetailPage";
+import PayrollRunDetailsPage from "./pages/hr/PayrollRunDetailsPage";
+import PayslipDetailPage from "./pages/hr/PayslipDetailPage";
 
 function App() {
   return (
@@ -127,6 +133,13 @@ function App() {
                   <Route path="/service/dashboard" element={<ServiceKanbanPage />} />
                   <Route path="/service/tickets/new" element={<RepairTicketIntakePage />} />
                   <Route path="/service/tickets/:id" element={<RepairTicketDetailPage />} />
+                  <Route path="/settings/product-hierarchy" element={<HierarchyManagementPage />} />
+                  {/* HR */}
+                  <Route path="/hr/employees" element={<EmployeesPage />} />
+                  <Route path="/hr/employees/:id" element={<EmployeeDetailPage />} />
+                  <Route path="/accounting/payroll" element={<PayrollPage />} />
+                  <Route path="/accounting/payroll/:id" element={<PayrollRunDetailsPage />} />
+                  <Route path="/accounting/payslips/:id" element={<PayslipDetailPage />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

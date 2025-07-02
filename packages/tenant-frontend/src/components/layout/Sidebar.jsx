@@ -48,6 +48,11 @@ import {
   Combine,
   FilePlus2,
   Hammer,
+  Network,
+  Plane,
+  CalendarCheck,
+  BadgeCheck,
+  FileCheck,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -178,6 +183,39 @@ const Sidebar = () => {
       ],
     },
     {
+      name: t("sidebar.hr_parent"), // e.g., "Human Resources"
+      href: "/hr/employees",
+      icon: Users, // 👤 Suitable for HR/People
+      permission: "hr:employee:view",
+      children: [
+        {
+          name: t("sidebar.sub_menu.employees"),
+          href: "/hr/employees",
+          icon: BadgeCheck, // ✅ Best for employee list/identity verification
+          permission: "hr:employee:view",
+        },
+        // Future features
+        {
+          name: "Attendance",
+          href: "/hr/attendance",
+          icon: CalendarCheck, // 📅 For check-in/out or time logs
+          permission: "hr:attendance:view",
+        },
+        {
+          name: "Leave Management",
+          href: "/hr/leave",
+          icon: Plane, // ✈️ For vacation/leave modules
+          permission: "hr:leave:view",
+        },
+        {
+          name: "Payroll",
+          href: "/hr/payroll",
+          icon: Wallet, // 💼 For salaries and compensation
+          permission: "hr:payroll:view",
+        },
+      ],
+    },
+    {
       name: t("sidebar.accounting"),
       href: "/accounting",
       icon: Landmark,
@@ -214,6 +252,7 @@ const Sidebar = () => {
           icon: SwatchBook,
           permission: "accounting:payment:view",
         },
+        { name: t("sidebar.sub_menu.payroll"), href: "/accounting/payroll", icon: FileCheck, permission: "hr:payroll:run" },
       ],
     },
     {
@@ -229,6 +268,7 @@ const Sidebar = () => {
       permission: "settings:access",
       children: [
         { name: "Company Profile", href: "/settings/company-profile", icon: Building, permission: "settings:company:manage" },
+        { name: "Product Hierarchy", href: "/settings/product-hierarchy", icon: Network, permission: "inventory:product:manage" },
 
         {
           name: t("sidebar.sub_menu.profile"),
