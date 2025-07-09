@@ -60,7 +60,7 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
 
   const handleConfirm = () => {
     const itemToPrint = {
-      ProductVariantsId: variant._id,
+      ProductVariantId: variant._id,
       variantName: variant.variantName,
       sku: variant.sku,
       isSerialized,
@@ -138,7 +138,7 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
           isOpen={isSerialSelectorOpen}
           onClose={() => setIsSerialSelectorOpen(false)}
           onConfirm={setSelectedSerials}
-          ProductVariantsId={variant._id}
+          ProductVariantId={variant._id}
           branchId={selectedBranchId} // <-- THE CRITICAL FIX
           initialSelection={selectedSerials}
         />

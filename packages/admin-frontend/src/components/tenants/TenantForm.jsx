@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import ModuleToggles from "./ModuleToggles";
 import { Button, Card, Input, Label } from "../../../../ui-library/src";
+import { Eye, EyeOff } from "lucide-react"; // optional icons if you're using Lucide
+
 // Adjust the import path based on your project structure
 // We import all our UI building blocks from the shared library
 
@@ -10,12 +12,7 @@ import { Button, Card, Input, Label } from "../../../../ui-library/src";
  * @param {object} [props.tenantToEdit] - If provided, the form will be in "Edit" mode.
  * @param {Function} props.onComplete - A callback function to run after a successful submission (e.g., to close a modal and refetch data).
  */
-const TenantForm = ({
-  tenantToEdit,
-  availableModules = [],
-  onSave,
-  onCancel,
-}) => {
+const TenantForm = ({ tenantToEdit, availableModules = [], onSave, onCancel }) => {
   const initialFormData = React.useMemo(
     () => ({
       // companyName: "",
@@ -37,6 +34,8 @@ const TenantForm = ({
     []
   );
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const [formData, setFormData] = useState(initialFormData);
   const [isSaving, setIsSaving] = useState(false);
   const isEditMode = Boolean(tenantToEdit);
@@ -47,9 +46,7 @@ const TenantForm = ({
         tenantInfo: {
           companyName: tenantToEdit.companyName || "",
           subdomain: tenantToEdit.subdomain || "",
-          licenseExpiry: tenantToEdit.licenseExpiry
-            ? new Date(tenantToEdit.licenseExpiry).toISOString().split("T")[0]
-            : "",
+          licenseExpiry: tenantToEdit.licenseExpiry ? new Date(tenantToEdit.licenseExpiry).toISOString().split("T")[0] : "",
           enabledModules: tenantToEdit.enabledModules || [],
         },
         primaryBranch: {}, // Not editable here
@@ -107,12 +104,7 @@ const TenantForm = ({
               <h3 className="font-semibold text-lg">1. Company Details</h3>
               <div>
                 <Label>Company Name</Label>
-                <Input
-                  name="tenantInfo.companyName"
-                  value={formData.tenantInfo.companyName}
-                  onChange={handleChange}
-                  required
-                />
+                <Input name="tenantInfo.companyName" value={formData.tenantInfo.companyName} onChange={handleChange} required />
               </div>
               <div>
                 <Label>Subdomain</Label>
@@ -137,13 +129,7 @@ const TenantForm = ({
               </div>
               <div>
                 <Label>License Expiry</Label>
-                <Input
-                  name="tenantInfo.licenseExpiry"
-                  type="date"
-                  value={formData.tenantInfo.licenseExpiry}
-                  onChange={handleChange}
-                  required
-                />
+                <Input name="tenantInfo.licenseExpiry" type="date" value={formData.tenantInfo.licenseExpiry} onChange={handleChange} required />
               </div>
               <ModuleToggles
                 selectedModules={formData.tenantInfo.enabledModules}
@@ -159,9 +145,7 @@ const TenantForm = ({
             <>
               <Card>
                 <div className="p-6 space-y-4">
-                  <h3 className="font-semibold text-lg">
-                    2. Primary Branch Information
-                  </h3>
+                  <h3 className="font-semibold text-lg">2. Primary Branch Information</h3>
                   <div>
                     <Label>Branch Name</Label>
                     <Input
@@ -191,33 +175,31 @@ const TenantForm = ({
                   <h3 className="font-semibold text-lg">3. Owner Account</h3>
                   <div>
                     <Label>Owner Full Name</Label>
-                    <Input
-                      name="owner.name"
-                      value={formData.owner.name}
-                      onChange={handleChange}
-                      required
-                    />
+                    <Input name="owner.name" value={formData.owner.name} onChange={handleChange} required />
                   </div>
                   <div>
                     <Label>Owner Email</Label>
-                    <Input
-                      name="owner.email"
-                      type="email"
-                      value={formData.owner.email}
-                      onChange={handleChange}
-                      required
-                    />
+                    <Input name="owner.email" type="email" value={formData.owner.email} onChange={handleChange} required />
                   </div>
-                  <div>
+                  <div className="relative">
                     <Label>Password</Label>
                     <Input
                       name="owner.password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       value={formData.owner.password}
                       onChange={handleChange}
                       required
                       minLength="6"
+                      className="pr-10" // Add space for the icon/button
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-2 top-8 text-slate-400 hover:text-white"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                 </div>
               </Card>
@@ -231,13 +213,7 @@ const TenantForm = ({
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" disabled={isSaving}>
-          {isSaving
-            ? "Saving..."
-            : isEditMode
-            ? "Save Changes"
-            : "Create Tenant"}
-        </Button>
+        <Button type="submit">{isSaving ? "Saving..." : isEditMode ? "Save Changes" : "Create Tenant"}</Button>
       </div>
     </form>
   );

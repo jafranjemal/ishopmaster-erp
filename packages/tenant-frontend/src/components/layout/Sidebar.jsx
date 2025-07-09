@@ -30,6 +30,7 @@ import {
   Building2,
   KeyRound,
   Printer,
+  Gift,
   Tags,
   Plug,
   FileMinus,
@@ -81,13 +82,12 @@ const Sidebar = () => {
 
     {
       name: t("sidebar.pos_parent"), // e.g., "Point of Sale"
-      href: "/pos",
+      href: "/pos/shifts",
       icon: ShoppingCart,
       permission: "sales:pos:access",
       children: [
-        { name: t("sidebar.sub_menu.pos_terminal"), href: "/pos", icon: ShoppingCart, permission: "sales:pos:access" },
-        // --- ADD THE NEW LINK TO THE SUB-MENU ---
-        { name: t("sidebar.sub_menu.shifts"), href: "/shifts", icon: Clock, permission: "sales:pos:access" },
+        { name: t("sidebar.sub_menu.pos_terminal"), href: "/pos/shifts", icon: ShoppingCart, permission: "sales:pos:access" },
+        // Future links like Sales History will go here
       ],
     },
     {
@@ -373,6 +373,7 @@ const Sidebar = () => {
             },
           ],
         },
+        { name: "Benefits Setup", href: "/settings/benefits", icon: Gift, permission: "hr:benefits:manage" },
         { name: "Pricing & Promotions", href: "/settings/pricing", icon: Tags, permission: "sales:pricing:manage" },
 
         {

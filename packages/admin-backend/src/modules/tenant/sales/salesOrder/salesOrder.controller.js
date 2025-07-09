@@ -32,6 +32,7 @@ exports.createOrderFromOpportunity = asyncHandler(async (req, res, next) => {
         {
           opportunityId: req.params.opportunityId,
           userId: req.user._id,
+          user: req.user,
         },
         session
       );

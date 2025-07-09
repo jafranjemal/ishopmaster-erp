@@ -36,8 +36,8 @@ const StockAdjustmentHistoryList = ({ adjustments }) => {
             <TableRow key={adj._id}>
               <TableCell>{formatDate(adj.createdAt)}</TableCell>
               <TableCell>
-                <div className="font-medium">{adj.ProductVariantsId?.variantName || "N/A"}</div>
-                <div className="text-xs text-slate-400 font-mono">{adj.ProductVariantsId?.sku || "N/A"}</div>
+                <div className="font-medium">{adj.ProductVariantId?.variantName || "N/A"}</div>
+                <div className="text-xs text-slate-400 font-mono">{adj.ProductVariantId?.sku || "N/A"}</div>
               </TableCell>
               <TableCell>{adj.branchId?.name}</TableCell>
               <TableCell className={cn("text-right font-mono font-bold flex items-center justify-end gap-2", textColor)}>

@@ -24,11 +24,25 @@ const BRANDS = [
   { name: "JBL" },
   { name: "Logitech" },
   { name: "Belkin" },
-  { name: "Spigen" },
+
   // Software
   { name: "Microsoft Windows" },
   { name: "Kaspersky" },
   { name: "McAfee" },
+
+  { name: "ASPOR" },
+  { name: "VDENMENV" },
+  { name: "GX" },
+  { name: "G+OCA PRO" },
+  { name: "CELEBRATE" },
+
+  { name: "UNIQUE DESIGN" },
+  { name: "Redington" },
+  { name: "Xmart" },
+  { name: "ATB KING KONG" },
+  { name: "Crystal Case" },
+  { name: "Spigen" },
+  { name: "RECCI" },
   // Generic
   { name: "Unbranded" },
 ];

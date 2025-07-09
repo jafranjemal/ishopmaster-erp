@@ -11,7 +11,7 @@ const jobSheetItemSchema = new mongoose.Schema(
       required: true,
       enum: ["part", "service"],
     },
-    ProductVariantsId: {
+    ProductVariantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProductVariants",
       required: true,

@@ -4,9 +4,9 @@ const mongoose = require("mongoose");
 // For now, we'll assume it's similar enough to reuse for simplicity.
 const opportunityItemSchema = new mongoose.Schema(
   {
-    ProductVariantsId: {
+    ProductVariantId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ProductVariantss",
+      ref: "ProductVariants",
       required: true,
     },
     description: { type: String, required: true },
@@ -25,6 +25,11 @@ const opportunitySchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true }, // e.g., "Deal for 10 iPhones for XYZ Corp"
     accountId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
     amount: { type: Number, required: true }, // Estimated deal value
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+      required: true,
+    },
     stage: {
       type: String,
       required: true,

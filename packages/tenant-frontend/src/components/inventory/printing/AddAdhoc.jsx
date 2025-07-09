@@ -1,5 +1,5 @@
 import React from "react";
-import ProductVariantsSearch from "../../procurement/ProductVariantsSearch";
+import ProductVariantSearch from "../../procurement/ProductVariantSearch";
 
 /**
  * A component that provides a search interface to add single items to the print queue.
@@ -8,7 +8,7 @@ const AddAdhoc = ({ onAddItem }) => {
   const handleProductSelect = (variant) => {
     // Transform the variant into the format our print queue expects
     const itemToAdd = {
-      ProductVariantsId: variant._id,
+      ProductVariantId: variant._id,
       variantName: variant.variantName,
       sku: variant.sku,
       quantity: 1, // Default to 1, user can change in queue
@@ -21,7 +21,7 @@ const AddAdhoc = ({ onAddItem }) => {
 
   return (
     <div>
-      <ProductVariantsSearch onProductSelect={handleProductSelect} />
+      <ProductVariantSearch onProductSelect={handleProductSelect} />
       <p className="text-xs text-slate-400 mt-2">Search for any product by name or SKU to add it to the print queue.</p>
     </div>
   );

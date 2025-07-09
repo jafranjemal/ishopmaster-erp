@@ -1,32 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { PlusCircle, ShieldAlert } from "lucide-react";
-import {
-  tenantProductService,
-  tenantBrandService,
-  tenantCategoryService,
-  tenantAttributeService,
-  tenantAccountingService,
-  tenantUploadService,
-} from "../../services/api";
-import {
-  Button,
-  Modal,
-  Card,
-  CardContent,
-  Pagination,
-  FilterBar,
-  Label,
-  Input,
-  SelectTrigger,
-  Select,
-  SelectContent,
-  SelectValue,
-  SelectItem,
-} from "ui-library";
+import { tenantProductService, tenantBrandService, tenantCategoryService, tenantAttributeService, tenantAccountingService, tenantUploadService } from "../../services/api";
+import { Button, Modal, Card, CardContent, Pagination, FilterBar, Label, Input, SelectTrigger, Select, SelectContent, SelectValue, SelectItem, HierarchicalSelect } from "ui-library";
 import ProductTemplateList from "../../components/inventory/ProductTemplateList";
 import ProductTemplateForm from "../../components/inventory/ProductTemplateForm";
 import ProductTemplateHeader from "../../components/inventory/ProductTemplateHeader";
+import { t } from "i18next";
 
 const ProductTemplatesPage = () => {
   const [templates, setTemplates] = useState([]);
@@ -65,14 +45,7 @@ const ProductTemplatesPage = () => {
           ...overrideFilters, // Send filters to backend
         };
 
-        const [
-          templatesRes,
-          summaryRes,
-          brandsRes,
-          categoriesRes,
-          attributeSetsRes,
-          accountsRes,
-        ] = await Promise.all([
+        const [templatesRes, summaryRes, brandsRes, categoriesRes, attributeSetsRes, accountsRes] = await Promise.all([
           tenantProductService.getAllTemplates(params),
           tenantProductService.getSummary(),
           tenantBrandService.getAll(),
@@ -130,9 +103,7 @@ const ProductTemplatesPage = () => {
 
   const handleSave = async (formData) => {
     setIsSaving(true);
-    const apiCall = editingTemplate
-      ? tenantProductService.updateTemplate(editingTemplate._id, formData)
-      : tenantProductService.createTemplate(formData);
+    const apiCall = editingTemplate ? tenantProductService.updateTemplate(editingTemplate._id, formData) : tenantProductService.createTemplate(formData);
     try {
       await toast.promise(apiCall, {
         loading: "Saving template...",
@@ -153,14 +124,11 @@ const ProductTemplatesPage = () => {
   const handleDelete = async () => {
     if (!deleteConfirm) return;
     try {
-      await toast.promise(
-        tenantProductService.deleteTemplate(deleteConfirm._id),
-        {
-          loading: `Deleting "${deleteConfirm.baseName}"...`,
-          success: "Template deleted.",
-          error: (err) => err.response?.data?.error || "Failed to delete.",
-        }
-      );
+      await toast.promise(tenantProductService.deleteTemplate(deleteConfirm._id), {
+        loading: `Deleting "${deleteConfirm.baseName}"...`,
+        success: "Template deleted.",
+        error: (err) => err.response?.data?.error || "Failed to delete.",
+      });
       fetchData();
       handleCloseModals();
     } catch (error) {
@@ -202,24 +170,12 @@ const ProductTemplatesPage = () => {
         </Button>
       </div>
 
-      {isLoading && !summary ? (
-        <div className="p-8 text-center">Loading...</div>
-      ) : (
-        <ProductTemplateHeader summary={summary} />
-      )}
+      {isLoading && !summary ? <div className="p-8 text-center">Loading...</div> : <ProductTemplateHeader summary={summary} />}
 
-      <FilterBar
-        filterValues={filters}
-        onFilterChange={handleFilterChange}
-        onApplyFilters={handleApplyFilters}
-        onClearFilters={handleClearFilters}
-      >
+      <FilterBar filterValues={filters} onFilterChange={handleFilterChange} onApplyFilters={handleApplyFilters} onClearFilters={handleClearFilters}>
         <div>
           <Label>Brand</Label>
-          <Select
-            value={filters.brandId || ""}
-            onValueChange={(val) => handleFilterChange("brandId", val)}
-          >
+          <Select value={filters.brandId || ""} onValueChange={(val) => handleFilterChange("brandId", val)}>
             <SelectTrigger>
               <SelectValue placeholder="All Brands" />
             </SelectTrigger>
@@ -235,31 +191,19 @@ const ProductTemplatesPage = () => {
         </div>
 
         <div>
-          <Label>Category</Label>
-          <Select
+          <Label htmlFor="categoryId">{t("product_template_form.category_label", "Category")}</Label>
+          {/* Replace the old <Select> with our new reusable component */}
+          <HierarchicalSelect
+            placeholder="Select a category..."
+            options={prereqData.categories || []} // Pass the hierarchical data
             value={filters.categoryId || ""}
             onValueChange={(val) => handleFilterChange("categoryId", val)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">All</SelectItem>
-              {prereqData.categories.map((c) => (
-                <SelectItem key={c._id} value={c._id}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          />
         </div>
 
         <div>
           <Label>Type</Label>
-          <Select
-            value={filters.type || ""}
-            onValueChange={(val) => handleFilterChange("type", val)}
-          >
+          <Select value={filters.type || ""} onValueChange={(val) => handleFilterChange("type", val)}>
             <SelectTrigger>
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
@@ -275,12 +219,7 @@ const ProductTemplatesPage = () => {
 
         <div>
           <Label>Status</Label>
-          <Select
-            value={filters.isActive === "" ? "" : String(filters.isActive)}
-            onValueChange={(val) =>
-              handleFilterChange("isActive", val === "" ? "" : val === "true")
-            }
-          >
+          <Select value={filters.isActive === "" ? "" : String(filters.isActive)} onValueChange={(val) => handleFilterChange("isActive", val === "" ? "" : val === "true")}>
             <SelectTrigger>
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
@@ -295,33 +234,12 @@ const ProductTemplatesPage = () => {
 
       <Card>
         <CardContent className="p-0">
-          {isLoading ? (
-            <p className="p-8 text-center">Loading templates...</p>
-          ) : (
-            <ProductTemplateList
-              templates={templates}
-              onEdit={handleOpenEditModal}
-              onDelete={setDeleteConfirm}
-            />
-          )}
-          {paginationData && (
-            <Pagination
-              paginationData={paginationData}
-              onPageChange={setCurrentPage}
-            />
-          )}
+          {isLoading ? <p className="p-8 text-center">Loading templates...</p> : <ProductTemplateList templates={templates} onEdit={handleOpenEditModal} onDelete={setDeleteConfirm} />}
+          {paginationData && <Pagination paginationData={paginationData} onPageChange={setCurrentPage} />}
         </CardContent>
       </Card>
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModals}
-        title={
-          editingTemplate
-            ? "Edit Product Template"
-            : "Create New Product Template"
-        }
-      >
+      <Modal isOpen={isModalOpen} onClose={handleCloseModals} title={editingTemplate ? "Edit Product Template" : "Create New Product Template"}>
         {/* <ProductTemplateForm
           templateToEdit={editingTemplate}
           {...prereqData}
@@ -342,21 +260,14 @@ const ProductTemplatesPage = () => {
         />
       </Modal>
 
-      <Modal
-        isOpen={Boolean(deleteConfirm)}
-        onClose={handleCloseModals}
-        title="Confirm Deletion"
-      >
+      <Modal isOpen={Boolean(deleteConfirm)} onClose={handleCloseModals} title="Confirm Deletion">
         <div className="text-center">
           <ShieldAlert className="mx-auto h-12 w-12 text-red-500" />
           <p className="mt-4">
             Are you sure you want to delete template "{deleteConfirm?.baseName}
             "?
           </p>
-          <p className="text-sm text-slate-400 mt-2">
-            This action is irreversible and only possible if no variants are
-            linked to it.
-          </p>
+          <p className="text-sm text-slate-400 mt-2">This action is irreversible and only possible if no variants are linked to it.</p>
         </div>
         <div className="mt-6 flex justify-end space-x-4">
           <Button variant="outline" onClick={handleCloseModals}>

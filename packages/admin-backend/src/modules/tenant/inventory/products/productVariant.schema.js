@@ -65,7 +65,7 @@ const productVariantSchema = new mongoose.Schema(
  * automatically create its single, default ProductVariants.
  */
 productVariantSchema.statics.createDefaultVariant = async function (template) {
-  if (template.type === "bundle" || template.type === "service") {
+  if (template.type === "bundle" || template.type === "service" || !template.attributeSetId) {
     console.log(`Creating default variant for ${template.type}: ${template.baseName}`);
     return this.create({
       templateId: template._id, // Correct field name
@@ -77,6 +77,51 @@ productVariantSchema.statics.createDefaultVariant = async function (template) {
     });
   }
   return null; // Return null if no action was taken
+};
+
+productVariantSchema.statics.createVariantsFromAttributes = async function (
+  template,
+  attributeSet,
+  session = null
+) {
+  if (!attributeSet || !attributeSet.attributes || attributeSet.attributes.length === 0) {
+    throw new Error("No attributes available to generate variants");
+  }
+  console.log(`Creating variant for ${template.type}: ${template.baseName}`);
+
+  const ProductVariant = this;
+
+  // Prepare attribute options (array of arrays)
+  const attributeValueOptions = attributeSet.attributes.map((attr) =>
+    attr.values.map((value) => ({ key: attr.key, value }))
+  );
+
+  // Cartesian product helper
+  const cartesian = (arrays) =>
+    arrays.reduce(
+      (acc, curr) => acc.flatMap((accItem) => curr.map((currItem) => [...accItem, currItem])),
+      [[]]
+    );
+
+  const combinations = cartesian(attributeValueOptions);
+
+  const variantsToCreate = combinations.map((combination) => {
+    const attributesMap = {};
+    combination.forEach(({ key, value }) => {
+      attributesMap[key] = value;
+    });
+
+    return {
+      templateId: template._id,
+      variantName: Object.values(attributesMap).join(" / "),
+      sku: `${template.skuPrefix || "VAR"}-${Date.now()}`, // You might want to improve SKU uniqueness here
+      attributes: attributesMap,
+      costPrice: template.costPrice || 0,
+      sellingPrice: template.sellingPrice || 0,
+    };
+  });
+
+  return ProductVariant.insertMany(variantsToCreate, { session });
 };
 
 module.exports = productVariantSchema;

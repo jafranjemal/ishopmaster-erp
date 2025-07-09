@@ -20,7 +20,9 @@ const departmentRoutes = require("./department/department.routes"); // <-- 1. IM
 const jobPositionRoutes = require("./jobPosition/jobPosition.routes");
 const deductionRuleSchema = require("./DeductionRule/deductionRule.schema");
 const deductionRuleRoutes = require("./DeductionRule/deductionRule.routes");
-
+const benefitRoutes = require("./employeeBenefit/benefit.routes");
+const benefitTypeSchema = require("./employeeBenefit/benefitType.schema");
+const employeeBenefitSchema = require("./employeeBenefit/employeeBenefit.schema");
 const mainRouter = express.Router();
 
 mainRouter.use("/employees", employeeRoutes);
@@ -30,6 +32,7 @@ mainRouter.use("/leave", leaveRoutes);
 mainRouter.use("/departments", departmentRoutes); // <-- 2. MOUNT
 mainRouter.use("/job-positions", jobPositionRoutes); // <-- 2. MOUNT
 mainRouter.use("/deduction-rules", deductionRuleRoutes);
+mainRouter.use("/benefits", benefitRoutes);
 
 // Other HR routes for attendance, leave will be added here later
 
@@ -44,6 +47,8 @@ module.exports = {
     Department: departmentSchema, // <-- 2. ADD TO EXPORT
     JobPosition: jobPositionSchema, // <-- 2. ADD TO EXPORT
     DeductionRule: deductionRuleSchema,
+    BenefitType: benefitTypeSchema,
+    EmployeeBenefit: employeeBenefitSchema,
   },
   router: mainRouter,
 };

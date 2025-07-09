@@ -3,7 +3,7 @@ import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, 
 import { PlusCircle, Trash2 } from "lucide-react";
 
 import useAuth from "../../../context/useAuth";
-import ProductVariantsSearch from "../../procurement/ProductVariantSearch";
+import ProductVariantSearch from "../../procurement/ProductVariantSearch";
 
 const OpportunityItemEditor = ({ items = [], onAddItem, onRemoveItem, onUpdateItem }) => {
   const { formatCurrency } = useAuth();
@@ -11,7 +11,7 @@ const OpportunityItemEditor = ({ items = [], onAddItem, onRemoveItem, onUpdateIt
 
   const handleProductSelect = (variant) => {
     onAddItem({
-      ProductVariantsId: variant._id,
+      ProductVariantId: variant._id,
       description: variant.variantName,
       quantity: 1,
       unitPrice: variant.sellingPrice,
@@ -49,7 +49,7 @@ const OpportunityItemEditor = ({ items = [], onAddItem, onRemoveItem, onUpdateIt
               </TableRow>
             )}
             {items.map((item, index) => (
-              <TableRow key={item.ProductVariantsId}>
+              <TableRow key={item.ProductVariantId}>
                 <TableCell>{item.description}</TableCell>
                 <TableCell>
                   <Input
@@ -79,7 +79,7 @@ const OpportunityItemEditor = ({ items = [], onAddItem, onRemoveItem, onUpdateIt
         </Table>
       </div>
       <Modal isOpen={isSearchModalOpen} onClose={() => setIsSearchModalOpen(false)} title="Add Product or Service">
-        <ProductVariantsSearch onProductSelect={handleProductSelect} />
+        <ProductVariantSearch onProductSelect={handleProductSelect} />
       </Modal>
     </div>
   );

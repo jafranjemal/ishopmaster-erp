@@ -16,17 +16,17 @@ class RepairService {
    * If the item is a physical part, it deducts it from inventory.
    */
   async addItemToJobSheet(models, { ticketId, itemData, userId }) {
-    const { RepairTicket, ProductVariant } = models;
+    const { RepairTicket, ProductVariants } = models;
     const ticket = await RepairTicket.findById(ticketId);
     if (!ticket) throw new Error("Repair ticket not found.");
 
-    const variant = await ProductVariant.findById(itemData.productVariantId).lean();
+    const variant = await ProductVariantss.findById(itemData.ProductVariantsId).lean();
     if (!variant) throw new Error("Product/Service not found.");
 
     // If the item is a physical part, deduct from stock
     if (itemData.itemType === "part") {
       await inventoryService.decreaseStock(models, {
-        productVariantId: itemData.productVariantId,
+        ProductVariantsId: itemData.ProductVariantsId,
         branchId: ticket.branchId,
         quantity: itemData.quantity,
         serialNumber: itemData.serialNumber, // For serialized parts
@@ -61,7 +61,7 @@ class RepairService {
     // If the removed item was a physical part, add it back to stock
     if (itemToRemove.itemType === "part") {
       await inventoryService.increaseStock(models, {
-        productVariantId: itemToRemove.productVariantId,
+        ProductVariantsId: itemToRemove.ProductVariantsId,
         branchId: ticket.branchId,
         quantity: itemToRemove.quantity,
         costPriceInBaseCurrency: itemToRemove.costPrice,

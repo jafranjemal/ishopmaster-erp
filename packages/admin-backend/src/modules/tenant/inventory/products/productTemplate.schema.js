@@ -31,6 +31,7 @@ const productTemplateSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+      set: (value) => value?.toUpperCase(),
     },
     description: { type: String, trim: true },
     bundleItems: [bundleItemSchema],
@@ -58,8 +59,9 @@ const productTemplateSchema = new mongoose.Schema(
     // General marketing images for the product family.
     images: [
       {
-        url: { type: String, required: true },
+        url: { type: String, required: false },
         altText: { type: String },
+        name: { type: String },
       },
     ],
     // Financials specific to this variant, which can override template defaults.

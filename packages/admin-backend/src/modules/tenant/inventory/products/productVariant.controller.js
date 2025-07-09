@@ -28,43 +28,57 @@ exports.getAllVariants_old = asyncHandler(async (req, res, next) => {
 // @desc    Get all product variants with optional search, templateId, and server-side pagination
 // @route   GET /api/v1/tenant/inventory/products/variants?templateId=&search=&page=1&limit=20
 
-exports.getAllVariants = asyncHandler(async (req, res, next) => {
-  const { ProductVariants } = req.models;
-  const mongoose = require("mongoose");
+// @desc    Get all product variants with optional search, templateId, and server-side pagination
+// @route   GET /api/v1/tenant/inventory/products/variants?templateId=&search=&page=1&limit=20
+//
 
-  // Parse query params safely
+exports.getAllVariants = asyncHandler(async (req, res, next) => {
+  const { ProductVariants, InventoryItem } = req.models;
+
   const templateId = req.query.templateId || null;
   const search = req.query.search?.trim() || "";
+  const categoryId = req.query.categoryId?.trim() || null;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
 
-  // Build match stage
   const matchStage = { isActive: true };
+  if (templateId) matchStage.templateId = new mongoose.Types.ObjectId(templateId);
+  if (search) {
+    const regex = new RegExp(search, "i");
+    // Check if the search term matches any serial number first
+    const itemBySerial = await InventoryItem.findOne({ serialNumber: search }).lean();
 
-  if (templateId) {
-    try {
-      matchStage.templateId = new mongoose.Types.ObjectId(templateId);
-    } catch {
-      return res.status(400).json({ success: false, error: "Invalid templateId format." });
+    if (itemBySerial) {
+      // If a serial number matches, we ignore all other search criteria
+      // and target that specific variant directly.
+      matchStage = { _id: itemBySerial.productVariantId };
+    } else {
+      // Otherwise, search by name or SKU as before
+      matchStage.$or = [{ variantName: regex }, { sku: regex }];
     }
   }
 
-  if (search) {
-    const regex = new RegExp(search, "i");
-    matchStage.$or = [{ variantName: regex }, { sku: regex }, { barcode: regex }];
+  // This is the second match stage, which runs AFTER we have looked up the template.
+  const postLookupMatch = {};
+  if (categoryId) {
+    postLookupMatch["templateId.categoryId"] = new mongoose.Types.ObjectId(categoryId);
   }
 
-  // Count total matching documents for pagination meta
-  const totalCountPipeline = [{ $match: matchStage }, { $count: "total" }];
-  const countResult = await ProductVariants.aggregate(totalCountPipeline);
-  const total = countResult[0]?.total || 0;
-
-  // Main aggregation with deep bundleItems population
-  const variants = await ProductVariants.aggregate([
+  const aggregationPipeline = [
     { $match: matchStage },
-
-    // Lookup inventory lots (non-serialized stock)
+    // First, lookup the template so we can filter by its properties
+    {
+      $lookup: {
+        from: "producttemplates",
+        localField: "templateId",
+        foreignField: "_id",
+        as: "templateId",
+      },
+    },
+    { $unwind: "$templateId" },
+    // Now that we have the template data, we can apply the category filter.
+    { $match: postLookupMatch },
     {
       $lookup: {
         from: "inventorylots",
@@ -73,8 +87,6 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
         as: "lots",
       },
     },
-
-    // Lookup inventory items (serialized stock)
     {
       $lookup: {
         from: "inventoryitems",
@@ -85,36 +97,51 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
       },
     },
 
-    // Add calculated stock quantity
     {
       $addFields: {
         quantityInStock: {
-          $add: [{ $sum: "$lots.quantityInStock" }, { $size: "$items" }],
+          $add: [
+            {
+              $sum: {
+                $map: {
+                  input: { $ifNull: ["$lots", []] },
+                  as: "lot",
+                  in: { $ifNull: ["$$lot.quantityInStock", 0] },
+                },
+              },
+            },
+            {
+              $size: {
+                $ifNull: ["$items", []],
+              },
+            },
+          ],
         },
       },
     },
 
-    // --- Template Lookup with deep bundleItems.productVariantId population ---
     {
       $lookup: {
         from: "producttemplates",
         localField: "templateId",
         foreignField: "_id",
         pipeline: [
-          // Step 1: Lookup bundleItems.productVariantId (variants)
           {
             $lookup: {
               from: "productvariants",
               localField: "bundleItems.productVariantId",
               foreignField: "_id",
               pipeline: [
-                // Step 2: For each variant, lookup its templateId with only _id and type
                 {
                   $lookup: {
                     from: "producttemplates",
                     localField: "templateId",
                     foreignField: "_id",
-                    pipeline: [{ $project: { _id: 1, type: 1 } }],
+                    pipeline: [
+                      {
+                        $project: { _id: 1, type: 1 },
+                      },
+                    ],
                     as: "templateId",
                   },
                 },
@@ -128,12 +155,20 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
               as: "bundleItemsVariants",
             },
           },
-          // Step 3: Merge bundleItems array with populated bundleItemsVariants array by index
           {
             $addFields: {
               bundleItems: {
                 $map: {
-                  input: { $range: [0, { $size: "$bundleItems" }] },
+                  input: {
+                    $range: [
+                      0,
+                      {
+                        $size: {
+                          $ifNull: ["$bundleItems", []],
+                        },
+                      },
+                    ],
+                  },
                   as: "idx",
                   in: {
                     $mergeObjects: [
@@ -145,11 +180,16 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
               },
             },
           },
-          { $project: { bundleItemsVariants: 0 } },
+          {
+            $project: {
+              bundleItemsVariants: 0,
+            },
+          },
         ],
         as: "templateId",
       },
     },
+
     {
       $unwind: {
         path: "$templateId",
@@ -157,21 +197,26 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
       },
     },
 
-    // Remove intermediate arrays from response
     {
       $project: {
         lots: 0,
         items: 0,
       },
     },
+  ];
 
-    // Sort by variantName ascending
-    { $sort: { variantName: 1 } },
-
-    // Pagination
-    { $skip: skip },
-    { $limit: limit },
+  const results = await ProductVariants.aggregate([
+    ...aggregationPipeline,
+    {
+      $facet: {
+        data: [{ $sort: { variantName: 1 } }, { $skip: skip }, { $limit: limit }],
+        totalCount: [{ $count: "total" }],
+      },
+    },
   ]);
+
+  const variants = results[0].data;
+  const total = results[0].totalCount[0]?.total || 0;
 
   res.status(200).json({
     success: true,

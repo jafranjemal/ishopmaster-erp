@@ -4,12 +4,13 @@ import { PlusCircle, ShieldAlert } from "lucide-react";
 import { Link } from "react-router-dom";
 
 // Import all necessary services
-import { adminTenantService, adminModuleService } from "../services/api";
+import { adminTenantService, adminModuleService, tenantService } from "../services/api";
 
 // Import UI library and local components
 import { Button, Modal, Card, CardContent, FilterBar, Pagination } from "ui-library";
 import TenantList from "../components/tenants/TenantList";
 import TenantEditForm from "../components/tenants/TenantEditForm"; // We will use this single form for both create and edit
+import TenantForm from "../components/tenants/TenantForm";
 
 const TenantsPage = () => {
   // Data State
@@ -73,7 +74,7 @@ const TenantsPage = () => {
 
   const handleSave = async (formData) => {
     setIsSaving(true);
-    const apiCall = editingTenant ? adminTenantService.update(editingTenant._id, formData) : adminTenantService.create(formData); // Note: Your backend create might need refactoring to handle the full object
+    const apiCall = editingTenant ? adminTenantService.update(editingTenant._id, formData) : tenantService.create(formData); // Note: Your backend create might need refactoring to handle the full object
 
     try {
       await toast.promise(apiCall, {
@@ -159,13 +160,23 @@ const TenantsPage = () => {
         onClose={handleCloseModals}
         title={editingTenant ? `Edit Tenant: ${editingTenant.companyName}` : "Create New Tenant"}
       >
-        <TenantEditForm
-          tenant={editingTenant}
-          onSave={handleSave}
-          onCancel={handleCloseModals}
-          isSaving={isSaving}
-          availableModules={availableModules}
-        />
+        {editingTenant ? (
+          <TenantEditForm
+            tenant={editingTenant}
+            onSave={handleSave}
+            onCancel={handleCloseModals}
+            isSaving={isSaving}
+            availableModules={availableModules}
+          />
+        ) : (
+          <TenantForm
+            tenant={editingTenant}
+            onSave={handleSave}
+            onCancel={handleCloseModals}
+            isSaving={isSaving}
+            availableModules={availableModules}
+          />
+        )}
       </Modal>
 
       <Modal isOpen={Boolean(deleteConfirm)} onClose={handleCloseModals} title="Confirm Deletion">

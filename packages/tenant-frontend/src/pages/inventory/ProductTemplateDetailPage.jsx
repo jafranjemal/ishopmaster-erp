@@ -7,16 +7,7 @@ import VariantOptionSelector from "../../components/inventory/VariantOptionSelec
 import VariantEditor from "../../components/inventory/VariantEditor";
 import { tenantProductService } from "../../services/api";
 
-import {
-  Button,
-  Card,
-  CardContent,
-  Modal,
-  AlertModal,
-  CardHeader,
-  CardTitle,
-  Badge,
-} from "ui-library";
+import { Button, Card, CardContent, Modal, AlertModal, CardHeader, CardTitle, Badge } from "ui-library";
 import { ArrowLeft, Loader2, PlusCircle } from "lucide-react";
 import PrintModal from "../../components/inventory/printing/PrintModal";
 import PrintConfigModal from "../../components/inventory/printing/PrintConfigModal";
@@ -25,6 +16,7 @@ const ProductTemplateDetailPage = () => {
   const { t } = useTranslation();
   const { id: templateId } = useParams();
   const navigate = useNavigate();
+  const [deleteAlert, setDeleteAlert] = useState({ isOpen: false, variantId: null });
 
   const [template, setTemplate] = useState(null);
   const [variants, setVariants] = useState([]);
@@ -50,10 +42,7 @@ const ProductTemplateDetailPage = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const [templateRes, variantsRes] = await Promise.all([
-        tenantProductService.getTemplateById(templateId),
-        tenantProductService.getAllVariantsForTemplate(templateId),
-      ]);
+      const [templateRes, variantsRes] = await Promise.all([tenantProductService.getTemplateById(templateId), tenantProductService.getAllVariantsForTemplate(templateId)]);
       console.log("Template data:", variantsRes.data.data);
       setTemplate(templateRes.data.data);
       setVariants(variantsRes.data.data);
@@ -66,16 +55,26 @@ const ProductTemplateDetailPage = () => {
     }
   }, [templateId, t]);
 
+  const handleDeleteVariant = async () => {
+    if (!deleteAlert.variantId) return;
+
+    const promise = tenantInventoryService.deactivateVariant(deleteAlert.variantId);
+    await toast.promise(promise, {
+      loading: "Deactivating variant...",
+      success: "Variant deactivated successfully.",
+      error: (err) => err.response?.data?.error || "Could not deactivate variant.",
+    });
+
+    setDeleteAlert({ isOpen: false, variantId: null });
+    fetchData(); // Refetch all data to update the list
+  };
+
   useEffect(() => {
     fetchTemplateAndVariants();
   }, [fetchTemplateAndVariants]);
 
   const handleManageVariantsClick = () => {
-    if (
-      !template ||
-      !template.attributeSetId ||
-      template.attributeSetId.attributes.length === 0
-    ) {
+    if (!template || !template.attributeSetId || template.attributeSetId.attributes.length === 0) {
       setAlertState({
         isOpen: true,
         title: t("product_detail_page.no_attributes_title"),
@@ -88,10 +87,7 @@ const ProductTemplateDetailPage = () => {
 
   const handleSyncVariants = async (selectedOptions) => {
     setIsGenerating(true);
-    const promise = tenantProductService.syncVariants(
-      templateId,
-      selectedOptions
-    );
+    const promise = tenantProductService.syncVariants(templateId, selectedOptions);
 
     toast.promise(promise, {
       loading: t("messages.syncing_variants"),
@@ -100,8 +96,7 @@ const ProductTemplateDetailPage = () => {
         setIsAddVariantModalOpen(false);
         return t("messages.variants_synced_success");
       },
-      error: (err) =>
-        err.response?.data?.error || t("errors.failed_to_sync_variants"),
+      error: (err) => err.response?.data?.error || t("errors.failed_to_sync_variants"),
     });
 
     try {
@@ -120,8 +115,7 @@ const ProductTemplateDetailPage = () => {
     toast.promise(promise, {
       loading: t("messages.saving_variants"),
       success: t("messages.variants_saved_success"),
-      error: (err) =>
-        err.response?.data?.error || t("errors.failed_to_save_variants"),
+      error: (err) => err.response?.data?.error || t("errors.failed_to_save_variants"),
     });
 
     try {
@@ -173,12 +167,7 @@ const ProductTemplateDetailPage = () => {
       for (const variant of activeVariants) {
         // Check if the variant has a value for this attribute's NAME
         if (variant.attributes && variant.attributes[attrName]) {
-          console.log(
-            "Processing attribute:",
-            attrName,
-            "with key:",
-            variant.attributes[attrName]
-          );
+          console.log("Processing attribute:", attrName, "with key:", variant.attributes[attrName]);
           valuesForThisAttr.add(variant.attributes[attrName]);
         }
       }
@@ -193,11 +182,7 @@ const ProductTemplateDetailPage = () => {
   return (
     <div className="space-y-8">
       <div>
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/inventory/products")}
-          className="mb-4 text-slate-300"
-        >
+        <Button variant="ghost" onClick={() => navigate("/inventory/products")} className="mb-4 text-slate-300">
           <ArrowLeft className="mr-2 h-4 w-4" />
           {t("product_detail_page.back_button")}
         </Button>
@@ -208,9 +193,7 @@ const ProductTemplateDetailPage = () => {
       {variants.length === 0 ? (
         <Card>
           <CardContent className="p-6 text-center">
-            <p className="mb-4 text-slate-400">
-              {t("product_detail_page.no_variants_message")}
-            </p>
+            <p className="mb-4 text-slate-400">{t("product_detail_page.no_variants_message")}</p>
             <Button onClick={handleManageVariantsClick}>
               <PlusCircle className="mr-2 h-4 w-4" />
               {t("product_detail_page.generate_initial_variants_button")}
@@ -236,24 +219,21 @@ const ProductTemplateDetailPage = () => {
                   })}{" "}
                   out of {template?.attributeSetId?.attributes?.length} total.{" "}
                 </p>
-                {template.attributeSetId &&
-                  template.attributeSetId.attributes.length > 0 && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm text-slate-400">
-                        {t("product_detail_page.varies_by", "Varies by:")}
-                      </span>
-                      {template.attributeSetId.attributes.map(
-                        (attr) =>
-                          attr.values &&
-                          attr.values.length > 0 &&
-                          getInitialState()[attr.name]?.length > 0 && (
-                            <Badge key={attr._id} variant="outline">
-                              {attr.name}
-                            </Badge>
-                          )
-                      )}
-                    </div>
-                  )}
+                {template.attributeSetId && template.attributeSetId.attributes.length > 0 && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-sm text-slate-400">{t("product_detail_page.varies_by", "Varies by:")}</span>
+                    {template.attributeSetId.attributes.map(
+                      (attr) =>
+                        attr.values &&
+                        attr.values.length > 0 &&
+                        getInitialState()[attr.name]?.length > 0 && (
+                          <Badge key={attr._id} variant="outline">
+                            {attr.name}
+                          </Badge>
+                        )
+                    )}
+                  </div>
+                )}
               </div>
               <Button onClick={handleManageVariantsClick}>
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -262,6 +242,7 @@ const ProductTemplateDetailPage = () => {
             </div>
           </CardHeader>
           <VariantEditor
+            onDelete={(id) => setDeleteAlert({ isOpen: true, variantId: id })} // Pass the handler
             variants={variants}
             onSave={handleSaveVariants}
             isSaving={isSaving}
@@ -271,39 +252,24 @@ const ProductTemplateDetailPage = () => {
       )}
 
       {/* The Configuration Modal */}
-      <PrintConfigModal
-        isOpen={configModalState.isOpen}
-        onClose={() => setConfigModalState({ isOpen: false, variant: null })}
-        variant={configModalState.variant}
-        onConfirm={handleAddToPrintQueue}
-      />
+      <PrintConfigModal isOpen={configModalState.isOpen} onClose={() => setConfigModalState({ isOpen: false, variant: null })} variant={configModalState.variant} onConfirm={handleAddToPrintQueue} />
 
-      <PrintModal
-        isOpen={isPrintModalOpen}
-        onClose={() => setIsPrintModalOpen(false)}
-        itemsToPrint={itemsToPrint}
-      />
+      <PrintModal isOpen={isPrintModalOpen} onClose={() => setIsPrintModalOpen(false)} itemsToPrint={itemsToPrint} />
 
-      <Modal
-        isOpen={isAddVariantModalOpen}
-        onClose={() => setIsAddVariantModalOpen(false)}
-        title={t("product_detail_page.manage_variant_options_title")}
-      >
-        {template && template.attributeSetId && (
-          <VariantOptionSelector
-            attributes={template.attributeSetId.attributes}
-            existingVariants={variants}
-            onGenerate={handleSyncVariants}
-            isGenerating={isGenerating}
-          />
-        )}
+      <Modal isOpen={isAddVariantModalOpen} onClose={() => setIsAddVariantModalOpen(false)} title={t("product_detail_page.manage_variant_options_title")}>
+        {template && template.attributeSetId && <VariantOptionSelector attributes={template.attributeSetId.attributes} existingVariants={variants} onGenerate={handleSyncVariants} isGenerating={isGenerating} />}
       </Modal>
 
+      <AlertModal isOpen={alertState.isOpen} onClose={() => setAlertState({ isOpen: false, title: "", message: "" })} title={alertState.title} message={alertState.message} />
+
       <AlertModal
-        isOpen={alertState.isOpen}
-        onClose={() => setAlertState({ isOpen: false, title: "", message: "" })}
-        title={alertState.title}
-        message={alertState.message}
+        isOpen={deleteAlert.isOpen}
+        onClose={() => setDeleteAlert({ isOpen: false, variantId: null })}
+        onConfirm={handleDeleteVariant}
+        title="Deactivate Variant"
+        message="Are you sure you want to deactivate this variant? It will be removed from sale but its history will be preserved."
+        confirmText="Deactivate"
+        isDestructive
       />
     </div>
   );

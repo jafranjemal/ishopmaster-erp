@@ -34,7 +34,7 @@ const OpportunityDetailPage = () => {
     fetchData();
   }, [fetchData]);
 
-  const handleUpdateItem = (index, field, value) => {
+  const handleUpdateItemOld = (index, field, value) => {
     const newItems = [...opportunity.items];
     newItems[index][field] = value;
     // Recalculate final price for the line
@@ -54,10 +54,52 @@ const OpportunityDetailPage = () => {
       });
       navigate("/crm/opportunities");
     } catch (err) {
-      /* handled by toast */
+      console.log(err);
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const updateOpportunityItems = async (newItems) => {
+    const newTotalAmount = newItems.reduce((sum, item) => sum + item.finalPrice, 0);
+    const updatedOpportunity = { ...opportunity, items: newItems, amount: newTotalAmount };
+
+    // Optimistic UI update for a snappy experience
+    setOpportunity(updatedOpportunity);
+
+    try {
+      await tenantOpportunityService.update(opportunityId, { items: newItems, amount: newTotalAmount });
+      toast.success("Opportunity items updated.");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to save changes. Reverting.");
+      fetchData(); // Revert to server state on failure
+    }
+  };
+
+  const handleAddItem = (newItem) => {
+    const newItems = [...(opportunity.items || []), newItem];
+    updateOpportunityItems(newItems);
+  };
+
+  const handleRemoveItem = (indexToRemove) => {
+    const newItems = opportunity.items.filter((_, index) => index !== indexToRemove);
+    updateOpportunityItems(newItems);
+  };
+
+  const handleUpdateItem = (indexToUpdate, field, value) => {
+    const newItems = opportunity.items.map((item, index) => {
+      if (index === indexToUpdate) {
+        const updatedItem = { ...item, [field]: value };
+        // Recalculate final price for the line if quantity or unit price changes
+        if (field === "quantity" || field === "unitPrice") {
+          updatedItem.finalPrice = (updatedItem.quantity || 0) * (updatedItem.unitPrice || 0);
+        }
+        return updatedItem;
+      }
+      return item;
+    });
+    updateOpportunityItems(newItems);
   };
 
   if (isLoading || !opportunity) return <div className="p-8 text-center">Loading Opportunity...</div>;
@@ -105,12 +147,7 @@ const OpportunityDetailPage = () => {
         </CardContent>
       </Card>
 
-      <OpportunityItemEditor
-        items={opportunity.items}
-        onAddItem={() => {}} // This would call an API to add an item
-        onRemoveItem={() => {}} // This would call an API to remove an item
-        onUpdateItem={handleUpdateItem}
-      />
+      <OpportunityItemEditor items={opportunity.items} onAddItem={handleAddItem} onRemoveItem={handleRemoveItem} onUpdateItem={handleUpdateItem} />
     </div>
   );
 };

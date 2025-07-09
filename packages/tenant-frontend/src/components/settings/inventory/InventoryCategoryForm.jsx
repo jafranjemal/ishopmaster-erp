@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Input, Label } from "ui-library";
 
-const CategoryForm = ({ categoryToEdit, onSave, onCancel, isSaving }) => {
+const InventoryCategoryForm = ({ categoryToEdit, onSave, onCancel, isSaving }) => {
   const [formData, setFormData] = useState({ name: "", description: "" });
   useEffect(() => {
     if (categoryToEdit) {
@@ -14,8 +14,7 @@ const CategoryForm = ({ categoryToEdit, onSave, onCancel, isSaving }) => {
     }
   }, [categoryToEdit]);
 
-  const handleChange = (e) =>
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   const handleSubmit = async (e) => {
     e.preventDefault();
     await onSave(formData);
@@ -25,22 +24,11 @@ const CategoryForm = ({ categoryToEdit, onSave, onCancel, isSaving }) => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <Label htmlFor="name">Category Name</Label>
-        <Input
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-        />
+        <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
       </div>
       <div>
         <Label htmlFor="description">Description</Label>
-        <Input
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-        />
+        <Input id="description" name="description" value={formData.description} onChange={handleChange} />
       </div>
       <div className="pt-4 flex justify-end space-x-4">
         <Button type="button" variant="outline" onClick={onCancel}>
@@ -53,4 +41,4 @@ const CategoryForm = ({ categoryToEdit, onSave, onCancel, isSaving }) => {
     </form>
   );
 };
-export default CategoryForm;
+export default InventoryCategoryForm;

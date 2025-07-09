@@ -55,7 +55,7 @@ const TransferDetailView = ({ transfer }) => {
             <TableBody>
               {transfer.items.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell>{item.ProductVariantsId?.variantName || "N/A"}</TableCell>
+                  <TableCell>{item.ProductVariantId?.variantName || "N/A"}</TableCell>
                   <TableCell className="text-right font-bold">{item.quantity}</TableCell>
                 </TableRow>
               ))}

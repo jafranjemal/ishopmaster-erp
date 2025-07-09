@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { tenantHrService } from "../../services/api";
+import { tenantBenefitTypeService, tenantEmployeeBenefitService, tenantHrService } from "../../services/api";
 import * as Tabs from "@radix-ui/react-tabs";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, PlusCircle } from "lucide-react";
 import EmployeeDetailHeader from "../../components/hr/EmployeeDetailHeader";
 import PayslipHistoryList from "../../components/hr/PayslipHistoryList";
 import PayslipHistoryTable from "../../components/hr/PayslipHistoryTable";
@@ -13,6 +13,9 @@ import AttendanceHistoryTable from "../../components/hr/AttendanceHistoryTable";
 import LeaveRequestForm from "../../components/hr/LeaveRequestForm";
 import LeaveHistoryList from "../../components/hr/LeaveHistoryList";
 import EmployeeDocumentManager from "../../components/hr/employee/document/EmployeeDocumentManager";
+import AssignBenefitForm from "../../components/hr/benefits/AssignBenefitForm";
+import AssignedBenefitList from "../../components/hr/benefits/AssignedBenefitList";
+import { Button, Modal } from "ui-library";
 
 const EmployeeDetailPage = () => {
   const { id: employeeId } = useParams();
@@ -20,6 +23,9 @@ const EmployeeDetailPage = () => {
   const [employee, setEmployee] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [benefitTypes, setBenefitTypes] = useState([]);
+  const [isBenefitModalOpen, setIsBenefitModalOpen] = useState(false);
+  const [assignedBenefits, setAssignedBenefits] = useState([]);
   const [documents, setDocuments] = useState(employee?.documents || []);
 
   const memoizedDocuments = useMemo(() => employee?.documents, [employee?.documents]);
@@ -28,16 +34,58 @@ const EmployeeDetailPage = () => {
     if (!employeeId) return;
     try {
       setIsLoading(true);
-      const response = await tenantHrService.getEmployeeById(employeeId);
-      setEmployee(response.data.data);
+      const [employeeRes, typesRes, assignedRes] = await Promise.all([
+        tenantHrService.getEmployeeById(employeeId),
+        tenantBenefitTypeService.getAll(),
+        tenantEmployeeBenefitService.getForEmployee(employeeId),
+      ]);
+      setEmployee(employeeRes.data.data);
+      setBenefitTypes(typesRes.data.data);
+      setAssignedBenefits(assignedRes.data.data);
     } catch (error) {
-      console.log(error);
       toast.error("Failed to load employee details.");
       navigate("/hr/employees");
     } finally {
       setIsLoading(false);
     }
   }, [employeeId, navigate]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // --- THE DEFINITIVE FIX: FULLY IMPLEMENTED HANDLER ---
+  const handleAssignBenefit = async (formData) => {
+    setIsSaving(true);
+    try {
+      await toast.promise(tenantEmployeeBenefitService.assignToEmployee(employeeId, formData), {
+        loading: "Assigning benefit...",
+        success: "Benefit assigned successfully!",
+        error: (err) => err.response?.data?.error || "Failed to assign benefit.",
+      });
+      fetchData(); // Refresh data to show the new benefit
+      setIsBenefitModalOpen(false);
+    } catch (err) {
+      // The toast promise handles displaying the error
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  const handleRemoveBenefit = async (benefitAssignmentId) => {
+    if (!window.confirm("Are you sure you want to remove this benefit from the employee?")) return;
+    try {
+      await toast.promise(tenantEmployeeBenefitService.delete(benefitAssignmentId), {
+        loading: "Removing benefit...",
+        success: "Benefit removed.",
+        error: "Removal failed.",
+      });
+      fetchData(); // Refresh the list
+    } catch (err) {
+      /* handled by toast */
+    }
+  };
+
+  // --- END OF FIX ---
 
   const handleRequestLeave = async (formData) => {
     setIsSaving(true);
@@ -110,6 +158,9 @@ const EmployeeDetailPage = () => {
           <Tabs.Trigger value="payslips" className="px-4 py-2 ui-tabs-trigger">
             Payslip History
           </Tabs.Trigger>
+          <Tabs.Trigger value="benefits" className="px-4 py-2 ui-tabs-trigger">
+            Benefits
+          </Tabs.Trigger>
           <Tabs.Trigger value="documents" className="px-4 py-2 ui-tabs-trigger">
             Documents
           </Tabs.Trigger>{" "}
@@ -128,6 +179,17 @@ const EmployeeDetailPage = () => {
           <Tabs.Content value="payslips">
             <PayslipHistoryList payslips={employee.history?.payslips} />
           </Tabs.Content>
+          <Tabs.Content value="benefits">
+            <div className="space-y-4">
+              <div className="flex justify-end">
+                <Button onClick={() => setIsBenefitModalOpen(true)}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Assign New Benefit
+                </Button>
+              </div>
+              <AssignedBenefitList assignedBenefits={assignedBenefits} onRemove={handleRemoveBenefit} />
+            </div>
+          </Tabs.Content>
           <Tabs.Content value="documents">
             <EmployeeDocumentManager documents={employee?.documents} onChange={setDocuments} onSave={handleSaveDocuments} isSaving={isSaving} />
           </Tabs.Content>
@@ -145,6 +207,15 @@ const EmployeeDetailPage = () => {
           </Tabs.Content>
         </div>
       </Tabs.Root>
+
+      <Modal isOpen={isBenefitModalOpen} onClose={() => setIsBenefitModalOpen(false)} title="Assign Benefit to Employee">
+        <AssignBenefitForm
+          benefitTypes={benefitTypes}
+          onSave={handleAssignBenefit}
+          onCancel={() => setIsBenefitModalOpen(false)}
+          isSaving={isSaving}
+        />
+      </Modal>
     </div>
   );
 };

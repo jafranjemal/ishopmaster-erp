@@ -3,7 +3,7 @@ import "./App.css";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import RolesPage from "./pages/RolesPage";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import LocationsPage from "./pages/LocationsPage";
@@ -67,13 +67,41 @@ import PricingManagementPage from "./pages/settings/PricingManagementPage";
 import LeadManagementPage from "./pages/crm/LeadManagementPage";
 import OpportunityKanbanPage from "./pages/crm/OpportunityKanbanPage";
 import OpportunityDetailPage from "./pages/crm/OpportunityDetailPage";
+import PosLayout from "./components/layout/PosLayout";
+import BenefitsPage from "./pages/settings/BenefitsPage";
+import { useState } from "react";
 
 function App() {
+  const [posLayout, setPosLayout] = useState("default");
+  const togglePosLayout = () => setPosLayout((prev) => (prev === "default" ? "cartFocus" : "default"));
+
   return (
     <>
       <Routes>
         {/* Public Route */}
         <Route path="/login" element={<LoginPage />} />
+
+        {/* All POS-related routes are now grouped and use the dedicated PosLayout */}
+        <Route
+          path="/pos/*"
+          element={
+            <ProtectedRoute>
+              <PosLayout onLayoutToggle={togglePosLayout}>
+                <Routes>
+                  {/* The main entry point is now the shifts page (the gatekeeper) */}
+                  <Route path="shifts" element={<ShiftManagementPage />} />
+                  {/* The actual sales terminal is on a nested route */}
+                  <Route path="terminal" element={<PosPage layout={posLayout} />} />
+                  {/* Add other POS-related routes like sales history here in the future */}
+                  {/* <Route path="sales-history" element={<SalesHistoryPage />} /> */}
+
+                  {/* A fallback to redirect any old /pos links to the correct gatekeeper */}
+                  <Route path="*" element={<Navigate to="/pos/shifts" replace />} />
+                </Routes>
+              </PosLayout>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected Routes */}
         <Route
@@ -159,6 +187,7 @@ function App() {
                   <Route path="/hr/attendance" element={<AttendancePage />} />
                   <Route path="/hr/leave-management" element={<LeaveManagementPage />} />
                   <Route path="/hr/organization" element={<OrganizationPage />} />
+                  <Route path="/settings/benefits" element={<BenefitsPage />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

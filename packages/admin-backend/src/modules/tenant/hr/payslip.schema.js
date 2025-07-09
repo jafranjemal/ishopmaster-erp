@@ -11,6 +11,16 @@ const deductionLineSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// --- NEW SUB-SCHEMA FOR DETAILED BENEFITS ---
+const benefitLineSchema = new mongoose.Schema(
+  {
+    benefitName: { type: String, required: true },
+    amount: { type: Number, required: true },
+    type: { type: String, required: true, enum: ["deduction", "contribution"] },
+  },
+  { _id: false }
+);
+
 const payslipSchema = new mongoose.Schema(
   {
     payslipId: {
@@ -29,6 +39,7 @@ const payslipSchema = new mongoose.Schema(
       endDate: { type: Date, required: true },
     },
 
+    benefits: [benefitLineSchema],
     // Earnings
     baseSalary: { type: Number, required: true },
     totalCommissions: { type: Number, default: 0 },

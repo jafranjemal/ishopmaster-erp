@@ -9,6 +9,7 @@ const express = require("express");
 const pricingRuleSchema = require("./pricing/pricingRule.schema");
 const promotionSchema = require("./pricing/promotion.schema");
 const salesOrderSchema = require("./salesOrder/salesOrder.schema");
+const cashMovementSchema = require("./cashMovement.schema");
 const mainRouter = express.Router();
 /**
  * Manifest file for the Sales & POS module.
@@ -25,6 +26,7 @@ module.exports = {
     PricingRule: pricingRuleSchema,
     Promotion: promotionSchema,
     SalesOrder: salesOrderSchema,
+    CashMovement: cashMovementSchema,
   },
   router: mainRouter,
 };

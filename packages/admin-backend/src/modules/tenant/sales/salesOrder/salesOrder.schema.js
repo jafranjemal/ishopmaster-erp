@@ -10,7 +10,12 @@ const salesOrderSchema = new mongoose.Schema(
     sourceQuotationId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SalesInvoice",
-      required: true,
+      default: null, // No longer required
+    },
+    sourceOpportunityId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Opportunity",
+      default: null,
     },
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
@@ -24,7 +29,7 @@ const salesOrderSchema = new mongoose.Schema(
 
     items: [
       {
-        ProductVariantsId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariants" },
+        ProductVariantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariants" },
         description: { type: String },
         quantity: { type: Number },
         unitPrice: { type: Number },

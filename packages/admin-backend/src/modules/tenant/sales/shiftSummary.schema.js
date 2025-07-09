@@ -18,6 +18,12 @@ const shiftSummarySchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    // The employeeId is now optional, for cases where a non-employee admin runs a session.
+    employeeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee",
+      default: null,
+    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -58,6 +64,24 @@ const shiftSummarySchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+
+    // --- THE DEFINITIVE FIX: ADDED NEW FIELDS ---
+    /**
+     * The total cash added to the drawer for reasons other than sales (e.g., manager adding change).
+     */
+    calculatedPaidIn: {
+      type: Number,
+      default: 0,
+    },
+
+    /**
+     * The total cash removed from the drawer for reasons other than refunds (e.g., petty cash for supplies).
+     */
+    calculatedPaidOut: {
+      type: Number,
+      default: 0,
+    },
+    // --- END OF FIX ---
 
     // The cash amount the system expects to be in the drawer at the end.
     // Calculated as: openingFloat + calculatedCashIn - calculatedCashOut

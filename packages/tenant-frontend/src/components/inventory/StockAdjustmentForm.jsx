@@ -16,7 +16,7 @@ import {
 } from "ui-library";
 
 import { GitCommitVertical } from "lucide-react";
-import ProductVariantsSearch from "../procurement/ProductVariantsSearch";
+import ProductVariantSearch from "../procurement/ProductVariantSearch";
 
 const ADJUSTMENT_REASONS = [
   { value: "recount_add", label: "Stock Recount (Found)", type: "in" },
@@ -29,7 +29,7 @@ const ADJUSTMENT_REASONS = [
 
 const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   const initialFormState = {
-    ProductVariantsId: null,
+    ProductVariantId: null,
     ProductVariantsName: "",
     branchId: "",
     quantityChange: "",
@@ -42,7 +42,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   const handleProductSelect = (variant) => {
     setFormData((prev) => ({
       ...prev,
-      ProductVariantsId: variant._id,
+      ProductVariantId: variant._id,
       ProductVariantsName: variant.variantName,
     }));
   };
@@ -63,7 +63,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
     const quantityWithDirection = selectedReason.type === "out" ? -Math.abs(quantity) : Math.abs(quantity);
 
     const payload = {
-      ProductVariantsId: formData.ProductVariantsId,
+      ProductVariantId: formData.ProductVariantId,
       branchId: formData.branchId,
       quantityChange: quantityWithDirection,
       notes: `[${selectedReason.label}] ${formData.notes}`,
@@ -77,7 +77,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
     }
   };
 
-  const isFormInvalid = isSaving || !formData.ProductVariantsId || !formData.branchId || !formData.quantityChange || !formData.notes;
+  const isFormInvalid = isSaving || !formData.ProductVariantId || !formData.branchId || !formData.quantityChange || !formData.notes;
 
   return (
     <Card className="max-w-3xl mx-auto">
@@ -98,7 +98,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
                   onClick={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      ProductVariantsId: null,
+                      ProductVariantId: null,
                       ProductVariantsName: "",
                     }))
                   }
@@ -107,7 +107,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
                 </Button>
               </div>
             ) : (
-              <ProductVariantsSearch onProductSelect={handleProductSelect} />
+              <ProductVariantSearch onProductSelect={handleProductSelect} />
             )}
           </div>
 

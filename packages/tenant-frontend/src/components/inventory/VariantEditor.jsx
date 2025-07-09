@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
-  Badge,
-  Button,
-  Input,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "ui-library";
+import { Badge, Button, Input, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "ui-library";
 import { toast } from "react-hot-toast";
 import { tenantProductService } from "../../services/api";
-import { Barcode } from "lucide-react";
+import { Barcode, Trash2 } from "lucide-react";
 
-const VariantEditor = ({ variants, onPrint }) => {
+const VariantEditor = ({ variants, onPrint, onDelete }) => {
   const [editedVariants, setEditedVariants] = useState({});
   const [isSaving, setIsSaving] = useState(false);
 
@@ -43,14 +33,11 @@ const VariantEditor = ({ variants, onPrint }) => {
     }));
 
     // This is a placeholder until we build the bulk update API
-    await toast.promise(
-      tenantProductService.bulkUpdateVariants(variantsToUpdate),
-      {
-        loading: "Saving changes...",
-        success: "Variants updated successfully!",
-        error: "Could not save changes.",
-      }
-    );
+    await toast.promise(tenantProductService.bulkUpdateVariants(variantsToUpdate), {
+      loading: "Saving changes...",
+      success: "Variants updated successfully!",
+      error: "Could not save changes.",
+    });
 
     setIsSaving(false);
     setEditedVariants({}); // Clear changes after saving
@@ -78,19 +65,13 @@ const VariantEditor = ({ variants, onPrint }) => {
                   variant.variantName.split(" - ").map((name, index) => {
                     if (index === 0) {
                       return (
-                        <span
-                          key={index}
-                          className="mr-2 text-slate-100 font-semibold"
-                        >
+                        <span key={index} className="mr-2 text-slate-100 font-semibold">
                           {name}
                         </span>
                       );
                     }
                     return (
-                      <Badge
-                        key={index}
-                        className="mr-1 mb-1 bg-slate-700 text-slate-100 border-slate-500"
-                      >
+                      <Badge key={index} className="mr-1 mb-1 bg-slate-700 text-slate-100 border-slate-500">
                         {name}
                       </Badge>
                     );
@@ -98,48 +79,36 @@ const VariantEditor = ({ variants, onPrint }) => {
               </TableCell>
 
               <TableCell>
-                <Input
-                  defaultValue={variant.sku}
-                  onChange={(e) =>
-                    handleChange(variant._id, "sku", e.target.value)
-                  }
-                  className="h-8"
-                />
+                <Input defaultValue={variant.sku} onChange={(e) => handleChange(variant._id, "sku", e.target.value)} className="h-8" />
               </TableCell>
               <TableCell>
-                <Input
-                  type="number"
-                  defaultValue={variant.costPrice}
-                  onChange={(e) =>
-                    handleChange(variant._id, "costPrice", e.target.value)
-                  }
-                  className="h-8"
-                />
+                <Input type="number" defaultValue={variant.costPrice} onChange={(e) => handleChange(variant._id, "costPrice", e.target.value)} className="h-8" />
               </TableCell>
               <TableCell>
-                <Input
-                  type="number"
-                  defaultValue={variant.sellingPrice}
-                  onChange={(e) =>
-                    handleChange(variant._id, "sellingPrice", e.target.value)
-                  }
-                  className="h-8"
-                />
+                <Input type="number" defaultValue={variant.sellingPrice} onChange={(e) => handleChange(variant._id, "sellingPrice", e.target.value)} className="h-8" />
               </TableCell>
-              <TableCell className="text-center font-bold">
-                {variant.quantityInStock || 0}
-              </TableCell>
+              <TableCell className="text-center font-bold">{variant.quantityInStock || 0}</TableCell>
 
               <TableCell className="text-right">
                 {/* --- THE DEFINITIVE FIX --- */}
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => onDelete(variant._id)}
+                  aria-label="Deactivate Variant"
+                  // Disable if variant is already inactive or has stock
+                  disabled={!variant.isActive || (variant.quantityInStock && variant.quantityInStock > 0)}
+                  title={!variant.isActive ? "Variant is already inactive" : "Deactivate Variant"}
+                >
+                  <Trash2 className="h-4 w-4 text-slate-500 hover:text-red-500" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => onPrint(variant)}
                   aria-label="Print Barcode"
-                  disabled={
-                    !variant.quantityInStock || variant.quantityInStock <= 0
-                  } // Button is disabled if stock is 0
+                  disabled={!variant.quantityInStock || variant.quantityInStock <= 0} // Button is disabled if stock is 0
                 >
                   <Barcode className="h-4 w-4" />
                 </Button>
@@ -149,10 +118,7 @@ const VariantEditor = ({ variants, onPrint }) => {
         </TableBody>
       </Table>
       <div className="pt-4 text-right">
-        <Button
-          onClick={handleSaveClick}
-          disabled={isSaving || Object.keys(editedVariants).length === 0}
-        >
+        <Button onClick={handleSaveClick} disabled={isSaving || Object.keys(editedVariants).length === 0}>
           {isSaving ? "Saving Changes..." : "Save All Variant Changes"}
         </Button>
       </div>

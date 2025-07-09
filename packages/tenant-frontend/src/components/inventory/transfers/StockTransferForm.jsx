@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "ui-library";
 import { Trash2, Edit } from "lucide-react";
-import ProductVariantsSearch from "../../procurement/ProductVariantsSearch";
+import ProductVariantSearch from "../../procurement/ProductVariantSearch";
 
 const StockTransferForm = ({ formData, onFormChange, branches = [], onSave, onCancel, isSaving, onEditSerials }) => {
   const toBranchOptions = useMemo(() => {
@@ -24,10 +24,10 @@ const StockTransferForm = ({ formData, onFormChange, branches = [], onSave, onCa
   }, [branches, formData.fromBranchId]);
 
   const handleAddItem = (variant) => {
-    if (formData.items.some((item) => item.ProductVariantsId === variant._id)) return;
+    if (formData.items.some((item) => item.ProductVariantId === variant._id)) return;
     const newItem = {
       key: variant._id,
-      ProductVariantsId: variant._id,
+      ProductVariantId: variant._id,
       description: variant.variantName,
       isSerialized: variant.templateId?.type === "serialized",
       quantity: 1,
@@ -94,7 +94,7 @@ const StockTransferForm = ({ formData, onFormChange, branches = [], onSave, onCa
       </div>
       <div className={!formData.fromBranchId ? "opacity-50 pointer-events-none" : ""}>
         <Label>Add Items to Transfer</Label>
-        <ProductVariantsSearch onProductSelect={handleAddItem} />
+        <ProductVariantSearch onProductSelect={handleAddItem} />
         <p className="text-xs text-amber-400 mt-1">{!formData.fromBranchId && "Please select a source branch to add items."}</p>
       </div>
       <div className="border border-slate-700 rounded-lg overflow-hidden">

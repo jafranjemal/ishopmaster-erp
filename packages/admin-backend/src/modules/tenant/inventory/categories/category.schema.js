@@ -17,12 +17,21 @@ const categorySchema = new mongoose.Schema(
       trim: true,
     },
     // This field allows for creating a hierarchy, e.g., "Cases" is a child of "Accessories".
-    parentCategory: {
+    parent: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       default: null, // A null parent means it's a top-level category
       index: true,
     },
+    parent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      default: null, // A null parent means it's a top-level (root) category
+      index: true,
+    },
+    // For consistency with my previous Miller Column response.
+    linkedBrands: [{ type: mongoose.Schema.Types.ObjectId, ref: "Brand" }],
+    linkedRepairTypes: [{ type: mongoose.Schema.Types.ObjectId, ref: "RepairType" }],
   },
   { timestamps: true }
 );

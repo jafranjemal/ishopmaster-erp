@@ -292,6 +292,7 @@ export const tenantBrandService = {
 
 export const tenantCategoryService = {
   getAll: async () => api.get("/tenant/inventory/categories"),
+  getHierarchy: async () => api.get("/tenant/inventory/categories"),
   create: async (data) => api.post("/tenant/inventory/categories", data),
   update: async (id, data) => api.put(`/tenant/inventory/categories/${id}`, data),
   delete: async (id) => api.delete(`/tenant/inventory/categories/${id}`),
@@ -445,6 +446,8 @@ export const tenantProductService = {
   // --- We will add variant-specific methods here later ---
   getAllVariantsForTemplate: async (templateId) => api.get(`/tenant/inventory/products/variants?templateId=${templateId}`), // We need to build this backend route
   updateVariant: async (variantId, data) => api.put(`/tenant/inventory/products/variants/${variantId}`, data), // We need to build this backend route
+  // getAllVariants: async () => api.get(`/tenant/inventory/products/variants`), // We need to build this backend route
+  getAllVariants: async (params) => api.get("/tenant/inventory/products/variants", { params }),
 
   /**
    * Performs a bulk update on multiple variants at once.
@@ -686,26 +689,26 @@ export const tenantStockService = {
 
   /**
    * Submits a manual stock adjustment.
-   * @param {object} adjustmentData - { ProductVariantsId, branchId, quantityChange, notes, reason }
+   * @param {object} adjustmentData - { ProductVariantId, branchId, quantityChange, notes, reason }
    */
   createAdjustment: async (adjustmentData) => {
     return api.post("/tenant/inventory/stock/adjustments", adjustmentData);
   },
 
-  getLotQuantity: async (ProductVariantsId, branchId) => {
+  getLotQuantity: async (ProductVariantId, branchId) => {
     return api.get("/tenant/inventory/stock/lot-quantity", {
-      params: { ProductVariantsId, branchId },
+      params: { ProductVariantId, branchId },
     });
   },
-  getAvailableSerials: async (ProductVariantsId, branchId, params) => {
+  getAvailableSerials: async (ProductVariantId, branchId, params) => {
     return api.get("/tenant/inventory/stock/available-serials", {
-      params: { ProductVariantsId, branchId, ...params },
+      params: { ProductVariantId, branchId, ...params },
     });
   },
 
-  getLotsForVariant: async (ProductVariantsId, branchId) => {
+  getLotsForVariant: async (ProductVariantId, branchId) => {
     return api.get("/tenant/inventory/stock/lots-for-variant", {
-      params: { ProductVariantsId, branchId },
+      params: { ProductVariantId, branchId },
     });
   },
 
@@ -867,7 +870,11 @@ export const tenantShiftService = {
    * @param {string} shiftId - The ID of the shift to close.
    * @param {object} data - { closingFloat }
    */
-  closeShift: async (shiftId, data) => api.patch(`/tenant/sales/shifts/${shiftId}/close`, data),
+  closeShift: async (shiftId, data) =>
+    api.patch(`/tenant/sales/shifts/${shiftId}/close`, {
+      shiftId,
+      ...data,
+    }),
 
   /**
    * Gets a paginated history of closed shifts.
@@ -1106,6 +1113,23 @@ export const tenantSalesOrderService = {
 export const tenantActivityService = {
   getAllFor: async (relatedToType, relatedToId) => api.get("/tenant/crm/activities", { params: { relatedToType, relatedToId } }),
   create: async (data) => api.post("/tenant/crm/activities", data),
+};
+
+export const tenantBenefitTypeService = {
+  getAll: async () => api.get("/tenant/hr/benefits/types"),
+  create: async (data) => api.post("/tenant/hr/benefits/types", data),
+  update: async (id, data) => api.put(`/tenant/hr/benefits/types/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/hr/benefits/types/${id}`),
+};
+
+export const tenantEmployeeBenefitService = {
+  getForEmployee: async (employeeId) => api.get(`/tenant/hr/benefits/assignments/employee/${employeeId}`),
+  assignToEmployee: async (employeeId, data) => api.post(`/tenant/hr/benefits/assignments/employee/${employeeId}`, data),
+  delete: async (id) => api.delete(`/tenant/hr/benefits/assignments/${id}`),
+};
+
+export const tenantSearchService = {
+  findDocument: async (query) => api.get(`/tenant/search/documents`, { params: { query } }),
 };
 
 export default api;

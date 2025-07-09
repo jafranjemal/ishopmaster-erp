@@ -3,7 +3,7 @@ import { Input } from "ui-library";
 import { tenantProductService } from "../../services/api";
 import { debounce } from "lodash";
 
-const ProductVariantsSearch = ({ onProductSelect }) => {
+const ProductVariantSearch = ({ onProductSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -57,4 +57,4 @@ const ProductVariantsSearch = ({ onProductSelect }) => {
   );
 };
 
-export default ProductVariantsSearch;
+export default ProductVariantSearch;

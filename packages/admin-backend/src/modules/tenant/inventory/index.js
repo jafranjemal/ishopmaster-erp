@@ -6,8 +6,8 @@ const productTemplateRoutes = require("./products/productTemplate.routes");
 const brandRoutes = require("./brands/brand.routes");
 const categoryRoutes = require("./categories/category.routes");
 const productTemplateSchema = require("./products/productTemplate.schema");
-const ProductVariantsSchema = require("./products/ProductVariants.schema");
-const ProductVariantsRoutes = require("./products/ProductVariants.routes");
+const ProductVariantsSchema = require("./products/ProductVariant.schema");
+const ProductVariantsRoutes = require("./products/ProductVariant.routes");
 const inventoryLotSchema = require("./stock/inventoryLot.schema");
 const inventoryItemSchema = require("./stock/inventoryItem.schema");
 const stockMovementSchema = require("./stock/stockMovement.schema");
@@ -43,7 +43,7 @@ mainRouter.use("/assemblies", assemblyRoutes);
 module.exports = {
   schemas: {
     ProductTemplates: productTemplateSchema,
-    ProductVariantss: ProductVariantsSchema, // Will become ProductTemplates/Variant
+    ProductVariants: ProductVariantsSchema, // Will become ProductTemplates/Variant
     Brand: brandSchema,
     Category: categorySchema,
     InventoryLot: inventoryLotSchema,

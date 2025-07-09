@@ -1,12 +1,14 @@
 /**
- * Master list of attribute sets (specification sheets) for new tenants.
- * Each set maps to a product category (categoryKey) and defines relevant attributes.
+ * The definitive, corrected master list of attribute sets for a new tenant.
+ * This list has been de-duplicated, merged, and improved for a professional
+ * mobile sales and repair ERP.
  */
-const ATTRIBUTE_SETS = [
+const ATTRIBUTE_SET_MASTER_LIST = [
+  // --- DEVICE SPECIFICATIONS ---
   {
     name: "Smartphone Specifications",
-    categoryKey: "smartphones",
     attributeKeys: [
+      "model",
       "color",
       "storage",
       "ram",
@@ -18,9 +20,9 @@ const ATTRIBUTE_SETS = [
     ],
   },
   {
-    name: "iPad Specifications",
-    categoryKey: "tablets",
+    name: "Tablet Specifications",
     attributeKeys: [
+      "model",
       "color",
       "storage",
       "ram",
@@ -31,74 +33,236 @@ const ATTRIBUTE_SETS = [
     ],
   },
   {
-    name: "MacBook Specifications",
-    categoryKey: "laptops",
+    name: "Speaker Specifications",
     attributeKeys: [
       "color",
-      "storage",
-      "ram",
-      "processor",
-      "screen_size",
-      "os",
       "connectivity",
+      "power_rating",
       "battery_capacity",
+      "water_resistance",
+      "driver_size",
+      "warranty",
     ],
   },
   {
-    name: "iMac & Mac Mini Specifications",
-    categoryKey: "desktops",
-    attributeKeys: ["storage", "ram", "processor", "os", "connectivity"],
-  },
-  {
-    name: "Watch Specifications",
-    categoryKey: "apple_watch",
-    attributeKeys: ["color", "screen_size", "os", "connectivity", "material"],
-  },
-  {
-    name: "Phone Case Specifications",
-    categoryKey: "cases_covers",
-    attributeKeys: ["color", "material"],
-  },
-  {
-    name: "Screen Protector Specifications",
-    categoryKey: "screen_protectors",
-    attributeKeys: ["screen_size", "material"],
+    name: "Audio Accessory Specs",
+    attributeKeys: [
+      "color",
+      "connectivity", // Bluetooth, 3.5mm
+      "battery_capacity", // Optional
+      "noise_canceling", // Yes/No
+      "microphone", // Yes/No
+      "driver_size", // e.g., 10mm
+      "water_resistance", // e.g., IPX4
+      "warranty",
+    ],
   },
   {
     name: "Charger Specifications",
-    categoryKey: "chargers",
-    attributeKeys: ["power_supply", "connectivity"],
+    attributeKeys: [
+      "power_rating", // e.g., 20W, 30W
+      "voltage", // e.g., 5V, 9V
+      "connectivity", // e.g., USB-C, Lightning
+      "color",
+      "warranty",
+    ],
   },
   {
     name: "Earphones / Headphones",
-    categoryKey: "earphones",
-    attributeKeys: ["color", "connectivity", "material"],
+    attributeKeys: [
+      "connectivity", // e.g., Bluetooth, 3.5mm Jack
+      "driver_size", // e.g., 10mm
+      "noise_canceling", // e.g., Yes/No
+      "microphone", // e.g., Yes/No
+      "color",
+      "warranty",
+    ],
   },
   {
     name: "Spare Parts (Mobiles)",
-    categoryKey: "mobile_parts",
-    attributeKeys: ["part_type", "color", "material"],
+    attributeKeys: [
+      "model",
+      "part_type", // e.g., Display, Battery, Camera Module
+      "quality_type", // e.g., Original, Copy
+      "condition", // e.g., New, Used
+      "warranty",
+    ],
   },
   {
-    name: "Spare Parts (Laptops)",
-    categoryKey: "laptop_parts",
-    attributeKeys: ["part_type", "screen_size", "material"],
+    name: "Apple Case Specs",
+    attributeKeys: [
+      "model", // e.g., iPhone 15 Pro
+      "material", // e.g., Silicone, Leather
+      "color",
+    ],
   },
   {
-    name: "Repair Services (Phones)",
-    categoryKey: "phone_services",
-    attributeKeys: ["service_type", "screen_size", "os"],
+    name: "Apple iPhone Specs",
+    attributeKeys: [
+      "model",
+      "color",
+      "storage", // e.g., 128GB
+      "ram",
+      "screen_size",
+      "processor",
+      "os",
+    ],
   },
   {
-    name: "Repair Services (Laptops)",
-    categoryKey: "laptop_services",
-    attributeKeys: ["service_type", "screen_size", "processor", "os"],
+    name: "Apple MacBook Specs",
+    attributeKeys: ["model", "color", "storage", "ram", "processor", "screen_size", "os"],
   },
   {
-    name: "Accessories",
-    categoryKey: "accessories",
-    attributeKeys: ["color", "connectivity", "material"],
+    name: "Apple Watch Specs",
+    attributeKeys: ["model", "color", "storage", "screen_size", "connectivity", "os"],
+  },
+  {
+    name: "Color",
+    attributeKeys: ["color"],
+  },
+  {
+    name: "Power Bank Specifications",
+    attributeKeys: [
+      "battery_capacity", // e.g., 10000mAh
+      "power_rating", // e.g., 20W, 30W
+      "connector_type", // e.g., USB-C, Lightning
+      "color", // e.g., Black, White
+      "material", // e.g., Aluminum, Plastic
+      "weight", // ✅ Newly added
+    ],
+  },
+  {
+    name: "Cable Specifications",
+    attributeKeys: [
+      "length", // e.g., 1m, 2m
+      "color", // e.g., white, black
+      "connector_type", // e.g., USB-C to USB-C, USB-A to Lightning
+      "power_rating", // e.g., 60W, 100W
+      "material", // e.g., braided, rubber
+    ],
+  },
+  {
+    name: "Phone Case Attributes",
+    attributeKeys: ["color", "material"], // or just ["color"]
+  },
+  {
+    name: "Display Attributes",
+    attributeKeys: [
+      "model",
+      "screen_size",
+      "display_type", // e.g., AMOLED, LCD
+      "condition",
+      "warranty",
+    ],
+  },
+  {
+    name: "Storage",
+    attributeKeys: [
+      "storage", // e.g., 32GB, 64GB
+      "type", // e.g., microSD, USB Flash Drive
+      "speed_class", // e.g., Class 10, UHS-I, USB 3.2
+      "color", // Optional
+      "warranty", // e.g., 1 Year, 2 Years
+    ],
+  },
+  {
+    name: "Laptop Specifications",
+    attributeKeys: [
+      "model",
+      "color",
+      "storage",
+      "ram",
+      "processor",
+      "screen_size",
+      "os",
+      "connectivity",
+      "battery_capacity",
+    ],
+  },
+  {
+    name: "Smartwatch Specifications",
+    attributeKeys: ["model", "color", "screen_size", "os", "connectivity", "material"],
+  },
+
+  // --- ACCESSORY SPECIFICATIONS ---
+  {
+    name: "Phone Case Specifications",
+    attributeKeys: ["model", "color", "material"],
+  },
+  {
+    name: "Screen Protector Specs",
+    attributeKeys: ["model", "material", "quality_type"],
+  },
+  {
+    name: "Charger & Adapter Specs",
+    attributeKeys: ["power_supply", "connectivity", "quality_type"],
+  },
+  {
+    name: "Cable Specs",
+    attributeKeys: ["connectivity", "quality_type", "length"],
+  },
+  {
+    name: "Earphones & Headphones Specs",
+    attributeKeys: ["color", "connectivity", "material", "quality_type"],
+  },
+
+  // --- SPARE PART SPECIFICATIONS ---
+  {
+    name: "Display Screen Specs",
+    attributeKeys: ["model", "quality_type"],
+  },
+  {
+    name: "Housing Attributes",
+    attributeKeys: [
+      "material", // e.g., glass, plastic, aluminum
+      "color",
+      "condition",
+      "warranty",
+    ],
+  },
+  {
+    name: "Service Attributes",
+    attributeKeys: [
+      "service_duration", // e.g., 30 mins, 1 hour
+      "warranty", // e.g., 3 months, 6 months
+      "service_type", // e.g., screen replacement, battery replacement
+    ],
+  },
+  {
+    name: "Flex Cable Attributes",
+    attributeKeys: [
+      "model",
+      "length", // e.g., 10cm, 15cm
+      "connector_type", // e.g., Lightning, USB-C
+      "condition",
+      "warranty",
+    ],
+  },
+  {
+    name: "Battery Specs",
+    attributeKeys: [
+      "model",
+      "quality_type",
+      "capacity", // e.g., 2000mAh, 3000mAh
+      "voltage", // e.g., 3.8V, 7.4V
+      "condition", // New, Refurbished, Used
+      "warranty",
+    ],
+  },
+  {
+    name: "Back Glass Specs",
+    attributeKeys: ["model", "color"],
+  },
+  {
+    name: "General Spare Part Specs",
+    attributeKeys: ["part_type", "model", "color", "quality_type", "material"],
+  },
+
+  // --- SERVICE SPECIFICATIONS ---
+  {
+    name: "Repair Service Specs",
+    attributeKeys: ["service_type", "model", "os"],
   },
 ];
 
-module.exports = ATTRIBUTE_SETS;
+module.exports = ATTRIBUTE_SET_MASTER_LIST;

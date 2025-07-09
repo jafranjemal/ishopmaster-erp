@@ -4,7 +4,7 @@ import useAuth from "../../context/useAuth";
 
 const ShiftCloseForm = ({ activeShift, onSave, onCancel, isSaving }) => {
   const [closingFloat, setClosingFloat] = useState("");
-  const { formatCurrency } = useAuth();
+  const { formatCurrency, user } = useAuth();
 
   const expectedAmount = activeShift.openingFloat + activeShift.calculatedCashIn - activeShift.calculatedCashOut;
   const variance = useMemo(() => {
@@ -14,7 +14,7 @@ const ShiftCloseForm = ({ activeShift, onSave, onCancel, isSaving }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave({ closingFloat: Number(closingFloat) });
+    onSave({ closingFloat: Number(closingFloat), userId: user.id });
   };
 
   return (

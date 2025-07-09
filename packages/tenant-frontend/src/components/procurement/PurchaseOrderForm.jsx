@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Input, Label, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "ui-library";
 import { Trash2 } from "lucide-react";
-import ProductVariantsSearch from "./ProductVariantsSearch"; // Assuming this is a component for searching/selecting product variants
+import ProductVariantSearch from "./ProductVariantSearch"; // Assuming this is a component for searching/selecting product variants
 import useAuth from "../../context/useAuth";
 
 const PurchaseOrderForm = ({ poToEdit, suppliers, branches, onSave, onCancel, isSaving }) => {
@@ -23,10 +23,10 @@ const PurchaseOrderForm = ({ poToEdit, suppliers, branches, onSave, onCancel, is
   const handleHeaderChange = (e) => setPoData((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const handleAddItem = (variant) => {
-    if (poData.items.some((item) => item.ProductVariantsId === variant._id)) return; // Prevent duplicates
+    if (poData.items.some((item) => item.ProductVariantId === variant._id)) return; // Prevent duplicates
     console.log("Adding item:", variant);
     const newItem = {
-      ProductVariantsId: variant._id,
+      ProductVariantId: variant._id,
       description: variant.variantName,
       quantityOrdered: 1,
       costPrice: variant.costPrice || 0,
@@ -83,7 +83,7 @@ const PurchaseOrderForm = ({ poToEdit, suppliers, branches, onSave, onCancel, is
       </div>
       <div>
         <Label>Add Items to Order</Label>
-        <ProductVariantsSearch onProductSelect={handleAddItem} />
+        <ProductVariantSearch onProductSelect={handleAddItem} />
       </div>
       <div>
         <Table>

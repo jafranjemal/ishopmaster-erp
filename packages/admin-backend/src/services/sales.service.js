@@ -49,7 +49,7 @@ class SalesService {
     // 1. Process cart items to prepare for invoice and deduct stock
     for (const item of cartData.items) {
       const { costOfGoodsSold } = await inventoryService.decreaseStock(models, {
-        ProductVariantsId: item.ProductVariantsId,
+        ProductVariantId: item.ProductVariantId,
         branchId,
         quantity: item.quantity,
         serialNumber: item.serialNumber, // Will be present for serialized items
@@ -59,7 +59,7 @@ class SalesService {
 
       totalCostOfGoodsSold += costOfGoodsSold;
       saleItems.push({
-        ProductVariantsId: item.ProductVariantsId,
+        ProductVariantId: item.ProductVariantId,
         description: item.variantName,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
@@ -196,7 +196,7 @@ class SalesService {
    * Converts a won Opportunity into a confirmed Sales Order.
    * This version correctly reads the items from the Opportunity.
    */
-  async createOrderFromOpportunity(models, { opportunityId, userId }, session) {
+  async createOrderFromOpportunity(models, { opportunityId, userId, user }, session) {
     const { Opportunity, SalesOrder } = models;
 
     // The populate call will now work correctly
@@ -205,16 +205,22 @@ class SalesService {
     if (opportunity.stage === "Closed-Won")
       throw new Error("This opportunity has already been converted.");
 
+    const targetBranchId = opportunity.branchId || user.assignedBranchId;
+    if (!targetBranchId) {
+      throw new Error("Could not determine a destination branch for this sales order.");
+    }
+
     // --- THE DEFINITIVE FIX ---
     // Create the Sales Order by mapping the items directly from the opportunity.
+    // Create the Sales Order by mapping the items and including the new required fields.
     const [newSalesOrder] = await SalesOrder.create(
       [
         {
-          sourceOpportunityId: opportunity._id,
+          sourceOpportunityId: opportunity._id, // Correctly link to the opportunity
           customerId: opportunity.accountId,
-          branchId: opportunity.branchId, // Assuming opportunity has a branchId
+          branchId: targetBranchId, // Correctly pass the branchId
           items: opportunity.items.map((item) => ({
-            ProductVariantsId: item.ProductVariantsId,
+            productVariantId: item.productVariantId,
             description: item.description,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
@@ -230,6 +236,7 @@ class SalesService {
 
     // Update the original opportunity's status
     opportunity.stage = "Closed-Won";
+    opportunity.branchId = targetBranchId;
     await opportunity.save({ session });
 
     return newSalesOrder;

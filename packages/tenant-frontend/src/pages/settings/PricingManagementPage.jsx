@@ -22,16 +22,11 @@ const PricingManagementPage = () => {
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [rulesRes, promoRes, groupsRes, catRes] = await Promise.all([
-        tenantPricingService.getAllRules(),
-        tenantPricingService.getAllPromotions(),
-        tenantCustomerGroupService.getAll(),
-        tenantCategoryService.getAll(),
-      ]);
+      const [rulesRes, promoRes, groupsRes, catRes] = await Promise.all([tenantPricingService.getAllRules(), tenantPricingService.getAllPromotions(), tenantCustomerGroupService.getAll(), tenantCategoryService.getAll()]);
       setRules(rulesRes.data.data);
       setPromotions(promoRes.data.data);
       setCustomerGroups(groupsRes.data.data);
-      setCategories(catRes.data.data.filter((c) => !c.parentCategory)); // Assuming top-level categories for now
+      setCategories(catRes.data.data.filter((c) => !c.parent)); // Assuming top-level categories for now
     } catch (error) {
       toast.error("Failed to load pricing data.");
     } finally {
@@ -120,11 +115,7 @@ const PricingManagementPage = () => {
                 ) : rules.length === 0 ? (
                   <div className="p-8 text-center text-slate-400 italic">No pricing rules found.</div>
                 ) : (
-                  <PricingRuleList
-                    rules={rules}
-                    onEdit={(item) => setModalState({ isOpen: true, type: "rule", data: item })}
-                    onDelete={(item) => setDeleteConfirm({ type: "rule", data: item })}
-                  />
+                  <PricingRuleList rules={rules} onEdit={(item) => setModalState({ isOpen: true, type: "rule", data: item })} onDelete={(item) => setDeleteConfirm({ type: "rule", data: item })} />
                 )}
               </CardContent>
             </Card>
@@ -146,11 +137,7 @@ const PricingManagementPage = () => {
                 ) : promotions.length === 0 ? (
                   <div className="p-8 text-center text-slate-400 italic">No promotions available.</div>
                 ) : (
-                  <PromotionList
-                    promotions={promotions}
-                    onEdit={(item) => setModalState({ isOpen: true, type: "promotion", data: item })}
-                    onDelete={(item) => setDeleteConfirm({ type: "promotion", data: item })}
-                  />
+                  <PromotionList promotions={promotions} onEdit={(item) => setModalState({ isOpen: true, type: "promotion", data: item })} onDelete={(item) => setDeleteConfirm({ type: "promotion", data: item })} />
                 )}
               </CardContent>
             </Card>
@@ -159,29 +146,9 @@ const PricingManagementPage = () => {
       </Tabs.Root>
 
       {/* Create/Edit Modal */}
-      <Modal
-        isOpen={modalState.isOpen}
-        onClose={() => setModalState({ isOpen: false })}
-        title={`${modalState.data ? "Edit" : "Create"} ${modalState.type === "rule" ? "Pricing Rule" : "Promotion"}`}
-      >
-        {modalState.type === "rule" && (
-          <PricingRuleForm
-            ruleToEdit={modalState.data}
-            customerGroups={customerGroups}
-            categories={categories}
-            onSave={handleSave}
-            onCancel={() => setModalState({ isOpen: false })}
-            isSaving={isSaving}
-          />
-        )}
-        {modalState.type === "promotion" && (
-          <PromotionForm
-            promotionToEdit={modalState.data}
-            onSave={handleSave}
-            onCancel={() => setModalState({ isOpen: false })}
-            isSaving={isSaving}
-          />
-        )}
+      <Modal isOpen={modalState.isOpen} onClose={() => setModalState({ isOpen: false })} title={`${modalState.data ? "Edit" : "Create"} ${modalState.type === "rule" ? "Pricing Rule" : "Promotion"}`}>
+        {modalState.type === "rule" && <PricingRuleForm ruleToEdit={modalState.data} customerGroups={customerGroups} categories={categories} onSave={handleSave} onCancel={() => setModalState({ isOpen: false })} isSaving={isSaving} />}
+        {modalState.type === "promotion" && <PromotionForm promotionToEdit={modalState.data} onSave={handleSave} onCancel={() => setModalState({ isOpen: false })} isSaving={isSaving} />}
       </Modal>
 
       {/* Delete Confirmation */}

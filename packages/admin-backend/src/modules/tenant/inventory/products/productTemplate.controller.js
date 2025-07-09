@@ -1,5 +1,5 @@
 const asyncHandler = require("../../../../middleware/asyncHandler");
-
+const { ObjectId } = require("mongoose").Types;
 // Helper function to calculate the Cartesian product of multiple arrays
 const cartesian = (...arrays) => {
   return arrays.reduce(
@@ -88,135 +88,104 @@ exports.getAllTemplatesOld = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/tenant/inventory/products/templates
 
 exports.getAllTemplates = asyncHandler(async (req, res, next) => {
-  const { ProductTemplates } = req.models;
-  const { page = 1, limit = 25, search = "" } = req.query;
+  const { ProductTemplates, Category } = req.models;
+  const { page = 1, limit = 25, search = "", brandId, categoryId, type, isActive } = req.query;
   const skip = (page - 1) * limit;
 
-  // Build search filter
-  let matchStage = {};
+  const matchStage = {};
 
-  // Search by name
-  if (search && search.trim() !== "") {
-    const escapedSearch = search.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
-    matchStage.baseName = { $regex: escapedSearch, $options: "i" };
+  if (search) {
+    const regex = new RegExp(search.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"), "i");
+    matchStage.$or = [{ baseName: regex }, { skuPrefix: regex }];
   }
 
-  // Exact-match filters (only if value is not empty string)
-  if (req.query.brandId && req.query.brandId !== "") {
-    matchStage.brandId = req.query.brandId;
-  }
+  if (brandId && brandId !== "__none__") matchStage.brandId = new ObjectId(brandId);
+  if (type && type !== "__none__") matchStage.type = type;
+  if (isActive !== undefined && isActive !== "" && isActive !== "__none__")
+    matchStage.isActive = isActive === "true";
 
-  if (req.query.categoryId && req.query.categoryId !== "") {
-    matchStage.categoryId = req.query.categoryId;
-  }
-
-  if (req.query.type && req.query.type !== "") {
-    matchStage.type = req.query.type;
-  }
-
-  if (req.query.isActive !== undefined && req.query.isActive !== "") {
-    matchStage.isActive = req.query.isActive === "true";
-  }
-
-  const basePipeline = [
-    // Optional match stage for search filtering
-    { $match: matchStage },
-
-    // Lookup variants to count
-    {
-      $lookup: {
-        from: "productvariants",
-        localField: "_id",
-        foreignField: "templateId",
-        as: "variants",
-      },
-    },
-    {
-      $addFields: {
-        variantCount: { $size: "$variants" },
-      },
-    },
-
-    // Lookup brand
-    {
-      $lookup: {
-        from: "brands",
-        localField: "brandId",
-        foreignField: "_id",
-        as: "brand",
-      },
-    },
-    {
-      $unwind: { path: "$brand", preserveNullAndEmptyArrays: true },
-    },
-
-    // Lookup category
-    {
-      $lookup: {
-        from: "categories",
-        localField: "categoryId",
-        foreignField: "_id",
-        as: "category",
-      },
-    },
-    {
-      $unwind: { path: "$category", preserveNullAndEmptyArrays: true },
-    },
-
-    // Lookup and deeply populate attributeSetId
-    {
-      $lookup: {
-        from: "attributesets",
-        localField: "attributeSetId",
-        foreignField: "_id",
-        as: "attributeSet",
-      },
-    },
-    { $unwind: { path: "$attributeSet", preserveNullAndEmptyArrays: true } },
-
-    {
-      $lookup: {
-        from: "attributes",
-        localField: "attributeSet.attributes",
-        foreignField: "_id",
-        as: "attributeSet.attributesPopulated",
-      },
-    },
-
-    // Final shape
-    {
-      $project: {
-        baseName: 1,
-        skuPrefix: 1,
-        type: 1,
-        isActive: 1,
-        brandName: "$brand.name",
-        categoryName: "$category.name",
-        brandId: "$brand",
-        categoryId: "$category",
-        variantCount: 1,
-        createdAt: 1,
-        attributeSetId: {
-          _id: "$attributeSet._id",
-          name: "$attributeSet.name",
-          attributes: "$attributeSet.attributesPopulated",
+  // --- THE DEFINITIVE FIX: HIERARCHICAL CATEGORY FILTER ---
+  if (categoryId) {
+    // Use $graphLookup to find the selected category and all of its descendants in one step.
+    const categoryWithChildren = await Category.aggregate([
+      { $match: { _id: new ObjectId(categoryId) } },
+      {
+        $graphLookup: {
+          from: "categories",
+          startWith: "$_id",
+          connectFromField: "_id",
+          connectToField: "parent", // Correct field name
+          as: "descendants",
         },
       },
-    },
-    { $sort: { baseName: 1 } },
-  ];
+    ]);
 
+    if (categoryWithChildren.length > 0) {
+      const allIds = [
+        new ObjectId(categoryId),
+        ...categoryWithChildren[0].descendants.map((c) => c._id),
+      ];
+      matchStage.categoryId = { $in: allIds };
+    } else {
+      matchStage.categoryId = new ObjectId(categoryId);
+    }
+  }
+  // --- END OF FIX ---
+
+  // --- OPTIMIZED PAGINATION & AGGREGATION ---
+  // The $facet operator runs the count and the data fetch in a single, efficient trip.
   const results = await ProductTemplates.aggregate([
+    { $match: matchStage },
     {
       $facet: {
-        data: [...basePipeline, { $skip: skip }, { $limit: Number(limit) }],
-        totalCount: [...basePipeline, { $count: "total" }],
+        // The metadata pipeline just gets the count, which is very fast.
+        metadata: [{ $count: "total" }],
+        // The data pipeline performs the expensive lookups only on the paginated slice.
+        data: [
+          { $sort: { baseName: 1 } },
+          { $skip: skip },
+          { $limit: Number(limit) },
+          {
+            $lookup: {
+              from: "productvariants",
+              localField: "_id",
+              foreignField: "templateId",
+              as: "variants",
+            },
+          },
+          { $lookup: { from: "brands", localField: "brandId", foreignField: "_id", as: "brand" } },
+          {
+            $lookup: {
+              from: "categories",
+              localField: "categoryId",
+              foreignField: "_id",
+              as: "category",
+            },
+          },
+          { $unwind: { path: "$brand", preserveNullAndEmptyArrays: true } },
+          { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+          {
+            $project: {
+              baseName: 1,
+              skuPrefix: 1,
+              type: 1,
+              isActive: 1,
+              createdAt: 1,
+              variantCount: { $size: "$variants" },
+              brandName: "$brand.name",
+              categoryName: "$category.name",
+              // We pass the full objects for linking in the UI
+              brandId: "$brand",
+              categoryId: "$category",
+            },
+          },
+        ],
       },
     },
   ]);
 
   const data = results[0].data;
-  const total = results[0].totalCount[0]?.total || 0;
+  const total = results[0].metadata[0]?.total || 0;
 
   res.status(200).json({
     success: true,
@@ -225,9 +194,6 @@ exports.getAllTemplates = asyncHandler(async (req, res, next) => {
     pagination: {
       currentPage: Number(page),
       totalPages: Math.ceil(total / limit),
-      total, // total number of records
-      limit: Number(limit),
-      count: data.length, // how many items in this current page
     },
   });
 });

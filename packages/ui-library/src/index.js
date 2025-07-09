@@ -11,7 +11,9 @@
 
 // export * from "./lib/utils";
 
+export * from "./components/HierarchicalSelect";
 export * from "./components/Badge";
+export * from "./components/SearchableMultiSelect";
 export { default as Badge } from "./components/Badge";
 export * from "./components/Button";
 export * from "./components/Card";
