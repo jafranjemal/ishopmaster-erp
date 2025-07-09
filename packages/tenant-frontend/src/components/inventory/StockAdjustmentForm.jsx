@@ -16,7 +16,7 @@ import {
 } from "ui-library";
 
 import { GitCommitVertical } from "lucide-react";
-import ProductVariantSearch from "../procurement/ProductVariantSearch";
+import ProductVariantsSearch from "../procurement/ProductVariantsSearch";
 
 const ADJUSTMENT_REASONS = [
   { value: "recount_add", label: "Stock Recount (Found)", type: "in" },
@@ -29,8 +29,8 @@ const ADJUSTMENT_REASONS = [
 
 const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   const initialFormState = {
-    productVariantId: null,
-    productVariantName: "",
+    ProductVariantsId: null,
+    ProductVariantsName: "",
     branchId: "",
     quantityChange: "",
     reason: ADJUSTMENT_REASONS[0].value,
@@ -42,8 +42,8 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   const handleProductSelect = (variant) => {
     setFormData((prev) => ({
       ...prev,
-      productVariantId: variant._id,
-      productVariantName: variant.variantName,
+      ProductVariantsId: variant._id,
+      ProductVariantsName: variant.variantName,
     }));
   };
 
@@ -58,15 +58,12 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const selectedReason = ADJUSTMENT_REASONS.find(
-      (r) => r.value === formData.reason
-    );
+    const selectedReason = ADJUSTMENT_REASONS.find((r) => r.value === formData.reason);
     const quantity = Number(formData.quantityChange);
-    const quantityWithDirection =
-      selectedReason.type === "out" ? -Math.abs(quantity) : Math.abs(quantity);
+    const quantityWithDirection = selectedReason.type === "out" ? -Math.abs(quantity) : Math.abs(quantity);
 
     const payload = {
-      productVariantId: formData.productVariantId,
+      ProductVariantsId: formData.ProductVariantsId,
       branchId: formData.branchId,
       quantityChange: quantityWithDirection,
       notes: `[${selectedReason.label}] ${formData.notes}`,
@@ -80,39 +77,29 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
     }
   };
 
-  const isFormInvalid =
-    isSaving ||
-    !formData.productVariantId ||
-    !formData.branchId ||
-    !formData.quantityChange ||
-    !formData.notes;
+  const isFormInvalid = isSaving || !formData.ProductVariantsId || !formData.branchId || !formData.quantityChange || !formData.notes;
 
   return (
     <Card className="max-w-3xl mx-auto">
       <CardHeader>
         <CardTitle>Create New Adjustment</CardTitle>
-        <CardDescription>
-          All adjustments are logged in the audit trail. Please provide clear
-          notes.
-        </CardDescription>
+        <CardDescription>All adjustments are logged in the audit trail. Please provide clear notes.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <Label>1. Search for Product Variant</Label>
-            {formData.productVariantName ? (
+            {formData.ProductVariantsName ? (
               <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded-md mt-1">
-                <span className="font-medium">
-                  {formData.productVariantName}
-                </span>
+                <span className="font-medium">{formData.ProductVariantsName}</span>
                 <Button
                   size="sm"
                   variant="link"
                   onClick={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      productVariantId: null,
-                      productVariantName: "",
+                      ProductVariantsId: null,
+                      ProductVariantsName: "",
                     }))
                   }
                 >
@@ -120,17 +107,13 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
                 </Button>
               </div>
             ) : (
-              <ProductVariantSearch onProductSelect={handleProductSelect} />
+              <ProductVariantsSearch onProductSelect={handleProductSelect} />
             )}
           </div>
 
           <div>
             <Label htmlFor="branchId">2. Select Branch of Adjustment</Label>
-            <Select
-              onValueChange={(val) => handleSelectChange("branchId", val)}
-              value={formData.branchId}
-              required
-            >
+            <Select onValueChange={(val) => handleSelectChange("branchId", val)} value={formData.branchId} required>
               <SelectTrigger>
                 <SelectValue placeholder="Select branch location..." />
               </SelectTrigger>
@@ -160,11 +143,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
             </div>
             <div>
               <Label htmlFor="reason">4. Reason for Adjustment</Label>
-              <Select
-                onValueChange={(val) => handleSelectChange("reason", val)}
-                value={formData.reason}
-                required
-              >
+              <Select onValueChange={(val) => handleSelectChange("reason", val)} value={formData.reason} required>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

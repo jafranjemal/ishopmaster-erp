@@ -4,11 +4,20 @@ const mongoose = require("mongoose");
  * Defines the core Employee record. This is the single source of truth for a staff member,
  * separate from their optional system User account.
  */
+
+const documentSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    url: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const employeeSchema = new mongoose.Schema(
   {
     employeeId: { type: String, required: true, unique: true },
     name: { type: String, required: true, trim: true },
-
+    documents: [documentSchema],
     contactInfo: {
       phone: { type: String, trim: true },
       email: { type: String, trim: true, lowercase: true },
@@ -20,12 +29,28 @@ const employeeSchema = new mongoose.Schema(
       },
     },
 
-    designation: { type: String, required: true, trim: true }, // e.g., "Senior Technician", "Cashier"
+    designation: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "JobPosition", // Now links to the JobPosition model
+      required: true,
+    }, // e.g., "Senior Technician", "Cashier"
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
 
     // The crucial link to the system user account. Optional because not all employees may have a login.
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
 
+    accessCardId: {
+      type: String,
+      trim: true,
+      unique: true,
+      sparse: true, // Allows multiple documents to have a null value
+      default: null,
+    },
+    reportsTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee", // Self-referencing to create the hierarchy
+      default: null,
+    },
     compensation: {
       type: {
         type: String,

@@ -42,7 +42,7 @@ const EmployeeList = ({ employees, onEdit, onDelete, onView }) => {
                 <span className="text-xs text-slate-400 font-mono">{employee.employeeId}</span>
               </div>
             </TableCell>
-            <TableCell>{employee.designation}</TableCell>
+            <TableCell>{employee.designation?.name}</TableCell>
             <TableCell>{employee.branchId?.name || "N/A"}</TableCell>
             <TableCell>{employee.userId?.email || <span className="text-slate-500 italic">None</span>}</TableCell>
             <TableCell className="text-center">

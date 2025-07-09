@@ -1,27 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  Input,
-  Label,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "ui-library";
+import { Button, Input, Label, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "ui-library";
 import { Trash2 } from "lucide-react";
-import ProductVariantSearch from "./ProductVariantSearch"; // Assuming this is a component for searching/selecting product variants
+import ProductVariantsSearch from "./ProductVariantsSearch"; // Assuming this is a component for searching/selecting product variants
 import useAuth from "../../context/useAuth";
 
-const PurchaseOrderForm = ({
-  poToEdit,
-  suppliers,
-  branches,
-  onSave,
-  onCancel,
-  isSaving,
-}) => {
+const PurchaseOrderForm = ({ poToEdit, suppliers, branches, onSave, onCancel, isSaving }) => {
   const initialPoData = {
     supplierId: "",
     destinationBranchId: "",
@@ -33,23 +16,17 @@ const PurchaseOrderForm = ({
   const [totals, setTotals] = useState({ subTotal: 0, totalAmount: 0 });
   const { formatCurrency } = useAuth();
   useEffect(() => {
-    const subTotal = poData.items.reduce(
-      (sum, item) =>
-        sum + Number(item.quantityOrdered) * Number(item.costPrice),
-      0
-    );
+    const subTotal = poData.items.reduce((sum, item) => sum + Number(item.quantityOrdered) * Number(item.costPrice), 0);
     setTotals({ subTotal, totalAmount: subTotal });
   }, [poData.items]);
 
-  const handleHeaderChange = (e) =>
-    setPoData((p) => ({ ...p, [e.target.name]: e.target.value }));
+  const handleHeaderChange = (e) => setPoData((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const handleAddItem = (variant) => {
-    if (poData.items.some((item) => item.productVariantId === variant._id))
-      return; // Prevent duplicates
+    if (poData.items.some((item) => item.ProductVariantsId === variant._id)) return; // Prevent duplicates
     console.log("Adding item:", variant);
     const newItem = {
-      productVariantId: variant._id,
+      ProductVariantsId: variant._id,
       description: variant.variantName,
       quantityOrdered: 1,
       costPrice: variant.costPrice || 0,
@@ -75,20 +52,11 @@ const PurchaseOrderForm = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-6 max-h-[80vh] overflow-y-auto p-1 pr-4"
-    >
+    <form onSubmit={handleSubmit} className="space-y-6 max-h-[80vh] overflow-y-auto p-1 pr-4">
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <Label>Supplier</Label>
-          <select
-            name="supplierId"
-            value={poData.supplierId}
-            onChange={handleHeaderChange}
-            required
-            className="ui-input w-full"
-          >
+          <select name="supplierId" value={poData.supplierId} onChange={handleHeaderChange} required className="ui-input w-full">
             <option value="" disabled>
               Select Supplier
             </option>
@@ -101,13 +69,7 @@ const PurchaseOrderForm = ({
         </div>
         <div>
           <Label>Destination Branch</Label>
-          <select
-            name="destinationBranchId"
-            value={poData.destinationBranchId}
-            onChange={handleHeaderChange}
-            required
-            className="ui-input w-full"
-          >
+          <select name="destinationBranchId" value={poData.destinationBranchId} onChange={handleHeaderChange} required className="ui-input w-full">
             <option value="" disabled>
               Select Branch
             </option>
@@ -121,7 +83,7 @@ const PurchaseOrderForm = ({
       </div>
       <div>
         <Label>Add Items to Order</Label>
-        <ProductVariantSearch onProductSelect={handleAddItem} />
+        <ProductVariantsSearch onProductSelect={handleAddItem} />
       </div>
       <div>
         <Table>
@@ -142,9 +104,7 @@ const PurchaseOrderForm = ({
                   <Input
                     type="number"
                     value={item.quantityOrdered}
-                    onChange={(e) =>
-                      handleItemChange(index, "quantityOrdered", e.target.value)
-                    }
+                    onChange={(e) => handleItemChange(index, "quantityOrdered", e.target.value)}
                     className="h-8 w-20"
                   />
                 </TableCell>
@@ -152,9 +112,7 @@ const PurchaseOrderForm = ({
                   <Input
                     type="number"
                     value={item.costPrice}
-                    onChange={(e) =>
-                      handleItemChange(index, "costPrice", e.target.value)
-                    }
+                    onChange={(e) => handleItemChange(index, "costPrice", e.target.value)}
                     className="h-8 w-24"
                   />
                 </TableCell>
@@ -163,12 +121,7 @@ const PurchaseOrderForm = ({
                   {formatCurrency(item.quantityOrdered * item.costPrice)}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveItem(index)}
-                  >
+                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(index)}>
                     <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>
                 </TableCell>
@@ -178,8 +131,7 @@ const PurchaseOrderForm = ({
         </Table>
       </div>
       <div className="text-right font-semibold text-lg">
-        Total Amount:{" "}
-        <span className="font-mono">{formatCurrency(totals.totalAmount)}</span>
+        Total Amount: <span className="font-mono">{formatCurrency(totals.totalAmount)}</span>
       </div>
       <div className="pt-4 flex justify-end space-x-4">
         <Button type="button" variant="outline" onClick={onCancel}>

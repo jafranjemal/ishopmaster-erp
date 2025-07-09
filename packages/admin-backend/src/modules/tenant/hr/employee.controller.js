@@ -1,46 +1,76 @@
 const asyncHandler = require("../../../middleware/asyncHandler");
 const ErrorResponse = require("../../../utils/errorResponse");
-
-/**
- * @desc    Get all employees with pagination, plus unassigned users for the form dropdown.
- * @route   GET /api/v1/tenant/hr/employees
- * @access  Private (Requires 'hr:employee:view' or 'hr:employee:manage' permission)
- */
+const mongoose = require("mongoose");
+// @desc    Get all employees with pagination, search, plus unassigned users for the form dropdown.
+// @route   GET /api/v1/tenant/hr/employees
 exports.getAllEmployees = asyncHandler(async (req, res, next) => {
   const { Employee, User } = req.models;
   const { page = 1, limit = 25, search = "" } = req.query;
   const skip = (page - 1) * limit;
 
-  // --- Find Unassigned Users ---
-  // 1. Get all user IDs that are already linked to an employee record.
+  // --- Your excellent logic for finding unassigned users remains the same ---
   const linkedUserIds = (await Employee.find({ userId: { $ne: null } }).select("userId")).map(
     (e) => e.userId
   );
-
-  // 2. Find all users whose IDs are NOT in the linked list.
   const unassignedUsers = await User.find({ _id: { $nin: linkedUserIds } }).select("name email");
 
-  // --- Find Employees with Search and Pagination ---
-  const query = {};
-  if (search) {
-    // A robust search that looks at name, designation, and employeeId
-    query.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { designation: { $regex: search, $options: "i" } },
-      { employeeId: { $regex: search, $options: "i" } },
-    ];
-  }
+  // --- THE DEFINITIVE FIX: Using an Aggregation Pipeline for Robust Search ---
+  const searchMatchStage = search
+    ? {
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { employeeId: { $regex: search, $options: "i" } },
+          // We can now search by the populated job title text
+          { "jobPosition.title": { $regex: search, $options: "i" } },
+        ],
+      }
+    : {};
 
-  const [employees, total] = await Promise.all([
-    Employee.find(query)
-      .populate("branchId", "name")
-      .populate("userId", "email")
-      .sort({ name: 1 })
-      .skip(skip)
-      .limit(Number(limit))
-      .lean(),
-    Employee.countDocuments(query),
+  const aggregationPipeline = [
+    // 1. Lookup related documents first
+    {
+      $lookup: {
+        from: "jobpositions",
+        localField: "designation",
+        foreignField: "_id",
+        as: "jobPosition",
+      },
+    },
+    { $lookup: { from: "branches", localField: "branchId", foreignField: "_id", as: "branch" } },
+    { $lookup: { from: "users", localField: "userId", foreignField: "_id", as: "user" } },
+    // Use $unwind to deconstruct the array from the lookup
+    { $unwind: { path: "$jobPosition", preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: "$branch", preserveNullAndEmptyArrays: true } },
+    { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+    // 2. Now apply the search filter on the populated fields
+    { $match: searchMatchStage },
+  ];
+
+  // 3. Execute queries in parallel: one for the paginated data, one for the total count
+  const [employees, totalResult] = await Promise.all([
+    Employee.aggregate([
+      ...aggregationPipeline,
+      { $sort: { name: 1 } },
+      { $skip: skip },
+      { $limit: Number(limit) },
+      // 4. Project the final shape
+      {
+        $project: {
+          employeeId: 1,
+          name: 1,
+          contactInfo: 1,
+          isActive: 1,
+          createdAt: 1,
+          branchId: { _id: "$branch._id", name: "$branch.name" },
+          userId: { _id: "$user._id", email: "$user.email" },
+          designation: { _id: "$jobPosition._id", title: "$jobPosition.title" },
+        },
+      },
+    ]),
+    Employee.aggregate([...aggregationPipeline, { $count: "total" }]),
   ]);
+
+  const total = totalResult[0]?.total || 0;
 
   res.status(200).json({
     success: true,
@@ -90,43 +120,62 @@ exports.getEmployeeById = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: employee });
 });
 
-/**
- * @desc    Create a new employee
- * @route   POST /api/v1/tenant/hr/employees
- * @access  Private (Requires 'hr:employee:manage' permission)
- */
 exports.createEmployee = asyncHandler(async (req, res, next) => {
-  const { Employee } = req.models;
+  const { Employee, User } = req.models;
   const employeeData = req.body;
 
-  // Ensure userId is set to null if an empty string is passed from the form
   if (employeeData.userId === "") {
     employeeData.userId = null;
   }
+
+  // --- THE DEFINITIVE FIX: DATA INTEGRITY CHECK ---
+  if (employeeData.userId) {
+    const existingEmployeeLink = await Employee.findOne({ userId: employeeData.userId });
+    if (existingEmployeeLink) {
+      return res.status(400).json({
+        success: false,
+        error: `This user account is already linked to another employee (${existingEmployeeLink.name}).`,
+      });
+    }
+  }
+  // --- END OF FIX ---
 
   const newEmployee = await Employee.create(employeeData);
   res.status(201).json({ success: true, data: newEmployee });
 });
 
-/**
- * @desc    Update an employee
- * @route   PUT /api/v1/tenant/hr/employees/:id
- * @access  Private (Requires 'hr:employee:manage' permission)
- */
 exports.updateEmployee = asyncHandler(async (req, res, next) => {
   const { Employee } = req.models;
   const employeeData = req.body;
+  const employeeId = req.params.id;
 
   if (employeeData.userId === "") {
     employeeData.userId = null;
   }
 
-  const updatedEmployee = await Employee.findByIdAndUpdate(req.params.id, employeeData, {
+  // --- THE DEFINITIVE FIX: DATA INTEGRITY CHECK ---
+  if (employeeData.userId) {
+    // Check if another employee (not the one we are currently editing) is already using this userId
+    const existingEmployeeLink = await Employee.findOne({
+      userId: employeeData.userId,
+      _id: { $ne: employeeId }, // Exclude the current employee from the check
+    });
+    if (existingEmployeeLink) {
+      return res.status(400).json({
+        success: false,
+        error: `This user account is already linked to another employee (${existingEmployeeLink.name}).`,
+      });
+    }
+  }
+  // --- END OF FIX ---
+
+  const updatedEmployee = await Employee.findByIdAndUpdate(employeeId, employeeData, {
     new: true,
     runValidators: true,
   });
 
   if (!updatedEmployee) {
+    // Assuming ErrorResponse is a custom utility we have.
     return next(new ErrorResponse("Employee not found.", 404, "NOT_FOUND"));
   }
   res.status(200).json({ success: true, data: updatedEmployee });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { tenantHrService } from "../../services/api";
@@ -10,12 +10,19 @@ import PayslipHistoryTable from "../../components/hr/PayslipHistoryTable";
 import LeaveHistoryTable from "../../components/hr/LeaveHistoryTable";
 import CommissionsHistoryTable from "../../components/hr/CommissionsHistoryTable";
 import AttendanceHistoryTable from "../../components/hr/AttendanceHistoryTable";
+import LeaveRequestForm from "../../components/hr/LeaveRequestForm";
+import LeaveHistoryList from "../../components/hr/LeaveHistoryList";
+import EmployeeDocumentManager from "../../components/hr/employee/document/EmployeeDocumentManager";
 
 const EmployeeDetailPage = () => {
   const { id: employeeId } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [documents, setDocuments] = useState(employee?.documents || []);
+
+  const memoizedDocuments = useMemo(() => employee?.documents, [employee?.documents]);
 
   const fetchData = useCallback(async () => {
     if (!employeeId) return;
@@ -31,6 +38,57 @@ const EmployeeDetailPage = () => {
       setIsLoading(false);
     }
   }, [employeeId, navigate]);
+
+  const handleRequestLeave = async (formData) => {
+    setIsSaving(true);
+    try {
+      await toast.promise(tenantHrService.requestLeave(formData), {
+        loading: "Submitting leave request...",
+        success: "Request submitted successfully!",
+        error: (err) => err.response?.data?.error || "Failed to submit request.",
+      });
+      fetchData(); // Refresh history after submission
+      return true; // Indicate success to reset form
+    } catch (error) {
+      console.log(error);
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveDocumentsOld = async (documentData) => {
+    setIsSaving(true);
+    try {
+      await toast.promise(tenantHrService.updateEmployee(employee._id, documentData), {
+        loading: "Saving documents...",
+        success: "Documents updated!",
+        error: "Save failed.",
+      });
+      fetchData(); // Refresh data on success
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveDocuments = async (documentData) => {
+    setIsSaving(true);
+    console.log({ documentData });
+    try {
+      await toast.promise(tenantHrService.updateEmployee(employee._id, documentData), {
+        loading: "Saving documents...",
+        success: "Documents updated!",
+        error: "Save failed.",
+      });
+      fetchData(); // Refresh data on success
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -52,6 +110,10 @@ const EmployeeDetailPage = () => {
           <Tabs.Trigger value="payslips" className="px-4 py-2 ui-tabs-trigger">
             Payslip History
           </Tabs.Trigger>
+          <Tabs.Trigger value="documents" className="px-4 py-2 ui-tabs-trigger">
+            Documents
+          </Tabs.Trigger>{" "}
+          {/* <-- 3. ADD NEW TAB */}
           <Tabs.Trigger value="attendance" className="px-4 py-2 ui-tabs-trigger">
             Attendance
           </Tabs.Trigger>
@@ -66,11 +128,17 @@ const EmployeeDetailPage = () => {
           <Tabs.Content value="payslips">
             <PayslipHistoryList payslips={employee.history?.payslips} />
           </Tabs.Content>
+          <Tabs.Content value="documents">
+            <EmployeeDocumentManager documents={employee?.documents} onChange={setDocuments} onSave={handleSaveDocuments} isSaving={isSaving} />
+          </Tabs.Content>
           <Tabs.Content value="attendance">
             <AttendanceHistoryTable data={employee.history?.attendance} />
           </Tabs.Content>
           <Tabs.Content value="leave">
-            <LeaveHistoryTable data={employee.history?.leave} />
+            <div className="space-y-8">
+              <LeaveRequestForm onSave={handleRequestLeave} isSaving={isSaving} />
+              <LeaveHistoryList leaveRecords={employee.history.leave} />
+            </div>
           </Tabs.Content>
           <Tabs.Content value="Commissions">
             <CommissionsHistoryTable data={employee.history?.commissions} />

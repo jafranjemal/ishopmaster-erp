@@ -1,19 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import {
-  Modal,
-  Button,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  Label,
-} from "ui-library";
-import {
-  tenantLabelTemplateService,
-  tenantPrintService,
-} from "../../../services/api";
+import { Modal, Button, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Label } from "ui-library";
+import { tenantLabelTemplateService, tenantPrintService } from "../../../services/api";
 import { Printer, LoaderCircle } from "lucide-react";
 
 /**
@@ -65,15 +53,12 @@ const PrintModal = ({ isOpen, onClose, itemsToPrint = [] }) => {
     try {
       // Prepare the payload for the API based on the items passed in props
       const payloadItems = itemsToPrint.map((item) => ({
-        productVariantId: item.productVariantId || item._id,
+        ProductVariantsId: item.ProductVariantsId || item._id,
         quantity: item.isSerialized ? item.serials.length : item.quantity,
         serials: item.isSerialized ? item.serials : undefined,
       }));
 
-      const res = await tenantPrintService.generatePrintJob(
-        selectedTemplateId,
-        payloadItems
-      );
+      const res = await tenantPrintService.generatePrintJob(selectedTemplateId, payloadItems);
 
       const printWindow = window.open("", "_blank");
       if (!printWindow) {
@@ -109,11 +94,8 @@ const PrintModal = ({ isOpen, onClose, itemsToPrint = [] }) => {
       <div className="space-y-6">
         <div>
           <p className="text-sm text-slate-400">
-            You are about to print labels for{" "}
-            <span className="font-bold text-slate-100">
-              {itemsToPrint.length}
-            </span>{" "}
-            item(s). Please select the label template you would like to use.
+            You are about to print labels for <span className="font-bold text-slate-100">{itemsToPrint.length}</span> item(s). Please select the label
+            template you would like to use.
           </p>
         </div>
 
@@ -124,11 +106,7 @@ const PrintModal = ({ isOpen, onClose, itemsToPrint = [] }) => {
               <LoaderCircle className="h-4 w-4 animate-spin" />
             </div>
           ) : (
-            <Select
-              onValueChange={setSelectedTemplateId}
-              value={selectedTemplateId}
-              required
-            >
+            <Select onValueChange={setSelectedTemplateId} value={selectedTemplateId} required>
               <SelectTrigger id="template-select">
                 <SelectValue placeholder="Choose a label design..." />
               </SelectTrigger>
@@ -147,14 +125,10 @@ const PrintModal = ({ isOpen, onClose, itemsToPrint = [] }) => {
           <Button variant="outline" onClick={onClose}>
             Skip
           </Button>
-          <Button
-            onClick={handlePrint}
-            disabled={isPrinting || isLoadingTemplates || !selectedTemplateId}
-          >
+          <Button onClick={handlePrint} disabled={isPrinting || isLoadingTemplates || !selectedTemplateId}>
             {isPrinting ? (
               <>
-                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />{" "}
-                Generating...
+                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> Generating...
               </>
             ) : (
               <>

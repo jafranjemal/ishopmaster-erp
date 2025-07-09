@@ -1,5 +1,6 @@
 import React from "react";
 import { Search, Bell, User } from "lucide-react";
+import ClockInOutWidget from "../../../../tenant-frontend/src/components/shared/ClockInOutWidget";
 
 const TopBar = () => {
   return (
@@ -18,6 +19,7 @@ const TopBar = () => {
 
       {/* Placeholder for User Actions */}
       <div className="flex items-center space-x-6">
+        <ClockInOutWidget />
         <button className="text-slate-400 hover:text-slate-100">
           <Bell className="h-6 w-6" />
         </button>
@@ -26,9 +28,7 @@ const TopBar = () => {
             <div className="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center">
               <User className="h-6 w-6 text-slate-400" />
             </div>
-            <span className="hidden md:block text-sm font-medium">
-              Super Admin
-            </span>
+            <span className="hidden md:block text-sm font-medium">Super Admin</span>
           </button>
         </div>
       </div>

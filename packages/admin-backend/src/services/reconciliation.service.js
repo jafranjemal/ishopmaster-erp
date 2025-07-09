@@ -14,13 +14,7 @@ class ReconciliationService {
     { supplierId, goodsReceiptNoteIds, items, ...invoiceData },
     userId
   ) {
-    const {
-      SupplierInvoice,
-      GoodsReceiptNote,
-      PurchaseOrder,
-      Account,
-      Supplier,
-    } = models;
+    const { SupplierInvoice, GoodsReceiptNote, PurchaseOrder, Account, Supplier } = models;
 
     // 1. Fetch all related documents needed for reconciliation.
     const grns = await GoodsReceiptNote.find({
@@ -33,9 +27,7 @@ class ReconciliationService {
     const po = await PurchaseOrder.findById(grns[0].purchaseOrderId);
     if (!po) throw new Error("Related Purchase Order not found.");
 
-    const supplier = await Supplier.findById(supplierId).select(
-      "ledgerAccountId"
-    );
+    const supplier = await Supplier.findById(supplierId).select("ledgerAccountId");
     if (!supplier || !supplier.ledgerAccountId)
       throw new Error("Supplier's financial account not found.");
 
@@ -52,9 +44,7 @@ class ReconciliationService {
     ]);
 
     if (!grniAccount || !apAccount || !ppvAccount) {
-      throw new Error(
-        "Essential accounting ledgers (GRNI, AP, or PPV) are missing."
-      );
+      throw new Error("Essential accounting ledgers (GRNI, AP, or PPV) are missing.");
     }
 
     // --- THE DEFINITIVE FIX STARTS HERE ---
@@ -65,12 +55,9 @@ class ReconciliationService {
 
     const processedItems = items.map((item) => {
       const poItem = po.items.find(
-        (p) => p.productVariantId.toString() === item.productVariantId
+        (p) => p.ProductVariantsId.toString() === item.ProductVariantsId
       );
-      if (!poItem)
-        throw new Error(
-          `Billed item ${item.description} not found on original PO.`
-        );
+      if (!poItem) throw new Error(`Billed item ${item.description} not found on original PO.`);
 
       // Calculate the total cost for THIS line item
       const itemTotalCost = item.quantityBilled * item.finalCostPrice;
@@ -86,16 +73,11 @@ class ReconciliationService {
       return { ...item, totalCost: itemTotalCost };
     });
 
-    const purchasePriceVariance =
-      totalBilledValueInBase - totalOriginalValueInBase;
+    const purchasePriceVariance = totalBilledValueInBase - totalOriginalValueInBase;
 
     // Calculate final invoice totals
-    const subTotal = processedItems.reduce(
-      (sum, item) => sum + item.totalCost,
-      0
-    );
-    const totalAmount =
-      subTotal + (invoiceData.taxes || 0) + (invoiceData.shippingCosts || 0);
+    const subTotal = processedItems.reduce((sum, item) => sum + item.totalCost, 0);
+    const totalAmount = subTotal + (invoiceData.taxes || 0) + (invoiceData.shippingCosts || 0);
 
     // --- END OF FIX ---
 

@@ -21,7 +21,10 @@ export const FileUploader = ({
   const inputRef = useRef(null);
 
   useEffect(() => {
-    setFiles(initialFiles);
+    setFiles((prev) => {
+      const isSame = JSON.stringify(prev) === JSON.stringify(initialFiles);
+      return isSame ? prev : initialFiles;
+    });
   }, [initialFiles]);
 
   const uploadFile = useCallback(
@@ -55,7 +58,7 @@ export const FileUploader = ({
         const { data } = await axios.post(url, formData);
 
         const uploadedFile = {
-          name: data.original_filename,
+          name: data.original_filename || "untitled",
           url: data.secure_url,
         };
 
@@ -83,19 +86,14 @@ export const FileUploader = ({
           uploadedFiles.push(uploaded);
         }
 
-        const newFiles = multiple
-          ? [...files, ...uploadedFiles]
-          : uploadedFiles;
+        const newFiles = multiple ? [...files, ...uploadedFiles] : uploadedFiles;
         setFiles(newFiles);
         onUploadComplete?.(newFiles);
         toast.success("Upload complete", { id: toastId });
       } catch (error) {
-        toast.error(
-          error?.response?.data?.error?.message ||
-            error.message ||
-            "Upload failed",
-          { id: toastId }
-        );
+        toast.error(error?.response?.data?.error?.message || error.message || "Upload failed", {
+          id: toastId,
+        });
       } finally {
         setIsUploading(false);
       }
@@ -148,9 +146,7 @@ export const FileUploader = ({
           <p className="mt-2 text-sm text-slate-400">
             {isUploading ? "Uploading..." : "Drag & drop or click to upload"}
           </p>
-          <p className="text-xs text-slate-500">
-            Max {Math.round(maxSize / (1024 * 1024))}MB
-          </p>
+          <p className="text-xs text-slate-500">Max {Math.round(maxSize / (1024 * 1024))}MB</p>
         </div>
       </div>
 

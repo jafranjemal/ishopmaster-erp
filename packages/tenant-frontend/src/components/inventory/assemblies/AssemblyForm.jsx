@@ -19,7 +19,7 @@ import {
 import SerialSelectorModal from "../printing/SerialSelectorModal";
 import { Edit, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
-import ProductVariantSearch from "../../procurement/ProductVariantSearch";
+import ProductVariantsSearch from "../../procurement/ProductVariantsSearch";
 
 const AssemblyForm = ({ branches, onSave, isSaving }) => {
   const [selectedBundle, setSelectedBundle] = useState(null);
@@ -79,7 +79,7 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
 
     // Check if every serialized component has the correct number of serials selected
     for (const component of selectedBundle.templateId.bundleItems) {
-      const isSerialized = component.productVariantId.templateId?.type === "serialized";
+      const isSerialized = component.ProductVariantsId.templateId?.type === "serialized";
       if (isSerialized) {
         const requiredQty = component.quantity * quantityToAssemble;
         const selectedQty = componentSelections[component._id]?.length || 0;
@@ -103,7 +103,7 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
                 </Button>
               </div>
             ) : (
-              <ProductVariantSearch onProductSelect={handleProductSelect} />
+              <ProductVariantsSearch onProductSelect={handleProductSelect} />
             )}
           </div>
           <div>
@@ -190,7 +190,7 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
           isOpen={true}
           onClose={() => setSerialModalState({ isOpen: false, component: null })}
           onConfirm={handleSerialsConfirm}
-          productVariantId={serialModalState.component._id}
+          ProductVariantsId={serialModalState.component._id}
           branchId={fromBranchId}
           initialSelection={serialModalState.initialSelection}
           allowMultiple={true}

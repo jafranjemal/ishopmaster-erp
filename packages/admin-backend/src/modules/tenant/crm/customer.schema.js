@@ -45,6 +45,16 @@ const customerSchema = new mongoose.Schema(
       ref: "LoyaltyCard", // For a future module
       default: null,
     },
+    /**
+     * Links this customer to a specific customer group for pricing and marketing.
+     */
+    customerGroupId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CustomerGroup",
+      default: null,
+      index: true,
+    },
+
     isActive: {
       type: Boolean,
       default: true,

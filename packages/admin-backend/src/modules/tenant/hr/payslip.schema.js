@@ -3,6 +3,14 @@ const mongoose = require("mongoose");
 /**
  * Defines the final, generated payslip for an employee for a specific pay period.
  */
+const deductionLineSchema = new mongoose.Schema(
+  {
+    ruleName: { type: String, required: true },
+    amount: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
 const payslipSchema = new mongoose.Schema(
   {
     payslipId: {
@@ -27,7 +35,9 @@ const payslipSchema = new mongoose.Schema(
     bonuses: { type: Number, default: 0 },
 
     // Deductions
-    deductions: { type: Number, default: 0 }, // For taxes, advances, etc.
+    // This now stores a detailed breakdown of all applied deductions.
+    deductions: [deductionLineSchema],
+    totalDeductions: { type: Number, default: 0 }, // Store the sum for easy access
 
     // Final Calculation
     netPay: { type: Number, required: true },

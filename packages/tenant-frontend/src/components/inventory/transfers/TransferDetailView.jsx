@@ -1,17 +1,5 @@
 import React from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Badge,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "ui-library";
+import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "ui-library";
 import useAuth from "../../../context/useAuth";
 
 const TransferDetailView = ({ transfer }) => {
@@ -34,42 +22,29 @@ const TransferDetailView = ({ transfer }) => {
             <p className="text-slate-100">{transfer.fromBranchId.name}</p>
           </div>
           <div>
-            <h4 className="font-semibold text-slate-300 mb-2">
-              To (Destination)
-            </h4>
+            <h4 className="font-semibold text-slate-300 mb-2">To (Destination)</h4>
             <p className="text-slate-100">{transfer.toBranchId.name}</p>
           </div>
           <div>
             <h4 className="font-semibold text-slate-300 mb-2">Key Dates</h4>
             <p className="text-slate-400">
-              Created:{" "}
-              <span className="text-slate-100">
-                {formatDate(transfer.createdAt)}
-              </span>
+              Created: <span className="text-slate-100">{formatDate(transfer.createdAt)}</span>
             </p>
             {transfer.dispatchDate && (
               <p className="text-slate-400">
-                Dispatched:{" "}
-                <span className="text-slate-100">
-                  {formatDate(transfer.dispatchDate)}
-                </span>
+                Dispatched: <span className="text-slate-100">{formatDate(transfer.dispatchDate)}</span>
               </p>
             )}
             {transfer.receivedDate && (
               <p className="text-slate-400">
-                Received:{" "}
-                <span className="text-slate-100">
-                  {formatDate(transfer.receivedDate)}
-                </span>
+                Received: <span className="text-slate-100">{formatDate(transfer.receivedDate)}</span>
               </p>
             )}
           </div>
         </div>
 
         <div>
-          <h4 className="font-semibold text-slate-300 mb-2">
-            Items to be Transferred
-          </h4>
+          <h4 className="font-semibold text-slate-300 mb-2">Items to be Transferred</h4>
           <Table>
             <TableHeader>
               <TableRow>
@@ -80,12 +55,8 @@ const TransferDetailView = ({ transfer }) => {
             <TableBody>
               {transfer.items.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell>
-                    {item.productVariantId?.variantName || "N/A"}
-                  </TableCell>
-                  <TableCell className="text-right font-bold">
-                    {item.quantity}
-                  </TableCell>
+                  <TableCell>{item.ProductVariantsId?.variantName || "N/A"}</TableCell>
+                  <TableCell className="text-right font-bold">{item.quantity}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -95,9 +66,7 @@ const TransferDetailView = ({ transfer }) => {
         {transfer.notes && (
           <div>
             <h4 className="font-semibold text-slate-300 mb-2">Notes</h4>
-            <p className="text-sm text-slate-300 bg-slate-800 p-3 rounded-md">
-              {transfer.notes}
-            </p>
+            <p className="text-sm text-slate-300 bg-slate-800 p-3 rounded-md">{transfer.notes}</p>
           </div>
         )}
       </CardContent>

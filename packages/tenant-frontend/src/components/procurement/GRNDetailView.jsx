@@ -25,8 +25,7 @@ const GRNDetailView = ({ grn }) => {
           <div>
             <CardTitle>Goods Receipt Note #{grn.grnNumber}</CardTitle>
             <CardDescription>
-              Received on {formatDate(grn.receivedDate)} by{" "}
-              {grn.receivedBy?.name || "N/A"}
+              Received on {formatDate(grn.receivedDate)} by {grn.receivedBy?.name || "N/A"}
             </CardDescription>
           </div>
           <Badge variant="secondary" className="capitalize text-base px-3 py-1">
@@ -41,12 +40,8 @@ const GRNDetailView = ({ grn }) => {
             <p className="text-slate-100">{grn.supplierId.name}</p>
           </div>
           <div>
-            <h4 className="font-semibold text-slate-300 mb-2">
-              Original Purchase Order
-            </h4>
-            <p className="font-mono text-indigo-400">
-              {grn.purchaseOrderId.poNumber}
-            </p>
+            <h4 className="font-semibold text-slate-300 mb-2">Original Purchase Order</h4>
+            <p className="font-mono text-indigo-400">{grn.purchaseOrderId.poNumber}</p>
           </div>
         </div>
         <div>
@@ -63,29 +58,18 @@ const GRNDetailView = ({ grn }) => {
                 <React.Fragment key={index}>
                   <TableRow>
                     <TableCell>
-                      <div className="font-medium">
-                        {item.productVariantId.variantName}
-                      </div>
-                      <div className="text-xs text-slate-400 font-mono">
-                        SKU: {item.productVariantId.sku}
-                      </div>
+                      <div className="font-medium">{item.ProductVariantsId.variantName}</div>
+                      <div className="text-xs text-slate-400 font-mono">SKU: {item.ProductVariantsId.sku}</div>
                     </TableCell>
-                    <TableCell className="text-right font-bold">
-                      {item.quantityReceived}
-                    </TableCell>
+                    <TableCell className="text-right font-bold">{item.quantityReceived}</TableCell>
                   </TableRow>
                   {item.receivedSerials && item.receivedSerials.length > 0 && (
                     <TableRow className="bg-slate-900/50">
                       <TableCell colSpan={2} className="py-2 px-6">
-                        <p className="text-xs font-semibold text-slate-400 mb-1">
-                          Serial Numbers Received:
-                        </p>
+                        <p className="text-xs font-semibold text-slate-400 mb-1">Serial Numbers Received:</p>
                         <div className="flex flex-wrap gap-x-4 gap-y-1">
                           {item.receivedSerials.map((serial) => (
-                            <span
-                              key={serial}
-                              className="font-mono text-xs text-slate-300"
-                            >
+                            <span key={serial} className="font-mono text-xs text-slate-300">
                               {serial}
                             </span>
                           ))}

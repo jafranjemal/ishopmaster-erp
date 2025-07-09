@@ -12,6 +12,8 @@ import {
   Truck,
   Wrench,
   Users,
+  UserPlus,
+  TrendingUp,
   Landmark,
   UserCog,
   BarChart3,
@@ -28,7 +30,9 @@ import {
   Building2,
   KeyRound,
   Printer,
+  Tags,
   Plug,
+  FileMinus,
   BookOpen,
   Library,
   Tag,
@@ -53,6 +57,8 @@ import {
   CalendarCheck,
   BadgeCheck,
   FileCheck,
+  Clock11,
+  Contact2,
 } from "lucide-react";
 import useAuth from "../../context/useAuth";
 
@@ -175,13 +181,28 @@ const Sidebar = () => {
       permission: "crm:customer:manage",
       children: [
         {
+          name: "Leads",
+          href: "/crm/leads",
+          icon: UserPlus, // 👤➕ Represents adding/finding potential customers
+          permission: "crm:lead:view",
+        },
+        {
+          name: "Opportunities",
+          href: "/crm/opportunities",
+          icon: TrendingUp, // 📈 Represents potential deals/sales growth
+          permission: "crm:opportunity:view",
+        },
+
+        {
           name: t("sidebar.sub_menu.customers"),
           href: "/crm/customers",
           icon: Contact,
           permission: "crm:customer:manage",
         },
+        { name: "Customer Groups", href: "/crm/groups", icon: Contact2, permission: "crm:customer_group:manage" },
       ],
     },
+
     {
       name: t("sidebar.hr_parent"), // e.g., "Human Resources"
       href: "/hr/employees",
@@ -197,16 +218,20 @@ const Sidebar = () => {
         // Future features
         {
           name: "Attendance",
-          href: "/hr/attendance",
-          icon: CalendarCheck, // 📅 For check-in/out or time logs
+          icon: CalendarCheck,
           permission: "hr:attendance:view",
+          children: [{ name: "Timesheets", href: "/hr/attendance", icon: Clock11, permission: "hr:attendance:view" }],
         },
+        { name: "Leave Management", href: "/hr/leave-management", icon: CalendarCheck, permission: "hr:leave:manage" },
+
         {
           name: "Leave Management",
-          href: "/hr/leave",
+          href: "/hr/leave-management",
           icon: Plane, // ✈️ For vacation/leave modules
           permission: "hr:leave:view",
         },
+        { name: "Organization Setup", href: "/hr/organization", icon: Building2, permission: "hr:employee:view" },
+
         {
           name: "Payroll",
           href: "/hr/payroll",
@@ -341,18 +366,22 @@ const Sidebar = () => {
             },
             {
               name: t("sidebar.sub_menu.label_templates"),
+
               href: "/settings/printing",
               icon: Printer,
               permission: "settings:printing:manage",
             },
           ],
         },
+        { name: "Pricing & Promotions", href: "/settings/pricing", icon: Tags, permission: "sales:pricing:manage" },
+
         {
           name: t("sidebar.sub_menu.integrations"),
           href: "/settings/integrations",
           icon: Plug,
           permission: "settings:access",
         },
+        { name: "Deduction Rules", href: "/settings/payroll-rules", icon: FileMinus, permission: "hr:payroll:manage" },
       ],
     },
   ];

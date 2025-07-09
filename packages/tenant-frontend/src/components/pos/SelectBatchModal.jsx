@@ -8,17 +8,17 @@ import useAuth from "../../context/useAuth";
 /**
  * A modal for selecting a specific stock batch for a non-serialized item.
  */
-const SelectBatchModal = ({ isOpen, onClose, onSelectBatch, productVariant, branchId }) => {
+const SelectBatchModal = ({ isOpen, onClose, onSelectBatch, ProductVariants, branchId }) => {
   const [lots, setLots] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const { formatCurrency } = useAuth();
 
   const fetchLots = useCallback(async () => {
-    if (!isOpen || !productVariant?._id || !branchId) return;
+    if (!isOpen || !ProductVariants?._id || !branchId) return;
 
     setIsLoading(true);
     try {
-      const response = await tenantStockService.getLotsForVariant(productVariant._id, branchId);
+      const response = await tenantStockService.getLotsForVariant(ProductVariants._id, branchId);
       const availableLots = response.data.data;
       setLots(availableLots);
 
@@ -33,7 +33,7 @@ const SelectBatchModal = ({ isOpen, onClose, onSelectBatch, productVariant, bran
     } finally {
       setIsLoading(false);
     }
-  }, [isOpen, productVariant?._id, branchId]);
+  }, [isOpen, ProductVariants?._id, branchId]);
 
   useEffect(() => {
     fetchLots();
@@ -43,14 +43,14 @@ const SelectBatchModal = ({ isOpen, onClose, onSelectBatch, productVariant, bran
     const selection = {
       inventoryLotId: lot._id,
       // Use the batch-specific price if it exists, otherwise fall back to the variant's default price
-      sellingPrice: lot.sellingPriceInBaseCurrency || productVariant.defaultSellingPrice,
+      sellingPrice: lot.sellingPriceInBaseCurrency || ProductVariants.defaultSellingPrice,
     };
     onSelectBatch(selection);
     onClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Select Batch for: ${productVariant?.variantName}`}>
+    <Modal isOpen={isOpen} onClose={onClose} title={`Select Batch for: ${ProductVariants?.variantName}`}>
       <div className="space-y-4">
         <p className="text-sm text-slate-400">This item is available in multiple batches. Please select which one to sell from.</p>
         {isLoading ? (
@@ -66,7 +66,7 @@ const SelectBatchModal = ({ isOpen, onClose, onSelectBatch, productVariant, bran
                     Batch: <span className="font-mono">{lot.batchNumber || "Default"}</span>
                   </div>
                   <div className="font-bold text-lg font-mono">
-                    {formatCurrency(lot.sellingPriceInBaseCurrency || productVariant.defaultSellingPrice)}
+                    {formatCurrency(lot.sellingPriceInBaseCurrency || ProductVariants.defaultSellingPrice)}
                   </div>
                 </div>
                 <div className="text-xs text-slate-400">

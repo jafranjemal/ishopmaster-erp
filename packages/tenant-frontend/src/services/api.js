@@ -251,6 +251,13 @@ export const tenantCustomerService = {
   },
 };
 
+export const tenantCustomerGroupService = {
+  getAll: async () => api.get("/tenant/crm/groups"),
+  create: async (data) => api.post("/tenant/crm/groups", data),
+  update: async (id, data) => api.put(`/tenant/crm/groups/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/crm/groups/${id}`),
+};
+
 // --- NEW SUPPLIER (PROCUREMENT) SERVICE ---
 export const tenantSupplierService = {
   getAll: async () => api.get("/tenant/procurement/suppliers"),
@@ -679,26 +686,26 @@ export const tenantStockService = {
 
   /**
    * Submits a manual stock adjustment.
-   * @param {object} adjustmentData - { productVariantId, branchId, quantityChange, notes, reason }
+   * @param {object} adjustmentData - { ProductVariantsId, branchId, quantityChange, notes, reason }
    */
   createAdjustment: async (adjustmentData) => {
     return api.post("/tenant/inventory/stock/adjustments", adjustmentData);
   },
 
-  getLotQuantity: async (productVariantId, branchId) => {
+  getLotQuantity: async (ProductVariantsId, branchId) => {
     return api.get("/tenant/inventory/stock/lot-quantity", {
-      params: { productVariantId, branchId },
+      params: { ProductVariantsId, branchId },
     });
   },
-  getAvailableSerials: async (productVariantId, branchId, params) => {
+  getAvailableSerials: async (ProductVariantsId, branchId, params) => {
     return api.get("/tenant/inventory/stock/available-serials", {
-      params: { productVariantId, branchId, ...params },
+      params: { ProductVariantsId, branchId, ...params },
     });
   },
 
-  getLotsForVariant: async (productVariantId, branchId) => {
+  getLotsForVariant: async (ProductVariantsId, branchId) => {
     return api.get("/tenant/inventory/stock/lots-for-variant", {
-      params: { productVariantId, branchId },
+      params: { ProductVariantsId, branchId },
     });
   },
 
@@ -924,6 +931,15 @@ export const tenantHrService = {
   deleteEmployee: async (id) => {
     return api.delete(`/tenant/hr/employees/${id}`);
   },
+  getLeaveHistory: async (params) => {
+    return api.get("/tenant/hr/leave", { params });
+  },
+  requestLeave: async (leaveData) => {
+    return api.post("/tenant/hr/leave/request", leaveData);
+  },
+  updateLeaveStatus: async (id, leaveData) => {
+    return api.patch("/tenant/hr/leave/" + id + "/status", leaveData);
+  },
 };
 
 export const tenantPayrollService = {
@@ -954,6 +970,142 @@ export const tenantPayrollService = {
     });
     */
   },
+};
+
+export const tenantAttendanceService = {
+  /**
+   * Gets the current user's active (not clocked out) session.
+   */
+  getActiveSession: async () => {
+    return api.get("/tenant/hr/attendance/active");
+  },
+
+  /**
+   * Creates a new attendance record for the current user (clocks them in).
+   */
+  clockIn: async () => {
+    return api.post("/tenant/hr/attendance/clock-in");
+  },
+
+  /**
+   * Clocks out the current user's active session.
+   */
+  clockOut: async () => {
+    return api.patch("/tenant/hr/attendance/clock-out");
+  },
+  getTimesheet: async (params) => {
+    return api.get("/tenant/hr/attendance/timesheet", { params });
+  },
+
+  /**
+   * Updates an existing attendance record (Admin action).
+   * @param {string} entryId - The ID of the attendance record.
+   * @param {object} data - The updated data { checkInTime, checkOutTime, notes }.
+   */
+  updateEntry: async (entryId, data) => {
+    return api.put(`/tenant/hr/attendance/${entryId}`, data);
+  },
+
+  /**
+   * Creates a new, complete attendance record manually (Admin action).
+   * @param {object} data - { employeeId, branchId, checkInTime, checkOutTime, notes }.
+   */
+  createManualEntry: async (data) => {
+    // This would point to a new route, let's assume POST /hr/attendance/manual
+    // For now, we will re-use the update controller logic on a non-existent entry
+    // A dedicated endpoint is the better long-term solution.
+    // Let's assume a dedicated endpoint for this.
+    return api.post("/tenant/hr/attendance/manual", data);
+  },
+};
+
+export const tenantDepartmentService = {
+  getAll: async () => api.get("/tenant/hr/departments"),
+  create: async (data) => api.post("/tenant/hr/departments", data),
+  update: async (id, data) => api.put(`/tenant/hr/departments/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/hr/departments/${id}`),
+};
+
+export const tenantJobPositionService = {
+  getAll: async () => api.get("/tenant/hr/job-positions"),
+  create: async (data) => api.post("/tenant/hr/job-positions", data),
+  update: async (id, data) => api.put(`/tenant/hr/job-positions/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/hr/job-positions/${id}`),
+};
+
+export const tenantDeductionRuleService = {
+  /**
+   * Fetches all deduction rules for the tenant.
+   */
+  getAll: async () => api.get("/tenant/hr/deduction-rules"),
+
+  /**
+   * Creates a new deduction rule.
+   * @param {object} ruleData - The data for the new rule.
+   */
+  create: async (ruleData) => api.post("/tenant/hr/deduction-rules", ruleData),
+
+  /**
+   * Updates an existing deduction rule.
+   * @param {string} id - The ID of the rule to update.
+   * @param {object} ruleData - The updated rule data.
+   */
+  update: async (id, ruleData) => api.put(`/tenant/hr/deduction-rules/${id}`, ruleData),
+
+  /**
+   * Deletes a deduction rule.
+   * @param {string} id - The ID of the rule to delete.
+   */
+  delete: async (id) => api.delete(`/tenant/hr/deduction-rules/${id}`),
+};
+
+export const tenantPricingService = {
+  // Pricing Rules
+  getAllRules: async () => api.get("/tenant/sales/pricing/rules"),
+  createRule: async (data) => api.post("/tenant/sales/pricing/rules", data),
+  updateRule: async (id, data) => api.put(`/tenant/sales/pricing/rules/${id}`, data),
+  deleteRule: async (id) => api.delete(`/tenant/sales/pricing/rules/${id}`),
+
+  // Promotions
+  getAllPromotions: async () => api.get("/tenant/sales/pricing/promotions"),
+  createPromotion: async (data) => api.post("/tenant/sales/pricing/promotions", data),
+  updatePromotion: async (id, data) => api.put(`/tenant/sales/pricing/promotions/${id}`, data),
+  deletePromotion: async (id) => api.delete(`/tenant/sales/pricing/promotions/${id}`),
+};
+
+export const tenantLeadService = {
+  getAll: async (params) => api.get("/tenant/crm/leads", { params }),
+  create: async (data) => api.post("/tenant/crm/leads", data),
+  update: async (id, data) => api.put(`/tenant/crm/leads/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/crm/leads/${id}`),
+  convert: async (id) => api.post(`/tenant/crm/leads/${id}/convert`),
+};
+
+export const tenantOpportunityService = {
+  getAll: async (params) => api.get("/tenant/crm/opportunities", { params }),
+  getById: async (id) => api.get(`/tenant/crm/opportunities/${id}`),
+  create: async (data) => api.post("/tenant/crm/opportunities", data),
+  update: async (id, data) => api.put(`/tenant/crm/opportunities/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/crm/opportunities/${id}`),
+  updateStage: async (id, newStage, lossReason) => {
+    return api.patch(`/tenant/crm/opportunities/${id}/stage`, { newStage, lossReason });
+  },
+  // --- ADD NEW FUNCTIONS ---
+  addItem: async (id, itemData) => api.post(`/tenant/crm/opportunities/${id}/items`, itemData),
+  removeItem: async (id, itemId) => api.delete(`/tenant/crm/opportunities/${id}/items/${itemId}`),
+  // --- END OF NEW FUNCTIONS ---
+};
+
+export const tenantSalesOrderService = {
+  // This new service will handle the "Closed-Won" action
+  createFromOpportunity: async (opportunityId) => {
+    return api.post(`/tenant/sales/orders/from-opportunity/${opportunityId}`);
+  },
+};
+
+export const tenantActivityService = {
+  getAllFor: async (relatedToType, relatedToId) => api.get("/tenant/crm/activities", { params: { relatedToType, relatedToId } }),
+  create: async (data) => api.post("/tenant/crm/activities", data),
 };
 
 export default api;

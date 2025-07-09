@@ -16,7 +16,7 @@ import {
 import CompatibilitySelector from "./CompatibilitySelector";
 import FileUploader from "ui-library/components/FileUploader";
 import { Loader2, Trash2, X } from "lucide-react";
-import ProductVariantSearch from "../procurement/ProductVariantSearch";
+import ProductVariantsSearch from "../procurement/ProductVariantsSearch";
 
 const PRODUCT_TYPES = ["non-serialized", "serialized", "service", "bundle"];
 
@@ -99,23 +99,23 @@ const ProductTemplateForm = ({
 
   const handleAddBundleItem = (variant) => {
     // Prevent adding a bundle inside another bundle or adding duplicates
-    if (variant.templateId?.type === "bundle" || formData.bundleItems.some((item) => item.productVariantId === variant._id)) {
+    if (variant.templateId?.type === "bundle" || formData.bundleItems.some((item) => item.ProductVariantsId === variant._id)) {
       return;
     }
     const newItem = {
-      productVariantId: variant._id,
+      ProductVariantsId: variant._id,
       variantName: variant.variantName, // For display purposes in the form
       quantity: 1,
     };
     handleArrayChange("bundleItems", [...formData.bundleItems, newItem]);
   };
   const handleBundleItemQtyChange = (variantId, newQty) => {
-    const newItems = formData.bundleItems.map((item) => (item.productVariantId === variantId ? { ...item, quantity: Number(newQty) } : item));
+    const newItems = formData.bundleItems.map((item) => (item.ProductVariantsId === variantId ? { ...item, quantity: Number(newQty) } : item));
     handleArrayChange("bundleItems", newItems);
   };
 
   const handleRemoveBundleItem = (variantId) => {
-    const newItems = formData.bundleItems.filter((item) => item.productVariantId !== variantId);
+    const newItems = formData.bundleItems.filter((item) => item.ProductVariantsId !== variantId);
     handleArrayChange("bundleItems", newItems);
   };
 
@@ -241,25 +241,25 @@ const ProductTemplateForm = ({
           </CardHeader>
           <CardContent className="space-y-4">
             <Label>Add component items to this bundle</Label>
-            <ProductVariantSearch onProductSelect={handleAddBundleItem} />
+            <ProductVariantsSearch onProductSelect={handleAddBundleItem} />
             <div className="mt-4 space-y-2 border-t border-slate-700 pt-4">
               {formData.bundleItems.length === 0 && <p className="text-center text-sm text-slate-400">No components added yet.</p>}
               {formData.bundleItems.map((item) => (
-                <div key={item.productVariantId} className="flex items-center justify-between p-2 bg-slate-800 rounded-md">
+                <div key={item.ProductVariantsId} className="flex items-center justify-between p-2 bg-slate-800 rounded-md">
                   <span className="text-sm font-medium">{item.variantName}</span>
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`qty-${item.productVariantId}`} className="text-xs">
+                    <Label htmlFor={`qty-${item.ProductVariantsId}`} className="text-xs">
                       Qty:
                     </Label>
                     <Input
-                      id={`qty-${item.productVariantId}`}
+                      id={`qty-${item.ProductVariantsId}`}
                       type="number"
                       min="1"
                       value={item.quantity}
-                      onChange={(e) => handleBundleItemQtyChange(item.productVariantId, e.target.value)}
+                      onChange={(e) => handleBundleItemQtyChange(item.ProductVariantsId, e.target.value)}
                       className="h-8 w-20"
                     />
-                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveBundleItem(item.productVariantId)}>
+                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveBundleItem(item.ProductVariantsId)}>
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>

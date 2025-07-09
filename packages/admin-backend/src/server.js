@@ -24,7 +24,8 @@ const tenantProfileRoutes = require("./modules/tenant/profile/profile.routes.js"
 const tenantProductRoutes = require("../tenants/routes/product.routes.js");
 const backupRoutes = require("./modules/backups/backup.routes.js");
 const Tenant = require("./modules/admin/tenants/tenant.model.js");
-
+const apiKeyAuth = require("./middleware/apiKeyAuth.middleware");
+const { receiveDevicePunch } = require("./modules/tenant/hr/attendance.controller");
 // CORS configuration
 const allowedOrigins = [
   "http://localhost:5173", // Vite's default dev port
@@ -52,6 +53,10 @@ connectAdminDB();
 const app = express();
 app.use(express.json());
 app.use(cors(corsOptions));
+
+const publicApiRouter = express.Router();
+publicApiRouter.post("/attendance/punch", tenantResolver, apiKeyAuth, receiveDevicePunch);
+app.use("/api/v1/public", publicApiRouter);
 
 // --- DYNAMIC TENANT MODULE LOADER ---
 const tenantModulesPath = path.join(__dirname, "modules", "tenant");

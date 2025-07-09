@@ -58,6 +58,15 @@ import PayrollPage from "./pages/accounting/PayrollPage";
 import EmployeeDetailPage from "./pages/hr/EmployeeDetailPage";
 import PayrollRunDetailsPage from "./pages/hr/PayrollRunDetailsPage";
 import PayslipDetailPage from "./pages/hr/PayslipDetailPage";
+import AttendancePage from "./pages/hr/AttendancePage";
+import LeaveManagementPage from "./pages/hr/LeaveManagementPage";
+import OrganizationPage from "./pages/hr/OrganizationPage";
+import DeductionRulesPage from "./pages/settings/payroll/DeductionRulesPage";
+import CustomerGroupsPage from "./pages/crm/CustomerGroupsPage";
+import PricingManagementPage from "./pages/settings/PricingManagementPage";
+import LeadManagementPage from "./pages/crm/LeadManagementPage";
+import OpportunityKanbanPage from "./pages/crm/OpportunityKanbanPage";
+import OpportunityDetailPage from "./pages/crm/OpportunityDetailPage";
 
 function App() {
   return (
@@ -84,6 +93,7 @@ function App() {
                   <Route path="/inventory/assembly" element={<AssemblyPage />} />
                   <Route path="/inventory/products/templates/:id" element={<ProductTemplateDetailPage />} />
                   {/* Settings Module Routes */}
+                  <Route path="/settings/pricing" element={<PricingManagementPage />} />
                   <Route path="/settings/locations" element={<LocationsPage />} />
                   <Route path="/settings/users" element={<UsersPage />} />
                   <Route path="/settings/inventory/brands" element={<BrandsPage />} />
@@ -96,12 +106,18 @@ function App() {
                   <Route path="/settings/printing" element={<PrintingPage />} />{" "}
                   <Route path="/settings/printing/new" element={<LabelDesignerPage />} />{" "}
                   <Route path="/settings/printing/:id" element={<LabelDesignerPage />} />
+                  <Route path="/settings/payroll-rules" element={<DeductionRulesPage />} />
                   {/* --- accounting routes --- */}
                   <Route path="/accounting/chart" element={<ChartOfAccountsPage />} />
                   <Route path="/accounting/ledger" element={<GeneralLedgerPage />} />
                   {/* CRM Routes */}
+                  <Route path="/crm/leads" element={<LeadManagementPage />} />
+                  <Route path="/crm/opportunities" element={<OpportunityKanbanPage />} />
+                  <Route path="/crm/opportunities/:id" element={<OpportunityDetailPage />} />
+                  <Route path="/crm/groups" element={<CustomerGroupsPage />} />
                   <Route path="/crm/customers" element={<CustomersPage />} />
                   <Route path="/crm/customers/:id" element={<CustomerProfilePage />} /> {/* Procurement Routes */}
+                  {/* procurement */}
                   <Route path="/procurement/suppliers/:id" element={<SupplierProfilePage />} />
                   <Route path="/procurement/suppliers" element={<SuppliersPage />} />
                   <Route path="/procurement/po" element={<PurchaseOrdersPage />} />
@@ -140,6 +156,9 @@ function App() {
                   <Route path="/accounting/payroll" element={<PayrollPage />} />
                   <Route path="/accounting/payroll/:id" element={<PayrollRunDetailsPage />} />
                   <Route path="/accounting/payslips/:id" element={<PayslipDetailPage />} />
+                  <Route path="/hr/attendance" element={<AttendancePage />} />
+                  <Route path="/hr/leave-management" element={<LeaveManagementPage />} />
+                  <Route path="/hr/organization" element={<OrganizationPage />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

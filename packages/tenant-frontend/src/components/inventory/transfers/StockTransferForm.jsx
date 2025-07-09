@@ -16,26 +16,18 @@ import {
   TableRow,
 } from "ui-library";
 import { Trash2, Edit } from "lucide-react";
-import ProductVariantSearch from "../../procurement/ProductVariantSearch";
+import ProductVariantsSearch from "../../procurement/ProductVariantsSearch";
 
-const StockTransferForm = ({
-  formData,
-  onFormChange,
-  branches = [],
-  onSave,
-  onCancel,
-  isSaving,
-  onEditSerials,
-}) => {
+const StockTransferForm = ({ formData, onFormChange, branches = [], onSave, onCancel, isSaving, onEditSerials }) => {
   const toBranchOptions = useMemo(() => {
     return branches.filter((b) => b._id !== formData.fromBranchId);
   }, [branches, formData.fromBranchId]);
 
   const handleAddItem = (variant) => {
-    if (formData.items.some((item) => item.productVariantId === variant._id)) return;
+    if (formData.items.some((item) => item.ProductVariantsId === variant._id)) return;
     const newItem = {
       key: variant._id,
-      productVariantId: variant._id,
+      ProductVariantsId: variant._id,
       description: variant.variantName,
       isSerialized: variant.templateId?.type === "serialized",
       quantity: 1,
@@ -45,9 +37,7 @@ const StockTransferForm = ({
   };
 
   const handleItemQuantityChange = (key, value) => {
-    const newItems = formData.items.map((item) =>
-      item.key === key ? { ...item, quantity: Number(value) || 1 } : item
-    );
+    const newItems = formData.items.map((item) => (item.key === key ? { ...item, quantity: Number(value) || 1 } : item));
     onFormChange("items", newItems);
   };
 
@@ -73,11 +63,7 @@ const StockTransferForm = ({
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <Label>From (Source)</Label>
-          <Select
-            onValueChange={(val) => onFormChange("fromBranchId", val)}
-            value={formData.fromBranchId}
-            required
-          >
+          <Select onValueChange={(val) => onFormChange("fromBranchId", val)} value={formData.fromBranchId} required>
             <SelectTrigger>
               <SelectValue placeholder="Select source branch..." />
             </SelectTrigger>
@@ -92,12 +78,7 @@ const StockTransferForm = ({
         </div>
         <div>
           <Label>To (Destination)</Label>
-          <Select
-            onValueChange={(val) => onFormChange("toBranchId", val)}
-            value={formData.toBranchId}
-            required
-            disabled={!formData.fromBranchId}
-          >
+          <Select onValueChange={(val) => onFormChange("toBranchId", val)} value={formData.toBranchId} required disabled={!formData.fromBranchId}>
             <SelectTrigger>
               <SelectValue placeholder="Select destination branch..." />
             </SelectTrigger>
@@ -113,10 +94,8 @@ const StockTransferForm = ({
       </div>
       <div className={!formData.fromBranchId ? "opacity-50 pointer-events-none" : ""}>
         <Label>Add Items to Transfer</Label>
-        <ProductVariantSearch onProductSelect={handleAddItem} />
-        <p className="text-xs text-amber-400 mt-1">
-          {!formData.fromBranchId && "Please select a source branch to add items."}
-        </p>
+        <ProductVariantsSearch onProductSelect={handleAddItem} />
+        <p className="text-xs text-amber-400 mt-1">{!formData.fromBranchId && "Please select a source branch to add items."}</p>
       </div>
       <div className="border border-slate-700 rounded-lg overflow-hidden">
         <Table>
@@ -142,12 +121,7 @@ const StockTransferForm = ({
                   {item.isSerialized ? (
                     <div className="flex items-center justify-center gap-2">
                       <Badge variant="default">{item.serials.length} Selected</Badge>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEditSerials(item)}
-                      >
+                      <Button type="button" variant="outline" size="sm" onClick={() => onEditSerials(item)}>
                         <Edit className="h-3 w-3 mr-1" /> Select
                       </Button>
                     </div>
@@ -162,12 +136,7 @@ const StockTransferForm = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleRemoveItem(item.key)}
-                  >
+                  <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveItem(item.key)}>
                     <Trash2 className="h-4 w-4 text-red-500" />
                   </Button>
                 </TableCell>
@@ -178,11 +147,7 @@ const StockTransferForm = ({
       </div>
       <div>
         <Label>Notes (Optional)</Label>
-        <Input
-          name="notes"
-          value={formData.notes}
-          onChange={(e) => onFormChange("notes", e.target.value)}
-        />
+        <Input name="notes" value={formData.notes} onChange={(e) => onFormChange("notes", e.target.value)} />
       </div>
       <div className="pt-4 flex justify-end space-x-4">
         <Button type="button" variant="outline" onClick={onCancel}>

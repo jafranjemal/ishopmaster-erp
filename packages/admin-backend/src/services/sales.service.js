@@ -49,7 +49,7 @@ class SalesService {
     // 1. Process cart items to prepare for invoice and deduct stock
     for (const item of cartData.items) {
       const { costOfGoodsSold } = await inventoryService.decreaseStock(models, {
-        productVariantId: item.productVariantId,
+        ProductVariantsId: item.ProductVariantsId,
         branchId,
         quantity: item.quantity,
         serialNumber: item.serialNumber, // Will be present for serialized items
@@ -59,7 +59,7 @@ class SalesService {
 
       totalCostOfGoodsSold += costOfGoodsSold;
       saleItems.push({
-        productVariantId: item.productVariantId,
+        ProductVariantsId: item.ProductVariantsId,
         description: item.variantName,
         quantity: item.quantity,
         unitPrice: item.unitPrice,
@@ -154,6 +154,85 @@ class SalesService {
       ]);
     }
     return salesInvoice;
+  }
+
+  /**
+   * Converts a Quotation into a confirmed Sales Order.
+   */
+  async convertQuoteToOrder(models, { quoteId, userId }) {
+    const { SalesInvoice, SalesOrder } = models;
+
+    const quote = await SalesInvoice.findById(quoteId);
+    if (!quote || quote.status !== "quotation") {
+      throw new Error("Quotation not found or cannot be converted.");
+    }
+
+    // Check if quote has expired
+    if (quote.expiryDate && new Date(quote.expiryDate) < new Date()) {
+      throw new Error("This quotation has expired.");
+    }
+
+    // Create the Sales Order from the quote's data
+    const [newSalesOrder] = await SalesOrder.create([
+      {
+        sourceQuotationId: quote._id,
+        customerId: quote.customerId,
+        branchId: quote.branchId,
+        items: quote.items,
+        totalAmount: quote.totalAmount,
+        notes: quote.notes,
+        createdBy: userId,
+      },
+    ]);
+
+    // Update the original quote's status
+    quote.status = "completed"; // Or a new 'converted' status if needed
+    await quote.save();
+
+    return newSalesOrder;
+  }
+
+  /**
+   * Converts a won Opportunity into a confirmed Sales Order.
+   * This version correctly reads the items from the Opportunity.
+   */
+  async createOrderFromOpportunity(models, { opportunityId, userId }, session) {
+    const { Opportunity, SalesOrder } = models;
+
+    // The populate call will now work correctly
+    const opportunity = await Opportunity.findById(opportunityId).session(session);
+    if (!opportunity) throw new Error("Opportunity not found.");
+    if (opportunity.stage === "Closed-Won")
+      throw new Error("This opportunity has already been converted.");
+
+    // --- THE DEFINITIVE FIX ---
+    // Create the Sales Order by mapping the items directly from the opportunity.
+    const [newSalesOrder] = await SalesOrder.create(
+      [
+        {
+          sourceOpportunityId: opportunity._id,
+          customerId: opportunity.accountId,
+          branchId: opportunity.branchId, // Assuming opportunity has a branchId
+          items: opportunity.items.map((item) => ({
+            ProductVariantsId: item.ProductVariantsId,
+            description: item.description,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            finalPrice: item.finalPrice,
+          })),
+          totalAmount: opportunity.amount,
+          createdBy: userId,
+        },
+      ],
+      { session }
+    );
+    // --- END OF FIX ---
+
+    // Update the original opportunity's status
+    opportunity.stage = "Closed-Won";
+    await opportunity.save({ session });
+
+    return newSalesOrder;
   }
 }
 

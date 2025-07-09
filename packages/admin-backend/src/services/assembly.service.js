@@ -19,10 +19,10 @@ class AssemblyService {
     models,
     { bundleVariantId, branchId, quantityToAssemble, componentSelections, userId }
   ) {
-    const { ProductVariants, InventoryItem } = models;
+    const { ProductVariantss, InventoryItem } = models;
 
     // 1. Fetch the bundle's recipe
-    const bundleVariant = await ProductVariants.findById(bundleVariantId)
+    const bundleVariant = await ProductVariantss.findById(bundleVariantId)
       .populate("templateId")
       .lean();
     if (!bundleVariant || bundleVariant.templateId.type !== "bundle") {
@@ -33,17 +33,17 @@ class AssemblyService {
     // 2. Decrease stock for all component parts
     const consumedComponents = [];
     for (const component of recipe) {
-      const componentVariant = await ProductVariants.findById(component.productVariantId)
+      const componentVariant = await ProductVariantss.findById(component.ProductVariantsId)
         .populate("templateId")
         .lean();
       if (!componentVariant)
-        throw new Error(`Component with ID ${component.productVariantId} not found.`);
+        throw new Error(`Component with ID ${component.ProductVariantsId} not found.`);
 
       const isSerialized = componentVariant.templateId.type === "serialized";
       const requiredQty = component.quantity * quantityToAssemble;
 
       if (isSerialized) {
-        const selectedSerials = componentSelections[component.productVariantId.toString()];
+        const selectedSerials = componentSelections[component.ProductVariantsId.toString()];
         if (!selectedSerials || selectedSerials.length !== requiredQty) {
           throw new Error(
             `Incorrect number of serials selected for component ${componentVariant.variantName}. Required: ${requiredQty}, Selected: ${selectedSerials?.length || 0}`
@@ -52,7 +52,7 @@ class AssemblyService {
 
         for (const serial of selectedSerials) {
           await inventoryService.decreaseStock(models, {
-            productVariantId: component.productVariantId,
+            ProductVariantsId: component.ProductVariantsId,
             branchId,
             quantity: 1,
             serialNumber: serial,
@@ -63,13 +63,13 @@ class AssemblyService {
           const consumedItem = await InventoryItem.findOne({ serialNumber: serial }).lean();
           if (consumedItem)
             consumedComponents.push({
-              productVariantId: component.productVariantId,
+              ProductVariantsId: component.ProductVariantsId,
               inventoryItemId: consumedItem._id,
             });
         }
       } else {
         await inventoryService.decreaseStock(models, {
-          productVariantId: component.productVariantId,
+          ProductVariantsId: component.ProductVariantsId,
           branchId,
           quantity: requiredQty,
           userId,
@@ -90,7 +90,7 @@ class AssemblyService {
     }
 
     await inventoryService.increaseStock(models, {
-      productVariantId: bundleVariantId,
+      ProductVariantsId: bundleVariantId,
       branchId,
       quantity: quantityToAssemble,
       costPriceInBaseCurrency: bundleVariant.defaultCostPrice, // Cost should be sum of components in a real system

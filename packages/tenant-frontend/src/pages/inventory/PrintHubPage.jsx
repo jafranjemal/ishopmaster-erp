@@ -1,24 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import * as Tabs from "@radix-ui/react-tabs";
-import {
-  tenantGrnService,
-  tenantLabelTemplateService,
-  tenantPrintService,
-} from "../../services/api";
-import {
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  Label,
-} from "ui-library";
+import { tenantGrnService, tenantLabelTemplateService, tenantPrintService } from "../../services/api";
+import { Button, Card, CardContent, CardHeader, CardTitle, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Label } from "ui-library";
 import { Printer, QrCode, Barcode, HelpCircle } from "lucide-react";
 import PrintQueue from "../../components/inventory/printing/PrintQueue";
 import AddFromGRN from "../../components/inventory/printing/AddFromGRN";
@@ -59,27 +43,18 @@ const PrintHubPage = () => {
       const newItems = itemsToAdd
         .map((item) => ({
           ...item,
-          key: `${item.productVariantId}-${
-            item.batchNumber || (item.serials && item.serials[0]) || Date.now()
-          }`,
+          key: `${item.ProductVariantsId}-${item.batchNumber || (item.serials && item.serials[0]) || Date.now()}`,
         }))
-        .filter(
-          (newItem) => !printQueue.some((qItem) => qItem.key === newItem.key)
-        );
+        .filter((newItem) => !printQueue.some((qItem) => qItem.key === newItem.key));
       setPrintQueue((prev) => [...prev, ...newItems]);
     },
     [printQueue]
   );
 
-  const handleAdhocAdd = useCallback(
-    (itemToAdd) => handleAddToQueue([itemToAdd]),
-    [handleAddToQueue]
-  );
+  const handleAdhocAdd = useCallback((itemToAdd) => handleAddToQueue([itemToAdd]), [handleAddToQueue]);
 
   const handleQueueQuantityChange = useCallback((key, newQuantity) => {
-    setPrintQueue((q) =>
-      q.map((i) => (i.key === key ? { ...i, quantity: newQuantity } : i))
-    );
+    setPrintQueue((q) => q.map((i) => (i.key === key ? { ...i, quantity: newQuantity } : i)));
   }, []);
 
   const handleRemoveFromQueue = useCallback((key) => {
@@ -110,9 +85,7 @@ const PrintHubPage = () => {
 
   const handlePrint = async () => {
     if (!selectedTemplateId || printQueue.length === 0) {
-      return toast.error(
-        "Please select a template and add items to the queue."
-      );
+      return toast.error("Please select a template and add items to the queue.");
     }
     setIsPrinting(true);
     const printToast = toast.loading("Generating print document...");
@@ -120,15 +93,12 @@ const PrintHubPage = () => {
     try {
       // Prepare the payload for the API
       const itemsToPrint = printQueue.map((item) => ({
-        productVariantId: item.productVariantId,
+        ProductVariantsId: item.ProductVariantsId,
         quantity: item.isSerialized ? item.serials.length : item.quantity,
         serials: item.isSerialized ? item.serials : undefined,
       }));
 
-      const res = await tenantPrintService.generateLabels(
-        selectedTemplateId,
-        itemsToPrint
-      );
+      const res = await tenantPrintService.generateLabels(selectedTemplateId, itemsToPrint);
 
       const printWindow = window.open("", "_blank");
       if (!printWindow) {
@@ -154,27 +124,18 @@ const PrintHubPage = () => {
     }
   };
 
-  if (isLoading)
-    return <div className="p-8 text-center">Loading Print Hub...</div>;
+  if (isLoading) return <div className="p-8 text-center">Loading Print Hub...</div>;
 
   if (!printMode) {
     return (
       <div className="text-center p-8">
         <h1 className="text-3xl font-bold mb-4">Print Hub</h1>
-        <p className="text-slate-400 mb-8">
-          What would you like to print today?
-        </p>
+        <p className="text-slate-400 mb-8">What would you like to print today?</p>
         <div className="flex justify-center gap-8">
-          <Button
-            onClick={() => setPrintMode("barcode")}
-            className="h-24 w-48 text-lg flex-col gap-2"
-          >
+          <Button onClick={() => setPrintMode("barcode")} className="h-24 w-48 text-lg flex-col gap-2">
             <Barcode className="h-8 w-8" /> Barcodes
           </Button>
-          <Button
-            onClick={() => setPrintMode("qrcode")}
-            className="h-24 w-48 text-lg flex-col gap-2"
-          >
+          <Button onClick={() => setPrintMode("qrcode")} className="h-24 w-48 text-lg flex-col gap-2">
             <QrCode className="h-8 w-8" /> QR Codes
           </Button>
         </div>
@@ -187,19 +148,11 @@ const PrintHubPage = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">
           Print Hub:{" "}
-          <span
-            onClick={() => setPrintMode(null)}
-            className="capitalize text-indigo-400"
-          >
+          <span onClick={() => setPrintMode(null)} className="capitalize text-indigo-400">
             {printMode}s
           </span>
         </h1>
-        <Button
-          onClick={handlePrint}
-          disabled={
-            isPrinting || !selectedTemplateId || printQueue.length === 0
-          }
-        >
+        <Button onClick={handlePrint} disabled={isPrinting || !selectedTemplateId || printQueue.length === 0}>
           <Printer className="mr-2 h-4 w-4" />
           {isPrinting ? "Generating..." : "Generate & Print"}
         </Button>
@@ -208,10 +161,7 @@ const PrintHubPage = () => {
       <Card>
         <CardContent className="p-4 space-y-4">
           <Label>1. Select Label Template</Label>
-          <Select
-            onValueChange={setSelectedTemplateId}
-            value={selectedTemplateId}
-          >
+          <Select onValueChange={setSelectedTemplateId} value={selectedTemplateId}>
             <SelectTrigger>
               <SelectValue placeholder="Choose a label design..." />
             </SelectTrigger>
@@ -235,16 +185,10 @@ const PrintHubPage = () => {
             Add Ad-hoc Item
           </Tabs.Trigger>
         </Tabs.List>
-        <Tabs.Content
-          value="grn"
-          className="p-4 border border-t-0 border-slate-700 rounded-b-md"
-        >
+        <Tabs.Content value="grn" className="p-4 border border-t-0 border-slate-700 rounded-b-md">
           <AddFromGRN grns={grns} onAddItems={handleAddToQueue} />
         </Tabs.Content>
-        <Tabs.Content
-          value="adhoc"
-          className="p-4 border border-t-0 border-slate-700 rounded-b-md"
-        >
+        <Tabs.Content value="adhoc" className="p-4 border border-t-0 border-slate-700 rounded-b-md">
           <AddAdhoc onAddItem={handleAdhocAdd} />
         </Tabs.Content>
       </Tabs.Root>
@@ -268,7 +212,7 @@ const PrintHubPage = () => {
           isOpen={true}
           onClose={() => setSerialModalState({ isOpen: false, item: null })}
           onConfirm={handleSerialsConfirm}
-          productVariantId={serialModalState.item.productVariantId}
+          ProductVariantsId={serialModalState.item.ProductVariantsId}
           branchId={serialModalState.item.branchId} // This needs to be passed in the queue item
           initialSelection={serialModalState.item.serials}
         />

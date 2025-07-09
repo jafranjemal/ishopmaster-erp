@@ -30,8 +30,7 @@ const PurchaseOrderDetailPage = () => {
         throw new Error("Could not fetch purchase order details.");
       }
     } catch (err) {
-      const errorMessage =
-        err.response?.data?.error || "Failed to load purchase order.";
+      const errorMessage = err.response?.data?.error || "Failed to load purchase order.";
       toast.error(errorMessage);
       setError(errorMessage);
     } finally {
@@ -46,29 +45,22 @@ const PurchaseOrderDetailPage = () => {
   const handleConfirmReceipt = async (receivedData) => {
     setIsSaving(true);
     try {
-      await toast.promise(
-        tenantPurchaseOrderService.receiveGoods(poId, receivedData),
-        {
-          loading: "Processing receipt...",
-          success: "Goods received and stock updated successfully!",
-          error: (err) =>
-            err.response?.data?.error || "Failed to process receipt.",
-        }
-      );
+      await toast.promise(tenantPurchaseOrderService.receiveGoods(poId, receivedData), {
+        loading: "Processing receipt...",
+        success: "Goods received and stock updated successfully!",
+        error: (err) => err.response?.data?.error || "Failed to process receipt.",
+      });
       // After success, refetch the PO data to show its updated status
       await fetchData();
 
       const printQueueItems = receivedData.receivedItems.map((item) => {
-        const poItem = purchaseOrder.items.find(
-          (pi) => pi.productVariantId._id === item.productVariantId
-        );
+        const poItem = purchaseOrder.items.find((pi) => pi.ProductVariantsId._id === item.ProductVariantsId);
         return {
-          productVariantId: item.productVariantId,
+          ProductVariantsId: item.ProductVariantsId,
           variantName: poItem.description,
-          sku: poItem.productVariantId.sku,
+          sku: poItem.ProductVariantsId.sku,
           quantity: item.quantityReceived,
-          isSerialized:
-            poItem.productVariantId.templateId?.type === "serialized",
+          isSerialized: poItem.ProductVariantsId.templateId?.type === "serialized",
           serials: item.serials || [],
           batchNumber: purchaseOrder.poNumber,
         };
@@ -82,23 +74,15 @@ const PurchaseOrderDetailPage = () => {
     }
   };
 
-  if (isLoading)
-    return <div className="p-8 text-center">Loading Purchase Order...</div>;
-  if (error)
-    return <div className="p-8 text-center text-red-400">Error: {error}</div>;
-  if (!purchaseOrder)
-    return <div className="p-8 text-center">Purchase Order not found.</div>;
+  if (isLoading) return <div className="p-8 text-center">Loading Purchase Order...</div>;
+  if (error) return <div className="p-8 text-center text-red-400">Error: {error}</div>;
+  if (!purchaseOrder) return <div className="p-8 text-center">Purchase Order not found.</div>;
 
-  const canReceiveGoods = !["fully_received", "cancelled"].includes(
-    purchaseOrder.status
-  );
+  const canReceiveGoods = !["fully_received", "cancelled"].includes(purchaseOrder.status);
 
   return (
     <div className="space-y-8">
-      <Link
-        to="/procurement/po"
-        className="flex items-center text-sm text-indigo-400 hover:underline"
-      >
+      <Link to="/procurement/po" className="flex items-center text-sm text-indigo-400 hover:underline">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to all Purchase Orders
       </Link>
@@ -107,19 +91,9 @@ const PurchaseOrderDetailPage = () => {
       <PurchaseOrderDetailView purchaseOrder={purchaseOrder} />
 
       {/* Conditionally render the receiving form */}
-      {canReceiveGoods && (
-        <GoodsReceivingForm
-          purchaseOrder={purchaseOrder}
-          onReceive={handleConfirmReceipt}
-          isSaving={isSaving}
-        />
-      )}
+      {canReceiveGoods && <GoodsReceivingForm purchaseOrder={purchaseOrder} onReceive={handleConfirmReceipt} isSaving={isSaving} />}
 
-      <PrintModal
-        isOpen={isPrintModalOpen}
-        onClose={() => setIsPrintModalOpen(false)}
-        itemsToPrint={itemsToPrint}
-      />
+      <PrintModal isOpen={isPrintModalOpen} onClose={() => setIsPrintModalOpen(false)} itemsToPrint={itemsToPrint} />
     </div>
   );
 };

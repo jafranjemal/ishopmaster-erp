@@ -10,11 +10,7 @@ exports.createCustomer = asyncHandler(async (req, res, next) => {
   try {
     await session.withTransaction(async () => {
       // Delegate the complex, multi-step logic to the service layer
-      customer = await customerService.createCustomerWithLedger(
-        req.models,
-        req.body,
-        session
-      );
+      customer = await customerService.createCustomerWithLedger(req.models, req.body, session);
     });
     res.status(201).json({ success: true, data: customer });
   } finally {
@@ -28,10 +24,7 @@ exports.createCustomer = asyncHandler(async (req, res, next) => {
 exports.getAllCustomers = asyncHandler(async (req, res, next) => {
   const { Customer } = req.models;
   // Populate the ledgerAccountId to show the linked financial account details if needed
-  const customers = await Customer.find({}).populate(
-    "ledgerAccountId",
-    "name type"
-  );
+  const customers = await Customer.find({}).populate("ledgerAccountId", "name type");
   res.status(200).json({ success: true, data: customers });
 });
 
@@ -40,18 +33,13 @@ exports.getAllCustomers = asyncHandler(async (req, res, next) => {
 // @access  Private (Requires 'crm:customer:manage' permission)
 exports.getCustomerById = asyncHandler(async (req, res, next) => {
   const { Customer } = req.models;
-  const customer = await Customer.findById(req.params.id).populate(
-    "ledgerAccountId",
-    "name type"
-  );
+  const customer = await Customer.findById(req.params.id).populate("ledgerAccountId", "name type");
 
   if (!customer) {
-    return res
-      .status(404)
-      .json({
-        success: false,
-        error: `Customer not found with id of ${req.params.id}`,
-      });
+    return res.status(404).json({
+      success: false,
+      error: `Customer not found with id of ${req.params.id}`,
+    });
   }
 
   res.status(200).json({ success: true, data: customer });
@@ -64,22 +52,16 @@ exports.updateCustomer = asyncHandler(async (req, res, next) => {
   const { Customer } = req.models;
   // Whitelist of fields that a user is allowed to update.
   // Notice `ledgerAccountId` is NOT included for security.
-  const { name, phone, email, address, creditLimit, isActive } = req.body;
-  const fieldsToUpdate = { name, phone, email, address, creditLimit, isActive };
+  const { name, phone, email, address, creditLimit, isActive, customerGroupId } = req.body;
+  const fieldsToUpdate = { name, phone, email, address, creditLimit, isActive, customerGroupId };
 
-  const updatedCustomer = await Customer.findByIdAndUpdate(
-    req.params.id,
-    fieldsToUpdate,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const updatedCustomer = await Customer.findByIdAndUpdate(req.params.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!updatedCustomer)
-    return res
-      .status(404)
-      .json({ success: false, error: "Customer not found" });
+    return res.status(404).json({ success: false, error: "Customer not found" });
   res.status(200).json({ success: true, data: updatedCustomer });
 });
 
@@ -90,10 +72,7 @@ exports.deleteCustomer = asyncHandler(async (req, res, next) => {
   const { Customer, LedgerEntry } = req.models;
 
   const customer = await Customer.findById(req.params.id);
-  if (!customer)
-    return res
-      .status(404)
-      .json({ success: false, error: "Customer not found" });
+  if (!customer) return res.status(404).json({ success: false, error: "Customer not found" });
 
   // Data Integrity Check: Prevent deletion if the customer has financial history.
   if (customer.ledgerAccountId) {
@@ -128,16 +107,12 @@ exports.getCustomerLedger = asyncHandler(async (req, res, next) => {
   const customerId = req.params.id;
 
   // 1. Find the customer to get their ledgerAccountId
-  const customer = await Customer.findById(customerId)
-    .select("ledgerAccountId")
-    .lean();
+  const customer = await Customer.findById(customerId).select("ledgerAccountId").lean();
   if (!customer || !customer.ledgerAccountId) {
-    return res
-      .status(404)
-      .json({
-        success: false,
-        error: "Customer or their financial account not found.",
-      });
+    return res.status(404).json({
+      success: false,
+      error: "Customer or their financial account not found.",
+    });
   }
 
   const ledgerAccountId = customer.ledgerAccountId;
@@ -149,10 +124,7 @@ exports.getCustomerLedger = asyncHandler(async (req, res, next) => {
 
   // 3. Create the query to find all transactions for this account
   const query = {
-    $or: [
-      { debitAccountId: ledgerAccountId },
-      { creditAccountId: ledgerAccountId },
-    ],
+    $or: [{ debitAccountId: ledgerAccountId }, { creditAccountId: ledgerAccountId }],
   };
 
   // 4. Execute queries in parallel for efficiency

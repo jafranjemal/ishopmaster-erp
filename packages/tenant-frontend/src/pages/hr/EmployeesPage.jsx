@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { PlusCircle, ShieldAlert, Loader2 } from "lucide-react";
-import { tenantHrService, tenantLocationService } from "../../services/api";
+import { tenantDepartmentService, tenantHrService, tenantJobPositionService, tenantLocationService } from "../../services/api";
 import { Button, Modal, Card, CardContent, Pagination } from "ui-library";
 import EmployeeList from "../../components/hr/EmployeeList";
 import EmployeeForm from "../../components/hr/EmployeeForm";
@@ -24,15 +24,35 @@ const EmployeesPage = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
-
+  const [prereqData, setPrereqData] = useState({
+    branches: [], // Assuming branches are fetched elsewhere or added here
+    unassignedUsers: [],
+    departments: [],
+    jobPositions: [],
+    allEmployees: [],
+  });
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Fetch all necessary data in parallel for better performance
-      const [empResponse, branchResponse] = await Promise.all([
-        tenantHrService.getAllEmployees({ page: currentPage }),
+      const params = { page: currentPage, limit: 15 };
+
+      // --- THE FIX: Fetch all data in parallel ---
+      const [empResponse, deptsRes, positionsRes, branchResponse] = await Promise.all([
+        tenantHrService.getAllEmployees(params),
+        tenantDepartmentService.getAll(),
+        tenantJobPositionService.getAll(),
         tenantLocationService.getAllBranches(),
       ]);
+
+      setPrereqData({
+        allEmployees: empResponse.data.data.employees,
+        unassignedUsers: empResponse.data.data.unassignedUsers,
+        departments: deptsRes.data.data,
+        jobPositions: positionsRes.data.data,
+        branches: branchResponse.data.data, // In a real app, this would come from tenantLocationService
+      });
+
+      // Fetch all necessary data in parallel for better performance
 
       setEmployees(empResponse.data.data.employees);
       setUnassignedUsers(empResponse.data.data.unassignedUsers);
@@ -133,6 +153,7 @@ const EmployeesPage = () => {
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModals} title={editingEmployee ? "Edit Employee" : "Create New Employee"}>
         <EmployeeForm
+          {...prereqData}
           employeeToEdit={editingEmployee}
           branches={branches}
           unassignedUsers={unassignedUsers}

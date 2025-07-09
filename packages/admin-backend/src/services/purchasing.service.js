@@ -34,8 +34,7 @@ class PurchasingService {
       return { ...item, totalCost };
     });
 
-    const totalAmount =
-      subTotal + (poData.taxes || 0) + (poData.shippingCosts || 0);
+    const totalAmount = subTotal + (poData.taxes || 0) + (poData.shippingCosts || 0);
 
     // 3. Create the Purchase Order document
     const newPO = await PurchaseOrder.create({
@@ -55,11 +54,7 @@ class PurchasingService {
    * Receives goods from a PO, updating inventory and accounting records.
    * This entire method MUST be called from within a database transaction in the controller.
    */
-  async receiveGoodsFromPO_old(
-    models,
-    { poId, receivedItems, userId },
-    session
-  ) {
+  async receiveGoodsFromPO_old(models, { poId, receivedItems, userId }, session) {
     const { PurchaseOrder, Supplier, Account } = models;
 
     const po = await PurchaseOrder.findById(poId).session(session);
@@ -76,18 +71,16 @@ class PurchasingService {
       isSystemAccount: true,
       name: "Inventory Asset",
     }).session(session);
-    if (!inventoryAssetAccount)
-      throw new Error('System account "Inventory Asset" not found.');
+    if (!inventoryAssetAccount) throw new Error('System account "Inventory Asset" not found.');
 
     let totalReceivedValueInBase = 0;
 
     // 1. Update Inventory for each received item
     for (const item of receivedItems) {
       const poItem = po.items.find(
-        (p) => p.productVariantId.toString() === item.productVariantId
+        (p) => p.ProductVariantsId.toString() === item.ProductVariantsId
       );
-      if (!poItem)
-        throw new Error(`Item ${item.productVariantId} not found in this PO.`);
+      if (!poItem) throw new Error(`Item ${item.ProductVariantsId} not found in this PO.`);
 
       const costInBaseCurrency = poItem.costPrice * po.exchangeRateToBase;
       totalReceivedValueInBase += item.quantityReceived * costInBaseCurrency;
@@ -95,7 +88,7 @@ class PurchasingService {
       await inventoryService.increaseStock(
         models,
         {
-          productVariantId: item.productVariantId,
+          ProductVariantsId: item.ProductVariantsId,
           branchId: po.destinationBranchId,
           quantity: item.quantityReceived,
           costPriceInBaseCurrency: costInBaseCurrency,
@@ -156,11 +149,7 @@ class PurchasingService {
    * @param {string} data.userId - The ID of the user receiving the goods.
    * @param {mongoose.ClientSession} session - The Mongoose session for the transaction.
    */
-  async receiveGoodsFromPO(
-    models,
-    { poId, receivedItems, userId, notes },
-    session
-  ) {
+  async receiveGoodsFromPO(models, { poId, receivedItems, userId, notes }, session) {
     const { PurchaseOrder, Supplier, Account, GoodsReceiptNote } = models;
 
     const po = await PurchaseOrder.findById(poId).session(session);
@@ -183,9 +172,7 @@ class PurchasingService {
       }).session(session),
     ]);
     if (!grniAccount || !inventoryAssetAccount)
-      throw new Error(
-        "Essential accounting ledgers (GRNI or Inventory Asset) are missing."
-      );
+      throw new Error("Essential accounting ledgers (GRNI or Inventory Asset) are missing.");
 
     // 1. Create the Goods Receipt Note (GRN) document
     const grn = (
@@ -198,7 +185,7 @@ class PurchasingService {
             receivedBy: userId,
             notes,
             items: receivedItems.map((item) => ({
-              productVariantId: item.productVariantId,
+              ProductVariantsId: item.ProductVariantsId,
               quantityReceived: item.quantityReceived,
               receivedSerials: item.serials || [],
             })),
@@ -213,10 +200,9 @@ class PurchasingService {
     // 2. Update Inventory for each received item
     for (const item of receivedItems) {
       const poItem = po.items.find(
-        (p) => p.productVariantId.toString() === item.productVariantId
+        (p) => p.ProductVariantsId.toString() === item.ProductVariantsId
       );
-      if (!poItem)
-        throw new Error(`Item ${item.productVariantId} not found in this PO.`);
+      if (!poItem) throw new Error(`Item ${item.ProductVariantsId} not found in this PO.`);
 
       const costInBaseCurrency = poItem.costPrice * po.exchangeRateToBase;
       totalReceivedValueInBase += item.quantityReceived * costInBaseCurrency;
@@ -224,7 +210,7 @@ class PurchasingService {
       await inventoryService.increaseStock(
         models,
         {
-          productVariantId: item.productVariantId,
+          ProductVariantsId: item.ProductVariantsId,
           branchId: po.destinationBranchId,
           quantity: item.quantityReceived,
           costPriceInBaseCurrency: costInBaseCurrency,

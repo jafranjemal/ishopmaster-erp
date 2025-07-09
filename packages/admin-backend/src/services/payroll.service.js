@@ -14,29 +14,61 @@ class PayrollService {
    * @param {string} data.baseCurrency - The tenant's base currency.
    */
   async runPayrollForPeriod(models, { startDate, endDate, userId, baseCurrency }, session) {
-    const { Employee, Commission, Payslip, Account, PayrollRun } = models;
+    const { Employee, Commission, Payslip, Account, DeductionRule, PayrollRun } = models;
 
-    const employees = await Employee.find({ isActive: true }).session(session);
-    if (employees.length === 0) {
-      throw new Error("No active employees found to run payroll for.");
-    }
+    // 1. Fetch all active employees and deduction rules once for efficiency
+    const [employees, deductionRules] = await Promise.all([
+      Employee.find({ isActive: true }).session(session),
+      DeductionRule.find({ isActive: true }).populate("linkedAccountId").session(session),
+    ]);
 
-    let grandTotalPayroll = 0;
+    let grandTotalGrossPay = 0;
+    let grandTotalNetPay = 0;
+    const allJournalCredits = [];
     const payslipsToCreate = [];
     const processedCommissionIds = [];
 
+    // 2. Calculate payslip for each employee
     for (const employee of employees) {
       const commissions = await Commission.find({
         employeeId: employee._id,
         status: "pending",
         saleDate: { $gte: startDate, $lte: endDate },
       }).session(session);
-
       const totalCommissions = commissions.reduce((sum, c) => sum + c.commissionAmount, 0);
       const baseSalary = employee.compensation.baseSalary || 0;
-      const netPay = baseSalary + totalCommissions;
+      const grossPay = baseSalary + totalCommissions;
 
-      grandTotalPayroll += netPay;
+      let totalDeductions = 0;
+      const deductionBreakdown = [];
+
+      // Apply each deduction rule
+      for (const rule of deductionRules) {
+        let deductionAmount = 0;
+        if (rule.type === "percentage") {
+          deductionAmount = grossPay * (rule.value / 100);
+        } else {
+          // 'fixed'
+          deductionAmount = rule.value;
+        }
+
+        if (deductionAmount > 0) {
+          deductionBreakdown.push({ ruleName: rule.name, amount: deductionAmount });
+          totalDeductions += deductionAmount;
+
+          // Add this deduction to the list for the final journal entry
+          allJournalCredits.push({ accountId: rule.linkedAccountId._id, amount: deductionAmount });
+        }
+      }
+
+      const netPay = grossPay - totalDeductions;
+      if (netPay < 0) {
+        // In a real system, you might have more complex rules for this scenario
+        console.warn(`Warning: Employee ${employee.name} has a negative net pay.`);
+      }
+
+      grandTotalGrossPay += grossPay;
+      grandTotalNetPay += netPay;
 
       if (netPay > 0) {
         payslipsToCreate.push({
@@ -44,12 +76,15 @@ class PayrollService {
           payPeriod: { startDate, endDate },
           baseSalary,
           totalCommissions,
+          deductions: deductionBreakdown,
+          totalDeductions,
           netPay,
         });
         processedCommissionIds.push(...commissions.map((c) => c._id));
       }
     }
 
+    // 3. Perform bulk database operations
     if (payslipsToCreate.length === 0) {
       return {
         success: true,
@@ -85,15 +120,15 @@ class PayrollService {
           period: `${startDate.toLocaleString("default", { month: "long" })} ${startDate.getFullYear()}`,
           processedBy: userId,
           employeeCount: generatedPayslips.length,
-          totalPayout: grandTotalPayroll,
+          totalPayout: grandTotalGrossPay,
           payslips: generatedPayslips.map((p) => p._id),
         },
       ],
       { session }
     );
 
-    // Post the final, balanced journal entry to the accounting service
-    if (grandTotalPayroll > 0) {
+    // 4. Post the single, compound journal entry for the entire payroll run
+    if (grandTotalGrossPay > 0) {
       const [salariesExpenseAccount, salariesPayableAccount] = await Promise.all([
         Account.findOne({ isSystemAccount: true, name: "Salaries Expense" }).session(session),
         Account.findOne({ isSystemAccount: true, name: "Salaries Payable" }).session(session),
@@ -105,26 +140,34 @@ class PayrollService {
         );
       }
 
+      // Add a credit for each deduction type
+      for (const deduction of allJournalCredits) {
+        journalEntries.push({ accountId: deduction.accountId, credit: deduction.amount });
+      }
+
+      // Build the compound journal entry
+      const journalEntries = [
+        { accountId: salariesExpenseAccount._id, debit: grandTotalGrossPay }, // One debit for the total expense
+        { accountId: salariesPayableAccount._id, credit: grandTotalNetPay }, // Credit for the net pay owed
+      ];
+
       // This call now matches the definitive architecture you provided for the AccountingService.
       await accountingService.createJournalEntry(
         models,
         {
-          description: `Payroll for period: ${startDate.toISOString().split("T")[0]} to ${endDate.toISOString().split("T")[0]}`,
-          entries: [
-            { accountId: salariesExpenseAccount._id, debit: grandTotalPayroll },
-            { accountId: salariesPayableAccount._id, credit: grandTotalPayroll },
-          ],
-          currency: baseCurrency,
-          exchangeRateToBase: 1, // Payroll is always processed in the base currency
+          description: `Payroll for period ${startDate.toISOString().split("T")[0]} to ${endDate.toISOString().split("T")[0]}`,
+          entries: journalEntries,
+          currency: baseCurrency || "LKR", // This should be the tenant's base currency
+          exchangeRateToBase: 1,
         },
-        session // Explicitly pass the session
+        session
       );
     }
 
     return {
       success: true,
       message: `Payroll completed for ${employees.length} employees.`,
-      totalPayrollAmount: grandTotalPayroll,
+      totalPayrollAmount: grandTotalGrossPay,
       payslipsGenerated: generatedPayslips.length,
     };
   }

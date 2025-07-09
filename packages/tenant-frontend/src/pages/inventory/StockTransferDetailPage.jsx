@@ -66,10 +66,10 @@ const StockTransferDetailPage = () => {
 
       // 1. Prepare the precise list of items for the print job from the transfer data.
       const printQueueItems = transfer.items.map((item) => ({
-        productVariantId: item.productVariantId._id,
-        variantName: item.productVariantId.variantName,
-        sku: item.productVariantId.sku,
-        isSerialized: item.productVariantId.templateId?.type === "serialized",
+        ProductVariantsId: item.ProductVariantsId._id,
+        variantName: item.ProductVariantsId.variantName,
+        sku: item.ProductVariantsId.sku,
+        isSerialized: item.ProductVariantsId.templateId?.type === "serialized",
         // The quantity for the print job is now correctly determined
         quantity: item.isSerialized ? item.serials.length : item.quantity,
         serials: item.isSerialized ? item.serials : [],
@@ -111,10 +111,7 @@ const StockTransferDetailPage = () => {
 
   return (
     <div className="space-y-6">
-      <Link
-        to="/inventory/transfers"
-        className="flex items-center text-sm text-indigo-400 hover:underline"
-      >
+      <Link to="/inventory/transfers" className="flex items-center text-sm text-indigo-400 hover:underline">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to all Stock Transfers
       </Link>
@@ -126,33 +123,19 @@ const StockTransferDetailPage = () => {
 
       <TransferDetailView transfer={transfer} />
 
-      <Modal
-        isOpen={!!confirmAction}
-        onClose={() => setConfirmAction(null)}
-        title={`Confirm ${confirmAction}`}
-      >
-        <p>
-          Are you sure you want to {confirmAction} this transfer? This action will update stock
-          levels and cannot be easily undone.
-        </p>
+      <Modal isOpen={!!confirmAction} onClose={() => setConfirmAction(null)} title={`Confirm ${confirmAction}`}>
+        <p>Are you sure you want to {confirmAction} this transfer? This action will update stock levels and cannot be easily undone.</p>
         <div className="mt-6 flex justify-end space-x-4">
           <Button variant="outline" onClick={() => setConfirmAction(null)}>
             Cancel
           </Button>
-          <Button
-            onClick={confirmAction === "dispatch" ? handleDispatch : handleReceive}
-            disabled={isActionLoading}
-          >
+          <Button onClick={confirmAction === "dispatch" ? handleDispatch : handleReceive} disabled={isActionLoading}>
             {isActionLoading ? "Processing..." : `Confirm ${confirmAction}`}
           </Button>
         </div>
       </Modal>
 
-      <PrintModal
-        isOpen={isPrintModalOpen}
-        onClose={() => setIsPrintModalOpen(false)}
-        itemsToPrint={itemsToPrint}
-      />
+      <PrintModal isOpen={isPrintModalOpen} onClose={() => setIsPrintModalOpen(false)} itemsToPrint={itemsToPrint} />
     </div>
   );
 };

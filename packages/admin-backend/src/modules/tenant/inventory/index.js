@@ -6,8 +6,8 @@ const productTemplateRoutes = require("./products/productTemplate.routes");
 const brandRoutes = require("./brands/brand.routes");
 const categoryRoutes = require("./categories/category.routes");
 const productTemplateSchema = require("./products/productTemplate.schema");
-const productVariantSchema = require("./products/productVariant.schema");
-const productVariantRoutes = require("./products/productVariant.routes");
+const ProductVariantsSchema = require("./products/ProductVariants.schema");
+const ProductVariantsRoutes = require("./products/ProductVariants.routes");
 const inventoryLotSchema = require("./stock/inventoryLot.schema");
 const inventoryItemSchema = require("./stock/inventoryItem.schema");
 const stockMovementSchema = require("./stock/stockMovement.schema");
@@ -30,7 +30,7 @@ mainRouter.use("/templates", productTemplateRoutes);
 // Create a sub-router for all product-catalog related items
 const productsRouter = express.Router();
 productsRouter.use("/templates", productTemplateRoutes);
-productsRouter.use("/variants", productVariantRoutes);
+productsRouter.use("/variants", ProductVariantsRoutes);
 
 mainRouter.use("/products", productsRouter); // Mount the sub-router
 mainRouter.use("/stock", stockRoutes);
@@ -43,7 +43,7 @@ mainRouter.use("/assemblies", assemblyRoutes);
 module.exports = {
   schemas: {
     ProductTemplates: productTemplateSchema,
-    ProductVariants: productVariantSchema, // Will become ProductTemplates/Variant
+    ProductVariantss: ProductVariantsSchema, // Will become ProductTemplates/Variant
     Brand: brandSchema,
     Category: categorySchema,
     InventoryLot: inventoryLotSchema,

@@ -3,7 +3,7 @@ import { Input } from "ui-library";
 import { tenantProductService } from "../../services/api";
 import { debounce } from "lodash";
 
-const ProductVariantSearch = ({ onProductSelect }) => {
+const ProductVariantsSearch = ({ onProductSelect }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,20 +40,12 @@ const ProductVariantSearch = ({ onProductSelect }) => {
 
   return (
     <div className="relative">
-      <Input
-        placeholder="Search by SKU or Product Name to add items..."
-        value={searchTerm}
-        onChange={handleChange}
-      />
+      <Input placeholder="Search by SKU or Product Name to add items..." value={searchTerm} onChange={handleChange} />
       {results.length > 0 && (
         <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
           <ul>
             {results.map((variant) => (
-              <li
-                key={variant._id}
-                className="p-3 hover:bg-indigo-600/20 cursor-pointer"
-                onClick={() => handleSelect(variant)}
-              >
+              <li key={variant._id} className="p-3 hover:bg-indigo-600/20 cursor-pointer" onClick={() => handleSelect(variant)}>
                 <p className="font-medium">{variant.variantName}</p>
                 <p className="text-sm text-slate-400">SKU: {variant.sku}</p>
               </li>
@@ -65,4 +57,4 @@ const ProductVariantSearch = ({ onProductSelect }) => {
   );
 };
 
-export default ProductVariantSearch;
+export default ProductVariantsSearch;
