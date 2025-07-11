@@ -23,10 +23,10 @@ const PurchaseOrderForm = ({ poToEdit, suppliers, branches, onSave, onCancel, is
   const handleHeaderChange = (e) => setPoData((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const handleAddItem = (variant) => {
-    if (poData.items.some((item) => item.ProductVariantId === variant._id)) return; // Prevent duplicates
+    if (poData.items.some((item) => item.productVariantId === variant._id)) return; // Prevent duplicates
     console.log("Adding item:", variant);
     const newItem = {
-      ProductVariantId: variant._id,
+      productVariantId: variant._id,
       description: variant.variantName,
       quantityOrdered: 1,
       costPrice: variant.costPrice || 0,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Fragment, useState } from "react";
 import {
   Card,
   CardContent,
@@ -14,11 +14,18 @@ import {
   TableRow,
 } from "ui-library";
 import useAuth from "../../context/useAuth";
-
+import { ChevronDown, ChevronRight } from "lucide-react";
 const SupplierInvoiceDetailView = ({ invoice }) => {
   const { formatCurrency, formatDate } = useAuth();
   const amountDue = (invoice.totalAmount || 0) - (invoice.amountPaid || 0);
+  const [expanded, setExpanded] = useState({});
+  const toggle = (id) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
+  const sortedPayments = [...(invoice.payments || [])].sort((a, b) => new Date(b.paymentDate) - new Date(a.paymentDate));
+
+  const totals = { cleared: 0, pending: 0, bounced: 0 };
   return (
     <Card>
       <CardHeader>
@@ -27,7 +34,19 @@ const SupplierInvoiceDetailView = ({ invoice }) => {
             <CardTitle>Invoice #{invoice.supplierInvoiceNumber}</CardTitle>
             <CardDescription>From: {invoice.supplierId.name}</CardDescription>
           </div>
-          <Badge variant="secondary" className="capitalize text-base px-3 py-1">
+
+          <Badge
+            className="font-bold capitalize text-base px-3 py-1"
+            variant={
+              invoice.status === "fully_paid"
+                ? "success"
+                : invoice.status === "partially_paid"
+                  ? "warning"
+                  : invoice.status === "cancelled"
+                    ? "destructive"
+                    : "outline"
+            }
+          >
             {invoice.status.replace("_", " ")}
           </Badge>
         </div>
@@ -64,12 +83,8 @@ const SupplierInvoiceDetailView = ({ invoice }) => {
                 <TableRow key={index}>
                   <TableCell>{item.description}</TableCell>
                   <TableCell>{item.quantityBilled}</TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatCurrency(item.finalCostPrice)}
-                  </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {formatCurrency(item.totalCost)}
-                  </TableCell>
+                  <TableCell className="text-right font-mono">{formatCurrency(item.finalCostPrice)}</TableCell>
+                  <TableCell className="text-right font-mono">{formatCurrency(item.totalCost)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -107,32 +122,103 @@ const SupplierInvoiceDetailView = ({ invoice }) => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-4"></TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Method</TableHead>
                   <TableHead>Reference</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {invoice.payments.map((p) => (
-                  <TableRow key={p._id}>
-                    <TableCell>{formatDate(p.paymentDate)}</TableCell>
-                    <TableCell>
-                      {p.paymentLines
-                        .map((l) => l.paymentMethodId.name)
-                        .join(", ")}
-                    </TableCell>
-                    <TableCell>
-                      {p.paymentLines
-                        .map((l) => l.referenceNumber)
-                        .filter(Boolean)
-                        .join(", ")}
-                    </TableCell>
-                    <TableCell className="text-right font-mono">
-                      {formatCurrency(p.totalAmount)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {sortedPayments.map((p) => {
+                  const isExpanded = expanded[p._id];
+                  for (const line of p.paymentLines) {
+                    const status = line.status || "cleared";
+                    if (["cleared", "pending", "bounced"].includes(status)) {
+                      totals[status] += line.amount;
+                    }
+                  }
+                  return (
+                    <Fragment key={p._id}>
+                      {/* Payment group header */}
+                      <TableRow className="bg-muted cursor-pointer hover:bg-muted/80" onClick={() => toggle(p._id)}>
+                        <TableCell className="text-center align-middle">
+                          {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                        </TableCell>
+                        <TableCell>{formatDate(p.paymentDate)}</TableCell>
+                        <TableCell colSpan={2}>{p.paymentLines.map((l) => l.paymentMethodId?.name).join(", ")}</TableCell>
+                        <TableCell>
+                          <Badge variant={p.status === "completed" ? "success" : p.status === "voided" ? "destructive" : "warning"}>{p.status}</Badge>
+                        </TableCell>
+                        <TableCell
+                          className={`text-right font-mono ${
+                            p.status === "completed" ? "text-green-600" : p.status === "voided" ? "text-red-500" : "text-yellow-600"
+                          }`}
+                        >
+                          {formatCurrency(p.totalAmount)}
+                        </TableCell>
+                      </TableRow>
+
+                      {/* Payment line breakdown */}
+                      {isExpanded &&
+                        p.paymentLines.map((line, idx) => {
+                          const status = line.status || "cleared";
+
+                          return (
+                            <TableRow key={`${p._id}-${idx}`}>
+                              <TableCell></TableCell>
+                              <TableCell colSpan={1}></TableCell>
+                              <TableCell>{line.paymentMethodId?.name || "—"}</TableCell>
+                              <TableCell>{line.referenceNumber || "—"}</TableCell>
+                              <TableCell>
+                                <Badge variant={status === "cleared" ? "success" : status === "pending" ? "warning" : "destructive"}>{status}</Badge>
+                              </TableCell>
+                              <TableCell
+                                className={`text-right font-mono ${
+                                  status === "cleared" ? "text-green-600" : status === "pending" ? "text-yellow-600" : "text-red-600"
+                                }`}
+                              >
+                                {formatCurrency(line.amount)}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+
+                      {/* Optional: Notes */}
+                      {isExpanded && p.notes && (
+                        <TableRow>
+                          <TableCell></TableCell>
+                          <TableCell colSpan={5}>
+                            <div className="text-xs text-red-500 italic whitespace-pre-line">{p.notes}</div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </Fragment>
+                  );
+                })}
+
+                {/* Summary Totals */}
+                <TableRow className="text-right bg-muted font-semibold border-t">
+                  <TableCell colSpan={5} className="text-right">
+                    Total Cleared
+                  </TableCell>
+                  <TableCell colSpan={1} className="text-right text-green-600 font-mono">
+                    {formatCurrency(totals.cleared)}
+                  </TableCell>
+                </TableRow>
+                <TableRow className="text-right bg-muted font-semibold">
+                  <TableCell colSpan={5}>Total Pending</TableCell>
+                  <TableCell colSpan={1} className="text-right text-yellow-600 font-mono">
+                    {formatCurrency(totals.pending)}
+                  </TableCell>
+                </TableRow>
+                <TableRow className="text-right bg-muted font-semibold">
+                  <TableCell colSpan={5}>Total Bounced</TableCell>
+                  <TableCell colSpan={1} className="text-right text-red-600 font-mono">
+                    {formatCurrency(totals.bounced)}
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </div>

@@ -49,7 +49,7 @@ class SalesService {
     // 1. Process cart items to prepare for invoice and deduct stock
     for (const item of cartData.items) {
       const { costOfGoodsSold } = await inventoryService.decreaseStock(models, {
-        ProductVariantId: item.ProductVariantId,
+        productVariantId: item.productVariantId,
         branchId,
         quantity: item.quantity,
         serialNumber: item.serialNumber, // Will be present for serialized items
@@ -59,7 +59,7 @@ class SalesService {
 
       totalCostOfGoodsSold += costOfGoodsSold;
       saleItems.push({
-        ProductVariantId: item.ProductVariantId,
+        productVariantId: item.productVariantId,
         description: item.variantName,
         quantity: item.quantity,
         unitPrice: item.unitPrice,

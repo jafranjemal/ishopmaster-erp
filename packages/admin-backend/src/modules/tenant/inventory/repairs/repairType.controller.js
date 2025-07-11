@@ -4,8 +4,51 @@ const asyncHandler = require("../../../../middleware/asyncHandler");
 // @route   GET /api/v1/tenant/inventory/repairs
 exports.getAllRepairTypes = asyncHandler(async (req, res, next) => {
   const { RepairType } = req.models;
-  const repairTypes = await RepairType.find({}).sort({ name: 1 });
-  res.status(200).json({ success: true, data: repairTypes });
+
+  // === Extract Query Params ===
+  const {
+    page = 1,
+    limit = 20,
+    deviceId,
+    isActive,
+    search,
+    sortBy = "name",
+    sortOrder = "asc",
+  } = req.query;
+
+  // === Build Query Filter ===
+  const query = {};
+  if (deviceId) query.deviceId = deviceId;
+  if (isActive !== undefined) query.isActive = isActive === "true";
+
+  if (search) {
+    query.name = { $regex: search, $options: "i" }; // case-insensitive partial match
+  }
+
+  const sort = {
+    [sortBy]: sortOrder === "desc" ? -1 : 1,
+  };
+
+  // === Count total documents before pagination ===
+  const total = await RepairType.countDocuments(query);
+
+  // === Apply pagination & sorting ===
+  const repairTypes = await RepairType.find(query)
+    .sort(sort)
+    .skip((page - 1) * limit)
+    .limit(parseInt(limit));
+
+  // === Response ===
+  res.status(200).json({
+    success: true,
+    data: repairTypes,
+    pagination: {
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(total / limit),
+    },
+  });
 });
 
 // @desc    Create a new repair type

@@ -38,7 +38,7 @@
 //     setReceivedItems((prev) => ({
 //       ...prev,
 //       [key]: {
-//         ProductVariantId: poItem.ProductVariantId._id,
+//         productVariantId: poItem.productVariantId._id,
 //         quantityReceived: validatedQty,
 //         type: variant.templateId.type,
 //         serials:
@@ -135,7 +135,7 @@
 //               {itemsToReceive.map((item) => {
 //                 const currentEntry = receivedItems[item._id];
 //                 console.log(`Rendering item:`, item);
-//                 const variant = item.ProductVariantId;
+//                 const variant = item.productVariantId;
 //                 return (
 //                   <React.Fragment key={item._id}>
 //                     <TableRow>
@@ -286,7 +286,7 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
     setReceivedItems((prev) => ({
       ...prev,
       [variantId]: {
-        ProductVariantId: variantId,
+        productVariantId: variantId,
         quantityReceived: validatedQty,
         type: variant.templateId.type,
         serials: variant.templateId.type === "serialized" ? Array(validatedQty).fill("") : [],
@@ -354,7 +354,7 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
             </TableHeader>
             <TableBody>
               {itemsToReceive.map((item) => {
-                const variant = item.ProductVariantId;
+                const variant = item.productVariantId;
                 const variantId = variant._id;
                 const currentEntry = receivedItems[variantId];
                 return (

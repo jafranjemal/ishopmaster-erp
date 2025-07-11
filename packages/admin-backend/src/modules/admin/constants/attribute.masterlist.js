@@ -332,6 +332,17 @@ const ATTRIBUTES = [
     key: "voltage",
     values: ["3.7V", "3.8V", "7.4V", "11.1V", "12V", "24V"],
   },
+  {
+    name: "Warranty Plan",
+    key: "warrantyPlan",
+    values: [
+      "Standard Warranty",
+      "Extended Warranty",
+      "AppleCare+",
+      "Samsung Care+",
+      "iShield Protection Plan",
+    ],
+  },
 ];
 
 module.exports = ATTRIBUTES;

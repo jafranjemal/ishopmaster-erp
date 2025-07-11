@@ -53,7 +53,7 @@ const PrintModal = ({ isOpen, onClose, itemsToPrint = [] }) => {
     try {
       // Prepare the payload for the API based on the items passed in props
       const payloadItems = itemsToPrint.map((item) => ({
-        ProductVariantId: item.ProductVariantId || item._id,
+        productVariantId: item.productVariantId || item._id,
         quantity: item.isSerialized ? item.serials.length : item.quantity,
         serials: item.isSerialized ? item.serials : undefined,
       }));

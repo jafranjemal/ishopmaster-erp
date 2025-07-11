@@ -25,62 +25,91 @@ class AccountingService {
   ) {
     const { LedgerEntry } = models;
 
+    entries = entries.map((e) => ({
+      ...e,
+      debit: Number(e.debit || 0),
+      credit: Number(e.credit || 0),
+    }));
+
     // 1. Validate that the entries are balanced
-    const totalDebits = entries.reduce(
-      (sum, entry) => sum + (entry.debit || 0),
-      0
-    );
-    const totalCredits = entries.reduce(
-      (sum, entry) => sum + (entry.credit || 0),
-      0
-    );
+    const totalDebits = entries.reduce((sum, entry) => sum + (entry.debit || 0), 0);
+    const totalCredits = entries.reduce((sum, entry) => sum + (entry.credit || 0), 0);
 
     if (Math.abs(totalDebits - totalCredits) > 1e-9 || totalDebits === 0) {
-      throw new Error(
-        "Journal entry is unbalanced. Debits must equal credits."
-      );
+      throw new Error("Journal entry is unbalanced. Debits must equal credits.");
     }
     if (!currency || !exchangeRateToBase) {
-      throw new Error(
-        "Currency and exchange rate are required for journal entries."
-      );
+      throw new Error("Currency and exchange rate are required for journal entries.");
     }
 
     const transactionId = uuidv4();
     const ledgerDocs = [];
 
-    // 2. Create the individual ledger entry documents
-    for (const entry of entries) {
-      // Determine the debit and credit accounts for this specific transaction line
-      let debitAccountId, creditAccountId, amount;
-      if (entry.debit > 0) {
-        const creditEntry = entries.find(
-          (e) => e.credit > 0 && Math.abs(e.credit - entry.debit) < 1e-9
-        );
-        if (!creditEntry) continue; // This pair will be handled when we process the credit side
+    // // 2. Create the individual ledger entry documents
+    // for (const entry of entries) {
+    //   // Determine the debit and credit accounts for this specific transaction line
+    //   let debitAccountId, creditAccountId, amount;
 
-        debitAccountId = entry.accountId;
-        creditAccountId = creditEntry.accountId;
-        amount = entry.debit;
-      } else {
-        continue; // Skip credit entries directly, as they are paired with debits
+    //   if (entry.debit > 0) {
+    //     const creditEntry = entries.find(
+    //       (e) => e.credit > 0 && Math.abs(e.credit - entry.debit) < 1e-9
+    //     );
+    //     if (!creditEntry) continue; // This pair will be handled when we process the credit side
+
+    //     debitAccountId = entry.accountId;
+    //     creditAccountId = creditEntry.accountId;
+    //     amount = entry.debit;
+    //   } else {
+    //     continue; // Skip credit entries directly, as they are paired with debits
+    //   }
+
+    //   // 3. CRITICAL: Convert the transaction amount to the base currency
+    //   const amountInBaseCurrency = amount * exchangeRateToBase;
+
+    //   ledgerDocs.push({
+    //     transactionId,
+    //     description,
+    //     date: date || new Date(),
+    //     debitAccountId,
+    //     creditAccountId,
+    //     amount: amountInBaseCurrency, // <-- Always store the base currency amount
+    //     originalAmount: amount, // Store original amount for reference
+    //     originalCurrency: currency, // Store original currency for reference
+    //     exchangeRate: exchangeRateToBase,
+    //     ...refs,
+    //   });
+    // }
+
+    const debitEntries = entries.filter((e) => e.debit > 0);
+    const creditEntries = entries.filter((e) => e.credit > 0);
+
+    for (const debit of debitEntries) {
+      for (const credit of creditEntries) {
+        const amount = Math.min(debit.debit, credit.credit);
+        if (amount <= 0) continue;
+
+        const amountInBaseCurrency = amount * exchangeRateToBase;
+
+        ledgerDocs.push({
+          transactionId,
+          description,
+          date: date || new Date(),
+          debitAccountId: debit.accountId,
+          creditAccountId: credit.accountId,
+          amount: amountInBaseCurrency,
+          originalAmount: amount,
+          originalCurrency: currency,
+          exchangeRate: exchangeRateToBase,
+          ...refs,
+        });
+
+        // Reduce matched amounts
+        debit.debit -= amount;
+        credit.credit -= amount;
+
+        // Stop if this debit is fully consumed
+        if (debit.debit < 1e-6) break;
       }
-
-      // 3. CRITICAL: Convert the transaction amount to the base currency
-      const amountInBaseCurrency = amount * exchangeRateToBase;
-
-      ledgerDocs.push({
-        transactionId,
-        description,
-        date: date || new Date(),
-        debitAccountId,
-        creditAccountId,
-        amount: amountInBaseCurrency, // <-- Always store the base currency amount
-        originalAmount: amount, // Store original amount for reference
-        originalCurrency: currency, // Store original currency for reference
-        exchangeRate: exchangeRateToBase,
-        ...refs,
-      });
     }
 
     if (ledgerDocs.length === 0) {

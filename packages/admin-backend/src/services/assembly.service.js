@@ -33,17 +33,17 @@ class AssemblyService {
     // 2. Decrease stock for all component parts
     const consumedComponents = [];
     for (const component of recipe) {
-      const componentVariant = await ProductVariants.findById(component.ProductVariantId)
+      const componentVariant = await ProductVariants.findById(component.productVariantId)
         .populate("templateId")
         .lean();
       if (!componentVariant)
-        throw new Error(`Component with ID ${component.ProductVariantId} not found.`);
+        throw new Error(`Component with ID ${component.productVariantId} not found.`);
 
       const isSerialized = componentVariant.templateId.type === "serialized";
       const requiredQty = component.quantity * quantityToAssemble;
 
       if (isSerialized) {
-        const selectedSerials = componentSelections[component.ProductVariantId.toString()];
+        const selectedSerials = componentSelections[component.productVariantId.toString()];
         if (!selectedSerials || selectedSerials.length !== requiredQty) {
           throw new Error(
             `Incorrect number of serials selected for component ${componentVariant.variantName}. Required: ${requiredQty}, Selected: ${selectedSerials?.length || 0}`
@@ -52,7 +52,7 @@ class AssemblyService {
 
         for (const serial of selectedSerials) {
           await inventoryService.decreaseStock(models, {
-            ProductVariantId: component.ProductVariantId,
+            productVariantId: component.productVariantId,
             branchId,
             quantity: 1,
             serialNumber: serial,
@@ -63,13 +63,13 @@ class AssemblyService {
           const consumedItem = await InventoryItem.findOne({ serialNumber: serial }).lean();
           if (consumedItem)
             consumedComponents.push({
-              ProductVariantId: component.ProductVariantId,
+              productVariantId: component.productVariantId,
               inventoryItemId: consumedItem._id,
             });
         }
       } else {
         await inventoryService.decreaseStock(models, {
-          ProductVariantId: component.ProductVariantId,
+          productVariantId: component.productVariantId,
           branchId,
           quantity: requiredQty,
           userId,
@@ -90,7 +90,7 @@ class AssemblyService {
     }
 
     await inventoryService.increaseStock(models, {
-      ProductVariantId: bundleVariantId,
+      productVariantId: bundleVariantId,
       branchId,
       quantity: quantityToAssemble,
       costPriceInBaseCurrency: bundleVariant.defaultCostPrice, // Cost should be sum of components in a real system

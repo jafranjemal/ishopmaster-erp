@@ -9,6 +9,7 @@ const CURRENCY_MASTER_LIST = require("../modules/admin/constants/currency.master
 const EXCHANGE_RATE_MASTER_LIST = require("../modules/admin/constants/exchangeRate.masterlist");
 const PAYMENT_METHOD_MASTER_LIST = require("../modules/admin/constants/paymentMethod.masterlist");
 const PRODUCT_VARIANT_MASTER_LIST = require("../modules/admin/constants/productVarients.masterlist");
+const DEVICE_MASTER_LIST = require("../modules/admin/constants/device.masterlist");
 
 const customerService = require("./customer.service");
 
@@ -33,6 +34,8 @@ class TenantProvisioningService {
 
     // 4. Seed master data for inventory management.
     await this._seedMasterData(models, session);
+
+    await this._seedDevicesAndRepairs(models, session);
 
     // 5. Seed Product Variants, linking them to the newly created templates.
     // await this._seedProductVariants(models, session);
@@ -308,6 +311,89 @@ class TenantProvisioningService {
         await this.seedCategoriesRecursively(sourceNode.children, parentDoc._id, models, session);
       }
     }
+  }
+
+  /**
+   * Seed devices and linked repair types.
+   * @param {*} models
+   * @param {*} session
+   */
+  async _seedDevicesAndRepairs(models, session) {
+    const { Device, RepairType, Brand, Category } = models;
+
+    // Example Device list (extend as needed)
+    const devices = DEVICE_MASTER_LIST;
+    // Example Repairs list (common repairs for smartphones)
+    const commonRepairs = [
+      "Screen Replacement",
+      "Battery Replacement",
+      "Charging Port Repair",
+      "Camera Repair",
+      "Speaker/Mic Repair",
+      "Button Repair",
+      "Water Damage Treatment",
+    ];
+
+    // Lookup brand and category documents
+    const brandMap = new Map();
+    const categoryMap = new Map();
+
+    // Cache all brands & categories to avoid repeated queries
+    const allBrands = await Brand.find({}).session(session);
+    allBrands.forEach((b) => brandMap.set(b.name, b._id));
+
+    const allCategories = await Category.find({}).session(session);
+    allCategories.forEach((c) => categoryMap.set(c.name, c._id));
+
+    for (const deviceData of devices) {
+      const brandId = brandMap.get(deviceData.brandName);
+      const categoryId = categoryMap.get(deviceData.categoryName);
+
+      if (!brandId || !categoryId) {
+        console.warn(`Skipping device ${deviceData.name} - brand or category missing.`);
+        continue;
+      }
+
+      // Check if device already exists
+      let device = await Device.findOne({ name: deviceData.name, brandId }).session(session);
+      if (!device) {
+        device = new Device({
+          name: deviceData.name,
+          brandId,
+          categoryId,
+          isActive: true,
+        });
+        await device.save({ session });
+        console.log(`Created device: ${device.name}`);
+      } else {
+        console.log(`Device already exists: ${device.name}`);
+      }
+
+      // Seed repair types for this device
+      for (const repairName of commonRepairs) {
+        // Build a unique repair type name: "DeviceName - RepairName"
+        const repairTypeName = `${device.name} - ${repairName}`;
+
+        // Check if this repair type already exists for this device
+        const exists = await RepairType.findOne({
+          name: repairTypeName,
+          deviceId: device._id,
+        }).session(session);
+        if (exists) continue;
+
+        const repairType = new RepairType({
+          name: repairTypeName,
+          deviceId: device._id,
+          description: repairName,
+          isActive: true,
+        });
+
+        await repairType.save({ session });
+        console.log(`Created repair type: ${repairType.name}`);
+      }
+    }
+
+    console.log("Device and Repair Type seeding complete.");
   }
 
   /**

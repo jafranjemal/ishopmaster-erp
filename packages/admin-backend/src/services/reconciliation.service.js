@@ -54,7 +54,7 @@ class ReconciliationService {
     let totalOriginalValueInBase = 0;
 
     const processedItems = items.map((item) => {
-      const poItem = po.items.find((p) => p.ProductVariantId.toString() === item.ProductVariantId);
+      const poItem = po.items.find((p) => p.productVariantId.toString() === item.productVariantId);
       if (!poItem) throw new Error(`Billed item ${item.description} not found on original PO.`);
 
       // Calculate the total cost for THIS line item

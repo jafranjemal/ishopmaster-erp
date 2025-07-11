@@ -68,7 +68,7 @@ const StockTransfersPage = () => {
     setSerialModalState({
       isOpen: true,
       itemKey: item.key,
-      variantId: item.ProductVariantId,
+      variantId: item.productVariantId,
       initialSelection: item.serials || [],
     });
   };
@@ -149,7 +149,7 @@ const StockTransfersPage = () => {
           isOpen={true}
           onClose={() => setSerialModalState({ isOpen: false, itemKey: null, variantId: null })}
           onConfirm={handleSerialsConfirm} // This needs to be passed to the form to update its internal state
-          ProductVariantId={serialModalState.variantId}
+          productVariantId={serialModalState.variantId}
           branchId={formData.fromBranchId}
           initialSelection={serialModalState.initialSelection}
         />

@@ -37,7 +37,7 @@ const PrintQueue = ({ queue, onQuantityChange, onRemoveItem, onEditSerials }) =>
                 </div>
               ) : (
                 <LotQuantityInput
-                  ProductVariantId={item.ProductVariantId}
+                  productVariantId={item.productVariantId}
                   branchId={item.branchId} // This needs to be passed when item is added to queue
                   value={item.quantity}
                   onChange={(newQty) => onQuantityChange(item.key, newQty)}

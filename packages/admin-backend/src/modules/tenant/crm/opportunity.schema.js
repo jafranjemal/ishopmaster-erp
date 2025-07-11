@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 // For now, we'll assume it's similar enough to reuse for simplicity.
 const opportunityItemSchema = new mongoose.Schema(
   {
-    ProductVariantId: {
+    productVariantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProductVariants",
       required: true,

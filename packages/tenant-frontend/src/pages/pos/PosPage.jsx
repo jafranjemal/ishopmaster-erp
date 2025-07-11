@@ -203,7 +203,7 @@ const PosPage = ({ layout }) => {
           <div className="flex-grow overflow-y-auto pt-4 pr-2">
             <ProductGrid items={popularItems} onAddItem={handleAddItemToCart} />
           </div> */}
-          <DiscoveryPanel onItemsSelected={handleAddItemsToJob} />
+          <DiscoveryPanel onAddItem={handleAddItemToJob} onItemsSelected={handleAddItemsToJob} />
         </div>
 
         <CustomerSearchModal isOpen={isCustomerSearchOpen} onClose={() => setIsCustomerSearchOpen(false)} onSelectCustomer={setSelectedCustomer} />
@@ -238,7 +238,7 @@ const PosPage = ({ layout }) => {
         {/* <WorkspaceTabs activeTab={activeWorkspace} onTabChange={setActiveWorkspace} />
         <div className="flex-grow overflow-y-auto">{renderWorkspace()}</div> */}
 
-        <DiscoveryPanel onItemsSelected={handleAddItemsToJob} />
+        <DiscoveryPanel onAddItem={handleAddItemToJob} onItemsSelected={handleAddItemsToJob} />
 
         {/* <ProductSearchPanel onAddItem={handleAddItemToCart} cartFocus={layout !== "cartFocus"} /> */}
         {canEditPrice && <div className="mt-4 p-2 bg-indigo-900/50 rounded-md text-center text-xs text-indigo-300">Manager Tools Unlocked</div>}

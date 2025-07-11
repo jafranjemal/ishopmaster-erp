@@ -32,17 +32,35 @@ exports.getAllVariants_old = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/tenant/inventory/products/variants?templateId=&search=&page=1&limit=20
 //
 
+const getAllDescendantCategoryIds = async (Category, categoryId) => {
+  const queue = [categoryId];
+  const result = new Set();
+
+  while (queue.length) {
+    const current = queue.shift();
+    result.add(current);
+    const children = await Category.find({ parent: current }, "_id").lean();
+    for (const child of children) {
+      queue.push(child._id.toString());
+    }
+  }
+
+  return Array.from(result); // Includes original ID + all children
+};
+
 exports.getAllVariants = asyncHandler(async (req, res, next) => {
-  const { ProductVariants, InventoryItem } = req.models;
+  const { ProductVariants, InventoryItem, Category } = req.models;
 
   const templateId = req.query.templateId || null;
   const search = req.query.search?.trim() || "";
   const categoryId = req.query.categoryId?.trim() || null;
+  const brandId = req.query.brandId?.trim() || null;
+  const templateType = req.query.templateType || null;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const skip = (page - 1) * limit;
 
-  const matchStage = { isActive: true };
+  let matchStage = { isActive: true };
   if (templateId) matchStage.templateId = new mongoose.Types.ObjectId(templateId);
   if (search) {
     const regex = new RegExp(search, "i");
@@ -52,22 +70,32 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
     if (itemBySerial) {
       // If a serial number matches, we ignore all other search criteria
       // and target that specific variant directly.
-      matchStage = { _id: itemBySerial.productVariantId };
+      matchStage = {
+        _id: itemBySerial.productVariantId,
+        isActive: true,
+      };
     } else {
       // Otherwise, search by name or SKU as before
       matchStage.$or = [{ variantName: regex }, { sku: regex }];
     }
   }
 
+  let categoryIds = [];
+  if (categoryId) {
+    categoryIds = await getAllDescendantCategoryIds(Category, categoryId);
+  }
+
   // This is the second match stage, which runs AFTER we have looked up the template.
   const postLookupMatch = {};
-  if (categoryId) {
-    postLookupMatch["templateId.categoryId"] = new mongoose.Types.ObjectId(categoryId);
-  }
+  if (categoryIds.length)
+    postLookupMatch["templateId.categoryId"] = {
+      $in: categoryIds.map((id) => new mongoose.Types.ObjectId(id)),
+    };
+  if (brandId) postLookupMatch["templateId.brandId"] = new mongoose.Types.ObjectId(brandId);
+  if (templateType) postLookupMatch["templateId.type"] = templateType;
 
   const aggregationPipeline = [
     { $match: matchStage },
-    // First, lookup the template so we can filter by its properties
     {
       $lookup: {
         from: "producttemplates",
@@ -77,7 +105,6 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
       },
     },
     { $unwind: "$templateId" },
-    // Now that we have the template data, we can apply the category filter.
     { $match: postLookupMatch },
     {
       $lookup: {
@@ -96,7 +123,6 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
         as: "items",
       },
     },
-
     {
       $addFields: {
         quantityInStock: {
@@ -110,93 +136,11 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
                 },
               },
             },
-            {
-              $size: {
-                $ifNull: ["$items", []],
-              },
-            },
+            { $size: { $ifNull: ["$items", []] } },
           ],
         },
       },
     },
-
-    {
-      $lookup: {
-        from: "producttemplates",
-        localField: "templateId",
-        foreignField: "_id",
-        pipeline: [
-          {
-            $lookup: {
-              from: "productvariants",
-              localField: "bundleItems.productVariantId",
-              foreignField: "_id",
-              pipeline: [
-                {
-                  $lookup: {
-                    from: "producttemplates",
-                    localField: "templateId",
-                    foreignField: "_id",
-                    pipeline: [
-                      {
-                        $project: { _id: 1, type: 1 },
-                      },
-                    ],
-                    as: "templateId",
-                  },
-                },
-                {
-                  $unwind: {
-                    path: "$templateId",
-                    preserveNullAndEmptyArrays: true,
-                  },
-                },
-              ],
-              as: "bundleItemsVariants",
-            },
-          },
-          {
-            $addFields: {
-              bundleItems: {
-                $map: {
-                  input: {
-                    $range: [
-                      0,
-                      {
-                        $size: {
-                          $ifNull: ["$bundleItems", []],
-                        },
-                      },
-                    ],
-                  },
-                  as: "idx",
-                  in: {
-                    $mergeObjects: [
-                      { $arrayElemAt: ["$bundleItems", "$$idx"] },
-                      { $arrayElemAt: ["$bundleItemsVariants", "$$idx"] },
-                    ],
-                  },
-                },
-              },
-            },
-          },
-          {
-            $project: {
-              bundleItemsVariants: 0,
-            },
-          },
-        ],
-        as: "templateId",
-      },
-    },
-
-    {
-      $unwind: {
-        path: "$templateId",
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-
     {
       $project: {
         lots: 0,

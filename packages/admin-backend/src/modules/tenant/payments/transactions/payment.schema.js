@@ -7,8 +7,13 @@ const paymentLineSchema = new mongoose.Schema(
       ref: "PaymentMethod",
       required: true,
     },
-    amount: { type: Number, required: true, min: 0.01 },
+    amount: { type: Number, required: true, min: 0.01, set: (v) => parseFloat(v) },
     referenceNumber: { type: String, trim: true }, // For Cheque No., Card TXN ID, etc.
+    status: {
+      type: String,
+      enum: ["cleared", "bounced", "pending"],
+      default: "cleared", // cash/card assumed cleared by default
+    },
   },
   { _id: false }
 );
@@ -33,7 +38,7 @@ const paymentSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["completed", "voided", "pending_clearance"],
+      enum: ["completed", "voided", "pending_clearance", "partially_cleared"],
       default: "completed",
     },
     notes: { type: String, trim: true },
@@ -44,9 +49,7 @@ const paymentSchema = new mongoose.Schema(
 
 paymentSchema.pre("validate", async function (next) {
   if (this.isNew) {
-    const lastPayment = await this.constructor
-      .findOne()
-      .sort({ createdAt: -1 });
+    const lastPayment = await this.constructor.findOne().sort({ createdAt: -1 });
     let lastNumber = 0;
     if (lastPayment && lastPayment.paymentId)
       lastNumber = parseInt(lastPayment.paymentId.split("-")[1]);

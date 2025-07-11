@@ -54,13 +54,13 @@ const PurchaseOrderDetailPage = () => {
       await fetchData();
 
       const printQueueItems = receivedData.receivedItems.map((item) => {
-        const poItem = purchaseOrder.items.find((pi) => pi.ProductVariantId._id === item.ProductVariantId);
+        const poItem = purchaseOrder.items.find((pi) => pi.productVariantId._id === item.productVariantId);
         return {
-          ProductVariantId: item.ProductVariantId,
+          productVariantId: item.productVariantId,
           variantName: poItem.description,
-          sku: poItem.ProductVariantId.sku,
+          sku: poItem.productVariantId.sku,
           quantity: item.quantityReceived,
-          isSerialized: poItem.ProductVariantId.templateId?.type === "serialized",
+          isSerialized: poItem.productVariantId.templateId?.type === "serialized",
           serials: item.serials || [],
           batchNumber: purchaseOrder.poNumber,
         };

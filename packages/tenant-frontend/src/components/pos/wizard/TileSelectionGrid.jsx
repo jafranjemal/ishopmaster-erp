@@ -19,7 +19,7 @@ const TileSelectionGrid = ({ items, onSelect, itemType = "category" }) => {
           className="aspect-square flex flex-col items-center justify-center text-center p-2 cursor-pointer bg-slate-700 hover:bg-indigo-600/30 hover:border-indigo-500 transition-all duration-150"
         >
           <Icon className="h-8 w-8 text-indigo-400 mb-2" />
-          <p className="text-xs font-semibold leading-tight line-clamp-2">{item.name || item.title}</p>
+          <p className="text-xs font-semibold leading-tight line-clamp-2">{item.name || item.variantName}</p>
         </Card>
       ))}
     </div>

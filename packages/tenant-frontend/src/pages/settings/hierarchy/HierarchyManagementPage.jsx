@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { toast } from "react-hot-toast";
-import { tenantCategoryService, tenantBrandService, tenantRepairTypeService } from "../../../services/api";
+import { tenantCategoryService, tenantBrandService, tenantRepairTypeService, tenantDeviceService } from "../../../services/api";
 import { Button, Modal, Card, CardContent } from "ui-library";
 import HierarchyColumn from "../../../components/settings/hierarchy/HierarchyColumn";
 import CategoryForm from "../../../components/settings/hierarchy/CategoryForm";
@@ -9,6 +9,7 @@ import { ShieldAlert } from "lucide-react";
 import CategoryDetailPanel from "../../../components/settings/CategoryDetailPanel";
 import BrandForm from "../../../components/settings/inventory/BrandForm";
 import RepairTypeForm from "../../../components/settings/hierarchy/RepairTypeForm";
+import DeviceForm from "../../../components/settings/hierarchy/DeviceForm";
 
 /**
  * The definitive, professional page for managing the entire Product & Service Hierarchy.
@@ -20,6 +21,7 @@ const HierarchyManagementPage = () => {
   const [repairTypes, setRepairTypes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [data, setData] = useState({ categories: [], brands: [], devices: [], repairTypes: [] });
 
   // The path now stores the full selected category objects, which is more robust.
   const [path, setPath] = useState([]);
@@ -46,7 +48,18 @@ const HierarchyManagementPage = () => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [catRes, brandRes, repairRes] = await Promise.all([tenantCategoryService.getHierarchy(), tenantBrandService.getAll(), tenantRepairTypeService.getAll()]);
+      const [catRes, brandRes, repairRes] = await Promise.all([
+        tenantCategoryService.getHierarchy(),
+        tenantBrandService.getAll(),
+        tenantRepairTypeService.getAll(),
+      ]);
+      setData({
+        categories: catRes.data.data.map((c) => ({ ...c, type: "category" })),
+        brands: brandRes.data.data.map((b) => ({ ...b, type: "brand" })),
+        devices: [],
+        repairTypes: [],
+      });
+
       setCategories(flattenCategories(catRes.data.data));
       setBrands(brandRes.data.data);
       setRepairTypes(repairRes.data.data);
@@ -61,16 +74,24 @@ const HierarchyManagementPage = () => {
     fetchData();
   }, [fetchData]);
 
-  const handleSelect = (item, columnIndex) => {
-    setPath((prevPath) => {
-      const newPath = [...prevPath.slice(0, columnIndex)];
-      newPath[columnIndex] = item;
-      return newPath;
-    });
+  const handleSelect = async (item, level) => {
+    const newPath = [...path.slice(0, level), item];
+    setPath(newPath);
+    console.log("item ", item);
+    if (item.type === "brand") {
+      const res = await tenantDeviceService.getAll({ brandId: item._id });
+      setData((prev) => ({ ...prev, devices: res.data.data.map((d) => ({ ...d, type: "device" })) }));
+    } else if (item.type === "device") {
+      const res = await tenantRepairTypeService.getAll({ deviceId: item._id });
+      const repairTypeRes = res.data.data.filter((rt) => rt.deviceId === item._id).map((rt) => ({ ...rt, type: "repairType" }));
+
+      setData((prev) => ({ ...prev, repairTypes: repairTypeRes }));
+    }
   };
 
   const handleOpenModal = (type, parentId = null, data = null) => {
     // This single function now opens the modal for any entity type
+
     setModalState({ isOpen: true, type, parentId, data });
   };
 
@@ -102,6 +123,42 @@ const HierarchyManagementPage = () => {
   };
 
   const handleSave = async (formData) => {
+    setIsSaving(true);
+    const { type, data: editingData, parentId } = modalState;
+    const isEditMode = Boolean(editingData);
+    let apiCall;
+
+    const payload = { ...formData };
+    if (!isEditMode && parentId) {
+      if (type.toLowerCase().includes("category")) payload.parent = parentId;
+      if (type === "device") {
+        payload.brandId = parentId;
+        payload.categoryId = path.find((p) => p.type === "category" || p.type === "subCategory")?._id;
+      }
+      if (type === "repairType") payload.deviceId = parentId;
+    }
+
+    const serviceMap = {
+      category: tenantCategoryService,
+      subCategory: tenantCategoryService,
+      device: tenantDeviceService,
+      repairType: tenantRepairTypeService,
+    };
+    const service = serviceMap[type];
+    apiCall = isEditMode ? service.update(editingData._id, payload) : service.create(payload);
+
+    try {
+      await toast.promise(apiCall, { loading: "Saving...", success: "Item saved!", error: (err) => err.response?.data?.error || "Save failed." });
+      fetchData();
+      handleCloseModals();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleSaveOld = async (formData) => {
     setIsSaving(true);
     const { type, data: itemToEdit, parentId } = modalState;
 
@@ -153,16 +210,25 @@ const HierarchyManagementPage = () => {
 
   const handleDelete = async () => {
     if (!deleteConfirm) return;
-    const { data } = deleteConfirm;
-
+    const { type, data } = deleteConfirm;
+    const serviceMap = {
+      category: tenantCategoryService,
+      subCategory: tenantCategoryService,
+      device: tenantDeviceService,
+      repairType: tenantRepairTypeService,
+    };
+    const service = serviceMap[type];
     try {
-      await tenantCategoryService.delete(data._id);
-      toast.success(`Category "${data.name}" deleted successfully!`);
+      await toast.promise(service.delete(data._id), {
+        loading: `Deleting...`,
+        success: "Item deleted.",
+        error: (err) => err.response?.data?.error || "Delete failed.",
+      });
+      setPath([]);
+      fetchData();
       handleCloseModals();
-      setPath([]); // Reset path after deletion
-      await fetchData();
-    } catch (error) {
-      toast.error(`Failed to delete category: ` + (error.response?.data?.error || error.message));
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -197,6 +263,106 @@ const HierarchyManagementPage = () => {
   }, [categories, path, isLoading]);
 
   const selectedCategory = path.length > 0 ? path[path.length - 1] : null;
+
+  const columnsToRender = useMemo(() => {
+    const cols = [{ title: "Categories", items: data.categories, type: "category", level: 0, parentId: null }];
+    let currentItems = data.categories;
+
+    path.forEach((selectedItem, index) => {
+      let nextLevelItems = [];
+      let nextColTitle = "";
+      let nextColType = "";
+      let nextParentId = selectedItem._id;
+      let hasChildren = (item) => item.children?.length > 0;
+
+      const children = selectedItem.children || [];
+      if (children.length > 0) {
+        nextLevelItems = children.map((c) => ({ ...c, type: "subCategory" }));
+        nextColTitle = "Sub-Categories";
+        nextColType = "subCategory";
+      } else if (selectedItem.type === "category" || selectedItem.type === "subCategory") {
+        nextLevelItems = data.brands;
+        nextColTitle = "Brands";
+        nextColType = "brand";
+        hasChildren = () => true;
+      } else if (selectedItem.type === "brand") {
+        nextLevelItems = data.devices.filter((d) => d.brandId._id === selectedItem._id);
+        nextColTitle = "Devices";
+        nextColType = "device";
+        hasChildren = () => true;
+      } else if (selectedItem.type === "device") {
+        nextLevelItems = data.repairTypes.filter((rt) => rt.deviceId === selectedItem._id);
+        nextColTitle = "Repair Types";
+        nextColType = "repairType";
+      }
+
+      if (nextColTitle) {
+        cols.push({ title: nextColTitle, items: nextLevelItems, type: nextColType, level: index + 1, parentId: nextParentId, hasChildren });
+      }
+    });
+    return cols;
+  }, [path, data]);
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Product & Service Hierarchy</h1>
+      <p className="text-slate-400">Manage the relationships between categories, brands, devices, and repair types.</p>
+      <Card className="h-[60vh]">
+        <CardContent className="p-0 h-full flex overflow-x-auto">
+          {isLoading ? (
+            <p className="p-4 w-full text-center">Loading...</p>
+          ) : (
+            columnsToRender.map((col, index) => (
+              <HierarchyColumn
+                key={index}
+                title={col.title}
+                items={col.items}
+                selectedId={path[index]?._id}
+                onSelect={(item) => handleSelect(item, index)}
+                onAdd={() => handleOpenModal(col.type, col.parentId)}
+                onEdit={(item) => handleOpenModal(col.type, item.parent || col.parentId, item)}
+                onDelete={(item) => setDeleteConfirm({ type: col.type, data: item })}
+                itemHasChildren={col.hasChildren}
+              />
+            ))
+          )}
+        </CardContent>
+      </Card>
+
+      <Modal isOpen={modalState.isOpen} onClose={handleCloseModals} title={`${modalState.data ? "Edit" : "Create"} ${modalState.type}`}>
+        {modalState.type?.toLowerCase().includes("category") && (
+          <CategoryForm
+            allCategories={categories}
+            parentId={modalState.parentId}
+            itemToEdit={modalState.data}
+            onSave={handleSave}
+            onCancel={handleCloseModals}
+            isSaving={isSaving}
+          />
+        )}
+        {modalState.type === "device" && (
+          <DeviceForm itemToEdit={modalState.data} onSave={handleSave} onCancel={handleCloseModals} isSaving={isSaving} />
+        )}
+        {modalState.type === "repairType" && (
+          <RepairTypeForm itemToEdit={modalState.data} onSave={handleSave} onCancel={handleCloseModals} isSaving={isSaving} />
+        )}
+      </Modal>
+      <Modal isOpen={Boolean(deleteConfirm)} onClose={handleCloseModals} title="Confirm Deletion">
+        <div className="text-center">
+          <ShieldAlert className="mx-auto h-12 w-12 text-red-500" />
+          <p className="mt-4">Are you sure you want to delete "{deleteConfirm?.data.name || deleteConfirm?.data.title}"?</p>
+        </div>
+        <div className="mt-6 flex justify-end space-x-4">
+          <Button variant="outline" onClick={handleCloseModals}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
+        </div>
+      </Modal>
+    </div>
+  );
 
   return (
     <div className="page-container p-6">
@@ -257,8 +423,12 @@ const HierarchyManagementPage = () => {
           />
         )}
 
-        {modalState.type === "brand" && <BrandForm itemToEdit={modalState.data} onSave={handleSave} onCancel={handleCloseModals} isSaving={isSaving} />}
-        {modalState.type === "repairType" && <RepairTypeForm itemToEdit={modalState.data} onSave={handleSave} onCancel={handleCloseModals} isSaving={isSaving} />}
+        {modalState.type === "brand" && (
+          <BrandForm itemToEdit={modalState.data} onSave={handleSave} onCancel={handleCloseModals} isSaving={isSaving} />
+        )}
+        {modalState.type === "repairType" && (
+          <RepairTypeForm itemToEdit={modalState.data} onSave={handleSave} onCancel={handleCloseModals} isSaving={isSaving} />
+        )}
       </Modal>
 
       <Modal isOpen={Boolean(deleteConfirm)} onClose={handleCloseModals} title="Confirm Deletion">

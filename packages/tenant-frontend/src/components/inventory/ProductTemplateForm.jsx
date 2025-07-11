@@ -1,5 +1,18 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Button, Input, Label, Card, CardContent, CardHeader, CardTitle, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "ui-library";
+import {
+  Button,
+  Input,
+  Label,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "ui-library";
 import CompatibilitySelector from "./CompatibilitySelector";
 import FileUploader from "ui-library/components/FileUploader";
 import { Loader2, Trash2, X } from "lucide-react";
@@ -23,7 +36,18 @@ const generateCategoryOptions = (categories, level = 0) => {
 
 const PRODUCT_TYPES = ["non-serialized", "serialized", "service", "bundle"];
 
-const ProductTemplateForm = ({ templateToEdit, brands, categories, attributeSets, accounts, allTemplates, onSave, onCancel, isSaving, getSignatureFunc }) => {
+const ProductTemplateForm = ({
+  templateToEdit,
+  brands,
+  categories,
+  attributeSets,
+  accounts,
+  allTemplates,
+  onSave,
+  onCancel,
+  isSaving,
+  getSignatureFunc,
+}) => {
   const initialFormData = React.useMemo(
     () => ({
       baseName: "",
@@ -91,23 +115,23 @@ const ProductTemplateForm = ({ templateToEdit, brands, categories, attributeSets
 
   const handleAddBundleItem = (variant) => {
     // Prevent adding a bundle inside another bundle or adding duplicates
-    if (variant.templateId?.type === "bundle" || formData.bundleItems.some((item) => item.ProductVariantId === variant._id)) {
+    if (variant.templateId?.type === "bundle" || formData.bundleItems.some((item) => item.productVariantId === variant._id)) {
       return;
     }
     const newItem = {
-      ProductVariantId: variant._id,
+      productVariantId: variant._id,
       variantName: variant.variantName, // For display purposes in the form
       quantity: 1,
     };
     handleArrayChange("bundleItems", [...formData.bundleItems, newItem]);
   };
   const handleBundleItemQtyChange = (variantId, newQty) => {
-    const newItems = formData.bundleItems.map((item) => (item.ProductVariantId === variantId ? { ...item, quantity: Number(newQty) } : item));
+    const newItems = formData.bundleItems.map((item) => (item.productVariantId === variantId ? { ...item, quantity: Number(newQty) } : item));
     handleArrayChange("bundleItems", newItems);
   };
 
   const handleRemoveBundleItem = (variantId) => {
-    const newItems = formData.bundleItems.filter((item) => item.ProductVariantId !== variantId);
+    const newItems = formData.bundleItems.filter((item) => item.productVariantId !== variantId);
     handleArrayChange("bundleItems", newItems);
   };
 
@@ -239,14 +263,21 @@ const ProductTemplateForm = ({ templateToEdit, brands, categories, attributeSets
             <div className="mt-4 space-y-2 border-t border-slate-700 pt-4">
               {formData.bundleItems.length === 0 && <p className="text-center text-sm text-slate-400">No components added yet.</p>}
               {formData.bundleItems.map((item) => (
-                <div key={item.ProductVariantId} className="flex items-center justify-between p-2 bg-slate-800 rounded-md">
+                <div key={item.productVariantId} className="flex items-center justify-between p-2 bg-slate-800 rounded-md">
                   <span className="text-sm font-medium">{item.variantName}</span>
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`qty-${item.ProductVariantId}`} className="text-xs">
+                    <Label htmlFor={`qty-${item.productVariantId}`} className="text-xs">
                       Qty:
                     </Label>
-                    <Input id={`qty-${item.ProductVariantId}`} type="number" min="1" value={item.quantity} onChange={(e) => handleBundleItemQtyChange(item.ProductVariantId, e.target.value)} className="h-8 w-20" />
-                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveBundleItem(item.ProductVariantId)}>
+                    <Input
+                      id={`qty-${item.productVariantId}`}
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => handleBundleItemQtyChange(item.productVariantId, e.target.value)}
+                      className="h-8 w-20"
+                    />
+                    <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveBundleItem(item.productVariantId)}>
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>
@@ -335,7 +366,12 @@ const ProductTemplateForm = ({ templateToEdit, brands, categories, attributeSets
           <CardTitle className="text-lg">Marketing Images</CardTitle>
         </CardHeader>
         <CardContent>
-          <FileUploader initialFiles={formData.images && formData.images} onUploadComplete={(imgs) => handleArrayChange("images", imgs)} getSignatureFunc={getSignatureFunc} multiple={true} />
+          <FileUploader
+            initialFiles={formData.images && formData.images}
+            onUploadComplete={(imgs) => handleArrayChange("images", imgs)}
+            getSignatureFunc={getSignatureFunc}
+            multiple={true}
+          />
         </CardContent>
       </Card>
       {/* Preview section */}
@@ -345,7 +381,11 @@ const ProductTemplateForm = ({ templateToEdit, brands, categories, attributeSets
           <CardTitle className="text-lg">Compatibility</CardTitle>
         </CardHeader>
         <CardContent>
-          <CompatibilitySelector allTemplates={allTemplates.filter((t) => t._id !== templateToEdit?._id)} selectedIds={formData.compatibility} onChange={(ids) => handleArrayChange("compatibility", ids)} />
+          <CompatibilitySelector
+            allTemplates={allTemplates.filter((t) => t._id !== templateToEdit?._id)}
+            selectedIds={formData.compatibility}
+            onChange={(ids) => handleArrayChange("compatibility", ids)}
+          />
         </CardContent>
       </Card>
 

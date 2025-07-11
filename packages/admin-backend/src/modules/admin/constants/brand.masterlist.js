@@ -24,6 +24,7 @@ const BRANDS = [
   { name: "JBL" },
   { name: "Logitech" },
   { name: "Belkin" },
+  { name: "LuxShield" },
 
   // Software
   { name: "Microsoft Windows" },

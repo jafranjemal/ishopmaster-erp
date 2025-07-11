@@ -306,7 +306,7 @@ export const tenantDeviceService = {
 };
 
 export const tenantRepairTypeService = {
-  getAll: async () => api.get("/tenant/inventory/repairs"),
+  getAll: async (params) => api.get("/tenant/inventory/repairs", { params }),
   create: async (data) => api.post("/tenant/inventory/repairs", data),
   update: async (id, data) => api.put(`/tenant/inventory/repairs/${id}`, data),
   delete: async (id) => api.delete(`/tenant/inventory/repairs/${id}`),
@@ -689,26 +689,26 @@ export const tenantStockService = {
 
   /**
    * Submits a manual stock adjustment.
-   * @param {object} adjustmentData - { ProductVariantId, branchId, quantityChange, notes, reason }
+   * @param {object} adjustmentData - { productVariantId, branchId, quantityChange, notes, reason }
    */
   createAdjustment: async (adjustmentData) => {
     return api.post("/tenant/inventory/stock/adjustments", adjustmentData);
   },
 
-  getLotQuantity: async (ProductVariantId, branchId) => {
+  getLotQuantity: async (productVariantId, branchId) => {
     return api.get("/tenant/inventory/stock/lot-quantity", {
-      params: { ProductVariantId, branchId },
+      params: { productVariantId, branchId },
     });
   },
-  getAvailableSerials: async (ProductVariantId, branchId, params) => {
+  getAvailableSerials: async (productVariantId, branchId, params) => {
     return api.get("/tenant/inventory/stock/available-serials", {
-      params: { ProductVariantId, branchId, ...params },
+      params: { productVariantId, branchId, ...params },
     });
   },
 
-  getLotsForVariant: async (ProductVariantId, branchId) => {
+  getLotsForVariant: async (productVariantId, branchId) => {
     return api.get("/tenant/inventory/stock/lots-for-variant", {
-      params: { ProductVariantId, branchId },
+      params: { productVariantId, branchId },
     });
   },
 

@@ -45,9 +45,7 @@ const supplierInvoiceSchema = new mongoose.Schema(
     },
 
     // An array of GRNs that this single invoice covers.
-    goodsReceiptNoteIds: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "GoodsReceiptNote" },
-    ],
+    goodsReceiptNoteIds: [{ type: mongoose.Schema.Types.ObjectId, ref: "GoodsReceiptNote" }],
 
     status: {
       type: String,
@@ -65,7 +63,10 @@ const supplierInvoiceSchema = new mongoose.Schema(
     // Multi-Currency Fields from the original PO
     transactionCurrency: { type: String, required: true },
     exchangeRateToBase: { type: Number, required: true },
-
+    amountPaid: {
+      type: Number,
+      default: 0,
+    },
     invoiceDate: { type: Date, required: true },
     dueDate: { type: Date },
 
@@ -87,9 +88,7 @@ const supplierInvoiceSchema = new mongoose.Schema(
 // Pre-save hook to generate a sequential, user-friendly ID.
 supplierInvoiceSchema.pre("validate", async function (next) {
   if (this.isNew) {
-    const lastInvoice = await this.constructor
-      .findOne()
-      .sort({ createdAt: -1 });
+    const lastInvoice = await this.constructor.findOne().sort({ createdAt: -1 });
     let lastNumber = 0;
     if (lastInvoice && lastInvoice.invoiceId) {
       lastNumber = parseInt(lastInvoice.invoiceId.split("-")[1]);

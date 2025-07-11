@@ -8,7 +8,7 @@ import { useDebounce } from "../../../hooks/useDebounce";
 /**
  * A reusable modal for selecting specific serial numbers from available stock.
  */
-const SerialSelectorModal = ({ isOpen, onClose, onConfirm, ProductVariantId, branchId, initialSelection = [], allowMultiple = true }) => {
+const SerialSelectorModal = ({ isOpen, onClose, onConfirm, productVariantId, branchId, initialSelection = [], allowMultiple = true }) => {
   const [availableSerials, setAvailableSerials] = useState([]);
   const [selectedSerials, setSelectedSerials] = useState(initialSelection);
   const [pagination, setPagination] = useState(null);
@@ -19,11 +19,11 @@ const SerialSelectorModal = ({ isOpen, onClose, onConfirm, ProductVariantId, bra
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const fetchData = useCallback(async () => {
-    if (!isOpen || !ProductVariantId || !branchId) return;
+    if (!isOpen || !productVariantId || !branchId) return;
     setIsLoading(true);
     try {
       const params = { page: currentPage, limit: 20, searchTerm: debouncedSearchTerm };
-      const response = await tenantStockService.getAvailableSerials(ProductVariantId, branchId, params);
+      const response = await tenantStockService.getAvailableSerials(productVariantId, branchId, params);
       setAvailableSerials(response.data.data);
       setPagination(response.data.pagination);
     } catch (error) {
@@ -32,7 +32,7 @@ const SerialSelectorModal = ({ isOpen, onClose, onConfirm, ProductVariantId, bra
     } finally {
       setIsLoading(false);
     }
-  }, [isOpen, ProductVariantId, branchId, currentPage, debouncedSearchTerm]);
+  }, [isOpen, productVariantId, branchId, currentPage, debouncedSearchTerm]);
 
   useEffect(() => {
     // Reset selection when initialSelection changes (e.g., editing a different item)

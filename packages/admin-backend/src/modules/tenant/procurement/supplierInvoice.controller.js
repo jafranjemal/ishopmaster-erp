@@ -104,9 +104,7 @@ exports.getInvoiceByIdOld = asyncHandler(async (req, res, next) => {
     .populate("goodsReceiptNoteIds", "grnNumber receivedDate");
 
   if (!invoice)
-    return res
-      .status(404)
-      .json({ success: false, error: "Supplier Invoice not found" });
+    return res.status(404).json({ success: false, error: "Supplier Invoice not found" });
   res.status(200).json({ success: true, data: invoice });
 });
 
@@ -124,9 +122,7 @@ exports.getInvoiceById = asyncHandler(async (req, res, next) => {
     .lean();
 
   if (!invoice) {
-    return res
-      .status(404)
-      .json({ success: false, error: "Supplier Invoice not found" });
+    return res.status(404).json({ success: false, error: "Supplier Invoice not found" });
   }
 
   // 2. Fetch all related payment documents for this specific invoice.
@@ -142,6 +138,8 @@ exports.getInvoiceById = asyncHandler(async (req, res, next) => {
 
   // 3. Attach the payment history to the invoice object before responding.
   invoice.payments = payments;
-
+  if (payments && !invoice.amountPaid) {
+    invoice.amountPaid = payments.reduce((sum, p) => sum + (p.totalAmount || 0), 0);
+  }
   res.status(200).json({ success: true, data: invoice });
 });

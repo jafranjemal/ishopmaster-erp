@@ -10,6 +10,13 @@ const cartesian = (...arrays) => {
   );
 };
 
+// Helper to generate unique SKU parts
+const generateSkuPart = (value) =>
+  value
+    .replace(/[^A-Z0-9]/gi, "")
+    .substring(0, 3)
+    .toUpperCase();
+
 // Helper function for validation
 const validatePhysicalProduct = (data) => {
   if (!data.brandId) {
@@ -512,90 +519,132 @@ exports.generateVariants = asyncHandler(async (req, res, next) => {
  * @route   POST /api/v1/tenant/inventory/templates/:id/sync-variants
  * @access  Private (inventory:product:manage)
  */
+
 exports.syncVariants = asyncHandler(async (req, res, next) => {
   const { ProductTemplates, ProductVariants } = req.models;
   const { id: templateId } = req.params;
-  console.log("Synchronizing variants for template ID:", templateId);
-  const { options: desiredOptions } = req.body; // The desired state from the UI
+  const { options: desiredOptions } = req.body;
 
-  // 1. Get the template and all existing variants in parallel
+  console.log("🔄 Synchronizing variants for template ID:", templateId);
+
+  // Validate input
+  if (!desiredOptions || typeof desiredOptions !== "object") {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid 'options' payload. Expecting attribute values object.",
+    });
+  }
+
+  // Helper: Cartesian product
+  const cartesian = (...arrays) =>
+    arrays.reduce((a, b) => a.flatMap((d) => b.map((e) => [...d, e])), [[]]);
+
+  // Helper: Normalize attributes into a unique key string
+  const createComboKeyFromAttrs = (attributes) =>
+    Object.entries(attributes || {})
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([k, v]) => `${k}=${v}`)
+      .join("-");
+
+  // Helper: Generate safe SKU part
+  const generateSkuPart = (val) =>
+    val
+      .replace(/[^A-Z0-9]/gi, "")
+      .substring(0, 3)
+      .toUpperCase();
+
+  // Helper: Generate short unique suffix
+  const generateUniqueSkuSuffix = () => Math.random().toString(36).substring(2, 6).toUpperCase(); // e.g., X9F3
+
+  // 1. Load template and variants
   const [template, existingVariants] = await Promise.all([
     ProductTemplates.findById(templateId),
-    ProductVariants.find({ templateId }).lean(), // .lean() for faster, plain JS objects
+    ProductVariants.find({ templateId }).lean(),
   ]);
 
   if (!template) {
     return res.status(404).json({ success: false, error: "Product Template not found" });
   }
 
-  // 2. Generate all desired combinations from the user's selections
   const optionKeys = Object.keys(desiredOptions);
   const optionValues = Object.values(desiredOptions);
   const desiredCombinations = optionValues.length > 0 ? cartesian(...optionValues) : [];
 
-  // Create a simple string key for each combination for efficient lookups (e.g., "Blue-Small")
-  const createComboKey = (combo) => (Array.isArray(combo) ? combo : [combo]).join("-");
-
-  const desiredComboKeys = new Set(desiredCombinations.map(createComboKey));
-
-  // Create a Map of existing variants for O(1) lookups. This is highly performant.
-  const existingVariantMap = new Map(
-    existingVariants.map((v) => [createComboKey(Object.values(v.attributes)), v])
+  const desiredComboKeys = new Set(
+    desiredCombinations.map((combo) => {
+      const attrs = {};
+      combo.forEach((val, idx) => (attrs[optionKeys[idx]] = val));
+      return createComboKeyFromAttrs(attrs);
+    })
   );
 
-  // 3. Reconcile states: determine what to create, deactivate, and reactivate
+  const existingVariantMap = new Map(
+    existingVariants.map((v) => [createComboKeyFromAttrs(v.attributes), v])
+  );
+
+  const usedSkus = new Set(existingVariants.map((v) => v.sku?.toUpperCase()).filter(Boolean));
+
+  // Final variant buckets
   const variantsToCreate = [];
   const variantsToReactivate = [];
   const variantsToDeactivate = [];
+  const skippedVariants = [];
 
-  // Check which desired variants need to be created or reactivated
   desiredCombinations.forEach((combo) => {
-    const key = createComboKey(combo);
-    const existing = existingVariantMap.get(key);
+    const attrs = {};
+    const nameParts = [template.baseName];
+    const skuParts = [template?.skuPrefix || template.baseName.substring(0, 5).toUpperCase()];
+
+    combo.forEach((val, idx) => {
+      const attrKey = optionKeys[idx];
+      attrs[attrKey] = val;
+      nameParts.push(val);
+      skuParts.push(generateSkuPart(val));
+    });
+
+    const comboKey = createComboKeyFromAttrs(attrs);
+    const existing = existingVariantMap.get(comboKey);
+
+    const finalSku = skuParts.join("-") + `-${generateUniqueSkuSuffix()}`;
 
     if (!existing) {
-      // This variant doesn't exist, so we need to create it.
-      const attributes = {};
-      const nameParts = [template.baseName];
-      const skuParts = [template.sku || template.baseName.substring(0, 5).toUpperCase()];
-      const comboArray = Array.isArray(combo) ? combo : [combo];
-      comboArray.forEach((value, index) => {
-        const attrKey = optionKeys[index];
-        attributes[attrKey] = value;
-        nameParts.push(value);
-        skuParts.push(
-          value
-            .replace(/[^A-Z0-9]/gi, "")
-            .substring(0, 3)
-            .toUpperCase()
-        );
-      });
-      variantsToCreate.push({
-        templateId,
-        variantName: nameParts.join(" - "),
-        sku: skuParts.join("-"),
-        attributes,
-        sellingPrice: template.sellingPrice,
-        costPrice: template.costPrice,
-      });
+      if (!usedSkus.has(finalSku.toUpperCase())) {
+        usedSkus.add(finalSku.toUpperCase());
+        variantsToCreate.push({
+          templateId,
+          variantName: nameParts.join(" - "),
+          sku: finalSku,
+          attributes: attrs,
+          sellingPrice: template.sellingPrice,
+          costPrice: template.costPrice,
+        });
+      } else {
+        console.warn(`⚠️ Skipping variant due to duplicate SKU: ${finalSku}`);
+        skippedVariants.push(nameParts.join(" - "));
+      }
     } else if (!existing.isActive) {
-      // It exists but is inactive, so we should reactivate it.
       variantsToReactivate.push(existing._id);
     }
   });
 
-  // Check which existing variants need to be deactivated
+  // Detect deactivations
   existingVariantMap.forEach((variant, key) => {
     if (variant.isActive && !desiredComboKeys.has(key)) {
       variantsToDeactivate.push(variant._id);
     }
   });
 
-  // 4. Perform all database operations in parallel for max efficiency
+  // Run DB operations
   const dbOperations = [];
+
   if (variantsToCreate.length > 0) {
-    dbOperations.push(ProductVariants.insertMany(variantsToCreate));
+    dbOperations.push(
+      ProductVariants.insertMany(variantsToCreate, {
+        ordered: false,
+      })
+    );
   }
+
   if (variantsToReactivate.length > 0) {
     dbOperations.push(
       ProductVariants.updateMany(
@@ -604,6 +653,7 @@ exports.syncVariants = asyncHandler(async (req, res, next) => {
       )
     );
   }
+
   if (variantsToDeactivate.length > 0) {
     dbOperations.push(
       ProductVariants.updateMany(
@@ -613,13 +663,22 @@ exports.syncVariants = asyncHandler(async (req, res, next) => {
     );
   }
 
-  await Promise.all(dbOperations);
+  try {
+    await Promise.all(dbOperations);
+  } catch (err) {
+    console.error("❌ DB sync error:", err.message);
+    return res.status(500).json({
+      success: false,
+      error: "Database sync failed: " + err.message,
+    });
+  }
 
-  // 5. Return the full, updated list of all variants for the template
   const allUpdatedVariants = await ProductVariants.find({ templateId });
+
   res.status(200).json({
     success: true,
-    message: "Variants synchronized successfully.",
+    message: "✅ Variants synchronized successfully.",
     data: allUpdatedVariants,
+    skipped: skippedVariants,
   });
 });

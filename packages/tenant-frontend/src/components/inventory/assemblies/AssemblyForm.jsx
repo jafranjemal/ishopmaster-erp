@@ -79,7 +79,7 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
 
     // Check if every serialized component has the correct number of serials selected
     for (const component of selectedBundle.templateId.bundleItems) {
-      const isSerialized = component.ProductVariantId.templateId?.type === "serialized";
+      const isSerialized = component.productVariantId.templateId?.type === "serialized";
       if (isSerialized) {
         const requiredQty = component.quantity * quantityToAssemble;
         const selectedQty = componentSelections[component._id]?.length || 0;
@@ -190,7 +190,7 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
           isOpen={true}
           onClose={() => setSerialModalState({ isOpen: false, component: null })}
           onConfirm={handleSerialsConfirm}
-          ProductVariantId={serialModalState.component._id}
+          productVariantId={serialModalState.component._id}
           branchId={fromBranchId}
           initialSelection={serialModalState.initialSelection}
           allowMultiple={true}

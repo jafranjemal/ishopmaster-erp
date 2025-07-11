@@ -650,7 +650,7 @@ const PRODUCT_TEMPLATE_MASTER_LIST = [
     cogsAccountName: "Cost of Goods Sold",
   },
   {
-    baseName: "Apple Iphone 8 256gb Space Grey Black",
+    baseName: "Apple Iphone 8",
     type: "serialized",
     brandName: "Apple",
     categoryName: "Smartphones",
@@ -665,7 +665,7 @@ const PRODUCT_TEMPLATE_MASTER_LIST = [
     cogsAccountName: "Cost of Goods Sold",
   },
   {
-    baseName: "Apple Iphone 8 64gb Space Grey Black",
+    baseName: "Apple Iphone 7",
     type: "serialized",
     brandName: "Apple",
     categoryName: "Smartphones",

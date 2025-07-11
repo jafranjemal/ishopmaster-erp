@@ -1,5 +1,9 @@
 const errorHandler = (err, req, res, next) => {
   let error = { ...err };
+
+  if (!error.message) {
+    error.message = "Something went wrong";
+  }
   error.message = err.message;
 
   // Log to console for the developer
@@ -13,7 +17,12 @@ const errorHandler = (err, req, res, next) => {
 
   // Mongoose duplicate key
   if (err.code === 11000) {
-    const field = Object.keys(err.keyValue)[0];
+    let field = "unknown";
+    try {
+      field = err.keyValue ? Object.keys(err.keyValue)[0] : "unknown";
+    } catch (e) {
+      console.warn("Failed to extract duplicate key field:", e);
+    }
     const message = `Duplicate field value entered for '${field}'. Please use another value.`;
     return res.status(400).json({ success: false, error: message });
   }

@@ -48,14 +48,14 @@ const ReconciliationPage = () => {
       // Consolidate all items from all selected GRNs
       const consolidatedItems = tempGrnDetails.data.data.reduce((acc, grn) => {
         grn.items.forEach((item) => {
-          const poItem = po.items.find((p) => p.ProductVariantId._id === item.ProductVariantId._id);
-          const existingItem = acc.get(item.ProductVariantId._id);
+          const poItem = po.items.find((p) => p.productVariantId._id === item.productVariantId._id);
+          const existingItem = acc.get(item.productVariantId._id);
 
           if (existingItem) {
             existingItem.quantityBilled += item.quantityReceived;
           } else {
-            acc.set(item.ProductVariantId._id, {
-              ProductVariantId: item.ProductVariantId._id,
+            acc.set(item.productVariantId._id, {
+              productVariantId: item.productVariantId._id,
               description: poItem?.description || "N/A",
               quantityBilled: item.quantityReceived,
               finalCostPrice: poItem?.costPrice || 0,

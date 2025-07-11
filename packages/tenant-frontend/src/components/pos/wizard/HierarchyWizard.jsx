@@ -52,6 +52,7 @@ const HierarchyWizard = ({ startMode, onItemsSelected, onAddItem }) => {
             break;
           case "CATEGORY": {
             const res = await tenantCategoryService.getAll();
+
             const rootName = startMode === "REPAIRS" ? "Services" : "Products";
             const root = res.data.data.find((c) => c.name === rootName && !c.parent);
             itemsToShow = root ? root.children : [];
@@ -76,6 +77,7 @@ const HierarchyWizard = ({ startMode, onItemsSelected, onAddItem }) => {
           case "PRODUCT_LIST": {
             const res = await tenantProductService.getAllVariants({
               categoryId: newSelections.category._id,
+              brandId: newSelections.brand?._id,
               templateType: newSelections.productType,
             });
             itemsToShow = res.data.data;
@@ -100,8 +102,11 @@ const HierarchyWizard = ({ startMode, onItemsSelected, onAddItem }) => {
   const handleSelect = (item) => {
     if (step === "SELECT_PRODUCT_TYPE") navigateToStep("CATEGORY", { productType: item._id }, [item]);
     else if (step === "CATEGORY") navigateToStep("BRAND", { ...selections, category: item }, [...path, item]);
-    else if (step === "BRAND") navigateToStep("DEVICE", { ...selections, brand: item }, [...path, item]);
-    else if (step === "DEVICE") navigateToStep("PROBLEM", { ...selections, device: item }, [...path, item]);
+    else if (step === "BRAND") {
+      const nextSelections = { ...selections, brand: item };
+      const isRepairFlow = startMode === "REPAIRS";
+      navigateToStep(isRepairFlow ? "DEVICE" : "PRODUCT_LIST", nextSelections, [...path, item]);
+    } else if (step === "DEVICE") navigateToStep("PROBLEM", { ...selections, device: item }, [...path, item]);
     else if (step === "PROBLEM") {
       setProblemSelections((prev) => (prev.some((p) => p._id === item._id) ? prev.filter((p) => p._id !== item._id) : [...prev, item]));
     } else if (step === "PRODUCT_LIST") onAddItem(item);

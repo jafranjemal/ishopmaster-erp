@@ -66,10 +66,10 @@ const StockTransferDetailPage = () => {
 
       // 1. Prepare the precise list of items for the print job from the transfer data.
       const printQueueItems = transfer.items.map((item) => ({
-        ProductVariantId: item.ProductVariantId._id,
-        variantName: item.ProductVariantId.variantName,
-        sku: item.ProductVariantId.sku,
-        isSerialized: item.ProductVariantId.templateId?.type === "serialized",
+        productVariantId: item.productVariantId._id,
+        variantName: item.productVariantId.variantName,
+        sku: item.productVariantId.sku,
+        isSerialized: item.productVariantId.templateId?.type === "serialized",
         // The quantity for the print job is now correctly determined
         quantity: item.isSerialized ? item.serials.length : item.quantity,
         serials: item.isSerialized ? item.serials : [],

@@ -24,10 +24,10 @@ const StockTransferForm = ({ formData, onFormChange, branches = [], onSave, onCa
   }, [branches, formData.fromBranchId]);
 
   const handleAddItem = (variant) => {
-    if (formData.items.some((item) => item.ProductVariantId === variant._id)) return;
+    if (formData.items.some((item) => item.productVariantId === variant._id)) return;
     const newItem = {
       key: variant._id,
-      ProductVariantId: variant._id,
+      productVariantId: variant._id,
       description: variant.variantName,
       isSerialized: variant.templateId?.type === "serialized",
       quantity: 1,

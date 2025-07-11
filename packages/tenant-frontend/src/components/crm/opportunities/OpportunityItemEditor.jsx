@@ -11,7 +11,7 @@ const OpportunityItemEditor = ({ items = [], onAddItem, onRemoveItem, onUpdateIt
 
   const handleProductSelect = (variant) => {
     onAddItem({
-      ProductVariantId: variant._id,
+      productVariantId: variant._id,
       description: variant.variantName,
       quantity: 1,
       unitPrice: variant.sellingPrice,
@@ -49,7 +49,7 @@ const OpportunityItemEditor = ({ items = [], onAddItem, onRemoveItem, onUpdateIt
               </TableRow>
             )}
             {items.map((item, index) => (
-              <TableRow key={item.ProductVariantId}>
+              <TableRow key={item.productVariantId}>
                 <TableCell>{item.description}</TableCell>
                 <TableCell>
                   <Input

@@ -1,22 +1,21 @@
 const mongoose = require("mongoose");
 
-/**
- * Defines a standard type of repair service offered by the business.
- * e.g., "Screen Replacement", "Battery Replacement", "Water Damage Treatment"
- */
 const repairTypeSchema = new mongoose.Schema(
   {
     name: {
       type: String,
       required: true,
       trim: true,
-      unique: true,
+    },
+    deviceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Device",
+      required: true,
     },
     description: {
       type: String,
       trim: true,
     },
-    // The default price for this service, before any specific parts are added.
     defaultPrice: {
       type: Number,
       required: true,
@@ -29,5 +28,8 @@ const repairTypeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Compound unique index to ensure repair type name is unique per device
+repairTypeSchema.index({ name: 1, deviceId: 1 }, { unique: true });
 
 module.exports = repairTypeSchema;

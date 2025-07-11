@@ -14,7 +14,7 @@ exports.getOpportunityById = asyncHandler(async (req, res, next) => {
   const opportunity = await Opportunity.findById(req.params.id)
     .populate("accountId", "name phone")
     .populate("assignedTo", "name")
-    .populate("items.ProductVariantId", "variantName sku");
+    .populate("items.productVariantId", "variantName sku");
   if (!opportunity)
     return res.status(404).json({ success: false, error: "Opportunity not found." });
   res.status(200).json({ success: true, data: opportunity });

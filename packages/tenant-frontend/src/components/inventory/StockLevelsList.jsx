@@ -27,9 +27,9 @@ const StockLevelsList = ({ stockLevels }) => {
       <TableBody>
         {stockLevels.map((stock, index) => (
           // Using a composite key since _id is grouped out in the aggregation
-          <TableRow key={`${stock.ProductVariantId}-${stock.branchId}-${index}`}>
+          <TableRow key={`${stock.productVariantId}-${stock.branchId}-${index}`}>
             <TableCell className="font-medium">
-              <Link to={`/inventory/stock-details/${stock.ProductVariantId}`} className="hover:text-indigo-300 hover:underline">
+              <Link to={`/inventory/stock-details/${stock.productVariantId}`} className="hover:text-indigo-300 hover:underline">
                 {stock.variantName}
               </Link>
             </TableCell>
