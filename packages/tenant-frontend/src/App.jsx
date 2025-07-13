@@ -74,6 +74,7 @@ import WarrantyPoliciesPage from './pages/settings/WarrantyPoliciesPage';
 import CouponManagementPage from './pages/settings/CouponManagementPage';
 import CouponBatchDetailPage from './pages/settings/CouponBatchDetailPage';
 import BankReconciliationPage from './pages/accounting/BankReconciliationPage';
+import PeriodClosingPage from './pages/accounting/PeriodClosingPage';
 
 function App() {
   const [posLayout, setPosLayout] = useState('default');
@@ -143,6 +144,7 @@ function App() {
                   <Route path='/settings/printing/:id' element={<LabelDesignerPage />} />
                   <Route path='/settings/payroll-rules' element={<DeductionRulesPage />} />
                   {/* --- accounting routes --- */}
+                  <Route path='/accounting/period-closing' element={<PeriodClosingPage />} />
                   <Route path='/accounting/chart' element={<ChartOfAccountsPage />} />
                   <Route path='/accounting/ledger' element={<GeneralLedgerPage />} />
                   <Route path='/accounting/bank-reconciliation' element={<BankReconciliationPage />} />

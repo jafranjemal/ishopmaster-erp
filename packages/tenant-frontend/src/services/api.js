@@ -1183,4 +1183,27 @@ export const tenantReconciliationService = {
     return api.post('/tenant/accounting/reconciliation/confirm-match', data);
   },
 };
+
+export const tenantClosingService = {
+  /**
+   * Gets the status of all pre-closing validation tasks for a given period.
+   * @param {string} periodId - The ID of the financial period.
+   */
+  getClosingStatus: async (periodId) => {
+    return api.get(`/tenant/accounting/closing/status/${periodId}`);
+  },
+
+  /**
+   * Triggers the action to close a financial period.
+   * @param {string} periodId - The ID of the financial period to close.
+   */
+  closePeriod: async (periodId) => {
+    return api.post(`/tenant/accounting/closing/close/${periodId}`);
+  },
+
+  // We will need these later for the period selector
+  getAllPeriods: async () => api.get('/tenant/accounting/periods'),
+  createPeriod: async (data) => api.post('/tenant/accounting/periods', data),
+};
+
 export default api;
