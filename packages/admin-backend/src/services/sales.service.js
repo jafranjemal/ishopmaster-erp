@@ -45,6 +45,34 @@ class SalesService {
     try {
       const { SalesInvoice, Account, Customer, Employee, Commission } = models;
 
+      // --- 1. CREDIT LIMIT VALIDATION ---
+      const amountPaid = paymentData.paymentLines.reduce((sum, line) => sum + line.amount, 0);
+      const amountDue = cartData.totalAmount - amountPaid;
+
+      if (amountDue > 0) {
+        const customer = await Customer.findById(customerId).session(session);
+        if (!customer) throw new Error("Customer not found for credit check.");
+
+        // A credit limit of 0 means no credit is allowed.
+        if (customer.creditLimit === 0) {
+          throw new Error("This customer is not eligible for credit sales.");
+        }
+
+        // Fetch the current balance of the customer's A/R account
+        const arAccount = await Account.findById(customer.ledgerAccountId).session(session);
+        const currentBalance = arAccount.balance.get(baseCurrency) || 0;
+
+        const newBalance = currentBalance + amountDue;
+
+        if (newBalance > customer.creditLimit) {
+          throw new Error(
+            `Credit limit exceeded. Limit: ${customer.creditLimit}, Current Balance: ${currentBalance}, New Balance would be: ${newBalance}`
+          );
+        }
+      }
+      // --- END OF CREDIT LIMIT VALIDATION ---
+
+      // 2. Deduct stock and create invoice items
       let totalCostOfGoodsSold = 0;
       const saleItems = [];
 
@@ -136,6 +164,14 @@ class SalesService {
         );
       }
 
+      if (couponId) {
+        await couponService.markCouponAsRedeemed(
+          models,
+          { couponId, invoiceId: salesInvoice._id },
+          session
+        );
+      }
+
       // 5. Log commission if applicable
       const employee = await Employee.findOne({ userId: userId });
       if (
@@ -155,14 +191,6 @@ class SalesService {
             status: "pending",
           },
         ]);
-      }
-
-      if (couponId) {
-        await couponService.markCouponAsRedeemed(
-          models,
-          { couponId, invoiceId: salesInvoice._id },
-          session
-        );
       }
 
       return salesInvoice;

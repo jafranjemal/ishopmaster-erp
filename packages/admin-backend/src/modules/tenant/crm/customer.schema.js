@@ -30,10 +30,7 @@ const customerSchema = new mongoose.Schema(
       lowercase: true,
     },
     address: addressSchema,
-    creditLimit: {
-      type: Number,
-      default: 0,
-    },
+
     // This critical field will link to the ChartOfAccounts model.
     ledgerAccountId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -54,12 +51,33 @@ const customerSchema = new mongoose.Schema(
       default: null,
       index: true,
     },
+    /**
+     * The maximum amount of credit allowed for this customer.
+     * A value of 0 means no credit is extended.
+     */
+    creditLimit: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
 
+    /**
+     * Tracks the current stage of the dunning (payment reminder) process for this customer.
+     */
+    dunningStatus: {
+      type: String,
+      enum: ["none", "first_reminder", "second_reminder", "final_notice", "collections"],
+      default: "none",
+    },
     isActive: {
       type: Boolean,
       default: true,
     },
     isSystemCreated: {
+      type: Boolean,
+      default: false,
+    },
+    isWalkingCustomer: {
       type: Boolean,
       default: false,
     },

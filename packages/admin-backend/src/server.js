@@ -26,6 +26,7 @@ const backupRoutes = require("./modules/backups/backup.routes.js");
 const Tenant = require("./modules/admin/tenants/tenant.model.js");
 const apiKeyAuth = require("./middleware/apiKeyAuth.middleware");
 const { receiveDevicePunch } = require("./modules/tenant/hr/attendance.controller");
+const dunningService = require("./services/dunning.service.js");
 // CORS configuration
 const allowedOrigins = [
   "http://localhost:5173", // Vite's default dev port
@@ -139,6 +140,27 @@ cron.schedule(
   }
 );
 
+cron.schedule(
+  "0 2 * * *",
+  async () => {
+    console.log("Running nightly dunning job...");
+    try {
+      const tenants = await Tenant.find({ isActive: true });
+      for (const tenant of tenants) {
+        console.log(`Processing dunning for tenant: ${tenant.companyName}`);
+        const dbConnection = await databaseService.getTenantConnection(tenant.dbName);
+        const models = databaseService.getTenantModels(dbConnection);
+        await dunningService.sendReminders(models);
+      }
+    } catch (error) {
+      console.error("Error during nightly dunning job:", error);
+    }
+  },
+  {
+    scheduled: true,
+    timezone: "Asia/Colombo", // Use the appropriate timezone
+  }
+);
 // Custom Error Handler Middleware (must be after routes)
 app.use(errorHandler);
 

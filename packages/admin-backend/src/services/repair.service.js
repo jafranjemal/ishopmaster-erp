@@ -1,5 +1,7 @@
+const { getRepairStatusUpdateTemplate } = require("../utils/email-templates/repair.templates");
 const inventoryService = require("./inventory.service");
 const mongoose = require("mongoose");
+const notificationService = require("./notification.service");
 
 class RepairService {
   /**
@@ -93,6 +95,26 @@ class RepairService {
     // Add logic here to trigger notifications in the future
 
     await ticket.save();
+
+    // --- 2. THE DEFINITIVE INTEGRATION ---
+    try {
+      // We need to populate customer details to get their email
+      const populatedTicket = await ticket.populate("customerId", "name email");
+      const emailTemplate = getRepairStatusUpdateTemplate(populatedTicket);
+
+      if (emailTemplate && populatedTicket.customerId.email) {
+        await notificationService.sendEmail({
+          to: populatedTicket.customerId.email,
+          subject: emailTemplate.subject,
+          html: emailTemplate.html,
+        });
+      }
+    } catch (error) {
+      // Log the notification error, but do not fail the entire operation.
+      console.error(`Failed to send status update notification for ticket ${ticketId}:`, error);
+    }
+    // --- END OF INTEGRATION ---
+
     return ticket;
   }
 }
