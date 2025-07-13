@@ -12,7 +12,7 @@ export const FileUploader = ({
   onUploadComplete,
   initialFiles = [],
   getSignatureFunc,
-  accept = ["image/png", "image/jpeg", "application/pdf"],
+  accept = ["image/png", "image/jpeg", "image/webp", "application/pdf"],
   maxSize = 10 * 1024 * 1024,
   multiple = false,
 }) => {
@@ -136,7 +136,13 @@ export const FileUploader = ({
         role="button"
         tabIndex={0}
       >
-        <input {...getInputProps()} ref={inputRef} aria-hidden="true" />
+        <input
+          {...getInputProps()}
+          ref={inputRef}
+          aria-hidden="true"
+          type="file"
+          accept="image/png,image/jpeg,image/webp,application/pdf"
+        />
         <div className="text-center">
           {isUploading ? (
             <LoaderCircle className="mx-auto h-12 w-12 animate-spin text-slate-400" />

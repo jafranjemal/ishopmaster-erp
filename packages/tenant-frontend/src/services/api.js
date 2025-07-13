@@ -1,14 +1,14 @@
-import axios from "axios";
-import toast from "react-hot-toast";
+import axios from 'axios';
+import toast from 'react-hot-toast';
 
 // The baseURL is now dynamically set from the .env file (for local dev)
 // or from the environment variables set on the hosting platform (for production).
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api/v1";
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 // We need a way to communicate this back to the context. An event emitter is a clean way.
@@ -19,35 +19,35 @@ api.interceptors.response.use(
     if (error.response) {
       // Standard session expiry
       if (error.response.status === 401) {
-        if (window.location.pathname !== "/login") {
-          toast.error("Your session has expired. Please log in again.");
-          authEvents.dispatchEvent(new Event("logout"));
+        if (window.location.pathname !== '/login') {
+          toast.error('Your session has expired. Please log in again.');
+          authEvents.dispatchEvent(new Event('logout'));
         }
       }
       // --- NEW LOGIC ---
       // Specific license expiry error
-      else if (error.response.status === 403 && error.response.data?.error === "LICENSE_EXPIRED") {
+      else if (error.response.status === 403 && error.response.data?.error === 'LICENSE_EXPIRED') {
         // Fire a custom event that our AuthContext will listen for
-        authEvents.dispatchEvent(new Event("license_expired"));
+        authEvents.dispatchEvent(new Event('license_expired'));
         // We still reject the promise so the original component knows the API call failed
       }
       // --- END OF NEW LOGIC ---
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // For tenant-specific role management
 export const tenantRoleService = {
-  getAll: async () => api.get("/tenant/roles"),
-  create: async (data) => api.post("/tenant/roles", data),
+  getAll: async () => api.get('/tenant/roles'),
+  create: async (data) => api.post('/tenant/roles', data),
   update: async (id, data) => api.put(`/tenant/roles/${id}`, data),
   delete: async (id) => api.delete(`/tenant/roles/${id}`),
 };
 
 // For fetching the master list of all possible permissions
 export const adminPermissionService = {
-  getAll: async () => api.get("/admin/permissions"),
+  getAll: async () => api.get('/admin/permissions'),
 };
 
 export const tenantAuthService = {
@@ -63,13 +63,13 @@ export const tenantAuthService = {
     // We pass the subdomain in the `config` object as a custom header.
     // The `tenantResolver` middleware on our backend will use this header.
     const response = await api.post(
-      "/tenant/auth/login", // The URL path
+      '/tenant/auth/login', // The URL path
       { email, password }, // The request body
       {
         headers: {
-          "X-Tenant-ID": subdomain, // The crucial header for identifying the tenant
+          'X-Tenant-ID': subdomain, // The crucial header for identifying the tenant
         },
-      }
+      },
     );
     return response;
   },
@@ -82,7 +82,7 @@ export const tenantDashboardService = {
    * this would make a GET request to an endpoint like '/tenant/dashboard/summary'.
    */
   getSummary: async () => {
-    console.log("Fetching dashboard summary (mocked)...");
+    console.log('Fetching dashboard summary (mocked)...');
     // Simulate a network delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -93,42 +93,42 @@ export const tenantDashboardService = {
       lowStockItems: 3,
       newCustomersToday: 5,
       salesLast7Days: [
-        { date: "Jun 13", sales: 1200 },
-        { date: "Jun 14", sales: 1500 },
-        { date: "Jun 15", sales: 1100 },
-        { date: "Jun 16", sales: 1800 },
-        { date: "Jun 17", sales: 1600 },
-        { date: "Jun 18", sales: 1950 },
-        { date: "Jun 19", sales: 1450.75 },
+        { date: 'Jun 13', sales: 1200 },
+        { date: 'Jun 14', sales: 1500 },
+        { date: 'Jun 15', sales: 1100 },
+        { date: 'Jun 16', sales: 1800 },
+        { date: 'Jun 17', sales: 1600 },
+        { date: 'Jun 18', sales: 1950 },
+        { date: 'Jun 19', sales: 1450.75 },
       ],
       recentActivity: [
         {
           id: 1,
-          type: "SALE",
-          description: "Invoice INV-0084 created",
-          time: "5m ago",
-          user: "Jane Doe",
+          type: 'SALE',
+          description: 'Invoice INV-0084 created',
+          time: '5m ago',
+          user: 'Jane Doe',
         },
         {
           id: 2,
-          type: "REPAIR",
+          type: 'REPAIR',
           description: 'Ticket #REP-015 marked as "Completed"',
-          time: "15m ago",
-          user: "John Smith",
+          time: '15m ago',
+          user: 'John Smith',
         },
         {
           id: 3,
-          type: "INVENTORY",
+          type: 'INVENTORY',
           description: '10 units of "Screen Protector" added',
-          time: "45m ago",
-          user: "Jane Doe",
+          time: '45m ago',
+          user: 'Jane Doe',
         },
         {
           id: 4,
-          type: "CUSTOMER",
+          type: 'CUSTOMER',
           description: 'New customer "Alice" registered',
-          time: "1h ago",
-          user: "Jane Doe",
+          time: '1h ago',
+          user: 'Jane Doe',
         },
       ],
     };
@@ -139,21 +139,21 @@ export const tenantDashboardService = {
 
 export const tenantLocationService = {
   // --- Branch Methods ---
-  getAllBranches: async () => api.get("/tenant/locations/branches"),
-  createBranch: async (data) => api.post("/tenant/locations/branches", data),
+  getAllBranches: async () => api.get('/tenant/locations/branches'),
+  createBranch: async (data) => api.post('/tenant/locations/branches', data),
   updateBranch: async (id, data) => api.put(`/tenant/locations/branches/${id}`, data),
   deleteBranch: async (id) => api.delete(`/tenant/locations/branches/${id}`),
 
   // --- Warehouse Methods ---
-  getAllWarehouses: async () => api.get("/tenant/locations/warehouses"),
-  createWarehouse: async (data) => api.post("/tenant/locations/warehouses", data),
+  getAllWarehouses: async () => api.get('/tenant/locations/warehouses'),
+  createWarehouse: async (data) => api.post('/tenant/locations/warehouses', data),
   updateWarehouse: async (id, data) => api.put(`/tenant/locations/warehouses/${id}`, data),
   deleteWarehouse: async (id) => api.delete(`/tenant/locations/warehouses/${id}`),
 };
 
 export const tenantUserService = {
-  getAll: async () => api.get("/tenant/users"),
-  create: async (userData) => api.post("/tenant/users", userData),
+  getAll: async () => api.get('/tenant/users'),
+  create: async (userData) => api.post('/tenant/users', userData),
   update: async (id, userData) => api.put(`/tenant/users/${id}`, userData),
   delete: async (id) => api.delete(`/tenant/users/${id}`), // This is the deactivate route
   adminResetPassword: async (userId, newPassword) => {
@@ -167,7 +167,7 @@ export const tenantAccountingService = {
    * Fetches all accounts in the tenant's Chart of Accounts.
    */
   getAllAccounts: async () => {
-    return api.get("/tenant/accounting/accounts");
+    return api.get('/tenant/accounting/accounts');
   },
 
   /**
@@ -175,7 +175,7 @@ export const tenantAccountingService = {
    * @param {object} accountData - The data for the new account.
    */
   createAccount: async (accountData) => {
-    return api.post("/tenant/accounting/accounts", accountData);
+    return api.post('/tenant/accounting/accounts', accountData);
   },
 
   /**
@@ -204,10 +204,10 @@ export const tenantAccountingService = {
    * @param {string} [params.endDate] - The end date for filtering (ISO format).
    */
   getLedgerEntries: async (params) => {
-    return api.get("/tenant/accounting/ledger", { params });
+    return api.get('/tenant/accounting/ledger', { params });
   },
 
-  getChart: () => api.get("/tenant/accounting/chart"),
+  getChart: () => api.get('/tenant/accounting/chart'),
 
   /**
    * Fetches the Chart of Accounts with support for pagination and filtering.
@@ -232,12 +232,12 @@ export const tenantAccountingService = {
 
 // --- NEW CUSTOMER (CRM) SERVICE ---
 export const tenantCustomerService = {
-  getAll: async () => api.get("/tenant/crm/customers"),
+  getAll: async () => api.get('/tenant/crm/customers'),
   getById: async (id) => api.get(`/tenant/crm/customers/${id}`),
   getByName: async (name) => {
-    return api.get("/tenant/crm/customers", { params: { name: name, limit: 1 } });
+    return api.get('/tenant/crm/customers', { params: { name: name, limit: 1 } });
   },
-  create: async (data) => api.post("/tenant/crm/customers", data),
+  create: async (data) => api.post('/tenant/crm/customers', data),
   update: async (id, data) => api.put(`/tenant/crm/customers/${id}`, data),
   delete: async (id) => api.delete(`/tenant/crm/customers/${id}`),
   /**
@@ -252,17 +252,17 @@ export const tenantCustomerService = {
 };
 
 export const tenantCustomerGroupService = {
-  getAll: async () => api.get("/tenant/crm/groups"),
-  create: async (data) => api.post("/tenant/crm/groups", data),
+  getAll: async () => api.get('/tenant/crm/groups'),
+  create: async (data) => api.post('/tenant/crm/groups', data),
   update: async (id, data) => api.put(`/tenant/crm/groups/${id}`, data),
   delete: async (id) => api.delete(`/tenant/crm/groups/${id}`),
 };
 
 // --- NEW SUPPLIER (PROCUREMENT) SERVICE ---
 export const tenantSupplierService = {
-  getAll: async () => api.get("/tenant/procurement/suppliers"),
+  getAll: async () => api.get('/tenant/procurement/suppliers'),
   getById: async (id) => api.get(`/tenant/procurement/suppliers/${id}`),
-  create: async (data) => api.post("/tenant/procurement/suppliers", data),
+  create: async (data) => api.post('/tenant/procurement/suppliers', data),
   update: async (id, data) => api.put(`/tenant/procurement/suppliers/${id}`, data),
   delete: async (id) => api.delete(`/tenant/procurement/suppliers/${id}`),
   getSupplierLedger: async (id, params) => {
@@ -271,11 +271,11 @@ export const tenantSupplierService = {
 };
 
 export const tenantProfileService = {
-  getMyProfile: async () => api.get("/tenant/profile"),
-  updateLocalization: async (data) => api.put("/tenant/profile/localization", data),
-  updateMyProfile: async (data) => api.put("/tenant/profile/me", data),
+  getMyProfile: async () => api.get('/tenant/profile'),
+  updateLocalization: async (data) => api.put('/tenant/profile/localization', data),
+  updateMyProfile: async (data) => api.put('/tenant/profile/me', data),
   updateCompanyProfile: async (profileData) => {
-    return api.put("/tenant/profile/company", profileData);
+    return api.put('/tenant/profile/company', profileData);
   },
   adminResetPassword: async (userId, newPassword) => {
     return api.patch(`/tenant/users/${userId}/reset-password`, newPassword);
@@ -284,50 +284,50 @@ export const tenantProfileService = {
 
 // --- NEW METADATA SERVICES ---
 export const tenantBrandService = {
-  getAll: async () => api.get("/tenant/inventory/brands"),
-  create: async (data) => api.post("/tenant/inventory/brands", data),
+  getAll: async () => api.get('/tenant/inventory/brands'),
+  create: async (data) => api.post('/tenant/inventory/brands', data),
   update: async (id, data) => api.put(`/tenant/inventory/brands/${id}`, data),
   delete: async (id) => api.delete(`/tenant/inventory/brands/${id}`),
 };
 
 export const tenantCategoryService = {
-  getAll: async () => api.get("/tenant/inventory/categories"),
-  getHierarchy: async () => api.get("/tenant/inventory/categories"),
-  create: async (data) => api.post("/tenant/inventory/categories", data),
+  getAll: async () => api.get('/tenant/inventory/categories'),
+  getHierarchy: async () => api.get('/tenant/inventory/categories'),
+  create: async (data) => api.post('/tenant/inventory/categories', data),
   update: async (id, data) => api.put(`/tenant/inventory/categories/${id}`, data),
   delete: async (id) => api.delete(`/tenant/inventory/categories/${id}`),
 };
 
 export const tenantDeviceService = {
-  getAll: async (params) => api.get("/tenant/inventory/devices", { params }),
-  create: async (data) => api.post("/tenant/inventory/devices", data),
+  getAll: async (params) => api.get('/tenant/inventory/devices', { params }),
+  create: async (data) => api.post('/tenant/inventory/devices', data),
   update: async (id, data) => api.put(`/tenant/inventory/devices/${id}`, data),
   delete: async (id) => api.delete(`/tenant/inventory/devices/${id}`),
 };
 
 export const tenantRepairTypeService = {
-  getAll: async (params) => api.get("/tenant/inventory/repairs", { params }),
-  create: async (data) => api.post("/tenant/inventory/repairs", data),
+  getAll: async (params) => api.get('/tenant/inventory/repairs', { params }),
+  create: async (data) => api.post('/tenant/inventory/repairs', data),
   update: async (id, data) => api.put(`/tenant/inventory/repairs/${id}`, data),
   delete: async (id) => api.delete(`/tenant/inventory/repairs/${id}`),
 };
 
 export const tenantAttributeService = {
   // Methods for individual Attributes
-  getAllAttributes: async () => api.get("/tenant/attributes"),
-  createAttribute: async (data) => api.post("/tenant/attributes", data),
+  getAllAttributes: async () => api.get('/tenant/attributes'),
+  createAttribute: async (data) => api.post('/tenant/attributes', data),
   updateAttribute: async (id, data) => api.put(`/tenant/attributes/${id}`, data),
   deleteAttribute: async (id) => api.delete(`/tenant/attributes/${id}`),
   // Methods for Attribute Sets
-  getAllAttributeSets: async () => api.get("/tenant/attributes/sets"),
-  createAttributeSet: async (data) => api.post("/tenant/attributes/sets", data),
+  getAllAttributeSets: async () => api.get('/tenant/attributes/sets'),
+  createAttributeSet: async (data) => api.post('/tenant/attributes/sets', data),
   updateAttributeSet: async (id, data) => api.put(`/tenant/attributes/sets/${id}`, data),
   deleteAttributeSet: async (id) => api.delete(`/tenant/attributes/sets/${id}`),
 };
 
 export const tenantAttributeSetService = {
-  getAll: () => api.get("/tenant/attributes/sets"),
-  create: (data) => api.post("/tenant/attributes/sets", data),
+  getAll: () => api.get('/tenant/attributes/sets'),
+  create: (data) => api.post('/tenant/attributes/sets', data),
   update: (id, data) => api.put(`/tenant/attributes/sets/${id}`, data),
   delete: (id) => api.delete(`/tenant/attributes/sets/${id}`),
 };
@@ -337,9 +337,9 @@ export const tenantInventoryService = {
    * Fetches all product templates for the tenant.
    */
   getAllTemplates: (queryParams) => {
-    const cleanParams = Object.fromEntries(Object.entries(queryParams).filter(([_, v]) => v != null && v !== ""));
+    const cleanParams = Object.fromEntries(Object.entries(queryParams).filter(([_, v]) => v != null && v !== ''));
 
-    console.log("Fetching all product templates with params:", cleanParams);
+    console.log('Fetching all product templates with params:', cleanParams);
 
     return api.get(`/tenant/inventory/templates`, { params: cleanParams });
   },
@@ -357,7 +357,7 @@ export const tenantInventoryService = {
    * @param {object} data - The form data for the new template.
    */
   createTemplate: (data) => {
-    return api.post("/tenant/inventory/templates", data);
+    return api.post('/tenant/inventory/templates', data);
   },
 
   /**
@@ -399,7 +399,7 @@ export const tenantInventoryService = {
    * @param {Array<object>} variants - The array of variant objects to update.
    */
   batchUpdateVariants: (variants) => {
-    return api.patch("/tenant/inventory/variants/batch-update", { variants });
+    return api.patch('/tenant/inventory/variants/batch-update', { variants });
   },
 };
 
@@ -407,14 +407,14 @@ export const tenantInventoryService = {
 // This service will house all product-related API calls.
 export const tenantProductService = {
   // --- TEMPLATE METHODS ---
-  getAllTemplates: async (params) => api.get("/tenant/inventory/templates", { params }),
+  getAllTemplates: async (params) => api.get('/tenant/inventory/templates', { params }),
 
   getTemplateById: async (id) => api.get(`/tenant/inventory/templates/${id}`),
-  createTemplate: async (data) => api.post("/tenant/inventory/templates", data),
+  createTemplate: async (data) => api.post('/tenant/inventory/templates', data),
   updateTemplate: async (id, data) => api.put(`/tenant/inventory/templates/${id}`, data),
   deleteTemplate: async (id) => api.delete(`/tenant/inventory/templates/${id}`),
 
-  getSummary: async () => api.get("/tenant/inventory/templates/summary"),
+  getSummary: async () => api.get('/tenant/inventory/templates/summary'),
 
   /**
    * Fetches a single product variant by its ID.
@@ -444,10 +444,13 @@ export const tenantProductService = {
   },
 
   // --- We will add variant-specific methods here later ---
-  getAllVariantsForTemplate: async (templateId) => api.get(`/tenant/inventory/products/variants?templateId=${templateId}`), // We need to build this backend route
+  getAllVariantsForTemplate: async (templateId) =>
+    api.get(`/tenant/inventory/products/variants?templateId=${templateId}`), // We need to build this backend route
   updateVariant: async (variantId, data) => api.put(`/tenant/inventory/products/variants/${variantId}`, data), // We need to build this backend route
+  updateVariantImages: async (variantId, data) =>
+    api.put(`/tenant/inventory/products/variants/${variantId}/image`, data), // We need to build this backend route
   // getAllVariants: async () => api.get(`/tenant/inventory/products/variants`), // We need to build this backend route
-  getAllVariants: async (params) => api.get("/tenant/inventory/products/variants", { params }),
+  getAllVariants: async (params) => api.get('/tenant/inventory/products/variants', { params }),
 
   /**
    * Performs a bulk update on multiple variants at once.
@@ -455,9 +458,9 @@ export const tenantProductService = {
    */
   bulkUpdateVariants: async (variantsToUpdate) => {
     // We will build this backend endpoint in a later chapter. For now, it's a placeholder.
-    console.log("Calling bulk update with:", variantsToUpdate);
+    console.log('Calling bulk update with:', variantsToUpdate);
     //return Promise.resolve({ data: { success: true } });
-    return api.patch("/tenant/inventory/products/variants/bulk-update", {
+    return api.patch('/tenant/inventory/products/variants/bulk-update', {
       variants: variantsToUpdate,
     });
   },
@@ -467,9 +470,9 @@ export const tenantProductService = {
 
 // --- PURCHASE ORDER SERVICE ---
 export const tenantPurchaseOrderService = {
-  getAll: async (params) => api.get("/tenant/procurement/purchase-orders", { params }),
+  getAll: async (params) => api.get('/tenant/procurement/purchase-orders', { params }),
   getById: async (id) => api.get(`/tenant/procurement/purchase-orders/${id}`),
-  create: async (data) => api.post("/tenant/procurement/purchase-orders", data),
+  create: async (data) => api.post('/tenant/procurement/purchase-orders', data),
   // update: async (id, data) => api.put(`/tenant/procurement/purchase-orders/${id}`, data),
   // delete: async (id) => api.delete(`/tenant/procurement/purchase-orders/${id}`),
   receiveGoods: async (poId, receivedData) => {
@@ -477,7 +480,7 @@ export const tenantPurchaseOrderService = {
   },
 
   getPOsAwaitingInvoice: async () => {
-    return api.get("/tenant/procurement/purchase-orders/awaiting-invoice");
+    return api.get('/tenant/procurement/purchase-orders/awaiting-invoice');
   },
 };
 
@@ -487,13 +490,13 @@ export const tenantCurrencyService = {
   /**
    * Fetches all supported currencies for the tenant.
    */
-  getAllCurrencies: async () => api.get("/tenant/currencies"),
+  getAllCurrencies: async () => api.get('/tenant/currencies'),
 
   /**
    * Creates a new supported currency.
    * @param {object} currencyData - e.g., { name, code, symbol }
    */
-  createCurrency: async (currencyData) => api.post("/tenant/currencies", currencyData),
+  createCurrency: async (currencyData) => api.post('/tenant/currencies', currencyData),
 
   /**
    * Updates a supported currency.
@@ -514,13 +517,13 @@ export const tenantCurrencyService = {
    * Fetches historical exchange rates with pagination and filtering.
    * @param {object} params - Query params like { page, limit, startDate, endDate }.
    */
-  getExchangeRates: async (params) => api.get("/tenant/currencies/rates", { params }),
+  getExchangeRates: async (params) => api.get('/tenant/currencies/rates', { params }),
 
   /**
    * Creates or updates the exchange rate for a specific day.
    * @param {object} rateData - e.g., { fromCurrency, toCurrency, date, rate }
    */
-  createOrUpdateExchangeRate: async (rateData) => api.post("/tenant/currencies/rates", rateData),
+  createOrUpdateExchangeRate: async (rateData) => api.post('/tenant/currencies/rates', rateData),
 
   /**
    * Deletes a specific exchange rate entry.
@@ -535,23 +538,9 @@ export const tenantUploadService = {
    * Gets a secure, temporary signature from the backend for direct-to-cloud uploads.
    */
   getCloudinarySignature: async () => {
-    return api.post("/tenant/uploads/signature", {
+    return api.post('/tenant/uploads/signature', {
       timestamp: Math.round(new Date().getTime() / 1000),
     });
-  },
-};
-
-// --- NEW RECONCILIATION SERVICE ---
-export const tenantReconciliationService = {
-  /**
-   * Posts the final supplier invoice data to trigger the three-way match.
-   * @param {object} invoiceData - The complete payload for the supplier invoice.
-   */
-  postInvoice: async (invoiceData) => {
-    // We will build this backend API in the next step.
-    // For now, we define the service that will call it.
-    // The endpoint will likely be /tenant/procurement/invoices
-    return api.post("/tenant/procurement/invoices", invoiceData);
   },
 };
 
@@ -561,14 +550,14 @@ export const tenantGrnService = {
    * Fetches only GRNs that have a status of 'pending_invoice'.
    */
   getAwaitingInvoice: async () => {
-    return api.get("/tenant/procurement/grns/awaiting-invoice");
+    return api.get('/tenant/procurement/grns/awaiting-invoice');
   },
   /**
    * Fetches the full details for one or more GRNs to begin reconciliation.
    * @param {string[]} grnIds - An array of Goods Receipt Note IDs.
    */
   getDetailsForReconciliation: async (grnIds) => {
-    return api.post("/tenant/procurement/grns/by-ids", { grnIds });
+    return api.post('/tenant/procurement/grns/by-ids', { grnIds });
   },
   /**
    * Fetches the full details of a single Goods Receipt Note.
@@ -580,17 +569,17 @@ export const tenantGrnService = {
   getGrnByPoId: async (grnId) => {
     return api.get(`/tenant/procurement/grns/${grnId}`);
   },
-  getAll: async (params) => api.get("/tenant/procurement/grns", { params }),
+  getAll: async (params) => api.get('/tenant/procurement/grns', { params }),
 
   generatePrintJob: async (templateId, items) => {
-    return api.post("/tenant/inventory/print/labels", { templateId, items });
+    return api.post('/tenant/inventory/print/labels', { templateId, items });
   },
 };
 
 // --- PAYMENT METHOD SERVICE ---
 export const tenantPaymentMethodService = {
-  getAll: async () => api.get("/tenant/payments/methods"),
-  create: async (data) => api.post("/tenant/payments/methods", data),
+  getAll: async () => api.get('/tenant/payments/methods'),
+  create: async (data) => api.post('/tenant/payments/methods', data),
   update: async (id, data) => api.put(`/tenant/payments/methods/${id}`, data),
   delete: async (id) => api.delete(`/tenant/payments/methods/${id}`),
 };
@@ -600,7 +589,7 @@ export const tenantChequeService = {
    * Fetches all cheques with a 'pending_clearance' status.
    */
   getPending: async () => {
-    return api.get("/tenant/payments/cheques/pending");
+    return api.get('/tenant/payments/cheques/pending');
   },
 
   /**
@@ -615,7 +604,7 @@ export const tenantChequeService = {
 
 // --- INVOICE SERVICE ---
 export const tenantInvoiceService = {
-  getAll: async (params) => api.get("/tenant/procurement/invoices", { params }),
+  getAll: async (params) => api.get('/tenant/procurement/invoices', { params }),
   /**
    * Fetches the full details of a single Supplier Invoice.
    * @param {string} invoiceId - The ID of the supplier invoice.
@@ -640,7 +629,7 @@ export const tenantPaymentService = {
    * Fetches all payment transactions with filtering and pagination.
    * @param {object} params - { page, limit, direction, paymentMethodId, etc. }
    */
-  getAll: async (params) => api.get("/tenant/payments/transactions", { params }),
+  getAll: async (params) => api.get('/tenant/payments/transactions', { params }),
   /**
    * Fetches a single payment by its ID with all details.
    */
@@ -654,7 +643,7 @@ export const tenantStockService = {
    * @param {object} params - { page, limit, branchId, searchTerm }.
    */
   getStockLevels: async (params) => {
-    return api.get("/tenant/inventory/stock/levels", { params });
+    return api.get('/tenant/inventory/stock/levels', { params });
   },
   /**
    * Fetches summary KPI metrics for a single product variant.
@@ -665,7 +654,7 @@ export const tenantStockService = {
   },
 
   getSummary: async (params) => {
-    return api.get("/tenant/inventory/stock/summary", { params });
+    return api.get('/tenant/inventory/stock/summary', { params });
   },
 
   /**
@@ -673,7 +662,7 @@ export const tenantStockService = {
    * @param {object} params - { page, limit, branchId, userId, startDate, endDate }.
    */
   getAdjustmentHistory: async (params) => {
-    return api.get("/tenant/inventory/adjustments/history", { params });
+    return api.get('/tenant/inventory/adjustments/history', { params });
   },
 
   /**
@@ -689,26 +678,26 @@ export const tenantStockService = {
 
   /**
    * Submits a manual stock adjustment.
-   * @param {object} adjustmentData - { productVariantId, branchId, quantityChange, notes, reason }
+   * @param {object} adjustmentData - { ProductVariantId, branchId, quantityChange, notes, reason }
    */
   createAdjustment: async (adjustmentData) => {
-    return api.post("/tenant/inventory/stock/adjustments", adjustmentData);
+    return api.post('/tenant/inventory/stock/adjustments', adjustmentData);
   },
 
-  getLotQuantity: async (productVariantId, branchId) => {
-    return api.get("/tenant/inventory/stock/lot-quantity", {
-      params: { productVariantId, branchId },
+  getLotQuantity: async (ProductVariantId, branchId) => {
+    return api.get('/tenant/inventory/stock/lot-quantity', {
+      params: { ProductVariantId, branchId },
     });
   },
-  getAvailableSerials: async (productVariantId, branchId, params) => {
-    return api.get("/tenant/inventory/stock/available-serials", {
-      params: { productVariantId, branchId, ...params },
+  getAvailableSerials: async (ProductVariantId, branchId, params) => {
+    return api.get('/tenant/inventory/stock/available-serials', {
+      params: { ProductVariantId, branchId, ...params },
     });
   },
 
-  getLotsForVariant: async (productVariantId, branchId) => {
-    return api.get("/tenant/inventory/stock/lots-for-variant", {
-      params: { productVariantId, branchId },
+  getLotsForVariant: async (ProductVariantId, branchId) => {
+    return api.get('/tenant/inventory/stock/lots-for-variant', {
+      params: { ProductVariantId, branchId },
     });
   },
 
@@ -722,7 +711,7 @@ export const tenantTransferService = {
    * @param {object} transferData - The data for the new transfer order.
    */
   create: async (transferData) => {
-    return api.post("/tenant/inventory/stock/transfers", transferData);
+    return api.post('/tenant/inventory/stock/transfers', transferData);
   },
 
   /**
@@ -730,7 +719,7 @@ export const tenantTransferService = {
    * @param {object} params - Query params like { page, limit, status }.
    */
   getAll: async (params) => {
-    return api.get("/tenant/inventory/stock/transfers", { params });
+    return api.get('/tenant/inventory/stock/transfers', { params });
   },
 
   /**
@@ -765,11 +754,11 @@ export const tenantInstallmentService = {
    * @param {object} planData - Data to create the plan (totalAmount, installments, etc.).
    */
   create: async (planData) => {
-    return api.post("/tenant/payments/installments", planData);
+    return api.post('/tenant/payments/installments', planData);
   },
 
   getAllForCustomer: async (customerId) => {
-    return api.get("/tenant/payments/installments", { params: { customerId } });
+    return api.get('/tenant/payments/installments', { params: { customerId } });
   },
 
   /**
@@ -797,7 +786,7 @@ export const tenantLabelTemplateService = {
   /**
    * Fetches all saved label templates for the tenant.
    */
-  getAll: async () => api.get("/tenant/printing/label-templates"),
+  getAll: async () => api.get('/tenant/printing/label-templates'),
 
   /**
    * Fetches a single label template by its ID.
@@ -809,7 +798,7 @@ export const tenantLabelTemplateService = {
    * Creates a new label template.
    * @param {object} templateData - The data for the new template design.
    */
-  create: async (templateData) => api.post("/tenant/printing/label-templates", templateData),
+  create: async (templateData) => api.post('/tenant/printing/label-templates', templateData),
 
   /**
    * Updates an existing label template.
@@ -832,21 +821,21 @@ export const tenantPrintService = {
    * @param {Array<object>} items - The list of items to print labels for.
    */
   generateLabels: async (templateId, items, isPreview) => {
-    return api.post("/tenant/inventory/print/labels", {
+    return api.post('/tenant/inventory/print/labels', {
       templateId,
       items,
       isPreview,
     });
   },
   generatePrintJob: async (templateId, items, isPreview) => {
-    return api.post("/tenant/inventory/print/labels", {
+    return api.post('/tenant/inventory/print/labels', {
       templateId,
       items,
       isPreview,
     });
   },
   generateLabelPreview: async (templateData, itemData) => {
-    return api.post("/tenant/inventory/print/label-preview", {
+    return api.post('/tenant/inventory/print/label-preview', {
       template: templateData,
       itemData: itemData,
     });
@@ -857,13 +846,13 @@ export const tenantShiftService = {
   /**
    * Gets the current user's currently open shift, if any.
    */
-  getActive: async () => api.get("/tenant/sales/shifts/active"),
+  getActive: async () => api.get('/tenant/sales/shifts/active'),
 
   /**
    * Opens a new shift for the current user.
    * @param {object} data - { openingFloat }
    */
-  openShift: async (data) => api.post("/tenant/sales/shifts/open", data),
+  openShift: async (data) => api.post('/tenant/sales/shifts/open', data),
 
   /**
    * Closes a specific shift and performs reconciliation.
@@ -880,7 +869,7 @@ export const tenantShiftService = {
    * Gets a paginated history of closed shifts.
    * @param {object} params - { page, limit }
    */
-  getHistory: async (params) => api.get("/tenant/sales/shifts/history", { params }),
+  getHistory: async (params) => api.get('/tenant/sales/shifts/history', { params }),
 };
 
 export const tenantAssemblyService = {
@@ -889,15 +878,16 @@ export const tenantAssemblyService = {
    * @param {object} assemblyData - The data for the assembly job.
    */
   create: async (assemblyData) => {
-    return api.post("/tenant/inventory/assemblies", assemblyData);
+    return api.post('/tenant/inventory/assemblies', assemblyData);
   },
 };
 
 export const tenantRepairService = {
-  getAll: async (params) => api.get("/tenant/service/tickets", { params }),
+  getAll: async (params) => api.get('/tenant/service/tickets', { params }),
   getById: async (ticketId) => api.get(`/tenant/service/tickets/${ticketId}`),
-  createTicket: async (ticketData) => api.post("/tenant/service/tickets", ticketData),
-  updateTicketStatus: async (ticketId, statusData) => api.patch(`/tenant/service/tickets/${ticketId}/status`, statusData),
+  createTicket: async (ticketData) => api.post('/tenant/service/tickets', ticketData),
+  updateTicketStatus: async (ticketId, statusData) =>
+    api.patch(`/tenant/service/tickets/${ticketId}/status`, statusData),
   addItemToJobSheet: async (ticketId, itemData) => api.post(`/tenant/service/tickets/${ticketId}/jobsheet`, itemData),
   removeJobSheetItem: async (ticketId, itemId) => api.delete(`/tenant/service/tickets/${ticketId}/jobsheet/${itemId}`),
 };
@@ -908,7 +898,7 @@ export const tenantHrService = {
    * @param {object} params - e.g., { page, limit }
    */
   getAllEmployees: async (params) => {
-    return api.get("/tenant/hr/employees", { params });
+    return api.get('/tenant/hr/employees', { params });
   },
   getEmployeeById: async (id) => {
     return api.get(`/tenant/hr/employees/${id}`);
@@ -919,7 +909,7 @@ export const tenantHrService = {
    * @param {object} employeeData - The data for the new employee.
    */
   createEmployee: async (employeeData) => {
-    return api.post("/tenant/hr/employees", employeeData);
+    return api.post('/tenant/hr/employees', employeeData);
   },
 
   /**
@@ -939,13 +929,13 @@ export const tenantHrService = {
     return api.delete(`/tenant/hr/employees/${id}`);
   },
   getLeaveHistory: async (params) => {
-    return api.get("/tenant/hr/leave", { params });
+    return api.get('/tenant/hr/leave', { params });
   },
   requestLeave: async (leaveData) => {
-    return api.post("/tenant/hr/leave/request", leaveData);
+    return api.post('/tenant/hr/leave/request', leaveData);
   },
   updateLeaveStatus: async (id, leaveData) => {
-    return api.patch("/tenant/hr/leave/" + id + "/status", leaveData);
+    return api.patch('/tenant/hr/leave/' + id + '/status', leaveData);
   },
 };
 
@@ -955,10 +945,10 @@ export const tenantPayrollService = {
    * @param {object} dateRange - { startDate, endDate }
    */
   runPayroll: async (dateRange) => {
-    return api.post("/tenant/hr/payroll/run", dateRange);
+    return api.post('/tenant/hr/payroll/run', dateRange);
   },
   getHistory: async (params) => {
-    return api.get("/tenant/hr/payroll/history", { params });
+    return api.get('/tenant/hr/payroll/history', { params });
   },
   getRunById: async (runId) => {
     return api.get(`/tenant/hr/payroll/history/${runId}`);
@@ -984,24 +974,24 @@ export const tenantAttendanceService = {
    * Gets the current user's active (not clocked out) session.
    */
   getActiveSession: async () => {
-    return api.get("/tenant/hr/attendance/active");
+    return api.get('/tenant/hr/attendance/active');
   },
 
   /**
    * Creates a new attendance record for the current user (clocks them in).
    */
   clockIn: async () => {
-    return api.post("/tenant/hr/attendance/clock-in");
+    return api.post('/tenant/hr/attendance/clock-in');
   },
 
   /**
    * Clocks out the current user's active session.
    */
   clockOut: async () => {
-    return api.patch("/tenant/hr/attendance/clock-out");
+    return api.patch('/tenant/hr/attendance/clock-out');
   },
   getTimesheet: async (params) => {
-    return api.get("/tenant/hr/attendance/timesheet", { params });
+    return api.get('/tenant/hr/attendance/timesheet', { params });
   },
 
   /**
@@ -1022,20 +1012,20 @@ export const tenantAttendanceService = {
     // For now, we will re-use the update controller logic on a non-existent entry
     // A dedicated endpoint is the better long-term solution.
     // Let's assume a dedicated endpoint for this.
-    return api.post("/tenant/hr/attendance/manual", data);
+    return api.post('/tenant/hr/attendance/manual', data);
   },
 };
 
 export const tenantDepartmentService = {
-  getAll: async () => api.get("/tenant/hr/departments"),
-  create: async (data) => api.post("/tenant/hr/departments", data),
+  getAll: async () => api.get('/tenant/hr/departments'),
+  create: async (data) => api.post('/tenant/hr/departments', data),
   update: async (id, data) => api.put(`/tenant/hr/departments/${id}`, data),
   delete: async (id) => api.delete(`/tenant/hr/departments/${id}`),
 };
 
 export const tenantJobPositionService = {
-  getAll: async () => api.get("/tenant/hr/job-positions"),
-  create: async (data) => api.post("/tenant/hr/job-positions", data),
+  getAll: async () => api.get('/tenant/hr/job-positions'),
+  create: async (data) => api.post('/tenant/hr/job-positions', data),
   update: async (id, data) => api.put(`/tenant/hr/job-positions/${id}`, data),
   delete: async (id) => api.delete(`/tenant/hr/job-positions/${id}`),
 };
@@ -1044,13 +1034,13 @@ export const tenantDeductionRuleService = {
   /**
    * Fetches all deduction rules for the tenant.
    */
-  getAll: async () => api.get("/tenant/hr/deduction-rules"),
+  getAll: async () => api.get('/tenant/hr/deduction-rules'),
 
   /**
    * Creates a new deduction rule.
    * @param {object} ruleData - The data for the new rule.
    */
-  create: async (ruleData) => api.post("/tenant/hr/deduction-rules", ruleData),
+  create: async (ruleData) => api.post('/tenant/hr/deduction-rules', ruleData),
 
   /**
    * Updates an existing deduction rule.
@@ -1068,30 +1058,30 @@ export const tenantDeductionRuleService = {
 
 export const tenantPricingService = {
   // Pricing Rules
-  getAllRules: async () => api.get("/tenant/sales/pricing/rules"),
-  createRule: async (data) => api.post("/tenant/sales/pricing/rules", data),
+  getAllRules: async () => api.get('/tenant/sales/pricing/rules'),
+  createRule: async (data) => api.post('/tenant/sales/pricing/rules', data),
   updateRule: async (id, data) => api.put(`/tenant/sales/pricing/rules/${id}`, data),
   deleteRule: async (id) => api.delete(`/tenant/sales/pricing/rules/${id}`),
 
   // Promotions
-  getAllPromotions: async () => api.get("/tenant/sales/pricing/promotions"),
-  createPromotion: async (data) => api.post("/tenant/sales/pricing/promotions", data),
+  getAllPromotions: async () => api.get('/tenant/sales/pricing/promotions'),
+  createPromotion: async (data) => api.post('/tenant/sales/pricing/promotions', data),
   updatePromotion: async (id, data) => api.put(`/tenant/sales/pricing/promotions/${id}`, data),
   deletePromotion: async (id) => api.delete(`/tenant/sales/pricing/promotions/${id}`),
 };
 
 export const tenantLeadService = {
-  getAll: async (params) => api.get("/tenant/crm/leads", { params }),
-  create: async (data) => api.post("/tenant/crm/leads", data),
+  getAll: async (params) => api.get('/tenant/crm/leads', { params }),
+  create: async (data) => api.post('/tenant/crm/leads', data),
   update: async (id, data) => api.put(`/tenant/crm/leads/${id}`, data),
   delete: async (id) => api.delete(`/tenant/crm/leads/${id}`),
   convert: async (id) => api.post(`/tenant/crm/leads/${id}/convert`),
 };
 
 export const tenantOpportunityService = {
-  getAll: async (params) => api.get("/tenant/crm/opportunities", { params }),
+  getAll: async (params) => api.get('/tenant/crm/opportunities', { params }),
   getById: async (id) => api.get(`/tenant/crm/opportunities/${id}`),
-  create: async (data) => api.post("/tenant/crm/opportunities", data),
+  create: async (data) => api.post('/tenant/crm/opportunities', data),
   update: async (id, data) => api.put(`/tenant/crm/opportunities/${id}`, data),
   delete: async (id) => api.delete(`/tenant/crm/opportunities/${id}`),
   updateStage: async (id, newStage, lossReason) => {
@@ -1111,20 +1101,22 @@ export const tenantSalesOrderService = {
 };
 
 export const tenantActivityService = {
-  getAllFor: async (relatedToType, relatedToId) => api.get("/tenant/crm/activities", { params: { relatedToType, relatedToId } }),
-  create: async (data) => api.post("/tenant/crm/activities", data),
+  getAllFor: async (relatedToType, relatedToId) =>
+    api.get('/tenant/crm/activities', { params: { relatedToType, relatedToId } }),
+  create: async (data) => api.post('/tenant/crm/activities', data),
 };
 
 export const tenantBenefitTypeService = {
-  getAll: async () => api.get("/tenant/hr/benefits/types"),
-  create: async (data) => api.post("/tenant/hr/benefits/types", data),
+  getAll: async () => api.get('/tenant/hr/benefits/types'),
+  create: async (data) => api.post('/tenant/hr/benefits/types', data),
   update: async (id, data) => api.put(`/tenant/hr/benefits/types/${id}`, data),
   delete: async (id) => api.delete(`/tenant/hr/benefits/types/${id}`),
 };
 
 export const tenantEmployeeBenefitService = {
   getForEmployee: async (employeeId) => api.get(`/tenant/hr/benefits/assignments/employee/${employeeId}`),
-  assignToEmployee: async (employeeId, data) => api.post(`/tenant/hr/benefits/assignments/employee/${employeeId}`, data),
+  assignToEmployee: async (employeeId, data) =>
+    api.post(`/tenant/hr/benefits/assignments/employee/${employeeId}`, data),
   delete: async (id) => api.delete(`/tenant/hr/benefits/assignments/${id}`),
 };
 
@@ -1132,4 +1124,63 @@ export const tenantSearchService = {
   findDocument: async (query) => api.get(`/tenant/search/documents`, { params: { query } }),
 };
 
+export const tenantWarrantyPolicyService = {
+  getAll: async () => api.get('/tenant/inventory/warranties'),
+  create: async (data) => api.post('/tenant/inventory/warranties', data),
+  update: async (id, data) => api.put(`/tenant/inventory/warranties/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/inventory/warranties/${id}`),
+};
+
+export const tenantCouponService = {
+  // Coupon Batch (Campaign) Management
+  getAllBatches: async () => api.get('/tenant/sales/pricing/coupons/batches'),
+  createBatch: async (data) => api.post('/tenant/sales/pricing/coupons/batches', data),
+  updateBatch: async (id, data) => api.put(`/tenant/sales/pricing/coupons/batches/${id}`, data),
+  generateFromBatch: async (id, data) => api.post(`/tenant/sales/pricing/coupons/batches/${id}/generate`, data),
+
+  /**
+   * Gets all unique coupon codes for a given batch, with filters.
+   * @param {string} batchId - The ID of the coupon campaign.
+   * @param {object} params - { page, limit, status }
+   */
+  getCouponsForBatch: async (batchId, params) => {
+    return api.get(`/tenant/sales/pricing/coupons/by-batch/${batchId}`, { params });
+  },
+
+  // Coupon Redemption
+  validate: async (code, cartTotal) => api.post('/tenant/sales/pricing/coupons/validate', { code, cartTotal }),
+};
+
+export const tenantReconciliationService = {
+  postInvoice: async (invoiceData) => {
+    // We will build this backend API in the next step.
+    // For now, we define the service that will call it.
+    // The endpoint will likely be /tenant/procurement/invoices
+    return api.post('/tenant/procurement/invoices', invoiceData);
+  },
+
+  /**
+   * Uploads a statement by sending the file URL and metadata to the backend.
+   * @param {object} data - { fileUrl, accountId, statementDate }
+   */
+  uploadStatement: async (data) => {
+    return api.post('/tenant/accounting/reconciliation/upload', data);
+  },
+
+  /**
+   * Fetches suggested matches for a given statement.
+   * @param {string} statementId - The ID of the bank statement.
+   */
+  getSuggestions: async (statementId) => {
+    return api.get(`/tenant/accounting/reconciliation/suggest/${statementId}`);
+  },
+
+  /**
+   * Confirms a match between a statement line and ledger entries.
+   * @param {object} data - { statementId, statementLineId, ledgerEntryIds }
+   */
+  confirmMatch: async (data) => {
+    return api.post('/tenant/accounting/reconciliation/confirm-match', data);
+  },
+};
 export default api;

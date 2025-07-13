@@ -5,7 +5,9 @@ import LotQuantityInput from "./LotQuantityInput";
 
 const PrintQueue = ({ queue, onQuantityChange, onRemoveItem, onEditSerials }) => {
   if (queue.length === 0) {
-    return <div className="p-8 text-center text-slate-400">Add items from a GRN or search to build your print queue.</div>;
+    return (
+      <div className="p-8 text-center text-slate-400">Add items from a GRN or search to build your print queue.</div>
+    );
   }
   return (
     <Table>
@@ -25,7 +27,9 @@ const PrintQueue = ({ queue, onQuantityChange, onRemoveItem, onEditSerials }) =>
               <div className="font-mono text-xs text-slate-400">{item.sku}</div>
             </TableCell>
             <TableCell>
-              <Badge variant={item.isSerialized ? "default" : "secondary"}>{item.isSerialized ? "Serialized" : "Non-Serialized"}</Badge>
+              <Badge variant={item.isSerialized ? "default" : "secondary"}>
+                {item.isSerialized ? "Serialized" : "Non-Serialized"}
+              </Badge>
             </TableCell>
             <TableCell className="text-center">
               {item.isSerialized ? (
@@ -37,7 +41,7 @@ const PrintQueue = ({ queue, onQuantityChange, onRemoveItem, onEditSerials }) =>
                 </div>
               ) : (
                 <LotQuantityInput
-                  productVariantId={item.productVariantId}
+                  ProductVariantId={item.ProductVariantId}
                   branchId={item.branchId} // This needs to be passed when item is added to queue
                   value={item.quantity}
                   onChange={(newQty) => onQuantityChange(item.key, newQty)}

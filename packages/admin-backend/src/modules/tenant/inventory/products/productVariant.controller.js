@@ -108,6 +108,43 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
     { $match: postLookupMatch },
     {
       $lookup: {
+        from: "productvariants",
+        localField: "templateId.requiredParts.productVariantId",
+        foreignField: "_id",
+        as: "requiredPartsVariants",
+      },
+    },
+    {
+      $addFields: {
+        "templateId.requiredParts": {
+          $map: {
+            input: "$templateId.requiredParts",
+            as: "part",
+            in: {
+              $mergeObjects: [
+                "$$part",
+                {
+                  productVariant: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$requiredPartsVariants",
+                          as: "pv",
+                          cond: { $eq: ["$$pv._id", "$$part.productVariantId"] },
+                        },
+                      },
+                      0,
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
+    {
+      $lookup: {
         from: "inventorylots",
         localField: "_id",
         foreignField: "productVariantId",
@@ -143,6 +180,7 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
     },
     {
       $project: {
+        requiredPartsVariants: 0,
         lots: 0,
         items: 0,
       },
@@ -188,6 +226,28 @@ exports.updateVariant = asyncHandler(async (req, res, next) => {
   });
   if (!updatedVariant)
     return res.status(404).json({ success: false, error: "Product Variant not found" });
+  res.status(200).json({ success: true, data: updatedVariant });
+});
+
+exports.updateVariantImage = asyncHandler(async (req, res, next) => {
+  const { ProductVariants } = req.models;
+  const { images } = req.body;
+  const { id: variantId } = req.params;
+
+  if (!images) {
+    return next(new ErrorResponse("Image URL is required.", 400));
+  }
+
+  const updatedVariant = await ProductVariants.findByIdAndUpdate(
+    variantId,
+    { $set: { images: images } },
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedVariant) {
+    return next(new ErrorResponse("Product Variant not found.", 404));
+  }
+
   res.status(200).json({ success: true, data: updatedVariant });
 });
 

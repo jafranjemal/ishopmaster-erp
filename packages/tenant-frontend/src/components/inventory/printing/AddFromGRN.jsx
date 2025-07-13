@@ -16,9 +16,9 @@ const AddFromGRN = ({ grns = [], onAddItems }) => {
 
       // Transform the GRN items into the format our print queue expects
       const itemsToAdd = grn.items.map((item) => ({
-        productVariantId: item.productVariantId._id,
-        variantName: item.productVariantId.variantName,
-        sku: item.productVariantId.sku,
+        ProductVariantId: item.ProductVariantId._id,
+        variantName: item.ProductVariantId.variantName,
+        sku: item.ProductVariantId.sku,
         quantity: item.quantityReceived,
         // Pass along the serials if they exist
         isSerialized: item.receivedSerials && item.receivedSerials.length > 0,

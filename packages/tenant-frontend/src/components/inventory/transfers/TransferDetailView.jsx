@@ -1,5 +1,17 @@
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle, Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "ui-library";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Badge,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "ui-library";
 import useAuth from "../../../context/useAuth";
 
 const TransferDetailView = ({ transfer }) => {
@@ -55,7 +67,7 @@ const TransferDetailView = ({ transfer }) => {
             <TableBody>
               {transfer.items.map((item, index) => (
                 <TableRow key={index}>
-                  <TableCell>{item.productVariantId?.variantName || "N/A"}</TableCell>
+                  <TableCell>{item.ProductVariantId?.variantName || "N/A"}</TableCell>
                   <TableCell className="text-right font-bold">{item.quantity}</TableCell>
                 </TableRow>
               ))}

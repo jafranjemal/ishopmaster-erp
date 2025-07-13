@@ -2,6 +2,7 @@ const inventoryService = require("./inventory.service");
 const accountingService = require("./accounting.service");
 const paymentsService = require("./payments.service");
 const mongoose = require("mongoose");
+const couponService = require("./coupon.service");
 
 /**
  * The SalesService handles all complex business logic related to sales,
@@ -38,122 +39,142 @@ class SalesService {
    */
   async finalizeSale(
     models,
-    { cartData, paymentData, customerId, branchId, userId },
+    { cartData, paymentData, customerId, branchId, userId, couponId },
     baseCurrency
   ) {
-    const { SalesInvoice, Account, Customer, Employee, Commission } = models;
+    try {
+      const { SalesInvoice, Account, Customer, Employee, Commission } = models;
 
-    let totalCostOfGoodsSold = 0;
-    const saleItems = [];
+      let totalCostOfGoodsSold = 0;
+      const saleItems = [];
 
-    // 1. Process cart items to prepare for invoice and deduct stock
-    for (const item of cartData.items) {
-      const { costOfGoodsSold } = await inventoryService.decreaseStock(models, {
-        productVariantId: item.productVariantId,
-        branchId,
-        quantity: item.quantity,
-        serialNumber: item.serialNumber, // Will be present for serialized items
-        userId,
-        // We will link the sale ID later
-      });
+      // 1. Process cart items to prepare for invoice and deduct stock
+      for (const item of cartData.items) {
+        const { costOfGoodsSold } = await inventoryService.decreaseStock(models, {
+          ProductVariantId: item.ProductVariantId,
+          branchId,
+          quantity: item.quantity,
+          serialNumber: item.serialNumber, // Will be present for serialized items
+          userId,
+          // We will link the sale ID later
+        });
 
-      totalCostOfGoodsSold += costOfGoodsSold;
-      saleItems.push({
-        productVariantId: item.productVariantId,
-        description: item.variantName,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        discount: item.discount,
-        finalPrice: item.finalPrice,
-        costPriceInBaseCurrency: costOfGoodsSold / item.quantity,
-      });
-    }
+        totalCostOfGoodsSold += costOfGoodsSold;
+        saleItems.push({
+          ProductVariantId: item.ProductVariantId,
+          description: item.variantName,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          discount: item.discount,
+          finalPrice: item.finalPrice,
+          costPriceInBaseCurrency: costOfGoodsSold / item.quantity,
+        });
+      }
 
-    // 2. Create the Sales Invoice with status 'completed'
-    const [salesInvoice] = await SalesInvoice.create([
-      {
-        customerId,
-        branchId,
-        items: saleItems,
-        subTotal: cartData.subTotal,
-        totalDiscount: cartData.totalDiscount,
-        totalTax: cartData.totalTax,
-        totalAmount: cartData.totalAmount,
-        soldBy: userId,
-        status: "completed",
-      },
-    ]);
-
-    // Now that we have the invoice ID, we can update the stock movement refs
-    // In a real high-performance system, this might be done as a background job.
-    await inventoryService.linkSaleToMovements(models, { saleId: salesInvoice._id, cartItems });
-
-    // 3. Post the core Sales and COGS journal entries
-    const [arAccount, salesRevenueAccount, cogsAccount, inventoryAssetAccount] = await Promise.all([
-      Customer.findById(customerId)
-        .select("ledgerAccountId")
-        .then((c) => Account.findById(c.ledgerAccountId)),
-      Account.findOne({ isSystemAccount: true, name: "Sales Revenue" }),
-      Account.findOne({ isSystemAccount: true, name: "Cost of Goods Sold" }),
-      Account.findOne({ isSystemAccount: true, name: "Inventory Asset" }),
-    ]);
-
-    await accountingService.createJournalEntry(models, {
-      description: `Sale to customer for Invoice #${salesInvoice.invoiceNumber}`,
-      entries: [
-        { accountId: arAccount._id, debit: salesInvoice.totalAmount },
-        { accountId: salesRevenueAccount._id, credit: salesInvoice.subTotal },
-      ],
-      refs: { salesInvoiceId: salesInvoice._id },
-    });
-
-    await accountingService.createJournalEntry(models, {
-      description: `COGS for Invoice #${salesInvoice.invoiceNumber}`,
-      entries: [
-        { accountId: cogsAccount._id, debit: totalCostOfGoodsSold },
-        { accountId: inventoryAssetAccount._id, credit: totalCostOfGoodsSold },
-      ],
-      refs: { salesInvoiceId: salesInvoice._id },
-    });
-
-    // 4. Record the payment using the universal PaymentsService
-    if (paymentData && paymentData.paymentLines.length > 0) {
-      await paymentsService.recordPayment(
-        models,
+      // 2. Create the Sales Invoice with status 'completed'
+      const [salesInvoice] = await SalesInvoice.create([
         {
-          paymentSourceId: salesInvoice._id,
-          paymentSourceType: "SalesInvoice",
-          paymentLines: paymentData.paymentLines,
-          paymentDate: new Date(),
-          direction: "inflow",
-          notes: paymentData.notes,
-        },
-        userId,
-        baseCurrency
-      );
-    }
-
-    // 5. Log commission if applicable
-    const employee = await Employee.findOne({ userId: userId });
-    if (
-      employee &&
-      employee.compensation.type === "commission_based" &&
-      employee.compensation.commissionRate > 0
-    ) {
-      const commissionAmount =
-        salesInvoice.totalAmount * (employee.compensation.commissionRate / 100);
-
-      await Commission.create([
-        {
-          employeeId: employee._id,
-          salesInvoiceId: salesInvoice._id,
-          commissionAmount: parseFloat(commissionAmount.toFixed(2)),
-          saleDate: salesInvoice.createdAt,
-          status: "pending",
+          customerId,
+          branchId,
+          items: saleItems,
+          subTotal: cartData.subTotal,
+          totalDiscount: cartData.totalDiscount,
+          totalTax: cartData.totalTax,
+          totalAmount: cartData.totalAmount,
+          soldBy: userId,
+          status: "completed",
         },
       ]);
+
+      // Now that we have the invoice ID, we can update the stock movement refs
+      // In a real high-performance system, this might be done as a background job.
+      await inventoryService.linkSaleToMovements(models, { saleId: salesInvoice._id, cartItems });
+
+      // 3. Post the core Sales and COGS journal entries
+      const [arAccount, salesRevenueAccount, cogsAccount, inventoryAssetAccount] =
+        await Promise.all([
+          Customer.findById(customerId)
+            .select("ledgerAccountId")
+            .then((c) => Account.findById(c.ledgerAccountId)),
+          Account.findOne({ isSystemAccount: true, name: "Sales Revenue" }),
+          Account.findOne({ isSystemAccount: true, name: "Cost of Goods Sold" }),
+          Account.findOne({ isSystemAccount: true, name: "Inventory Asset" }),
+        ]);
+
+      await accountingService.createJournalEntry(models, {
+        description: `Sale to customer for Invoice #${salesInvoice.invoiceNumber}`,
+        entries: [
+          { accountId: arAccount._id, debit: salesInvoice.totalAmount },
+          { accountId: salesRevenueAccount._id, credit: salesInvoice.subTotal },
+        ],
+        refs: { salesInvoiceId: salesInvoice._id },
+      });
+
+      await accountingService.createJournalEntry(models, {
+        description: `COGS for Invoice #${salesInvoice.invoiceNumber}`,
+        entries: [
+          { accountId: cogsAccount._id, debit: totalCostOfGoodsSold },
+          { accountId: inventoryAssetAccount._id, credit: totalCostOfGoodsSold },
+        ],
+        refs: { salesInvoiceId: salesInvoice._id },
+      });
+
+      // 4. Record the payment using the universal PaymentsService
+      if (paymentData && paymentData.paymentLines.length > 0) {
+        await paymentsService.recordPayment(
+          models,
+          {
+            paymentSourceId: salesInvoice._id,
+            paymentSourceType: "SalesInvoice",
+            paymentLines: paymentData.paymentLines,
+            paymentDate: new Date(),
+            direction: "inflow",
+            notes: paymentData.notes,
+          },
+          userId,
+          baseCurrency
+        );
+      }
+
+      // 5. Log commission if applicable
+      const employee = await Employee.findOne({ userId: userId });
+      if (
+        employee &&
+        employee.compensation.type === "commission_based" &&
+        employee.compensation.commissionRate > 0
+      ) {
+        const commissionAmount =
+          salesInvoice.totalAmount * (employee.compensation.commissionRate / 100);
+
+        await Commission.create([
+          {
+            employeeId: employee._id,
+            salesInvoiceId: salesInvoice._id,
+            commissionAmount: parseFloat(commissionAmount.toFixed(2)),
+            saleDate: salesInvoice.createdAt,
+            status: "pending",
+          },
+        ]);
+      }
+
+      if (couponId) {
+        await couponService.markCouponAsRedeemed(
+          models,
+          { couponId, invoiceId: salesInvoice._id },
+          session
+        );
+      }
+
+      return salesInvoice;
+    } catch (error) {
+      if (couponId) {
+        // This runs if any of the above `await` calls fail.
+        await couponService.releaseCouponLock(models, { couponId }, session);
+      }
+
+      console.error("Error in finalizeSale:", error);
+      throw new Error("Failed to finalize sale. Please try again.");
     }
-    return salesInvoice;
   }
 
   /**
@@ -169,7 +190,9 @@ class SalesService {
 
     // Check if quote has expired
     if (quote.expiryDate && new Date(quote.expiryDate) < new Date()) {
-      throw new Error("This quotation has expired.");
+      quote.status = "cancelled"; // Or some other expired status
+      await quote.save({ session });
+      throw new Error("This quotation has expired and cannot be converted.");
     }
 
     // Create the Sales Order from the quote's data

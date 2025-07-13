@@ -8,7 +8,7 @@ const AddAdhoc = ({ onAddItem }) => {
   const handleProductSelect = (variant) => {
     // Transform the variant into the format our print queue expects
     const itemToAdd = {
-      productVariantId: variant._id,
+      ProductVariantId: variant._id,
       variantName: variant.variantName,
       sku: variant.sku,
       quantity: 1, // Default to 1, user can change in queue

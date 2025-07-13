@@ -29,7 +29,7 @@ const ADJUSTMENT_REASONS = [
 
 const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   const initialFormState = {
-    productVariantId: null,
+    ProductVariantId: null,
     ProductVariantsName: "",
     branchId: "",
     quantityChange: "",
@@ -42,7 +42,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   const handleProductSelect = (variant) => {
     setFormData((prev) => ({
       ...prev,
-      productVariantId: variant._id,
+      ProductVariantId: variant._id,
       ProductVariantsName: variant.variantName,
     }));
   };
@@ -63,7 +63,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
     const quantityWithDirection = selectedReason.type === "out" ? -Math.abs(quantity) : Math.abs(quantity);
 
     const payload = {
-      productVariantId: formData.productVariantId,
+      ProductVariantId: formData.ProductVariantId,
       branchId: formData.branchId,
       quantityChange: quantityWithDirection,
       notes: `[${selectedReason.label}] ${formData.notes}`,
@@ -77,7 +77,8 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
     }
   };
 
-  const isFormInvalid = isSaving || !formData.productVariantId || !formData.branchId || !formData.quantityChange || !formData.notes;
+  const isFormInvalid =
+    isSaving || !formData.ProductVariantId || !formData.branchId || !formData.quantityChange || !formData.notes;
 
   return (
     <Card className="max-w-3xl mx-auto">
@@ -98,7 +99,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
                   onClick={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      productVariantId: null,
+                      ProductVariantId: null,
                       ProductVariantsName: "",
                     }))
                   }

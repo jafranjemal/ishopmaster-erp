@@ -87,17 +87,28 @@ const salesInvoiceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Pre-save hook to generate a sequential, user-friendly Invoice Number.
-salesInvoiceSchema.pre("validate", async function (next) {
+// Intelligent pre-save hook to generate sequential IDs based on status
+salesInvoiceSchema.pre("save", async function (next) {
   if (this.isNew) {
-    const lastInvoice = await this.constructor.findOne().sort({ createdAt: -1 });
-    let lastNumber = 0;
-    if (lastInvoice && lastInvoice.invoiceNumber) {
-      lastNumber = parseInt(lastInvoice.invoiceNumber.split("-")[1]);
+    if (this.status === "completed" && !this.invoiceId) {
+      const lastDoc = await this.constructor
+        .findOne({ invoiceId: { $ne: null } })
+        .sort({ createdAt: -1 });
+      const lastNumber =
+        lastDoc && lastDoc.invoiceId ? parseInt(lastDoc.invoiceId.split("-")[1]) : 0;
+      this.invoiceId = "INV-" + String(lastNumber + 1).padStart(7, "0");
+    } else if (this.status === "quotation" && !this.quotationId) {
+      const lastDoc = await this.constructor
+        .findOne({ quotationId: { $ne: null } })
+        .sort({ createdAt: -1 });
+      const lastNumber =
+        lastDoc && lastDoc.quotationId ? parseInt(lastDoc.quotationId.split("-")[1]) : 0;
+      this.quotationId = "QT-" + String(lastNumber + 1).padStart(7, "0");
+    } else if (["draft", "on_hold"].includes(this.status) && !this.draftId) {
+      // Using a simpler, non-sequential ID for temporary drafts
+      this.draftId = `DRAFT-${Date.now()}`;
     }
-    this.invoiceNumber = "INV-" + String(lastNumber + 1).padStart(7, "0");
   }
   next();
 });
-
 module.exports = salesInvoiceSchema;

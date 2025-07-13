@@ -7,19 +7,19 @@ import useAuth from "../../../context/useAuth";
  * A "smart" input component that fetches the max available stock for a product lot
  * and validates user input against it.
  * @param {object} props
- * @param {string} props.productVariantId - The ID of the product variant.
+ * @param {string} props.ProductVariantId - The ID of the product variant.
  * @param {string} props.branchId - The ID of the branch where stock is located.
  * @param {number} props.value - The current quantity value from the parent state.
  * @param {Function} props.onChange - Callback function to update the parent state.
  */
-const LotQuantityInput = ({ productVariantId, branchId, value, onChange }) => {
+const LotQuantityInput = ({ ProductVariantId, branchId, value, onChange }) => {
   const [maxQuantity, setMaxQuantity] = useState(Infinity);
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   useEffect(() => {
     const fetchAvailableQuantity = async () => {
       await tenantStockService
-        .getLotQuantity(productVariantId, user.branchId)
+        .getLotQuantity(ProductVariantId, user.branchId)
         .then(async (response) => {
           console.log(response.data);
           setMaxQuantity(response.data.data.availableQuantity);
@@ -33,11 +33,11 @@ const LotQuantityInput = ({ productVariantId, branchId, value, onChange }) => {
           setIsLoading(false);
         });
     };
-    if (productVariantId && user.branchId) {
+    if (ProductVariantId && user.branchId) {
       setIsLoading(true);
       fetchAvailableQuantity();
     }
-  }, [productVariantId, user.branchId]);
+  }, [ProductVariantId, user.branchId]);
 
   const handleQuantityChange = (e) => {
     let newQuantity = parseInt(e.target.value, 10);

@@ -8,7 +8,15 @@ import { useDebounce } from "../../../hooks/useDebounce";
 /**
  * A reusable modal for selecting specific serial numbers from available stock.
  */
-const SerialSelectorModal = ({ isOpen, onClose, onConfirm, productVariantId, branchId, initialSelection = [], allowMultiple = true }) => {
+const SerialSelectorModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  ProductVariantId,
+  branchId,
+  initialSelection = [],
+  allowMultiple = true,
+}) => {
   const [availableSerials, setAvailableSerials] = useState([]);
   const [selectedSerials, setSelectedSerials] = useState(initialSelection);
   const [pagination, setPagination] = useState(null);
@@ -19,11 +27,11 @@ const SerialSelectorModal = ({ isOpen, onClose, onConfirm, productVariantId, bra
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   const fetchData = useCallback(async () => {
-    if (!isOpen || !productVariantId || !branchId) return;
+    if (!isOpen || !ProductVariantId || !branchId) return;
     setIsLoading(true);
     try {
       const params = { page: currentPage, limit: 20, searchTerm: debouncedSearchTerm };
-      const response = await tenantStockService.getAvailableSerials(productVariantId, branchId, params);
+      const response = await tenantStockService.getAvailableSerials(ProductVariantId, branchId, params);
       setAvailableSerials(response.data.data);
       setPagination(response.data.pagination);
     } catch (error) {
@@ -32,7 +40,7 @@ const SerialSelectorModal = ({ isOpen, onClose, onConfirm, productVariantId, bra
     } finally {
       setIsLoading(false);
     }
-  }, [isOpen, productVariantId, branchId, currentPage, debouncedSearchTerm]);
+  }, [isOpen, ProductVariantId, branchId, currentPage, debouncedSearchTerm]);
 
   useEffect(() => {
     // Reset selection when initialSelection changes (e.g., editing a different item)
@@ -45,7 +53,9 @@ const SerialSelectorModal = ({ isOpen, onClose, onConfirm, productVariantId, bra
 
   const handleToggleSerial = (serialNumber) => {
     if (allowMultiple) {
-      setSelectedSerials((prev) => (prev.includes(serialNumber) ? prev.filter((s) => s !== serialNumber) : [...prev, serialNumber]));
+      setSelectedSerials((prev) =>
+        prev.includes(serialNumber) ? prev.filter((s) => s !== serialNumber) : [...prev, serialNumber]
+      );
     } else {
       // If multiple selections are not allowed, just select the new one
       setSelectedSerials([serialNumber]);
@@ -62,7 +72,12 @@ const SerialSelectorModal = ({ isOpen, onClose, onConfirm, productVariantId, bra
       <div className="space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input placeholder="Search by serial number..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
+          <Input
+            placeholder="Search by serial number..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-9"
+          />
         </div>
         <p className="text-sm text-slate-400">{selectedSerials.length} serial(s) selected.</p>
 
@@ -74,7 +89,10 @@ const SerialSelectorModal = ({ isOpen, onClose, onConfirm, productVariantId, bra
           ) : (
             <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
               {availableSerials.map((item) => (
-                <label key={item._id} className="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-slate-700/50">
+                <label
+                  key={item._id}
+                  className="flex items-center space-x-3 cursor-pointer p-1 rounded hover:bg-slate-700/50"
+                >
                   <Checkbox
                     id={`serial-${item._id}`}
                     checked={selectedSerials.includes(item.serialNumber)}
@@ -87,7 +105,9 @@ const SerialSelectorModal = ({ isOpen, onClose, onConfirm, productVariantId, bra
           )}
         </div>
 
-        {pagination && pagination.totalPages > 1 && <Pagination paginationData={pagination} onPageChange={setCurrentPage} />}
+        {pagination && pagination.totalPages > 1 && (
+          <Pagination paginationData={pagination} onPageChange={setCurrentPage} />
+        )}
 
         <div className="pt-4 flex justify-end space-x-4">
           <Button variant="outline" onClick={onClose}>

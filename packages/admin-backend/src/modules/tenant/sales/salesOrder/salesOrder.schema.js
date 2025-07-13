@@ -23,13 +23,13 @@ const salesOrderSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["pending_fulfillment", "partially_fulfilled", "fulfilled", "cancelled"],
+      enum: ["pending_fulfillment", "partially_fulfilled", "fulfilled", "cancelled", "invoiced"],
       default: "pending_fulfillment",
     },
 
     items: [
       {
-        productVariantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariants" },
+        ProductVariantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariants" },
         description: { type: String },
         quantity: { type: Number },
         unitPrice: { type: Number },

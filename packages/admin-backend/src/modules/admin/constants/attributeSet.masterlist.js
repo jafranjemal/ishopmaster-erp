@@ -99,18 +99,19 @@ const ATTRIBUTE_SET_MASTER_LIST = [
   {
     name: "Apple iPhone Specs",
     attributeKeys: [
-      "model",
       "color",
       "storage", // e.g., 128GB
       "ram",
       "screen_size",
       "processor",
-      "os",
+      "water_resistance",
+      "warrantyPlan",
+      "warranty",
     ],
   },
   {
     name: "Apple MacBook Specs",
-    attributeKeys: ["model", "color", "storage", "ram", "processor", "screen_size", "os"],
+    attributeKeys: ["color", "storage", "ram", "processor", "screen_size", "os"],
   },
   {
     name: "Apple Watch Specs",

@@ -2,7 +2,19 @@ import React, { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import * as Tabs from "@radix-ui/react-tabs";
 import { tenantGrnService, tenantLabelTemplateService, tenantPrintService } from "../../services/api";
-import { Button, Card, CardContent, CardHeader, CardTitle, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Label } from "ui-library";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  Label,
+} from "ui-library";
 import { Printer, QrCode, Barcode, HelpCircle } from "lucide-react";
 import PrintQueue from "../../components/inventory/printing/PrintQueue";
 import AddFromGRN from "../../components/inventory/printing/AddFromGRN";
@@ -43,7 +55,7 @@ const PrintHubPage = () => {
       const newItems = itemsToAdd
         .map((item) => ({
           ...item,
-          key: `${item.productVariantId}-${item.batchNumber || (item.serials && item.serials[0]) || Date.now()}`,
+          key: `${item.ProductVariantId}-${item.batchNumber || (item.serials && item.serials[0]) || Date.now()}`,
         }))
         .filter((newItem) => !printQueue.some((qItem) => qItem.key === newItem.key));
       setPrintQueue((prev) => [...prev, ...newItems]);
@@ -93,7 +105,7 @@ const PrintHubPage = () => {
     try {
       // Prepare the payload for the API
       const itemsToPrint = printQueue.map((item) => ({
-        productVariantId: item.productVariantId,
+        ProductVariantId: item.ProductVariantId,
         quantity: item.isSerialized ? item.serials.length : item.quantity,
         serials: item.isSerialized ? item.serials : undefined,
       }));
@@ -212,7 +224,7 @@ const PrintHubPage = () => {
           isOpen={true}
           onClose={() => setSerialModalState({ isOpen: false, item: null })}
           onConfirm={handleSerialsConfirm}
-          productVariantId={serialModalState.item.productVariantId}
+          ProductVariantId={serialModalState.item.ProductVariantId}
           branchId={serialModalState.item.branchId} // This needs to be passed in the queue item
           initialSelection={serialModalState.item.serials}
         />

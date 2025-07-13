@@ -8,7 +8,7 @@ const Select = SelectPrimitive.Root;
 const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
 
-const SelectTrigger = React.forwardRef(({ className, children, ...props }, ref) => (
+const SelectTriggerold = React.forwardRef(({ className, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
@@ -23,6 +23,42 @@ const SelectTrigger = React.forwardRef(({ className, children, ...props }, ref) 
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
+
+const SelectTrigger = React.forwardRef(
+  ({ className, children, suffixIcon: SuffixIcon, onSuffixIconClick, ...props }, ref) => (
+    <div className="relative flex items-center">
+      <SelectPrimitive.Trigger
+        ref={ref}
+        className={cn(
+          "flex h-10 w-full items-center justify-between rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm ring-offset-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </SelectPrimitive.Trigger>
+
+      <div className="absolute inset-y-0 right-2 flex items-center space-x-2">
+        {/* ChevronDown icon (default dropdown) */}
+        <SelectPrimitive.Icon asChild>
+          <ChevronDown className="h-4 w-4 text-slate-400" />
+        </SelectPrimitive.Icon>
+
+        {/* Suffix Icon */}
+        {SuffixIcon && (
+          <button
+            type="button"
+            onClick={onSuffixIconClick}
+            className="cursor-pointer p-1 text-slate-400 hover:text-white"
+            aria-label="Suffix action"
+          >
+            <SuffixIcon className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  )
+);
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectContent = React.forwardRef(

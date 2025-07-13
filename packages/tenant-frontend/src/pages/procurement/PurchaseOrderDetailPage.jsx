@@ -54,13 +54,13 @@ const PurchaseOrderDetailPage = () => {
       await fetchData();
 
       const printQueueItems = receivedData.receivedItems.map((item) => {
-        const poItem = purchaseOrder.items.find((pi) => pi.productVariantId._id === item.productVariantId);
+        const poItem = purchaseOrder.items.find((pi) => pi.ProductVariantId._id === item.ProductVariantId);
         return {
-          productVariantId: item.productVariantId,
+          ProductVariantId: item.ProductVariantId,
           variantName: poItem.description,
-          sku: poItem.productVariantId.sku,
+          sku: poItem.ProductVariantId.sku,
           quantity: item.quantityReceived,
-          isSerialized: poItem.productVariantId.templateId?.type === "serialized",
+          isSerialized: poItem.ProductVariantId.templateId?.type === "serialized",
           serials: item.serials || [],
           batchNumber: purchaseOrder.poNumber,
         };
@@ -91,7 +91,9 @@ const PurchaseOrderDetailPage = () => {
       <PurchaseOrderDetailView purchaseOrder={purchaseOrder} />
 
       {/* Conditionally render the receiving form */}
-      {canReceiveGoods && <GoodsReceivingForm purchaseOrder={purchaseOrder} onReceive={handleConfirmReceipt} isSaving={isSaving} />}
+      {canReceiveGoods && (
+        <GoodsReceivingForm purchaseOrder={purchaseOrder} onReceive={handleConfirmReceipt} isSaving={isSaving} />
+      )}
 
       <PrintModal isOpen={isPrintModalOpen} onClose={() => setIsPrintModalOpen(false)} itemsToPrint={itemsToPrint} />
     </div>

@@ -23,10 +23,10 @@ const PurchaseOrderForm = ({ poToEdit, suppliers, branches, onSave, onCancel, is
   const handleHeaderChange = (e) => setPoData((p) => ({ ...p, [e.target.name]: e.target.value }));
 
   const handleAddItem = (variant) => {
-    if (poData.items.some((item) => item.productVariantId === variant._id)) return; // Prevent duplicates
+    if (poData.items.some((item) => item.ProductVariantId === variant._id)) return; // Prevent duplicates
     console.log("Adding item:", variant);
     const newItem = {
-      productVariantId: variant._id,
+      ProductVariantId: variant._id,
       description: variant.variantName,
       quantityOrdered: 1,
       costPrice: variant.costPrice || 0,
@@ -56,7 +56,13 @@ const PurchaseOrderForm = ({ poToEdit, suppliers, branches, onSave, onCancel, is
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <Label>Supplier</Label>
-          <select name="supplierId" value={poData.supplierId} onChange={handleHeaderChange} required className="ui-input w-full">
+          <select
+            name="supplierId"
+            value={poData.supplierId}
+            onChange={handleHeaderChange}
+            required
+            className="ui-input w-full"
+          >
             <option value="" disabled>
               Select Supplier
             </option>
@@ -69,7 +75,13 @@ const PurchaseOrderForm = ({ poToEdit, suppliers, branches, onSave, onCancel, is
         </div>
         <div>
           <Label>Destination Branch</Label>
-          <select name="destinationBranchId" value={poData.destinationBranchId} onChange={handleHeaderChange} required className="ui-input w-full">
+          <select
+            name="destinationBranchId"
+            value={poData.destinationBranchId}
+            onChange={handleHeaderChange}
+            required
+            className="ui-input w-full"
+          >
             <option value="" disabled>
               Select Branch
             </option>

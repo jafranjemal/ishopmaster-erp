@@ -24,10 +24,10 @@ const StockTransferForm = ({ formData, onFormChange, branches = [], onSave, onCa
   }, [branches, formData.fromBranchId]);
 
   const handleAddItem = (variant) => {
-    if (formData.items.some((item) => item.productVariantId === variant._id)) return;
+    if (formData.items.some((item) => item.ProductVariantId === variant._id)) return;
     const newItem = {
       key: variant._id,
-      productVariantId: variant._id,
+      ProductVariantId: variant._id,
       description: variant.variantName,
       isSerialized: variant.templateId?.type === "serialized",
       quantity: 1,
@@ -37,7 +37,9 @@ const StockTransferForm = ({ formData, onFormChange, branches = [], onSave, onCa
   };
 
   const handleItemQuantityChange = (key, value) => {
-    const newItems = formData.items.map((item) => (item.key === key ? { ...item, quantity: Number(value) || 1 } : item));
+    const newItems = formData.items.map((item) =>
+      item.key === key ? { ...item, quantity: Number(value) || 1 } : item
+    );
     onFormChange("items", newItems);
   };
 
@@ -78,7 +80,12 @@ const StockTransferForm = ({ formData, onFormChange, branches = [], onSave, onCa
         </div>
         <div>
           <Label>To (Destination)</Label>
-          <Select onValueChange={(val) => onFormChange("toBranchId", val)} value={formData.toBranchId} required disabled={!formData.fromBranchId}>
+          <Select
+            onValueChange={(val) => onFormChange("toBranchId", val)}
+            value={formData.toBranchId}
+            required
+            disabled={!formData.fromBranchId}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select destination branch..." />
             </SelectTrigger>
@@ -95,7 +102,9 @@ const StockTransferForm = ({ formData, onFormChange, branches = [], onSave, onCa
       <div className={!formData.fromBranchId ? "opacity-50 pointer-events-none" : ""}>
         <Label>Add Items to Transfer</Label>
         <ProductVariantSearch onProductSelect={handleAddItem} />
-        <p className="text-xs text-amber-400 mt-1">{!formData.fromBranchId && "Please select a source branch to add items."}</p>
+        <p className="text-xs text-amber-400 mt-1">
+          {!formData.fromBranchId && "Please select a source branch to add items."}
+        </p>
       </div>
       <div className="border border-slate-700 rounded-lg overflow-hidden">
         <Table>

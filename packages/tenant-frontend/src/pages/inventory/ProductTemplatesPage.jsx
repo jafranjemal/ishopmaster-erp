@@ -1,12 +1,35 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { toast } from "react-hot-toast";
-import { PlusCircle, ShieldAlert } from "lucide-react";
-import { tenantProductService, tenantBrandService, tenantCategoryService, tenantAttributeService, tenantAccountingService, tenantUploadService } from "../../services/api";
-import { Button, Modal, Card, CardContent, Pagination, FilterBar, Label, Input, SelectTrigger, Select, SelectContent, SelectValue, SelectItem, HierarchicalSelect } from "ui-library";
-import ProductTemplateList from "../../components/inventory/ProductTemplateList";
-import ProductTemplateForm from "../../components/inventory/ProductTemplateForm";
-import ProductTemplateHeader from "../../components/inventory/ProductTemplateHeader";
-import { t } from "i18next";
+import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
+import { PlusCircle, ShieldAlert } from 'lucide-react';
+import {
+  tenantProductService,
+  tenantBrandService,
+  tenantCategoryService,
+  tenantAttributeService,
+  tenantAccountingService,
+  tenantUploadService,
+  tenantWarrantyPolicyService,
+} from '../../services/api';
+import {
+  Button,
+  Modal,
+  Card,
+  CardContent,
+  Pagination,
+  FilterBar,
+  Label,
+  Input,
+  SelectTrigger,
+  Select,
+  SelectContent,
+  SelectValue,
+  SelectItem,
+  HierarchicalSelect,
+} from 'ui-library';
+import ProductTemplateList from '../../components/inventory/ProductTemplateList';
+import ProductTemplateForm from '../../components/inventory/ProductTemplateForm';
+import ProductTemplateHeader from '../../components/inventory/ProductTemplateHeader';
+import { t } from 'i18next';
 
 const ProductTemplatesPage = () => {
   const [templates, setTemplates] = useState([]);
@@ -16,6 +39,7 @@ const ProductTemplatesPage = () => {
     categories: [],
     attributeSets: [],
     accounts: [],
+    warrantyPolicies: [],
   });
   const [paginationData, setPaginationData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,12 +51,12 @@ const ProductTemplatesPage = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [filters, setFilters] = useState({
-    search: "",
-    brandId: "",
-    categoryId: "",
-    type: "",
-    isActive: "",
-    searchTerm: "",
+    search: '',
+    brandId: '',
+    categoryId: '',
+    type: '',
+    isActive: '',
+    searchTerm: '',
   });
 
   const fetchData = useCallback(
@@ -45,14 +69,16 @@ const ProductTemplatesPage = () => {
           ...overrideFilters, // Send filters to backend
         };
 
-        const [templatesRes, summaryRes, brandsRes, categoriesRes, attributeSetsRes, accountsRes] = await Promise.all([
-          tenantProductService.getAllTemplates(params),
-          tenantProductService.getSummary(),
-          tenantBrandService.getAll(),
-          tenantCategoryService.getAll(),
-          tenantAttributeService.getAllAttributeSets(),
-          tenantAccountingService.getAllAccounts(),
-        ]);
+        const [templatesRes, summaryRes, brandsRes, categoriesRes, attributeSetsRes, accountsRes, warrantiesRes] =
+          await Promise.all([
+            tenantProductService.getAllTemplates(params),
+            tenantProductService.getSummary(),
+            tenantBrandService.getAll(),
+            tenantCategoryService.getAll(),
+            tenantAttributeService.getAllAttributeSets(),
+            tenantAccountingService.getAllAccounts(),
+            tenantWarrantyPolicyService.getAll(),
+          ]);
 
         setTemplates(templatesRes.data.data);
         setPaginationData(templatesRes.data.pagination);
@@ -62,15 +88,16 @@ const ProductTemplatesPage = () => {
           categories: categoriesRes.data.data,
           attributeSets: attributeSetsRes.data.data,
           accounts: accountsRes.data.data,
+          warrantyPolicies: warrantiesRes.data.data,
         });
       } catch (error) {
         console.log(error);
-        toast.error("Failed to load product catalog data.");
+        toast.error('Failed to load product catalog data.');
       } finally {
         setIsLoading(false);
       }
     },
-    [currentPage, filters]
+    [currentPage, filters],
   );
 
   useEffect(() => {
@@ -90,7 +117,7 @@ const ProductTemplatesPage = () => {
       const response = await tenantProductService.getTemplateById(template._id);
       setDetailedTemplateData(response.data.data);
     } catch (error) {
-      toast.error("Failed to load template details for editing.");
+      toast.error('Failed to load template details for editing.');
       setIsModalOpen(false);
     } finally {
       setIsDetailLoading(false);
@@ -103,12 +130,14 @@ const ProductTemplatesPage = () => {
 
   const handleSave = async (formData) => {
     setIsSaving(true);
-    const apiCall = editingTemplate ? tenantProductService.updateTemplate(editingTemplate._id, formData) : tenantProductService.createTemplate(formData);
+    const apiCall = editingTemplate
+      ? tenantProductService.updateTemplate(editingTemplate._id, formData)
+      : tenantProductService.createTemplate(formData);
     try {
       await toast.promise(apiCall, {
-        loading: "Saving template...",
+        loading: 'Saving template...',
         success: `Template "${formData.baseName}" saved!`,
-        error: (err) => err.response?.data?.error || "Failed to save.",
+        error: (err) => err.response?.data?.error || 'Failed to save.',
       });
       fetchData();
       handleCloseModals();
@@ -126,8 +155,8 @@ const ProductTemplatesPage = () => {
     try {
       await toast.promise(tenantProductService.deleteTemplate(deleteConfirm._id), {
         loading: `Deleting "${deleteConfirm.baseName}"...`,
-        success: "Template deleted.",
-        error: (err) => err.response?.data?.error || "Failed to delete.",
+        success: 'Template deleted.',
+        error: (err) => err.response?.data?.error || 'Failed to delete.',
       });
       fetchData();
       handleCloseModals();
@@ -150,11 +179,11 @@ const ProductTemplatesPage = () => {
 
   const handleClearFilters = () => {
     const cleared = {
-      search: "",
-      brandId: "",
-      categoryId: "",
-      type: "",
-      isActive: "",
+      search: '',
+      brandId: '',
+      categoryId: '',
+      type: '',
+      isActive: '',
     };
     setFilters(cleared);
     setCurrentPage(1);
@@ -162,25 +191,34 @@ const ProductTemplatesPage = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Product Catalog</h1>
+    <div className='space-y-6'>
+      <div className='flex justify-between items-center'>
+        <h1 className='text-3xl font-bold'>Product Catalog</h1>
         <Button onClick={handleOpenCreateModal}>
-          <PlusCircle className="mr-2 h-4 w-4" /> New Product Template
+          <PlusCircle className='mr-2 h-4 w-4' /> New Product Template
         </Button>
       </div>
 
-      {isLoading && !summary ? <div className="p-8 text-center">Loading...</div> : <ProductTemplateHeader summary={summary} />}
+      {isLoading && !summary ? (
+        <div className='p-8 text-center'>Loading...</div>
+      ) : (
+        <ProductTemplateHeader summary={summary} />
+      )}
 
-      <FilterBar filterValues={filters} onFilterChange={handleFilterChange} onApplyFilters={handleApplyFilters} onClearFilters={handleClearFilters}>
+      <FilterBar
+        filterValues={filters}
+        onFilterChange={handleFilterChange}
+        onApplyFilters={handleApplyFilters}
+        onClearFilters={handleClearFilters}
+      >
         <div>
           <Label>Brand</Label>
-          <Select value={filters.brandId || ""} onValueChange={(val) => handleFilterChange("brandId", val)}>
+          <Select value={filters.brandId || ''} onValueChange={(val) => handleFilterChange('brandId', val)}>
             <SelectTrigger>
-              <SelectValue placeholder="All Brands" />
+              <SelectValue placeholder='All Brands' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value=''>All</SelectItem>
               {prereqData.brands.map((b) => (
                 <SelectItem key={b._id} value={b._id}>
                   {b.name}
@@ -191,55 +229,66 @@ const ProductTemplatesPage = () => {
         </div>
 
         <div>
-          <Label htmlFor="categoryId">{t("product_template_form.category_label", "Category")}</Label>
+          <Label htmlFor='categoryId'>{t('product_template_form.category_label', 'Category')}</Label>
           {/* Replace the old <Select> with our new reusable component */}
           <HierarchicalSelect
-            placeholder="Select a category..."
+            placeholder='Select a category...'
             options={prereqData.categories || []} // Pass the hierarchical data
-            value={filters.categoryId || ""}
-            onValueChange={(val) => handleFilterChange("categoryId", val)}
+            value={filters.categoryId || ''}
+            onValueChange={(val) => handleFilterChange('categoryId', val)}
           />
         </div>
 
         <div>
           <Label>Type</Label>
-          <Select value={filters.type || ""} onValueChange={(val) => handleFilterChange("type", val)}>
+          <Select value={filters.type || ''} onValueChange={(val) => handleFilterChange('type', val)}>
             <SelectTrigger>
-              <SelectValue placeholder="All Types" />
+              <SelectValue placeholder='All Types' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
-              <SelectItem value="non-serialized">Non-Serialized</SelectItem>
-              <SelectItem value="serialized">Serialized</SelectItem>
-              <SelectItem value="service">Service</SelectItem>
-              <SelectItem value="bundle">Bundle</SelectItem>
+              <SelectItem value=''>All</SelectItem>
+              <SelectItem value='non-serialized'>Non-Serialized</SelectItem>
+              <SelectItem value='serialized'>Serialized</SelectItem>
+              <SelectItem value='service'>Service</SelectItem>
+              <SelectItem value='bundle'>Bundle</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div>
           <Label>Status</Label>
-          <Select value={filters.isActive === "" ? "" : String(filters.isActive)} onValueChange={(val) => handleFilterChange("isActive", val === "" ? "" : val === "true")}>
+          <Select
+            value={filters.isActive === '' ? '' : String(filters.isActive)}
+            onValueChange={(val) => handleFilterChange('isActive', val === '' ? '' : val === 'true')}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="All Statuses" />
+              <SelectValue placeholder='All Statuses' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
-              <SelectItem value="true">Active</SelectItem>
-              <SelectItem value="false">Inactive</SelectItem>
+              <SelectItem value=''>All</SelectItem>
+              <SelectItem value='true'>Active</SelectItem>
+              <SelectItem value='false'>Inactive</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </FilterBar>
 
       <Card>
-        <CardContent className="p-0">
-          {isLoading ? <p className="p-8 text-center">Loading templates...</p> : <ProductTemplateList templates={templates} onEdit={handleOpenEditModal} onDelete={setDeleteConfirm} />}
+        <CardContent className='p-0'>
+          {isLoading ? (
+            <p className='p-8 text-center'>Loading templates...</p>
+          ) : (
+            <ProductTemplateList templates={templates} onEdit={handleOpenEditModal} onDelete={setDeleteConfirm} />
+          )}
           {paginationData && <Pagination paginationData={paginationData} onPageChange={setCurrentPage} />}
         </CardContent>
       </Card>
 
-      <Modal isOpen={isModalOpen} onClose={handleCloseModals} title={editingTemplate ? "Edit Product Template" : "Create New Product Template"}>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModals}
+        title={editingTemplate ? 'Edit Product Template' : 'Create New Product Template'}
+      >
         {/* <ProductTemplateForm
           templateToEdit={editingTemplate}
           {...prereqData}
@@ -249,6 +298,8 @@ const ProductTemplatesPage = () => {
           isSaving={isSaving}
         /> */}
         <ProductTemplateForm
+          warrantyPolicies={prereqData.warrantyPolicies}
+          onDataRefresh={fetchData}
           accounts={prereqData.accounts}
           templateToEdit={detailedTemplateData}
           {...prereqData}
@@ -260,20 +311,22 @@ const ProductTemplatesPage = () => {
         />
       </Modal>
 
-      <Modal isOpen={Boolean(deleteConfirm)} onClose={handleCloseModals} title="Confirm Deletion">
-        <div className="text-center">
-          <ShieldAlert className="mx-auto h-12 w-12 text-red-500" />
-          <p className="mt-4">
+      <Modal isOpen={Boolean(deleteConfirm)} onClose={handleCloseModals} title='Confirm Deletion'>
+        <div className='text-center'>
+          <ShieldAlert className='mx-auto h-12 w-12 text-red-500' />
+          <p className='mt-4'>
             Are you sure you want to delete template "{deleteConfirm?.baseName}
             "?
           </p>
-          <p className="text-sm text-slate-400 mt-2">This action is irreversible and only possible if no variants are linked to it.</p>
+          <p className='text-sm text-slate-400 mt-2'>
+            This action is irreversible and only possible if no variants are linked to it.
+          </p>
         </div>
-        <div className="mt-6 flex justify-end space-x-4">
-          <Button variant="outline" onClick={handleCloseModals}>
+        <div className='mt-6 flex justify-end space-x-4'>
+          <Button variant='outline' onClick={handleCloseModals}>
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleDelete}>
+          <Button variant='destructive' onClick={handleDelete}>
             Delete Template
           </Button>
         </div>

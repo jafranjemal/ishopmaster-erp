@@ -79,7 +79,7 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
 
     // Check if every serialized component has the correct number of serials selected
     for (const component of selectedBundle.templateId.bundleItems) {
-      const isSerialized = component.productVariantId.templateId?.type === "serialized";
+      const isSerialized = component.ProductVariantId.templateId?.type === "serialized";
       if (isSerialized) {
         const requiredQty = component.quantity * quantityToAssemble;
         const selectedQty = componentSelections[component._id]?.length || 0;
@@ -141,7 +141,9 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
                 />
               </div>
               <div className="border-t border-slate-700 pt-4">
-                <h4 className="font-semibold mb-2 text-slate-300">Required Components for {quantityToAssemble} Kit(s):</h4>
+                <h4 className="font-semibold mb-2 text-slate-300">
+                  Required Components for {quantityToAssemble} Kit(s):
+                </h4>
                 <div className="space-y-2">
                   {selectedBundle?.templateId.bundleItems.map((component) => {
                     console.log({ component });
@@ -151,7 +153,10 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
                     const isComponentComplete = requiredQty === selectedQty;
 
                     return (
-                      <div key={component._id} className="flex justify-between items-center p-3 bg-slate-900/50 rounded-md">
+                      <div
+                        key={component._id}
+                        className="flex justify-between items-center p-3 bg-slate-900/50 rounded-md"
+                      >
                         <div>
                           <p className="font-medium">{component.variantName}</p>
                           <p className="text-xs text-slate-400">Total Required: {requiredQty}</p>
@@ -159,10 +164,19 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
                         {isSerialized ? (
                           <div className="flex items-center gap-2">
                             <Badge variant={isComponentComplete ? "success" : "destructive"}>
-                              {isComponentComplete ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                              {isComponentComplete ? (
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                              ) : (
+                                <XCircle className="h-3 w-3 mr-1" />
+                              )}
                               {selectedQty} / {requiredQty} Selected
                             </Badge>
-                            <Button type="button" size="sm" variant="outline" onClick={() => handleEditSerials(component)}>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditSerials(component)}
+                            >
                               <Edit className="h-3 w-3 mr-1" /> Select Serials
                             </Button>
                           </div>
@@ -190,7 +204,7 @@ const AssemblyForm = ({ branches, onSave, isSaving }) => {
           isOpen={true}
           onClose={() => setSerialModalState({ isOpen: false, component: null })}
           onConfirm={handleSerialsConfirm}
-          productVariantId={serialModalState.component._id}
+          ProductVariantId={serialModalState.component._id}
           branchId={fromBranchId}
           initialSelection={serialModalState.initialSelection}
           allowMultiple={true}

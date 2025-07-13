@@ -6,18 +6,18 @@ class PricingService {
    * and returns a new cart object with final calculated prices.
    */
   async calculatePrices(models, { cartData, customerId }) {
-    const { PricingRule, Promotion, Customer } = models;
+    const { PricingRule, Promotion, Customer, ProductVariants } = models;
     const now = new Date();
 
     // 1. Fetch all relevant data in parallel for performance
-    const [customer, activeRules, activePromotions] = await Promise.all([
+    const [customer, activeRules, activePromotions, cartVariants] = await Promise.all([
       Customer.findById(customerId).lean(),
-      PricingRule.find({ isActive: true }).lean(),
-      Promotion.find({
-        isActive: true,
-        startDate: { $lte: now },
-        endDate: { $gte: now },
-      }).lean(),
+      PricingRule.find({ isActive: true }).sort({ priority: -1 }).lean(),
+      Promotion.find({ isActive: true, startDate: { $lte: now }, endDate: { $gte: now } }).lean(),
+      // Fetch full variant details for every item in the cart to check their categories
+      ProductVariants.find({ _id: { $in: cartData.items.map((i) => i.productVariantId) } })
+        .populate("templateId")
+        .lean(),
     ]);
 
     const pricedCartItems = [];
@@ -25,63 +25,79 @@ class PricingService {
 
     // 2. Loop through each item in the original cart
     for (const item of cartData.items) {
-      let currentPrice = item.unitPrice;
-      let lineItemDiscount = 0;
-      let appliedDiscountDetails = null;
-
-      // Logic to apply promotions first (can be made more complex with priorities)
-      const itemPromotion = activePromotions.find(
-        (p) => /* logic to match item to promotion */ true
+      const variantDetails = cartVariants.find(
+        (v) => v._id.toString() === item.productVariantId.toString()
       );
-      if (itemPromotion) {
-        if (itemPromotion.discount.type === "percentage") {
-          lineItemDiscount = currentPrice * (itemPromotion.discount.value / 100);
-        } else {
-          // fixed
-          lineItemDiscount = itemPromotion.discount.value;
-        }
-        appliedDiscountDetails = {
-          type: itemPromotion.discount.type,
-          value: itemPromotion.discount.value,
-        };
-      }
+      if (!variantDetails) continue;
 
-      // Logic to apply customer group rules next
-      if (customer?.customerGroupId) {
-        const customerRule = activeRules.find(
-          (r) => r.customerGroupId?.toString() === customer.customerGroupId.toString()
-        );
-        if (customerRule) {
-          let ruleDiscount = 0;
-          if (customerRule.discount.type === "percentage") {
-            ruleDiscount = (currentPrice - lineItemDiscount) * (customerRule.discount.value / 100);
-          } else {
-            // fixed
-            ruleDiscount = customerRule.discount.value;
+      let currentPrice = item.unitPrice;
+      let appliedDiscounts = [];
+
+      // --- PASS 1: APPLY THE BEST PROMOTION ---
+      let bestPromotionDiscount = 0;
+      let appliedPromotion = null;
+
+      for (const promo of activePromotions) {
+        const appliesToAll = promo.conditions.appliesTo === "all_products";
+        const appliesToCategory =
+          promo.conditions.appliesTo === "specific_categories" &&
+          promo.conditions.items.some((id) => id.equals(variantDetails.templateId.categoryId));
+        const appliesToProduct =
+          promo.conditions.appliesTo === "specific_products" &&
+          promo.conditions.items.some((id) => id.equals(variantDetails._id));
+
+        if (appliesToAll || appliesToCategory || appliesToProduct) {
+          const discount =
+            promo.discount.type === "percentage"
+              ? currentPrice * (promo.discount.value / 100)
+              : promo.discount.value;
+          if (discount > bestPromotionDiscount) {
+            bestPromotionDiscount = discount;
+            appliedPromotion = promo;
           }
-          // This simplified logic just adds discounts. A real system might have rules on stacking.
-          lineItemDiscount += ruleDiscount;
-          appliedDiscountDetails = {
-            type: customerRule.discount.type,
-            value: customerRule.discount.value,
-          };
         }
       }
 
-      const finalLinePrice = (item.unitPrice - lineItemDiscount) * item.quantity;
-      totalDiscountAmount += lineItemDiscount * item.quantity;
+      if (appliedPromotion) {
+        currentPrice -= bestPromotionDiscount;
+        appliedDiscounts.push({ name: appliedPromotion.name, amount: bestPromotionDiscount });
+      }
+
+      // --- PASS 2: APPLY CUSTOMER-LEVEL RULES (to the already discounted price) ---
+      const applicableRules = activeRules.filter((rule) => {
+        const customerMatch =
+          !rule.customerGroupId || rule.customerGroupId.equals(customer?.customerGroupId);
+        const categoryMatch =
+          !rule.productCategoryId ||
+          rule.productCategoryId.equals(variantDetails.templateId.categoryId);
+        return customerMatch && categoryMatch;
+      });
+
+      for (const rule of applicableRules) {
+        const ruleDiscount =
+          rule.discount.type === "percentage"
+            ? currentPrice * (rule.discount.value / 100)
+            : rule.discount.value;
+        if (ruleDiscount > 0) {
+          currentPrice -= ruleDiscount;
+          appliedDiscounts.push({ name: rule.name, amount: ruleDiscount });
+        }
+      }
+
+      const finalLinePrice = currentPrice * item.quantity;
+      const totalLineDiscount = item.unitPrice * item.quantity - finalLinePrice;
+      totalDiscountAmount += totalLineDiscount;
 
       pricedCartItems.push({
         ...item,
-        finalPrice: parseFloat(finalLinePrice.toFixed(2)),
-        discount: appliedDiscountDetails,
+        finalPrice: parseFloat(currentPrice.toFixed(2)),
+        appliedDiscounts, // For receipt transparency
       });
     }
 
-    const subTotal = pricedCartItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-    const totalAmount = subTotal - totalDiscountAmount; // Simplified total, not including tax yet
+    const subTotal = cartData.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+    const totalAmount = subTotal - totalDiscountAmount;
 
-    // 3. Return the new, fully calculated cart object
     return {
       items: pricedCartItems,
       subTotal: parseFloat(subTotal.toFixed(2)),

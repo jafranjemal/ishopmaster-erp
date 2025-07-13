@@ -58,8 +58,8 @@ const GRNDetailView = ({ grn }) => {
                 <React.Fragment key={index}>
                   <TableRow>
                     <TableCell>
-                      <div className="font-medium">{item.productVariantId.variantName}</div>
-                      <div className="text-xs text-slate-400 font-mono">SKU: {item.productVariantId.sku}</div>
+                      <div className="font-medium">{item.ProductVariantId.variantName}</div>
+                      <div className="text-xs text-slate-400 font-mono">SKU: {item.ProductVariantId.sku}</div>
                     </TableCell>
                     <TableCell className="text-right font-bold">{item.quantityReceived}</TableCell>
                   </TableRow>

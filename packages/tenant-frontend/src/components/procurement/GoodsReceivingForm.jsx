@@ -38,7 +38,7 @@
 //     setReceivedItems((prev) => ({
 //       ...prev,
 //       [key]: {
-//         productVariantId: poItem.productVariantId._id,
+//         ProductVariantId: poItem.ProductVariantId._id,
 //         quantityReceived: validatedQty,
 //         type: variant.templateId.type,
 //         serials:
@@ -135,7 +135,7 @@
 //               {itemsToReceive.map((item) => {
 //                 const currentEntry = receivedItems[item._id];
 //                 console.log(`Rendering item:`, item);
-//                 const variant = item.productVariantId;
+//                 const variant = item.ProductVariantId;
 //                 return (
 //                   <React.Fragment key={item._id}>
 //                     <TableRow>
@@ -274,7 +274,10 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
   const { formatCurrency } = useAuth();
   const [receivedItems, setReceivedItems] = useState({});
 
-  const itemsToReceive = useMemo(() => purchaseOrder.items.filter((item) => item.quantityOrdered > item.quantityReceived), [purchaseOrder.items]);
+  const itemsToReceive = useMemo(
+    () => purchaseOrder.items.filter((item) => item.quantityOrdered > item.quantityReceived),
+    [purchaseOrder.items]
+  );
 
   const handleQuantityChange = (poItemId, variant, value) => {
     const qty = parseInt(value, 10) || 0;
@@ -286,7 +289,7 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
     setReceivedItems((prev) => ({
       ...prev,
       [variantId]: {
-        productVariantId: variantId,
+        ProductVariantId: variantId,
         quantityReceived: validatedQty,
         type: variant.templateId.type,
         serials: variant.templateId.type === "serialized" ? Array(validatedQty).fill("") : [],
@@ -354,7 +357,7 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
             </TableHeader>
             <TableBody>
               {itemsToReceive.map((item) => {
-                const variant = item.productVariantId;
+                const variant = item.ProductVariantId;
                 const variantId = variant._id;
                 const currentEntry = receivedItems[variantId];
                 return (
@@ -388,7 +391,9 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
                       <TableRow className="bg-slate-900/50">
                         <TableCell colSpan={3} className="p-4">
                           <div className="space-y-2">
-                            <Label className="font-semibold mb-2 block">Enter Serial Numbers & Optional Override Prices:</Label>
+                            <Label className="font-semibold mb-2 block">
+                              Enter Serial Numbers & Optional Override Prices:
+                            </Label>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
                               {[...Array(currentEntry.quantityReceived)].map((_, i) => (
                                 <div key={i} className="flex items-center gap-2">
@@ -402,7 +407,9 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
                                   <Input
                                     type="number"
                                     placeholder="Override Price"
-                                    onChange={(e) => handlePriceChange(variantId, "overrideSellingPrice", e.target.value)}
+                                    onChange={(e) =>
+                                      handlePriceChange(variantId, "overrideSellingPrice", e.target.value)
+                                    }
                                     className="h-8 w-32"
                                   />
                                 </div>

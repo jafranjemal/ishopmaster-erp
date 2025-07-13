@@ -53,7 +53,7 @@ const PrintModal = ({ isOpen, onClose, itemsToPrint = [] }) => {
     try {
       // Prepare the payload for the API based on the items passed in props
       const payloadItems = itemsToPrint.map((item) => ({
-        productVariantId: item.productVariantId || item._id,
+        ProductVariantId: item.ProductVariantId || item._id,
         quantity: item.isSerialized ? item.serials.length : item.quantity,
         serials: item.isSerialized ? item.serials : undefined,
       }));
@@ -94,8 +94,8 @@ const PrintModal = ({ isOpen, onClose, itemsToPrint = [] }) => {
       <div className="space-y-6">
         <div>
           <p className="text-sm text-slate-400">
-            You are about to print labels for <span className="font-bold text-slate-100">{itemsToPrint.length}</span> item(s). Please select the label
-            template you would like to use.
+            You are about to print labels for <span className="font-bold text-slate-100">{itemsToPrint.length}</span>{" "}
+            item(s). Please select the label template you would like to use.
           </p>
         </div>
 

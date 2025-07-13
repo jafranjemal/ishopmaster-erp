@@ -27,7 +27,10 @@ const StockTransfersPage = () => {
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [transfersRes, branchesRes] = await Promise.all([tenantTransferService.getAll(), tenantLocationService.getAllBranches()]);
+      const [transfersRes, branchesRes] = await Promise.all([
+        tenantTransferService.getAll(),
+        tenantLocationService.getAllBranches(),
+      ]);
       setAllTransfers(transfersRes.data.data);
       setBranches(branchesRes.data.data);
     } catch (error) {
@@ -68,7 +71,7 @@ const StockTransfersPage = () => {
     setSerialModalState({
       isOpen: true,
       itemKey: item.key,
-      variantId: item.productVariantId,
+      variantId: item.ProductVariantId,
       initialSelection: item.serials || [],
     });
   };
@@ -76,7 +79,9 @@ const StockTransfersPage = () => {
   const handleSerialsConfirm = (selectedSerials) => {
     handleFormChange(
       "items",
-      formData.items.map((item) => (item.key === serialModalState.itemKey ? { ...item, serials: selectedSerials } : item))
+      formData.items.map((item) =>
+        item.key === serialModalState.itemKey ? { ...item, serials: selectedSerials } : item
+      )
     );
     setSerialModalState({ isOpen: false, itemKey: null, variantId: null, initialSelection: [] });
   };
@@ -117,17 +122,23 @@ const StockTransfersPage = () => {
         <div className="pt-6">
           <Tabs.Content value="pending">
             <Card>
-              <CardContent className="p-0">{isLoading ? <p>Loading...</p> : <TransferList transfers={filteredTransfers.pending} />}</CardContent>
+              <CardContent className="p-0">
+                {isLoading ? <p>Loading...</p> : <TransferList transfers={filteredTransfers.pending} />}
+              </CardContent>
             </Card>
           </Tabs.Content>
           <Tabs.Content value="in_transit">
             <Card>
-              <CardContent className="p-0">{isLoading ? <p>Loading...</p> : <TransferList transfers={filteredTransfers.in_transit} />}</CardContent>
+              <CardContent className="p-0">
+                {isLoading ? <p>Loading...</p> : <TransferList transfers={filteredTransfers.in_transit} />}
+              </CardContent>
             </Card>
           </Tabs.Content>
           <Tabs.Content value="completed">
             <Card>
-              <CardContent className="p-0">{isLoading ? <p>Loading...</p> : <TransferList transfers={filteredTransfers.completed} />}</CardContent>
+              <CardContent className="p-0">
+                {isLoading ? <p>Loading...</p> : <TransferList transfers={filteredTransfers.completed} />}
+              </CardContent>
             </Card>
           </Tabs.Content>
         </div>
@@ -149,7 +160,7 @@ const StockTransfersPage = () => {
           isOpen={true}
           onClose={() => setSerialModalState({ isOpen: false, itemKey: null, variantId: null })}
           onConfirm={handleSerialsConfirm} // This needs to be passed to the form to update its internal state
-          productVariantId={serialModalState.variantId}
+          ProductVariantId={serialModalState.variantId}
           branchId={formData.fromBranchId}
           initialSelection={serialModalState.initialSelection}
         />

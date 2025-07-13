@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
  */
 
 // --- NEW SUB-SCHEMA FOR BUNDLE ITEMS ---
-const bundleItemSchema = new mongoose.Schema(
+const componentItemSchema = new mongoose.Schema(
   {
     productVariantId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,18 +34,44 @@ const productTemplateSchema = new mongoose.Schema(
       set: (value) => value?.toUpperCase(),
     },
     description: { type: String, trim: true },
-    bundleItems: [bundleItemSchema],
+    bundleItems: {
+      type: [componentItemSchema],
+      default: undefined,
+    },
+    defaultWarrantyPolicyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "WarrantyPolicy",
+      default: null,
+    },
+    /**
+     * For 'service' type products, this stores the "Bill of Materials" -
+     * the spare parts consumed when this service is performed.
+     */
+    requiredParts: [componentItemSchema],
     brandId: { type: mongoose.Schema.Types.ObjectId, ref: "Brand" },
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: false,
     },
+    deviceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Device",
+      required: function () {
+        // A device link is required for physical products, but not for abstract services.
+        return (
+          this.type === "non-serialized" || this.type === "serialized" || this.type === "bundle"
+        );
+      },
+    },
 
     // The set of attributes that defines this product's variations (e.g., "Smartphone Specs")
     attributeSetId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "AttributeSet",
+      required: function () {
+        return this.type === "non-serialized" || this.type === "serialized";
+      },
     },
     alertQty: {
       type: Number,

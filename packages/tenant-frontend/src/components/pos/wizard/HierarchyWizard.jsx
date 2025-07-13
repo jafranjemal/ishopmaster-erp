@@ -1,164 +1,228 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { toast } from "react-hot-toast";
-import { tenantCategoryService, tenantDeviceService, tenantRepairTypeService, tenantProductService, tenantBrandService } from "../../../services/api";
-import BreadcrumbNavigator from "./BreadcrumbNavigator";
-import TileSelectionGrid from "./TileSelectionGrid";
-import { Button } from "ui-library";
-import { LoaderCircle, CheckCircle } from "lucide-react";
+import React, { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
+import {
+  tenantCategoryService,
+  tenantDeviceService,
+  tenantRepairTypeService,
+  tenantProductService,
+  tenantBrandService,
+} from '../../../services/api';
+import BreadcrumbNavigator from './BreadcrumbNavigator';
+import TileSelectionGrid from './TileSelectionGrid';
+import { Button } from 'ui-library';
+import { LoaderCircle, CheckCircle } from 'lucide-react';
+
+const STEP = {
+  INIT: 'INITIALIZING',
+  PRODUCT_TYPE: 'SELECT_PRODUCT_TYPE',
+  CATEGORY: 'CATEGORY',
+  BRAND: 'BRAND',
+  DEVICE: 'DEVICE',
+  TEMPLATE_SELECT: 'SELECT_TEMPLATE',
+  TEMPLATE_LIST: 'PROBLEM_TEMPLATE',
+  VARIANT_LIST: 'PRODUCT_LIST',
+  VARIANT_SELECT: 'PROBLEM',
+};
+
+const STEP_MAP = {
+  productType: STEP.CATEGORY,
+  category: STEP.BRAND,
+  brand: STEP.DEVICE,
+  device: STEP.TEMPLATE_SELECT,
+  template: STEP.VARIANT_LIST,
+};
 
 const HierarchyWizard = ({ startMode, onItemsSelected, onAddItem }) => {
-  const [step, setStep] = useState("INITIALIZING");
+  const [step, setStep] = useState(STEP.INIT);
   const [path, setPath] = useState([]);
   const [displayItems, setDisplayItems] = useState([]);
   const [selections, setSelections] = useState({});
   const [problemSelections, setProblemSelections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [data, setData] = useState({ categories: [], brands: [], devices: [], repairTypes: [] });
 
-  const fetchData = useCallback(async () => {
+  const fetchRootData = useCallback(async () => {
     try {
       setIsLoading(true);
       const [catRes, brandRes] = await Promise.all([tenantCategoryService.getAll(), tenantBrandService.getAll()]);
-      setData({ categories: catRes.data.data, brands: brandRes.data.data, devices: [], repairTypes: [] });
-    } catch (error) {
-      toast.error("Failed to load hierarchy data.");
+      return { categories: catRes.data.data, brands: brandRes.data.data };
+    } catch {
+      toast.error('Failed to load hierarchy data.');
+      return { categories: [], brands: [] };
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const navigateToStep = useCallback(
-    async (newStep, newSelections = {}, newPath = []) => {
-      setIsLoading(true);
-      setStep(newStep);
-      setSelections(newSelections);
-      setPath(newPath);
-      console.log("startMode : ", startMode);
-      console.log("step : ", newStep);
-      console.log("newSelections : ", newSelections);
-      console.log("newPath : ", newPath);
-      try {
-        let itemsToShow = [];
-        switch (newStep) {
-          case "SELECT_PRODUCT_TYPE":
-            itemsToShow = [
-              { _id: "non-serialized", name: "Non-Serialized" },
-              { _id: "serialized", name: "Serialized" },
-            ];
-            break;
-          case "CATEGORY": {
-            const res = await tenantCategoryService.getAll();
-
-            const rootName = startMode === "REPAIRS" ? "Services" : "Products";
-            const root = res.data.data.find((c) => c.name === rootName && !c.parent);
-            itemsToShow = root ? root.children : [];
-            setPath(root ? [{ _id: root._id, name: root.name }] : []);
-            break;
-          }
-          case "BRAND": {
-            const res = await tenantBrandService.getAll();
-            itemsToShow = res.data.data;
-            break;
-          }
-          case "DEVICE": {
-            const res = await tenantDeviceService.getAll({ brandId: newSelections.brand._id });
-            itemsToShow = res.data.data;
-            break;
-          }
-          case "PROBLEM": {
-            const res = await tenantRepairTypeService.getAll({ deviceId: newSelections.device._id });
-            itemsToShow = res.data.data;
-            break;
-          }
-          case "PRODUCT_LIST": {
-            const res = await tenantProductService.getAllVariants({
-              categoryId: newSelections.category._id,
-              brandId: newSelections.brand?._id,
-              templateType: newSelections.productType,
-            });
-            itemsToShow = res.data.data;
-            break;
-          }
-        }
-        setDisplayItems(itemsToShow);
-      } catch (error) {
-        toast.error(`Failed to load data for wizard.`);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [startMode]
-  );
-
-  useEffect(() => {
-    const initialStep = startMode === "ACCESSORIES" ? "SELECT_PRODUCT_TYPE" : "CATEGORY";
+    const initialStep = startMode === 'ACCESSORIES' ? STEP.PRODUCT_TYPE : STEP.CATEGORY;
     navigateToStep(initialStep);
-  }, [startMode, navigateToStep]);
+  }, [startMode]);
 
-  const handleSelect = (item) => {
-    if (step === "SELECT_PRODUCT_TYPE") navigateToStep("CATEGORY", { productType: item._id }, [item]);
-    else if (step === "CATEGORY") navigateToStep("BRAND", { ...selections, category: item }, [...path, item]);
-    else if (step === "BRAND") {
-      const nextSelections = { ...selections, brand: item };
-      const isRepairFlow = startMode === "REPAIRS";
-      navigateToStep(isRepairFlow ? "DEVICE" : "PRODUCT_LIST", nextSelections, [...path, item]);
-    } else if (step === "DEVICE") navigateToStep("PROBLEM", { ...selections, device: item }, [...path, item]);
-    else if (step === "PROBLEM") {
-      setProblemSelections((prev) => (prev.some((p) => p._id === item._id) ? prev.filter((p) => p._id !== item._id) : [...prev, item]));
-    } else if (step === "PRODUCT_LIST") onAddItem(item);
+  const navigateToStep = async (newStep, newSelections = selections, newPath = path) => {
+    setIsLoading(true);
+    setStep(newStep);
+    setSelections(newSelections);
+    setPath(newPath);
+    try {
+      let items = [];
+      switch (newStep) {
+        case STEP.PRODUCT_TYPE:
+          items = [
+            { _id: 'non-serialized', name: 'Standard' },
+            { _id: 'serialized', name: 'Serialized' },
+            { _id: 'bundle', name: 'Bundle/Combo' },
+          ];
+          break;
+        case STEP.CATEGORY: {
+          const cats = await tenantCategoryService.getAll();
+          const rootName = startMode === 'REPAIRS' ? 'Services' : 'Products';
+          const root = cats.data.data.find((c) => c.name === rootName && !c.parent);
+          items = root ? root.children : [];
+          if (!newPath.length && root) {
+            newPath = [{ _id: root._id, name: root.name, type: 'root' }];
+          }
+          break;
+        }
+        case STEP.BRAND: {
+          const brands = await tenantBrandService.getAll();
+          items = brands.data.data;
+          break;
+        }
+        case STEP.DEVICE: {
+          const devRes = await tenantDeviceService.getAll({ brandId: newSelections.brand._id });
+          items = devRes.data.data;
+          break;
+        }
+        case STEP.TEMPLATE_LIST: {
+          const tempList = await tenantProductService.getAllTemplates({
+            categoryId: newSelections.category._id,
+            type: 'service',
+          });
+          items = tempList.data.data;
+          break;
+        }
+        case STEP.VARIANT_SELECT: {
+          const variantsFromTemplate = await tenantProductService.getAllVariantsForTemplate(newSelections.template._id);
+          items = variantsFromTemplate.data.data;
+          break;
+        }
+        case STEP.TEMPLATE_SELECT:
+          const templates = await tenantProductService.getAllTemplates({
+            categoryId: newSelections.category._id,
+            brandId: newSelections.brand?._id,
+            deviceId: newSelections.device._id,
+            type: newSelections.productType,
+          });
+          items = templates.data.data;
+          break;
+        case STEP.VARIANT_LIST:
+          const allVariants = await tenantProductService.getAllVariantsForTemplate(newSelections.template._id);
+          items = allVariants.data.data;
+          break;
+      }
+      setDisplayItems(items);
+    } catch {
+      toast.error('Failed to load step data.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleBreadcrumbNavigate = (index) => {
-    // This logic allows jumping back to any previous step
-    if (index < 0) {
-      const initialStep = startMode === "ACCESSORIES" ? "SELECT_PRODUCT_TYPE" : "CATEGORY";
-      navigateToStep(initialStep);
-    } else {
-      // In a more complex app, we'd determine the step from the path item type
-      // For now, this is a simplified reset.
+  const handleSelect = (item) => {
+    const extendedPath = [...path, { ...item, type: step.toLowerCase() }];
+    switch (step) {
+      case STEP.PRODUCT_TYPE:
+        navigateToStep(STEP.CATEGORY, { productType: item._id }, [{ ...item, type: 'productType' }]);
+        break;
+      case STEP.CATEGORY:
+        navigateToStep(
+          startMode === 'REPAIRS' ? STEP.TEMPLATE_LIST : STEP.BRAND,
+          { ...selections, category: item },
+          extendedPath,
+        );
+        break;
+      case STEP.BRAND:
+        navigateToStep(STEP.DEVICE, { ...selections, brand: item }, extendedPath);
+        break;
+      case STEP.DEVICE:
+        const next = startMode === 'REPAIRS' ? STEP.VARIANT_SELECT : STEP.TEMPLATE_SELECT;
+        navigateToStep(next, { ...selections, device: item }, extendedPath);
+        break;
+      case STEP.TEMPLATE_SELECT:
+        navigateToStep(STEP.VARIANT_LIST, { ...selections, template: item }, extendedPath);
+        break;
+      case STEP.TEMPLATE_LIST:
+        navigateToStep(STEP.VARIANT_SELECT, { ...selections, template: item }, extendedPath);
+        break;
+      case STEP.VARIANT_SELECT:
+        setProblemSelections((prev) =>
+          prev.some((p) => p._id === item._id) ? prev.filter((p) => p._id !== item._id) : [...prev, item],
+        );
+        break;
+      case STEP.VARIANT_LIST:
+        onAddItem(item);
+        break;
     }
   };
 
   const handleAddToJob = () => {
     const jobItems = problemSelections.map((problem) => ({
-      lineType: "repair_service",
-      productVariantId: problem.productVariantId,
-      description: `${problem.name} for ${selections.device.name}`,
+      lineType: 'repair_service',
+      productVariantId: problem._id,
+      description: problem.variantName,
       quantity: 1,
-      unitPrice: problem.defaultPrice,
-      finalPrice: problem.defaultPrice,
+      unitPrice: problem.sellingPrice,
+      finalPrice: problem.sellingPrice,
       cartId: Date.now() + Math.random(),
     }));
     onItemsSelected(jobItems);
-    navigateToStep("CATEGORY"); // Reset wizard
+    navigateToStep(STEP.CATEGORY);
   };
 
-  const renderCurrentStep = () => {
-    if (isLoading)
+  const handleBreadcrumbNavigate = (index) => {
+    if (index === path.length - 1) return;
+    if (index < 0) return navigateToStep(startMode === 'ACCESSORIES' ? STEP.PRODUCT_TYPE : STEP.CATEGORY);
+    const newPath = path.slice(0, index + 1);
+    const newSelections = newPath.reduce((acc, item) => {
+      if (item.type !== 'root') acc[item.type] = item;
+      return acc;
+    }, {});
+    const lastType = newPath.at(-1).type;
+    const nextStep = STEP_MAP[lastType] || STEP.CATEGORY;
+    navigateToStep(nextStep, newSelections, newPath);
+  };
+
+  const renderStep = () => {
+    if (isLoading) {
       return (
-        <div className="flex justify-center items-center h-full">
-          <LoaderCircle className="h-6 w-6 animate-spin" />
+        <div className='flex justify-center items-center h-full'>
+          <LoaderCircle className='h-6 w-6 animate-spin' />
         </div>
       );
-    let itemType = "category";
-    if (step === "DEVICE") itemType = "device";
-    if (step === "PROBLEM") itemType = "problem";
-    return <TileSelectionGrid items={displayItems} onSelect={handleSelect} itemType={itemType} selectedIds={problemSelections.map((p) => p._id)} />;
+    }
+    const typeMap = {
+      [STEP.DEVICE]: 'device',
+      [STEP.VARIANT_SELECT]: 'problem',
+      [STEP.VARIANT_LIST]: 'product',
+    };
+    return (
+      <TileSelectionGrid
+        items={displayItems}
+        onSelect={handleSelect}
+        itemType={typeMap[step] || 'category'}
+        selectedIds={problemSelections.map((p) => p._id)}
+      />
+    );
   };
 
   return (
-    <div className="h-full flex flex-col gap-4">
+    <div className='h-full flex flex-col gap-4'>
       <BreadcrumbNavigator path={path} onNavigate={handleBreadcrumbNavigate} />
-      <div className="flex-grow overflow-y-auto pr-2">{renderCurrentStep()}</div>
-
-      {step === "PROBLEM" && (
-        <div className="flex-shrink-0 pt-4 border-t border-slate-700">
-          <Button className="w-full h-12 text-base" onClick={handleAddToJob} disabled={problemSelections.length === 0}>
-            <CheckCircle className="h-5 w-5 mr-2" />
+      <div className='flex-grow overflow-y-auto pr-2'>{renderStep()}</div>
+      {step === STEP.VARIANT_SELECT && (
+        <div className='flex-shrink-0 pt-4 border-t border-slate-700'>
+          <Button className='w-full h-12 text-base' onClick={handleAddToJob} disabled={!problemSelections.length}>
+            <CheckCircle className='h-5 w-5 mr-2' />
             Add {problemSelections.length} Service(s) to Job
           </Button>
         </div>
@@ -166,4 +230,5 @@ const HierarchyWizard = ({ startMode, onItemsSelected, onAddItem }) => {
     </div>
   );
 };
+
 export default HierarchyWizard;

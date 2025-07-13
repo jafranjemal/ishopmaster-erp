@@ -54,7 +54,7 @@ class ReconciliationService {
     let totalOriginalValueInBase = 0;
 
     const processedItems = items.map((item) => {
-      const poItem = po.items.find((p) => p.productVariantId.toString() === item.productVariantId);
+      const poItem = po.items.find((p) => p.ProductVariantId.toString() === item.ProductVariantId);
       if (!poItem) throw new Error(`Billed item ${item.description} not found on original PO.`);
 
       // Calculate the total cost for THIS line item
@@ -129,6 +129,96 @@ class ReconciliationService {
     );
 
     return newInvoices[0];
+  }
+
+  /**
+   * Parses a raw CSV buffer and creates a BankStatement document.
+   */
+  /**
+   * Parses a raw CSV from a URL and creates a BankStatement document.
+   */
+  async processStatementUpload(models, { fileUrl, accountId, statementDate }, userId) {
+    const { BankStatement } = models;
+
+    if (!fileUrl) {
+      throw new Error("File URL is required to process statement.");
+    }
+
+    // 1. Fetch the file content from the secure URL
+    const response = await axios.get(fileUrl, { responseType: "stream" });
+    const csvData = await new Promise((resolve, reject) => {
+      let data = "";
+      response.data.on("data", (chunk) => (data += chunk));
+      response.data.on("end", () => resolve(data));
+      response.data.on("error", (err) => reject(err));
+    });
+
+    // 2. Parse the downloaded CSV data
+    const parsed = papaparse.parse(csvData, { header: true, skipEmptyLines: true });
+    if (parsed.errors.length > 0) {
+      console.error("CSV Parsing Errors:", parsed.errors);
+      throw new Error("Failed to parse the uploaded CSV file.");
+    }
+
+    const lines = parsed.data.map((row) => ({
+      date: new Date(row.Date),
+      description: row.Description,
+      amount: parseFloat(row.Amount),
+      type: parseFloat(row.Amount) < 0 ? "debit" : "credit",
+    }));
+
+    // 3. Create the BankStatement document
+    const newStatement = await BankStatement.create({
+      accountId,
+      statementDate,
+      lines,
+      startingBalance: 0, // These would be entered by the user in a more advanced UI
+      endingBalance: 0,
+      uploadedBy: userId,
+    });
+    return newStatement;
+  }
+  /**
+   * Finds potential matches in the Ledger for lines in a BankStatement.
+   */
+  async suggestMatches(models, { statementId }) {
+    const { BankStatement, LedgerEntry } = models;
+    const statement = await BankStatement.findById(statementId);
+    if (!statement) throw new Error("Bank statement not found.");
+
+    const suggestions = [];
+    for (const line of statement.lines.filter((l) => l.status === "unmatched")) {
+      // Matching algorithm: Find ledger entries with the same amount within a 5-day window.
+      const fiveDaysBefore = new Date(line.date.getTime() - 5 * 24 * 60 * 60 * 1000);
+      const fiveDaysAfter = new Date(line.date.getTime() + 5 * 24 * 60 * 60 * 1000);
+
+      const potentialMatches = await LedgerEntry.find({
+        accountId: statement.accountId,
+        amountInBaseCurrency: Math.abs(line.amount),
+        date: { $gte: fiveDaysBefore, $lte: fiveDaysAfter },
+      }).lean();
+
+      if (potentialMatches.length > 0) {
+        suggestions.push({ statementLineId: line._id, potentialMatches });
+      }
+    }
+    return suggestions;
+  }
+
+  async confirmMatch(models, { statementId, statementLineId, ledgerEntryIds }, userId) {
+    const { Reconciliation, BankStatement } = models;
+    // In a real system, you'd also update the status of the ledger entries.
+    await BankStatement.updateOne(
+      { _id: statementId, "lines._id": statementLineId },
+      { $set: { "lines.$.status": "matched" } }
+    );
+    const newReconciliation = await Reconciliation.create({
+      statementId,
+      statementLineId,
+      ledgerEntryIds,
+      reconciledBy: userId,
+    });
+    return newReconciliation;
   }
 }
 

@@ -9,6 +9,21 @@ const promotionSchema = new mongoose.Schema(
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
 
+    conditions: {
+      appliesTo: {
+        type: String,
+        required: true,
+        enum: ["all_products", "specific_categories", "specific_products"],
+        default: "all_products",
+      },
+      items: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          // This ref can be dynamic in a more advanced system, but for now we'll handle it in the service
+        },
+      ],
+    },
+
     // --- Action (what is the discount) ---
     discount: {
       type: { type: String, required: true, enum: ["percentage", "fixed", "bogo"] }, // Buy One Get One
