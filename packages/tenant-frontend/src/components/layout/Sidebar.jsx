@@ -32,6 +32,7 @@ import {
   KeyRound,
   Printer,
   Gift,
+  CalendarDays,
   Tags,
   Plug,
   FileMinus,
@@ -428,6 +429,13 @@ const Sidebar = () => {
             },
           ],
         },
+        {
+          name: 'Financial Periods',
+          href: '/settings/financial-periods',
+          icon: CalendarDays,
+          permission: 'accounting:closing:manage',
+        },
+
         { name: 'Benefits Setup', href: '/settings/benefits', icon: Gift, permission: 'hr:benefits:manage' },
         { name: 'Pricing & Promotions', href: '/settings/pricing', icon: Tags, permission: 'sales:pricing:manage' },
 

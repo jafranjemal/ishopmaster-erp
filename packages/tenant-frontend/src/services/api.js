@@ -1204,6 +1204,13 @@ export const tenantClosingService = {
   // We will need these later for the period selector
   getAllPeriods: async () => api.get('/tenant/accounting/periods'),
   createPeriod: async (data) => api.post('/tenant/accounting/periods', data),
+  /**
+   * Generates all 12 monthly financial periods for a given year.
+   * @param {number} year - The year to generate periods for.
+   */
+  generateYearlyPeriods: async (year) => {
+    return api.post('/tenant/accounting/periods/generate-year', { year });
+  },
 };
 
 export default api;

@@ -75,6 +75,7 @@ import CouponManagementPage from './pages/settings/CouponManagementPage';
 import CouponBatchDetailPage from './pages/settings/CouponBatchDetailPage';
 import BankReconciliationPage from './pages/accounting/BankReconciliationPage';
 import PeriodClosingPage from './pages/accounting/PeriodClosingPage';
+import FinancialPeriodsPage from './pages/settings/FinancialPeriodsPage';
 
 function App() {
   const [posLayout, setPosLayout] = useState('default');
@@ -126,6 +127,7 @@ function App() {
                   <Route path='/inventory/assembly' element={<AssemblyPage />} />
                   <Route path='/inventory/products/templates/:id' element={<ProductTemplateDetailPage />} />
                   {/* Settings Module Routes */}
+                  <Route path='/settings/financial-periods' element={<FinancialPeriodsPage />} />
                   <Route path='/settings/coupons' element={<CouponManagementPage />} />
                   <Route path='/settings/coupons/:batchId' element={<CouponBatchDetailPage />} />
                   <Route path='/settings/warranties' element={<WarrantyPoliciesPage />} />

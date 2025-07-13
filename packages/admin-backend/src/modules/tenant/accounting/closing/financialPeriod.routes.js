@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(protect, authorize("accounting:closing:manage"));
 
 router.route("/").get(ctrl.getAllPeriods).post(ctrl.createPeriod);
-
+router.post("/generate-year", ctrl.generateYearlyPeriods);
 router.route("/:id").put(ctrl.updatePeriod);
 // Delete route can be added later if needed, but closing is preferred over deleting.
 
