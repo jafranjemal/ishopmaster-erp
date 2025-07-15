@@ -1,5 +1,7 @@
+const { default: mongoose } = require("mongoose");
 const asyncHandler = require("../../../middleware/asyncHandler");
 const customerService = require("../../../services/customer.service");
+const tokenService = require("../../../services/token.service");
 
 // @desc    Create a new customer and their linked ledger account
 // @route   POST /api/v1/tenant/crm
@@ -32,9 +34,20 @@ exports.getAllCustomers = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/tenant/crm/customers/:id
 // @access  Private (Requires 'crm:customer:manage' permission)
 exports.getCustomerById = asyncHandler(async (req, res, next) => {
-  const { Customer } = req.models;
-  const customer = await Customer.findById(req.params.id).populate("ledgerAccountId", "name type");
+  const { Customer, CustomerAuthToken } = req.models;
+  //const customer = await Customer.findById(req.params.id).populate("ledgerAccountId", "name type");
+  const customerId = new mongoose.Types.ObjectId(req.params.id);
 
+  const [customer, activeToken] = await Promise.all([
+    Customer.findById(customerId).populate("ledgerAccountId").lean(),
+    CustomerAuthToken.findOne({
+      customerId: customerId,
+      //status: 'active',
+      expiryDate: { $gt: new Date() }, // Ensure the token is not expired
+    }).lean(),
+  ]);
+
+  console.log("customer ", customer);
   if (!customer) {
     return res.status(404).json({
       success: false,
@@ -42,7 +55,12 @@ exports.getCustomerById = asyncHandler(async (req, res, next) => {
     });
   }
 
-  res.status(200).json({ success: true, data: customer });
+  const responseData = {
+    customer,
+    activePortalToken: activeToken ? activeToken.token : null,
+  };
+
+  res.status(200).json({ success: true, data: responseData });
 });
 
 // @desc    Update a customer's details
@@ -152,4 +170,23 @@ exports.getCustomerLedger = asyncHandler(async (req, res, next) => {
     },
     data: entries,
   });
+});
+
+// @desc    Manually generate a portal access token for a customer
+// @route   POST /api/v1/tenant/crm/customers/:id/generate-portal-token
+exports.generatePortalToken = asyncHandler(async (req, res, next) => {
+  //const token = await tokenService.generateForCustomer(req.models, { customerId: req.params.id });
+  // In a real app, the base URL should come from config/env variables
+  const { oneTimeToken } = await tokenService.generateForCustomer(req.models, {
+    customerId: req.params.id,
+    tenantId: req.tenant.subdomain, // or req.tenant._id, depending on what you use
+  });
+  const baseUrl = process.env.FRONTEND_PORTAL_BASE_URL;
+  if (!baseUrl) {
+    // This is a critical server configuration error.
+    console.error("FATAL ERROR: FRONTEND_PORTAL_BASE_URL is not defined in .env file.");
+    return res.status(500).json({ success: false, error: "Server configuration error." });
+  }
+  const loginUrl = `${baseUrl}/portal/login?token=${oneTimeToken}&tenant=${req.tenant.subdomain}`;
+  res.status(200).json({ success: true, data: { loginUrl, token: oneTimeToken } });
 });

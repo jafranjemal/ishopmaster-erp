@@ -54,7 +54,7 @@ class PurchasingService {
    * Receives goods from a PO, updating inventory and accounting records.
    * This entire method MUST be called from within a database transaction in the controller.
    */
-  async receiveGoodsFromPO_old(models, { poId, receivedItems, userId }, session) {
+  async receiveGoodsFromPO_old(models, { poId, receivedItems, userId }, session, tenant) {
     const { PurchaseOrder, Supplier, Account } = models;
 
     const po = await PurchaseOrder.findById(poId).session(session);
@@ -123,7 +123,8 @@ class PurchasingService {
           exchangeRateToBase: po.exchangeRateToBase,
           refs: { purchaseId: po._id },
         },
-        session
+        session,
+        tenant
       );
     }
 
@@ -147,7 +148,7 @@ class PurchasingService {
    * @param {string} data.userId - The ID of the user receiving the goods.
    * @param {mongoose.ClientSession} session - The Mongoose session for the transaction.
    */
-  async receiveGoodsFromPO(models, { poId, receivedItems, userId, notes }, session) {
+  async receiveGoodsFromPO(models, { poId, receivedItems, userId, notes }, session, tenant) {
     const { PurchaseOrder, Supplier, Account, GoodsReceiptNote } = models;
 
     const po = await PurchaseOrder.findById(poId).session(session);
@@ -244,7 +245,8 @@ class PurchasingService {
           exchangeRateToBase: po.exchangeRateToBase,
           refs: { purchaseId: po._id },
         },
-        session
+        session,
+        tenant
       );
     }
 

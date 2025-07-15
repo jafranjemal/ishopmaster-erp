@@ -12,7 +12,8 @@ class ReconciliationService {
   async postSupplierInvoice(
     models,
     { supplierId, goodsReceiptNoteIds, items, ...invoiceData },
-    userId
+    userId,
+    tenant
   ) {
     const { SupplierInvoice, GoodsReceiptNote, PurchaseOrder, Account, Supplier } = models;
 
@@ -99,15 +100,21 @@ class ReconciliationService {
       }
     }
 
-    await accountingService.createJournalEntry(models, {
-      description: `Supplier Invoice #${
-        invoiceData.supplierInvoiceNumber
-      } from ${apAccount.name.replace("AP - ", "")}`,
-      entries: journalEntries,
-      currency: po.transactionCurrency,
-      exchangeRateToBase: po.exchangeRateToBase,
-      refs: { purchaseId: po._id },
-    });
+    await accountingService.createJournalEntry(
+      models,
+      {
+        description: `Supplier Invoice #${
+          invoiceData.supplierInvoiceNumber
+        } from ${apAccount.name.replace("AP - ", "")}`,
+        entries: journalEntries,
+        currency: po.transactionCurrency,
+        exchangeRateToBase: po.exchangeRateToBase,
+        refs: { purchaseId: po._id },
+      },
+      null, // No session needed here
+
+      tenant
+    );
 
     // 4. Create the SupplierInvoice document with all calculated fields
     const newInvoices = await SupplierInvoice.create([

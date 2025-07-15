@@ -249,6 +249,9 @@ export const tenantCustomerService = {
   getCustomerLedger: async (customerId, params) => {
     return api.get(`/tenant/crm/customers/${customerId}/ledger`, { params });
   },
+  generatePortalToken: async (customerId) => {
+    return api.post(`/tenant/crm/customers/${customerId}/generate-portal-token`);
+  },
 };
 
 export const tenantCustomerGroupService = {
@@ -464,6 +467,7 @@ export const tenantProductService = {
       variants: variantsToUpdate,
     });
   },
+  getLedgerHistory: async (params) => api.get('/tenant/inventory/ledger', { params }),
 
   searchVariants: async (searchTerm) => api.get(`/tenant/inventory/products/variants?search=${searchTerm}`), // We will build this backend route
 };
@@ -1211,6 +1215,30 @@ export const tenantClosingService = {
   generateYearlyPeriods: async (year) => {
     return api.post('/tenant/accounting/periods/generate-year', { year });
   },
+};
+
+export const tenantBudgetService = {
+  /**
+   * Fetches all budget entries for a given year.
+   * @param {number} year - The year to fetch budgets for.
+   */
+  getBudgets: async (year) => {
+    return api.get('/tenant/accounting/budgets', { params: { year } });
+  },
+
+  /**
+   * Creates a new budget entry or updates an existing one (upsert).
+   * @param {object} budgetData - { accountId, financialPeriodId, amount }
+   */
+  createOrUpdateBudget: async (budgetData) => {
+    return api.post('/tenant/accounting/budgets', budgetData);
+  },
+};
+
+export const tenantReturnsService = {
+  // We need a way to find the original invoice first
+  findInvoice: async (invoiceNumber) => api.get(`/tenant/sales`, { params: { invoiceNumber } }),
+  processReturn: async (returnData) => api.post('/tenant/sales/returns', returnData),
 };
 
 export default api;

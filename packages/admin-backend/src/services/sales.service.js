@@ -3,6 +3,8 @@ const accountingService = require("./accounting.service");
 const paymentsService = require("./payments.service");
 const mongoose = require("mongoose");
 const couponService = require("./coupon.service");
+const taxService = require("./tax.service");
+const pricingService = require("./pricing.service");
 
 /**
  * The SalesService handles all complex business logic related to sales,
@@ -40,83 +42,124 @@ class SalesService {
   async finalizeSale(
     models,
     { cartData, paymentData, customerId, branchId, userId, couponId },
-    baseCurrency
+    baseCurrency,
+    tenant
   ) {
     try {
       const { SalesInvoice, Account, Customer, Employee, Commission } = models;
 
+      const pricedCart = await pricingService.calculatePrices(models, { cartData, customerId });
+      const { totalTax, taxBreakdown } = await taxService.calculateTax(models, {
+        cartData,
+        branchId,
+      });
+      const finalTotalAmount = pricedCart.totalAmount + totalTax;
+
       // --- 1. CREDIT LIMIT VALIDATION ---
       const amountPaid = paymentData.paymentLines.reduce((sum, line) => sum + line.amount, 0);
       const amountDue = cartData.totalAmount - amountPaid;
-
       if (amountDue > 0) {
         const customer = await Customer.findById(customerId).session(session);
-        if (!customer) throw new Error("Customer not found for credit check.");
-
-        // A credit limit of 0 means no credit is allowed.
-        if (customer.creditLimit === 0) {
+        if (!customer || customer.creditLimit === 0)
           throw new Error("This customer is not eligible for credit sales.");
-        }
 
-        // Fetch the current balance of the customer's A/R account
         const arAccount = await Account.findById(customer.ledgerAccountId).session(session);
+        // --- THE DEFINITIVE FIX: Correctly read balance from the Map ---
         const currentBalance = arAccount.balance.get(baseCurrency) || 0;
-
         const newBalance = currentBalance + amountDue;
-
         if (newBalance > customer.creditLimit) {
           throw new Error(
-            `Credit limit exceeded. Limit: ${customer.creditLimit}, Current Balance: ${currentBalance}, New Balance would be: ${newBalance}`
+            `Credit limit exceeded. Limit: ${customer.creditLimit}, New Balance: ${newBalance}`
           );
         }
       }
+
       // --- END OF CREDIT LIMIT VALIDATION ---
 
       // 2. Deduct stock and create invoice items
       let totalCostOfGoodsSold = 0;
       const saleItems = [];
 
-      // 1. Process cart items to prepare for invoice and deduct stock
-      for (const item of cartData.items) {
-        const { costOfGoodsSold } = await inventoryService.decreaseStock(models, {
-          ProductVariantId: item.ProductVariantId,
-          branchId,
-          quantity: item.quantity,
-          serialNumber: item.serialNumber, // Will be present for serialized items
-          userId,
-          // We will link the sale ID later
-        });
-
+      const inventoryItemIds = []; // To track for the audit link
+      for (const item of pricedCart.items) {
+        const { costOfGoodsSold, deductedItemIds } = await inventoryService.decreaseStock(
+          models,
+          {
+            productVariantId: item.productVariantId,
+            branchId,
+            quantity: item.quantity,
+            serialNumber: item.serialNumber,
+            userId,
+          },
+          session
+        );
         totalCostOfGoodsSold += costOfGoodsSold;
-        saleItems.push({
-          ProductVariantId: item.ProductVariantId,
-          description: item.variantName,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          discount: item.discount,
-          finalPrice: item.finalPrice,
-          costPriceInBaseCurrency: costOfGoodsSold / item.quantity,
-        });
+        saleItems.push({ ...item, costPriceInBaseCurrency: costOfGoodsSold / item.quantity });
+        if (deductedItemIds) inventoryItemIds.push(...deductedItemIds);
       }
 
+      // 1. Process cart items to prepare for invoice and deduct stock
+      // for (const item of cartData.items) {
+      //   const { costOfGoodsSold } = await inventoryService.decreaseStock(models, {
+      //     ProductVariantId: item.ProductVariantId,
+      //     branchId,
+      //     quantity: item.quantity,
+      //     serialNumber: item.serialNumber, // Will be present for serialized items
+      //     userId,
+      //     // We will link the sale ID later
+      //   });
+
+      //   totalCostOfGoodsSold += costOfGoodsSold;
+      //   saleItems.push({
+      //     ProductVariantId: item.ProductVariantId,
+      //     description: item.variantName,
+      //     quantity: item.quantity,
+      //     unitPrice: item.unitPrice,
+      //     discount: item.discount,
+      //     finalPrice: item.finalPrice,
+      //     costPriceInBaseCurrency: costOfGoodsSold / item.quantity,
+      //   });
+      // }
+
       // 2. Create the Sales Invoice with status 'completed'
-      const [salesInvoice] = await SalesInvoice.create([
-        {
-          customerId,
-          branchId,
-          items: saleItems,
-          subTotal: cartData.subTotal,
-          totalDiscount: cartData.totalDiscount,
-          totalTax: cartData.totalTax,
-          totalAmount: cartData.totalAmount,
-          soldBy: userId,
-          status: "completed",
-        },
-      ]);
+      // const [salesInvoice] = await SalesInvoice.create([
+      //   {
+      //     customerId,
+      //     branchId,
+      //     items: saleItems,
+      //     subTotal: cartData.subTotal,
+      //     totalDiscount: cartData.totalDiscount,
+      //     totalTax: totalTax,//cartData.totalTax,
+      //     totalAmount:  finalTotalAmount, //cartData.totalAmount,
+      //     soldBy: userId,
+      //     status: "completed",
+      //   },
+      // ]);
+
+      const [salesInvoice] = await SalesInvoice.create(
+        [
+          {
+            customerId,
+            branchId,
+            items: saleItems,
+            soldBy: userId,
+            status: "completed",
+            subTotal: pricedCart.subTotal,
+            totalDiscount: pricedCart.totalDiscount,
+            totalTax,
+            totalAmount: finalTotalAmount,
+          },
+        ],
+        { session }
+      );
 
       // Now that we have the invoice ID, we can update the stock movement refs
       // In a real high-performance system, this might be done as a background job.
-      await inventoryService.linkSaleToMovements(models, { saleId: salesInvoice._id, cartItems });
+      await inventoryService.linkSaleToMovements(
+        models,
+        { saleId: salesInvoice._id, inventoryItemIds },
+        session
+      );
 
       // 3. Post the core Sales and COGS journal entries
       const [arAccount, salesRevenueAccount, cogsAccount, inventoryAssetAccount] =
@@ -129,48 +172,97 @@ class SalesService {
           Account.findOne({ isSystemAccount: true, name: "Inventory Asset" }),
         ]);
 
-      await accountingService.createJournalEntry(models, {
-        description: `Sale to customer for Invoice #${salesInvoice.invoiceNumber}`,
-        entries: [
-          { accountId: arAccount._id, debit: salesInvoice.totalAmount },
-          { accountId: salesRevenueAccount._id, credit: salesInvoice.subTotal },
-        ],
-        refs: { salesInvoiceId: salesInvoice._id },
-      });
+      // Revenue & Tax Journal Entry
+      const revenueEntries = [
+        { accountId: arAccount._id, debit: finalTotalAmount },
+        {
+          accountId: salesRevenueAccount._id,
+          credit: pricedCart.subTotal - pricedCart.totalDiscount,
+        },
+      ];
 
-      await accountingService.createJournalEntry(models, {
-        description: `COGS for Invoice #${salesInvoice.invoiceNumber}`,
-        entries: [
-          { accountId: cogsAccount._id, debit: totalCostOfGoodsSold },
-          { accountId: inventoryAssetAccount._id, credit: totalCostOfGoodsSold },
-        ],
-        refs: { salesInvoiceId: salesInvoice._id },
-      });
+      taxBreakdown.forEach((tax) =>
+        revenueEntries.push({ accountId: tax.linkedAccountId, credit: tax.amount })
+      );
 
-      // 4. Record the payment using the universal PaymentsService
-      if (paymentData && paymentData.paymentLines.length > 0) {
+      await accountingService.createJournalEntry(
+        models,
+        {
+          description: `Sale - Invoice #${salesInvoice.invoiceNumber}`,
+          entries: revenueEntries,
+          currency: baseCurrency,
+          refs: { salesInvoiceId: salesInvoice._id },
+        },
+        null,
+        tenant
+      );
+
+      // await accountingService.createJournalEntry(models, {
+      //   description: `Sale to customer for Invoice #${salesInvoice.invoiceNumber}`,
+      //   entries: revenueEntries,
+      //   refs: { salesInvoiceId: salesInvoice._id },
+      // });
+
+      await accountingService.createJournalEntry(
+        models,
+        {
+          description: `COGS for Invoice #${salesInvoice.invoiceNumber}`,
+          entries: [
+            { accountId: cogsAccount._id, debit: totalCostOfGoodsSold },
+            { accountId: inventoryAssetAccount._id, credit: totalCostOfGoodsSold },
+          ],
+          currency: baseCurrency,
+          refs: { salesInvoiceId: salesInvoice._id },
+        },
+        session,
+        tenant
+      );
+
+      // 6. Record Payment & Finalize Coupon
+      if (amountPaid > 0)
         await paymentsService.recordPayment(
           models,
           {
             paymentSourceId: salesInvoice._id,
             paymentSourceType: "SalesInvoice",
             paymentLines: paymentData.paymentLines,
-            paymentDate: new Date(),
             direction: "inflow",
-            notes: paymentData.notes,
           },
           userId,
-          baseCurrency
+          baseCurrency,
+          session
         );
-      }
-
-      if (couponId) {
+      if (couponId)
         await couponService.markCouponAsRedeemed(
           models,
           { couponId, invoiceId: salesInvoice._id },
           session
         );
-      }
+
+      // 4. Record the payment using the universal PaymentsService
+      // if (paymentData && paymentData.paymentLines.length > 0) {
+      //   await paymentsService.recordPayment(
+      //     models,
+      //     {
+      //       paymentSourceId: salesInvoice._id,
+      //       paymentSourceType: "SalesInvoice",
+      //       paymentLines: paymentData.paymentLines,
+      //       paymentDate: new Date(),
+      //       direction: "inflow",
+      //       notes: paymentData.notes,
+      //     },
+      //     userId,
+      //     baseCurrency
+      //   );
+      // }
+
+      // if (couponId) {
+      //   await couponService.markCouponAsRedeemed(
+      //     models,
+      //     { couponId, invoiceId: salesInvoice._id },
+      //     session
+      //   );
+      // }
 
       // 5. Log commission if applicable
       const employee = await Employee.findOne({ userId: userId });

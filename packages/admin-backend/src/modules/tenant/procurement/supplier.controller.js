@@ -9,11 +9,7 @@ exports.createSupplier = asyncHandler(async (req, res, next) => {
   let supplier;
   try {
     await session.withTransaction(async () => {
-      supplier = await supplierService.createSupplierWithLedger(
-        req.models,
-        req.body,
-        session
-      );
+      supplier = await supplierService.createSupplierWithLedger(req.models, req.body, session);
     });
     res.status(201).json({ success: true, data: supplier });
   } finally {
@@ -26,10 +22,7 @@ exports.createSupplier = asyncHandler(async (req, res, next) => {
 // @access  Private (Requires 'procurement:supplier:manage' permission)
 exports.getAllSuppliers = asyncHandler(async (req, res, next) => {
   const { Supplier } = req.models;
-  const suppliers = await Supplier.find({}).populate(
-    "ledgerAccountId",
-    "name type"
-  );
+  const suppliers = await Supplier.find({}).populate("ledgerAccountId", "name type");
   res.status(200).json({ success: true, data: suppliers });
 });
 
@@ -37,15 +30,20 @@ exports.getAllSuppliers = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/tenant/procurement/suppliers/:id
 // @access  Private (Requires 'procurement:supplier:manage' permission)
 exports.getSupplierById = asyncHandler(async (req, res, next) => {
-  const { Supplier } = req.models;
-  const supplier = await Supplier.findById(req.params.id).populate(
-    "ledgerAccountId",
-    "name type"
-  );
-  if (!supplier)
-    return res
-      .status(404)
-      .json({ success: false, error: "Supplier not found" });
+  const { Supplier, Account } = req.models;
+  const supplier = await Supplier.findById(req.params.id)
+    .populate("ledgerAccountId", "name type")
+    .lean();
+
+  if (supplier.ledgerAccountId) {
+    const accountDetails = await Account.findById(supplier.ledgerAccountId._id).lean();
+
+    // 3. Attach the full account object, including the balance Map, to the response.
+    // The frontend will now receive the complete balance data.
+    supplier.accountDetails = accountDetails;
+  }
+
+  if (!supplier) return res.status(404).json({ success: false, error: "Supplier not found" });
   res.status(200).json({ success: true, data: supplier });
 });
 
@@ -65,19 +63,13 @@ exports.updateSupplier = asyncHandler(async (req, res, next) => {
     isActive,
   };
 
-  const updatedSupplier = await Supplier.findByIdAndUpdate(
-    req.params.id,
-    fieldsToUpdate,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  const updatedSupplier = await Supplier.findByIdAndUpdate(req.params.id, fieldsToUpdate, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!updatedSupplier)
-    return res
-      .status(404)
-      .json({ success: false, error: "Supplier not found" });
+    return res.status(404).json({ success: false, error: "Supplier not found" });
   res.status(200).json({ success: true, data: updatedSupplier });
 });
 
@@ -88,10 +80,7 @@ exports.deleteSupplier = asyncHandler(async (req, res, next) => {
   const { Supplier, LedgerEntry, Account } = req.models;
 
   const supplier = await Supplier.findById(req.params.id);
-  if (!supplier)
-    return res
-      .status(404)
-      .json({ success: false, error: "Supplier not found" });
+  if (!supplier) return res.status(404).json({ success: false, error: "Supplier not found" });
 
   // Data Integrity Check: Prevent deletion if the supplier has financial history.
   if (supplier.ledgerAccountId) {
@@ -133,16 +122,12 @@ exports.getSupplierLedger = asyncHandler(async (req, res, next) => {
   const { Supplier, LedgerEntry } = req.models;
   const supplierId = req.params.id;
 
-  const supplier = await Supplier.findById(supplierId)
-    .select("ledgerAccountId")
-    .lean();
+  const supplier = await Supplier.findById(supplierId).select("ledgerAccountId").lean();
   if (!supplier || !supplier.ledgerAccountId) {
-    return res
-      .status(404)
-      .json({
-        success: false,
-        error: "Supplier or their financial account not found.",
-      });
+    return res.status(404).json({
+      success: false,
+      error: "Supplier or their financial account not found.",
+    });
   }
 
   const ledgerAccountId = supplier.ledgerAccountId;
@@ -151,10 +136,7 @@ exports.getSupplierLedger = asyncHandler(async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   const query = {
-    $or: [
-      { debitAccountId: ledgerAccountId },
-      { creditAccountId: ledgerAccountId },
-    ],
+    $or: [{ debitAccountId: ledgerAccountId }, { creditAccountId: ledgerAccountId }],
   };
 
   const [entries, total] = await Promise.all([

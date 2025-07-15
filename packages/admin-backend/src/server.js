@@ -27,6 +27,9 @@ const Tenant = require("./modules/admin/tenants/tenant.model.js");
 const apiKeyAuth = require("./middleware/apiKeyAuth.middleware");
 const { receiveDevicePunch } = require("./modules/tenant/hr/attendance.controller");
 const dunningService = require("./services/dunning.service.js");
+const portalAuthRoutes = require("./modules/tenant/portal/customerAuth.routes.js");
+const customerAuthTokenSchema = require("./modules/tenant/portal/customerAuthToken.schema.js");
+
 // CORS configuration
 const allowedOrigins = [
   "http://localhost:5173", // Vite's default dev port
@@ -55,6 +58,7 @@ const app = express();
 app.use(express.json());
 app.use(cors(corsOptions));
 
+const portalApiRouter = express.Router();
 const publicApiRouter = express.Router();
 publicApiRouter.post("/attendance/punch", tenantResolver, apiKeyAuth, receiveDevicePunch);
 app.use("/api/v1/public", publicApiRouter);
@@ -79,8 +83,14 @@ fs.readdirSync(tenantModulesPath).forEach((moduleName) => {
 
     // 2. Mount the module's router on a sub-path
     if (module.router) {
-      tenantRouter.use(`/${moduleName}`, module.router);
-      console.log(`  - Mounted routes at /${moduleName}`);
+      if (module.isPublic) {
+        // Public routes are mounted on the public router, which only uses the tenantResolver
+        publicApiRouter.use(`/${moduleName}`, tenantResolver, module.router);
+        console.log(`  - Mounted PUBLIC routes at /api/v1/public/${moduleName}`);
+      } else {
+        tenantRouter.use(`/${moduleName}`, module.router);
+        console.log(`  - Mounted routes at /${moduleName}`);
+      }
     }
   }
 });
@@ -102,6 +112,16 @@ app.use("/api/v1/admin/tenants", adminTenantRoutes);
 app.use("/api/v1/admin/modules", adminModulesRoutes);
 app.use("/api/v1/admin/permissions", adminPermissionsRoutes);
 app.use("/api/v1/backups", backupRoutes);
+
+portalApiRouter.use("/auth", tenantResolver, portalAuthRoutes);
+app.use("/api/v1/portal", portalApiRouter);
+app.use(
+  "/api/v1/portal2",
+  (req, res, next) => {
+    console.log("Portal2 route hit" + req.originalUrl);
+  },
+  portalApiRouter
+);
 
 // === Tenant Specific Routes ===
 // All routes below this line will have tenant context

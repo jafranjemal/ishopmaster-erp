@@ -76,6 +76,15 @@ import CouponBatchDetailPage from './pages/settings/CouponBatchDetailPage';
 import BankReconciliationPage from './pages/accounting/BankReconciliationPage';
 import PeriodClosingPage from './pages/accounting/PeriodClosingPage';
 import FinancialPeriodsPage from './pages/settings/FinancialPeriodsPage';
+import BudgetingPage from './pages/accounting/BudgetingPage';
+import InventoryLedgerPage from './pages/inventory/InventoryLedgerPage';
+import ReturnsPage from './pages/sales/ReturnsPage';
+import TrackRepairPage from './pages/portal/TrackRepairPage';
+import CustomerDashboardPage from './pages/portal/CustomerDashboardPage';
+import PortalLayout from './components/layout/PortalLayout';
+import PortalLoginPage from './pages/portal/PortalLoginPage';
+import RequestPortalLinkPage from './pages/portal/RequestPortalLinkPage';
+import { CustomerAuthProvider } from './context/CustomerAuthProvider';
 
 function App() {
   const [posLayout, setPosLayout] = useState('default');
@@ -85,7 +94,31 @@ function App() {
     <>
       <Routes>
         {/* Public Route */}
+
+        {/* --- PUBLIC-FACING ROUTES (NO LOGIN REQUIRED INITIALLY) --- */}
         <Route path='/login' element={<LoginPage />} />
+
+        {/* --- THE DEFINITIVE FIX: DEDICATED PORTAL ROUTE GROUP --- */}
+        <Route
+          path='/portal/*'
+          element={
+            <CustomerAuthProvider>
+              <PortalLayout>
+                <Routes>
+                  <Route path='track' element={<TrackRepairPage />} />
+                  <Route path='login' element={<PortalLoginPage />} />
+                  <Route path='request-link' element={<RequestPortalLinkPage />} />
+
+                  {/* The dashboard would have its own internal session check */}
+                  <Route path='dashboard' element={<CustomerDashboardPage />} />
+
+                  {/* Fallback for any other /portal URL */}
+                  <Route path='*' element={<Navigate to='/portal/request-link' replace />} />
+                </Routes>
+              </PortalLayout>
+            </CustomerAuthProvider>
+          }
+        />
 
         {/* All POS-related routes are now grouped and use the dedicated PosLayout */}
         <Route
@@ -146,6 +179,7 @@ function App() {
                   <Route path='/settings/printing/:id' element={<LabelDesignerPage />} />
                   <Route path='/settings/payroll-rules' element={<DeductionRulesPage />} />
                   {/* --- accounting routes --- */}
+                  <Route path='/accounting/budgets' element={<BudgetingPage />} />
                   <Route path='/accounting/period-closing' element={<PeriodClosingPage />} />
                   <Route path='/accounting/chart' element={<ChartOfAccountsPage />} />
                   <Route path='/accounting/ledger' element={<GeneralLedgerPage />} />
@@ -172,17 +206,19 @@ function App() {
                   <Route path='/accounting/payments' element={<PaymentsListPage />} />
                   <Route path='/procurement/invoices/:id' element={<SupplierInvoiceDetailPage />} />
                   <Route path='/accounting/payments/:id' element={<PaymentDetailPage />} />
+                  {/* inventory */}
+                  <Route path='/inventory/ledger' element={<InventoryLedgerPage />} />
                   <Route path='/inventory/stock-levels' element={<StockLevelsPage />} />
                   <Route path='/inventory/stock-details/:variantId' element={<StockDetailPage />} />
                   <Route path='/inventory/adjustments' element={<StockAdjustmentsPage />} />{' '}
                   <Route path='/inventory/adjustments-history' element={<AdjustmentHistoryPage />} />{' '}
                   <Route path='/inventory/transfers' element={<StockTransfersPage />} /> {/* <-- 2. ADD NEW ROUTE */}
                   <Route path='/inventory/transfers/:id' element={<StockTransferDetailPage />} />{' '}
+                  <Route path='/inventory/print-hub' element={<PrintHubPage />} />
+                  {/* procurement */}
                   <Route path='/procurement/receipts' element={<GoodsReceiptsPage />} />
                   <Route path='/procurement/receipts/:id' element={<GRNDetailPage />} />
-                  <Route path='/accounting/installments/:id' element={<InstallmentPlanDetailPage />} />{' '}
-                  <Route path='/inventory/print-hub' element={<PrintHubPage />} />
-                  {/* POS */}
+                  <Route path='/accounting/installments/:id' element={<InstallmentPlanDetailPage />} /> {/* POS */}
                   <Route path='/pos' element={<PosPage />} />
                   <Route path='/shifts' element={<ShiftManagementPage />} /> {/* <-- 2. ADD THE NEW ROUTE */}
                   {/* SERVICE */}
@@ -200,6 +236,12 @@ function App() {
                   <Route path='/hr/leave-management' element={<LeaveManagementPage />} />
                   <Route path='/hr/organization' element={<OrganizationPage />} />
                   <Route path='/settings/benefits' element={<BenefitsPage />} />
+                  {/* SALES */}
+                  <Route path='/sales/returns' element={<ReturnsPage />} />
+                  {/* PORTAL */}
+                  <Route path='/portal/track' element={<TrackRepairPage />} />
+                  <Route path='/portal/dashboard' element={<CustomerDashboardPage />} /> // This would be protected by a
+                  customer session
                 </Routes>
               </Layout>
             </ProtectedRoute>

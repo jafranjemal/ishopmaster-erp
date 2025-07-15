@@ -17,7 +17,8 @@ exports.createSale = asyncHandler(async (req, res, next) => {
           branchId: req.user.assignedBranchId,
           userId: req.user._id,
         },
-        req.tenant.settings.localization.baseCurrency
+        req.tenant.settings.localization.baseCurrency,
+        req.tenant
       );
     });
     res.status(201).json({ success: true, data: newSaleInvoice });

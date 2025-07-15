@@ -37,8 +37,17 @@ const accountSchema = new mongoose.Schema(
     },
     // The current running balance of the account.
     balance: {
-      type: Number,
-      default: 0,
+      type: Map,
+      of: Number,
+      default: {},
+    },
+    /**
+     * Flags this account as being for inter-company transactions,
+     * which are typically eliminated during financial consolidation.
+     */
+    isInterCompany: {
+      type: Boolean,
+      default: false,
     },
     // A flag to protect core system accounts from user deletion.
     isSystemAccount: {

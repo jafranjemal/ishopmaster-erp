@@ -10,7 +10,12 @@ class RepairService {
   async createTicket(models, data, userId, branchId) {
     const { RepairTicket } = models;
     const newTicket = await RepairTicket.create({ ...data, createdBy: userId, branchId });
-    return newTicket;
+    const portalToken = await tokenService.generateForRepairTicket(models, {
+      ticket: newTicket[0],
+    });
+    // Update the ticket with the generated token
+    // newTicket[0].portalToken = portalToken;
+    return { ticket: newTicket[0], portalToken };
   }
 
   /**

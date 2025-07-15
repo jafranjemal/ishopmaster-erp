@@ -31,12 +31,17 @@ exports.updateStatus = asyncHandler(async (req, res, next) => {
     let updatedCheque;
     await session.withTransaction(async () => {
       // Delegate all the complex business logic to the service layer.
-      updatedCheque = await chequeService.updateChequeStatus(req.models, {
-        chequeId,
-        newStatus: status,
-        userId: req.user._id,
-        baseCurrency: req.tenant.settings.localization.baseCurrency,
-      });
+      updatedCheque = await chequeService.updateChequeStatus(
+        req.models,
+        {
+          chequeId,
+          newStatus: status,
+          userId: req.user._id,
+          baseCurrency: req.tenant.settings.localization.baseCurrency,
+        },
+        req.tenant,
+        session
+      );
     });
     res.status(200).json({ success: true, data: updatedCheque });
   } finally {

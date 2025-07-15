@@ -156,7 +156,7 @@ const DEFAULT_ACCOUNTS_LIST = [
     description: "Income charged to customers for shipping and delivery fees.",
   },
   {
-    name: "Sales Returns and Allowances",
+    name: "Sales Returns & Allowances",
     code: "4900",
     type: "Revenue",
     subType: "Contra Revenue",

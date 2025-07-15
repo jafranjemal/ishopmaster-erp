@@ -22,6 +22,8 @@ const repairTypeRoutes = require("./repairs/repairType.routes");
 const assemblyRoutes = require("./assemblies/assembly.routes"); // <-- 1. IMPORT NEW ROUTES
 const warrantyRoutes = require("./warranties/warrantyPolicy.routes"); // <-- 1. IMPORT
 const warrantyPolicySchema = require("./warranties/warrantyPolicy.schema");
+const inventoryLedgerSchema = require("./inventoryLedger/inventoryLedger.schema");
+const inventoryLedgerRoutes = require("./inventoryLedger/inventoryLedger.routes"); // <-- 1. IMPORT NEW ROUTES
 
 const mainRouter = express.Router();
 
@@ -42,7 +44,7 @@ mainRouter.use("/devices", deviceRoutes);
 mainRouter.use("/repairs", repairTypeRoutes);
 mainRouter.use("/assemblies", assemblyRoutes);
 mainRouter.use("/warranties", warrantyRoutes);
-
+mainRouter.use("/ledger", inventoryLedgerRoutes);
 module.exports = {
   schemas: {
     ProductTemplates: productTemplateSchema,
@@ -56,6 +58,7 @@ module.exports = {
     StockTransfer: stockTransferSchema,
     RepairType: repairTypeSchema,
     WarrantyPolicy: warrantyPolicySchema,
+    InventoryLedger: inventoryLedgerSchema,
   },
   router: mainRouter,
 };

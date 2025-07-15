@@ -120,7 +120,7 @@ class InventoryService {
     const productType = variant.templateId.type;
     const movementType = refs.relatedSaleId ? "sale" : "transfer_out";
     let totalCostOfDeductedItems = 0;
-
+    const deductedItemIds = [];
     // --- NEW BUNDLE LOGIC ---
     if (productType === "bundle") {
       // If the item is a bundle, decrease stock for its components instead.
@@ -128,7 +128,7 @@ class InventoryService {
         const componentQtyToDeduct = bundleItem.quantity * quantity; // e.g., sell 2 kits, deduct 2 * 2 = 4 batteries
 
         // Recursively call decreaseStock for each component
-        const componentCost = await this.decreaseStock(models, {
+        const componentResult = await this.decreaseStock(models, {
           productVariantId: bundleItem.productVariantId._id,
           branchId,
           quantity: componentQtyToDeduct,
@@ -137,7 +137,10 @@ class InventoryService {
           userId,
           refs,
         });
-        totalCostOfDeductedItems += componentCost.costOfGoodsSold;
+        totalCostOfDeductedItems += componentResult.costOfGoodsSold;
+        if (componentResult.deductedItemIds) {
+          deductedItemIds.push(...componentResult.deductedItemIds);
+        }
       }
     }
     // --- END OF NEW BUNDLE LOGIC ---
@@ -191,6 +194,7 @@ class InventoryService {
       await item.save();
 
       totalCostOfDeductedItems = item.costPriceInBaseCurrency;
+      deductedItemIds.push(item._id);
       await this._logMovement(models, {
         productVariantId,
         branchId: item.branchId,
@@ -203,7 +207,7 @@ class InventoryService {
       });
     }
 
-    return { costOfGoodsSold: totalCostOfDeductedItems };
+    return { costOfGoodsSold: totalCostOfDeductedItems, deductedItemIds };
   }
 
   /**
@@ -351,6 +355,23 @@ class InventoryService {
     await transfer.save();
     return transfer;
   }
+
+  /**
+   * Links inventory ledger entries to a sales invoice after a sale is completed.
+   * This creates a permanent audit trail.
+   */
+  async linkSaleToMovements(models, { saleId, inventoryItemIds }, session) {
+    const { InventoryLedger } = models;
+    // This is a critical step for auditing. We find all ledger entries
+    // created for these items during this transaction and stamp them with the sale ID.
+    // A more robust implementation might use the transactionId from the journal entry.
+    await InventoryLedger.updateMany(
+      { inventoryItemId: { $in: inventoryItemIds }, salesInvoiceId: null },
+      { $set: { salesInvoiceId: saleId } },
+      { session }
+    );
+  }
+
   /**
    * Internal helper method to create a StockMovement audit record(s).
    * @private

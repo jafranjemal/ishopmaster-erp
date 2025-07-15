@@ -119,7 +119,7 @@ async function updatePaymentStatusAfterChequeBounce(models, paymentId) {
  * Handles cheque lifecycle status updates and accounting.
  */
 class ChequeService {
-  async updateChequeStatus(models, { chequeId, newStatus, userId, baseCurrency }) {
+  async updateChequeStatus(models, { chequeId, newStatus, userId, baseCurrency }, tenant, session) {
     const { Cheque, Payment, PaymentMethod, Account, SalesInvoice, SupplierInvoice } = models;
 
     const cheque = await Cheque.findById(chequeId);
@@ -199,13 +199,18 @@ class ChequeService {
     }
 
     // 1. Post journal entry
-    await accountingService.createJournalEntry(models, {
-      description: journalDescription,
-      entries: journalEntries,
-      currency: baseCurrency,
-      exchangeRateToBase: 1,
-      refs: { paymentId: payment._id },
-    });
+    await accountingService.createJournalEntry(
+      models,
+      {
+        description: journalDescription,
+        entries: journalEntries,
+        currency: baseCurrency,
+        exchangeRateToBase: 1,
+        refs: { paymentId: payment._id },
+      },
+      session,
+      tenant
+    );
 
     // 2. Update cheque document
     cheque.status = newStatus;

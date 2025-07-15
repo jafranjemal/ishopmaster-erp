@@ -18,7 +18,8 @@ exports.createAndPostInvoice = asyncHandler(async (req, res, next) => {
       newInvoice = await reconciliationService.postSupplierInvoice(
         req.models,
         { ...req.body }, // Pass the entire body from the frontend form
-        req.user._id
+        req.user._id,
+        req.tenant
       );
     });
     res.status(201).json({ success: true, data: newInvoice });

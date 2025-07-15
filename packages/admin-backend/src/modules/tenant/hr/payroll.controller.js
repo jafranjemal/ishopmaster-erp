@@ -22,7 +22,8 @@ exports.runPayroll = asyncHandler(async (req, res, next) => {
           endDate: new Date(endDate),
           userId: req.user._id,
         },
-        session
+        session,
+        req.tenant
       );
     });
     res.status(200).json({ success: true, data: result });

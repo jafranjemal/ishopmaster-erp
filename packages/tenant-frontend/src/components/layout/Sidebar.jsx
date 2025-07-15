@@ -11,6 +11,7 @@ import {
   Warehouse,
   Truck,
   Wrench,
+  History,
   Users,
   UserPlus,
   TrendingUp,
@@ -33,6 +34,7 @@ import {
   Printer,
   Gift,
   CalendarDays,
+  PiggyBank,
   Tags,
   Plug,
   FileMinus,
@@ -61,6 +63,7 @@ import {
   BadgeCheck,
   FileCheck,
   Clock11,
+  Undo2,
   Contact2,
 } from 'lucide-react';
 import useAuth from '../../context/useAuth';
@@ -94,6 +97,8 @@ const Sidebar = () => {
           icon: ShoppingCart,
           permission: 'sales:pos:access',
         },
+        { name: 'Process Return', href: '/sales/returns', icon: Undo2, permission: 'sales:return:manage' },
+
         // Future links like Sales History will go here
       ],
     },
@@ -141,6 +146,7 @@ const Sidebar = () => {
           icon: Printer, // Assuming Printer icon from lucide-react
           permission: 'inventory:product:view',
         },
+        { name: 'Inventory Ledger', href: '/inventory/ledger', icon: History, permission: 'inventory:stock:view' },
       ],
     },
     {
@@ -317,6 +323,7 @@ const Sidebar = () => {
           icon: CalendarOff,
           permission: 'accounting:closing:manage',
         },
+        { name: 'Budgets', href: '/accounting/budgets', icon: PiggyBank, permission: 'accounting:budget:manage' },
       ],
     },
     {

@@ -89,7 +89,7 @@ productVariantSchema.statics.createVariantsFromAttributes = async function (
   }
   console.log(`Creating variant for ${template.type}: ${template.baseName}`);
 
-  const ProductVariant = this;
+  const ProductVariants = this;
 
   // Prepare attribute options (array of arrays)
   const attributeValueOptions = attributeSet.attributes.map((attr) =>
@@ -121,7 +121,7 @@ productVariantSchema.statics.createVariantsFromAttributes = async function (
     };
   });
 
-  return ProductVariant.insertMany(variantsToCreate, { session });
+  return ProductVariants.insertMany(variantsToCreate, { session });
 };
 
 module.exports = productVariantSchema;

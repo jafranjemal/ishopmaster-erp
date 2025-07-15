@@ -199,7 +199,7 @@ const mongoose = require("mongoose");
 const accountingService = require("./accounting.service");
 
 class PayrollService {
-  async runPayrollForPeriod(models, { startDate, endDate, userId, baseCurrency }, session) {
+  async runPayrollForPeriod(models, { startDate, endDate, userId, baseCurrency }, session, tenant) {
     const { Employee, Commission, Payslip, Account, DeductionRule, EmployeeBenefit, PayrollRun } =
       models;
 
@@ -340,7 +340,8 @@ class PayrollService {
           currency: baseCurrency,
           exchangeRateToBase: 1,
         },
-        session
+        session,
+        tenant
       );
     }
 

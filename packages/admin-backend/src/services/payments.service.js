@@ -22,7 +22,8 @@ class PaymentsService {
     models,
     { paymentSourceId, paymentSourceType, paymentLines, ...restOfPaymentData },
     userId,
-    baseCurrency
+    baseCurrency,
+    tenant
   ) {
     const { Payment, PaymentMethod, Cheque, Account, SupplierInvoice } = models; // Add other source models as needed
 
@@ -108,19 +109,24 @@ class PaymentsService {
 
       // Create the journal entry for this specific payment line.
       // All amounts are assumed to be in the tenant's base currency for now.
-      await accountingService.createJournalEntry(models, {
-        description: journalDescription,
-        entries: [
-          { accountId: sourceLedgerAccountId, debit: line.amount },
-          { accountId: creditAccountId, credit: line.amount },
-        ],
-        currency: baseCurrency,
-        exchangeRateToBase: 1, // Assume internal transfers are at a 1:1 rate with base
-        refs: {
-          paymentId: newPayment._id,
-          [paymentSourceType.toLowerCase() + "Id"]: paymentSourceId,
+      await accountingService.createJournalEntry(
+        models,
+        {
+          description: journalDescription,
+          entries: [
+            { accountId: sourceLedgerAccountId, debit: line.amount },
+            { accountId: creditAccountId, credit: line.amount },
+          ],
+          currency: baseCurrency,
+          exchangeRateToBase: 1, // Assume internal transfers are at a 1:1 rate with base
+          refs: {
+            paymentId: newPayment._id,
+            [paymentSourceType.toLowerCase() + "Id"]: paymentSourceId,
+          },
         },
-      });
+        session,
+        tenant
+      );
     }
 
     // 5. Update the status of the source document
@@ -145,7 +151,8 @@ class PaymentsService {
     models,
     { paymentSourceId, paymentSourceType, paymentLines, ...restOfPaymentData },
     userId,
-    baseCurrency
+    baseCurrency,
+    tenant
   ) {
     const { Payment, PaymentMethod, Cheque, Account, SupplierInvoice } = models; // Add other source models as needed
 
@@ -277,18 +284,23 @@ class PaymentsService {
 
     console.log("🧾 Journal Entries Before Save:", JSON.stringify(journalEntries, null, 2));
     // 6. Post the single, balanced, compound journal entry.
-    await accountingService.createJournalEntry(models, {
-      description: `Payment for ${paymentSourceType} #${
-        sourceDocument.invoiceId || sourceDocument.poNumber
-      }`,
-      entries: journalEntries,
-      currency: baseCurrency,
-      exchangeRateToBase: 1, // Assumes payment is in base currency for simplicity
-      refs: {
-        paymentId: newPayment._id,
-        [`${paymentSourceType.toLowerCase()}Id`]: paymentSourceId,
+    await accountingService.createJournalEntry(
+      models,
+      {
+        description: `Payment for ${paymentSourceType} #${
+          sourceDocument.invoiceId || sourceDocument.poNumber
+        }`,
+        entries: journalEntries,
+        currency: baseCurrency,
+        exchangeRateToBase: 1, // Assumes payment is in base currency for simplicity
+        refs: {
+          paymentId: newPayment._id,
+          [`${paymentSourceType.toLowerCase()}Id`]: paymentSourceId,
+        },
       },
-    });
+      null,
+      tenant
+    );
     // --- END OF FIX ---
 
     // --- STATUS UPDATE LOGIC ---

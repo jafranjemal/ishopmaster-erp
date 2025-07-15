@@ -32,3 +32,4 @@ export * from "./components/AlertModal";
 export * from "./lib/utils"; // Also export our `cn` utility
 export { default as FileUploader } from "./components/FileUploader";
 export { Checkbox } from "./components/Checkbox";
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./components/Tooltip";

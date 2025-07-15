@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
+const exchangeRateService = require("./exchangeRate.service");
 
 /**
  * The AccountingService handles all core financial logic. It is the only
@@ -20,10 +21,19 @@ class AccountingService {
    */
   async createJournalEntry(
     models,
-    { description, date, entries, currency, exchangeRateToBase, refs = {} },
-    session
+    { description, date, entries, currency, refs = {} },
+    session,
+    tenant = { settings: { localization: { baseCurrency: "LKR" } } }
   ) {
-    const { LedgerEntry } = models;
+    const { Account, LedgerEntry } = models;
+
+    const baseCurrency = tenant.settings.localization.baseCurrency;
+
+    const exchangeRateToBase = await exchangeRateService.getRate(models, {
+      fromCurrency: currency,
+      toCurrency: baseCurrency,
+      date: date || new Date(),
+    });
 
     entries = entries.map((e) => ({
       ...e,
@@ -118,6 +128,19 @@ class AccountingService {
 
     // 4. Create all entries within the provided transaction session
     await LedgerEntry.create(ledgerDocs, { session });
+
+    // --- THE DEFINITIVE FIX: UPDATE ACCOUNT BALANCES ---
+    const bulkOps = [];
+    for (const [accountId, change] of accountUpdates.entries()) {
+      const update = { $inc: { [`balance.${baseCurrency}`]: change } };
+      bulkOps.push({
+        updateOne: { filter: { _id: new mongoose.Types.ObjectId(accountId) }, update },
+      });
+    }
+    if (bulkOps.length > 0) {
+      await Account.bulkWrite(bulkOps, { session });
+    }
+
     return true;
   }
 

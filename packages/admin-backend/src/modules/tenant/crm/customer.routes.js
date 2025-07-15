@@ -6,6 +6,7 @@ const {
   updateCustomer,
   deleteCustomer,
   getCustomerLedger,
+  generatePortalToken,
 } = require("./customer.controller");
 const { protect, authorize } = require("../../../middleware/auth.middleware");
 
@@ -19,14 +20,10 @@ router.use(authorize("crm:customer:manage"));
 
 router.route("/").get(getAllCustomers).post(createCustomer);
 
-router
-  .route("/:id")
-  .get(getCustomerById)
-  .put(updateCustomer)
-  .delete(deleteCustomer);
+router.route("/:id").get(getCustomerById).put(updateCustomer).delete(deleteCustomer);
 
-router
-  .route("/:id/ledger")
-  .get(authorize("crm:customer:view_financials"), getCustomerLedger);
+router.route("/:id/ledger").get(authorize("crm:customer:view_financials"), getCustomerLedger);
+
+router.post("/:id/generate-portal-token", authorize("crm:customer:manage"), generatePortalToken);
 
 module.exports = router;
