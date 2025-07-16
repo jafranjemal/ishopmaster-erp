@@ -16,7 +16,7 @@ const {
   getLotsForVariant,
 } = require("./stock.controller");
 const { protect, authorize } = require("../../../../middleware/auth.middleware");
-
+const ctrl = require("./stock.controller");
 const router = express.Router();
 
 // Protect all routes in this file
@@ -27,7 +27,7 @@ router.get("/summary", authorize("inventory:product:view"), getStockSummary);
 router.get("/levels", authorize("inventory:product:view"), getStockLevels);
 router.get("/details/:variantId", authorize("inventory:product:view"), getStockDetails);
 router.get("/movements/:variantId", authorize("inventory:product:view"), getStockMovements);
-
+router.get("/breakdown/:variantId", ctrl.getStockBreakdown);
 // Stock Adjustment Route
 router.post("/adjustments", authorize("inventory:stock:adjust"), createStockAdjustment);
 

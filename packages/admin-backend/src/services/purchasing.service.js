@@ -77,8 +77,8 @@ class PurchasingService {
 
     // 1. Update Inventory for each received item
     for (const item of receivedItems) {
-      const poItem = po.items.find((p) => p.ProductVariantId.toString() === item.ProductVariantId);
-      if (!poItem) throw new Error(`Item ${item.ProductVariantId} not found in this PO.`);
+      const poItem = po.items.find((p) => p.productVariantId.toString() === item.productVariantId);
+      if (!poItem) throw new Error(`Item ${item.productVariantId} not found in this PO.`);
 
       const costInBaseCurrency = poItem.costPrice * po.exchangeRateToBase;
       totalReceivedValueInBase += item.quantityReceived * costInBaseCurrency;
@@ -86,7 +86,7 @@ class PurchasingService {
       await inventoryService.increaseStock(
         models,
         {
-          ProductVariantId: item.ProductVariantId,
+          productVariantId: item.productVariantId,
           branchId: po.destinationBranchId,
           quantity: item.quantityReceived,
           costPriceInBaseCurrency: costInBaseCurrency,
@@ -184,7 +184,7 @@ class PurchasingService {
             receivedBy: userId,
             notes,
             items: receivedItems.map((item) => ({
-              ProductVariantId: item.ProductVariantId,
+              productVariantId: item.productVariantId,
               quantityReceived: item.quantityReceived,
               receivedSerials: item.serials || [],
             })),
@@ -198,8 +198,8 @@ class PurchasingService {
 
     // 2. Update Inventory for each received item
     for (const item of receivedItems) {
-      const poItem = po.items.find((p) => p.ProductVariantId.toString() === item.ProductVariantId);
-      if (!poItem) throw new Error(`Item ${item.ProductVariantId} not found in this PO.`);
+      const poItem = po.items.find((p) => p.productVariantId.toString() === item.productVariantId);
+      if (!poItem) throw new Error(`Item ${item.productVariantId} not found in this PO.`);
 
       const costInBaseCurrency = poItem.costPrice * po.exchangeRateToBase;
       totalReceivedValueInBase += item.quantityReceived * costInBaseCurrency;
@@ -207,7 +207,7 @@ class PurchasingService {
       await inventoryService.increaseStock(
         models,
         {
-          ProductVariantId: item.ProductVariantId,
+          productVariantId: item.productVariantId,
           branchId: po.destinationBranchId,
           quantity: item.quantityReceived,
           costPriceInBaseCurrency: costInBaseCurrency,

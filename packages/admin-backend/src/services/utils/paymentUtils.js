@@ -5,7 +5,7 @@
  * Utility: Recalculate amountPaid and payment status for an invoice (Sales, Supplier, or Expense)
  * Uses `paymentLines[].status` instead of querying Cheques
  */
-async function recalculateInvoicePayments(models, { sourceId, sourceType }) {
+async function recalculateInvoicePayments(models, { sourceId, sourceType }, session = null) {
   const { Payment } = models;
 
   const SourceModel = models[sourceType];
@@ -49,7 +49,7 @@ async function recalculateInvoicePayments(models, { sourceId, sourceType }) {
     invoice.status = "pending_payment";
   }
 
-  await invoice.save();
+  await invoice.save({ session });
 
   console.log(
     `[Recalc ✅] ${sourceType} ${invoice.invoiceId || invoice._id}: Paid = ${totalPaid}, Status = ${invoice.status}`

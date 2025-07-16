@@ -1,5 +1,6 @@
 const asyncHandler = require("../../../middleware/asyncHandler");
 const salesService = require("../../../services/sales.service");
+const salesCalculationService = require("../../../services/salesCalculation.service");
 
 // @desc    Create a new sale (finalize a POS transaction)
 // @route   POST /api/v1/tenant/sales/
@@ -11,14 +12,16 @@ exports.createSale = asyncHandler(async (req, res, next) => {
       newSaleInvoice = await salesService.finalizeSale(
         req.models,
         {
-          cartData: req.body.cart,
-          paymentData: req.body.payment,
+          cartData: req.body.cartData,
+          paymentData: req.body.paymentData,
           customerId: req.body.customerId,
           branchId: req.user.assignedBranchId,
           userId: req.user._id,
+          couponId: req.body.couponId || null,
         },
         req.tenant.settings.localization.baseCurrency,
-        req.tenant
+        req.tenant,
+        session
       );
     });
     res.status(201).json({ success: true, data: newSaleInvoice });
@@ -78,4 +81,41 @@ exports.updateSaleStatus = asyncHandler(async (req, res, next) => {
 
   await sale.save();
   res.status(200).json({ success: true, data: sale });
+});
+
+// @desc    Calculate all totals, discounts, and taxes for a given cart in real-time.
+// @route   POST /api/v1/tenant/sales/calculate-totals
+exports.calculateTotals = asyncHandler(async (req, res, next) => {
+  const { cartData, customerId, branchId } = req.body;
+
+  const calculatedCart = await salesCalculationService.calculateCartTotals(req.models, {
+    cartData,
+    customerId,
+    branchId,
+  });
+
+  console.log(calculatedCart);
+
+  res.status(200).json({ success: true, data: calculatedCart });
+});
+
+// @desc    Delete a draft or on_hold sale
+// @route   DELETE /api/v1/tenant/sales/:id
+exports.deleteDraftOrHold = asyncHandler(async (req, res, next) => {
+  const { SalesInvoice } = req.models;
+  const sale = await SalesInvoice.findById(req.params.id);
+
+  if (!sale) {
+    return res.status(404).json({ success: false, error: "Sale not found." });
+  }
+
+  // CRITICAL: Only allow deletion of non-completed, non-financial transactions.
+  if (!["draft", "on_hold", "quotation"].includes(sale.status)) {
+    return res
+      .status(400)
+      .json({ success: false, error: `Cannot delete a sale with status '${sale.status}'.` });
+  }
+
+  await sale.deleteOne();
+  res.status(200).json({ success: true, data: {} });
 });

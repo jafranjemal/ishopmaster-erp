@@ -1,5 +1,22 @@
 const mongoose = require("mongoose");
 
+const discountSchema = new mongoose.Schema(
+  {
+    type: { type: String, required: true, enum: ["percentage", "fixed"] },
+    value: { type: Number, required: true },
+    reason: { type: String, trim: true },
+  },
+  { _id: false }
+);
+
+const chargeSchema = new mongoose.Schema(
+  {
+    description: { type: String, required: true },
+    amount: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
 /**
  * Defines a single line item within a Sales Invoice.
  */
@@ -13,12 +30,24 @@ const saleItemSchema = new mongoose.Schema(
     description: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 },
     unitPrice: { type: Number, required: true },
-    discount: {
-      type: { type: String, enum: ["percentage", "fixed"] },
-      value: { type: Number },
-    },
+    lineDiscount: { type: discountSchema, default: null },
     finalPrice: { type: Number, required: true },
-    costPriceInBaseCurrency: { type: Number, required: true },
+    // This is required only on a 'completed' invoice, not a draft.
+    // The validation is handled in the SalesService before finalization.
+    costPriceInBaseCurrency: { type: Number },
+
+    // --- NEW TRACEABILITY FIELDS ---
+    // These fields create a permanent, human-readable audit trail on the invoice itself.
+    serialNumber: {
+      type: String,
+      default: null,
+      index: true, // Indexed for quick lookups of sales by serial number
+    },
+    batchNumber: {
+      type: String,
+      default: null,
+      index: true,
+    },
     inventoryLotId: { type: mongoose.Schema.Types.ObjectId, ref: "InventoryLot" },
     inventoryItemId: { type: mongoose.Schema.Types.ObjectId, ref: "InventoryItem" },
   },
@@ -30,7 +59,11 @@ const saleItemSchema = new mongoose.Schema(
  */
 const salesInvoiceSchema = new mongoose.Schema(
   {
-    invoiceNumber: { type: String, required: true, unique: true },
+    // invoiceId: { type: String, required: true, unique: true },
+    invoiceId: { type: String, unique: true, sparse: true },
+    quotationId: { type: String, unique: true, sparse: true },
+    draftId: { type: String, unique: true, sparse: true },
+
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
 
@@ -71,9 +104,14 @@ const salesInvoiceSchema = new mongoose.Schema(
 
     items: [saleItemSchema],
 
+    globalDiscount: { type: discountSchema, default: null },
+    additionalCharges: [chargeSchema],
+
     // Financial Totals
     subTotal: { type: Number, required: true },
-    totalDiscount: { type: Number, default: 0 },
+    totalLineDiscount: { type: Number, default: 0 },
+    totalGlobalDiscount: { type: Number, default: 0 },
+    totalCharges: { type: Number, default: 0 },
     totalTax: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
 
@@ -89,23 +127,24 @@ const salesInvoiceSchema = new mongoose.Schema(
 
 // Intelligent pre-save hook to generate sequential IDs based on status
 salesInvoiceSchema.pre("save", async function (next) {
+  // Only generate IDs for new documents to prevent changes on update.
   if (this.isNew) {
+    // A helper function to generate the next sequential ID for a given prefix.
+    const generateNextId = async (prefix, fieldName) => {
+      const lastDoc = await this.constructor
+        .findOne({ [fieldName]: { $ne: null } })
+        .sort({ createdAt: -1 });
+      const lastNumber =
+        lastDoc && lastDoc[fieldName] ? parseInt(lastDoc[fieldName].split("-")[1]) : 0;
+      return `${prefix}-${String(lastNumber + 1).padStart(7, "0")}`;
+    };
+
+    // Generate the correct ID based on the document's status.
     if (this.status === "completed" && !this.invoiceId) {
-      const lastDoc = await this.constructor
-        .findOne({ invoiceId: { $ne: null } })
-        .sort({ createdAt: -1 });
-      const lastNumber =
-        lastDoc && lastDoc.invoiceId ? parseInt(lastDoc.invoiceId.split("-")[1]) : 0;
-      this.invoiceId = "INV-" + String(lastNumber + 1).padStart(7, "0");
+      this.invoiceId = await generateNextId("INV", "invoiceId");
     } else if (this.status === "quotation" && !this.quotationId) {
-      const lastDoc = await this.constructor
-        .findOne({ quotationId: { $ne: null } })
-        .sort({ createdAt: -1 });
-      const lastNumber =
-        lastDoc && lastDoc.quotationId ? parseInt(lastDoc.quotationId.split("-")[1]) : 0;
-      this.quotationId = "QT-" + String(lastNumber + 1).padStart(7, "0");
+      this.quotationId = await generateNextId("QT", "quotationId");
     } else if (["draft", "on_hold"].includes(this.status) && !this.draftId) {
-      // Using a simpler, non-sequential ID for temporary drafts
       this.draftId = `DRAFT-${Date.now()}`;
     }
   }

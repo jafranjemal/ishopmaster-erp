@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "ui-library";
-import { tenantGrnService } from "../../../services/api";
-import { toast } from "react-hot-toast";
+import React, { useState } from 'react';
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'ui-library';
+import { tenantGrnService } from '../../../services/api';
+import { toast } from 'react-hot-toast';
 
 const AddFromGRN = ({ grns = [], onAddItems }) => {
-  const [selectedGrnId, setSelectedGrnId] = useState("");
+  const [selectedGrnId, setSelectedGrnId] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleAdd = async () => {
@@ -16,32 +16,32 @@ const AddFromGRN = ({ grns = [], onAddItems }) => {
 
       // Transform the GRN items into the format our print queue expects
       const itemsToAdd = grn.items.map((item) => ({
-        ProductVariantId: item.ProductVariantId._id,
-        variantName: item.ProductVariantId.variantName,
-        sku: item.ProductVariantId.sku,
+        productVariantId: item.productVariantId._id,
+        variantName: item.productVariantId.variantName,
+        sku: item.productVariantId.sku,
         quantity: item.quantityReceived,
         // Pass along the serials if they exist
         isSerialized: item.receivedSerials && item.receivedSerials.length > 0,
         serials: item.receivedSerials || [],
-        batchNumber: grn.purchaseOrderId?.poNumber || "N/A",
+        batchNumber: grn.purchaseOrderId?.poNumber || 'N/A',
       }));
       onAddItems(itemsToAdd);
       toast.success(`${itemsToAdd.length} item(s) from GRN #${grn.grnNumber} added to queue.`);
-      setSelectedGrnId(""); // Reset dropdown
+      setSelectedGrnId(''); // Reset dropdown
     } catch (error) {
       console.log(error);
-      toast.error("Could not fetch GRN details.");
+      toast.error('Could not fetch GRN details.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-end gap-2">
-      <div className="flex-grow">
+    <div className='flex items-end gap-2'>
+      <div className='flex-grow'>
         <Select onValueChange={setSelectedGrnId} value={selectedGrnId}>
           <SelectTrigger>
-            <SelectValue placeholder="Choose a recent delivery..." />
+            <SelectValue placeholder='Choose a recent delivery...' />
           </SelectTrigger>
           <SelectContent>
             {grns.map((g) => (
@@ -53,7 +53,7 @@ const AddFromGRN = ({ grns = [], onAddItems }) => {
         </Select>
       </div>
       <Button onClick={handleAdd} disabled={!selectedGrnId || isLoading}>
-        {isLoading ? "Loading..." : "Add Items to Queue"}
+        {isLoading ? 'Loading...' : 'Add Items to Queue'}
       </Button>
     </div>
   );

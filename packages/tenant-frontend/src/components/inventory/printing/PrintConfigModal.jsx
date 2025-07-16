@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Modal, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "ui-library";
-import SerialSelectorModal from "./SerialSelectorModal";
-import { tenantLocationService, tenantProductService, tenantStockService } from "../../../services/api";
-import { toast } from "react-hot-toast";
+import React, { useState, useEffect } from 'react';
+import { Modal, Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'ui-library';
+import SerialSelectorModal from './SerialSelectorModal';
+import { tenantLocationService, tenantProductService, tenantStockService } from '../../../services/api';
+import { toast } from 'react-hot-toast';
 
 const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
   const [quantity, setQuantity] = useState(1);
@@ -12,7 +12,7 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
 
   // --- THE DEFINITIVE FIX: State for branches and selected branch ---
   const [branches, setBranches] = useState([]);
-  const [selectedBranchId, setSelectedBranchId] = useState("");
+  const [selectedBranchId, setSelectedBranchId] = useState('');
   // --- END OF FIX ---
 
   useEffect(() => {
@@ -21,21 +21,21 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
       tenantLocationService
         .getAllBranches()
         .then((res) => setBranches(res.data.data))
-        .catch(() => toast.error("Could not load locations."));
+        .catch(() => toast.error('Could not load locations.'));
     }
 
     // Reset state when a new variant is passed in
     if (variant) {
       setQuantity(1);
       setSelectedSerials([]);
-      setSelectedBranchId(""); // Reset branch selection
+      setSelectedBranchId(''); // Reset branch selection
       // Determine if the variant is serialized
       const checkSerialization = async () => {
-        if (typeof variant.templateId === "string") {
+        if (typeof variant.templateId === 'string') {
           const templateRes = await tenantProductService.getTemplateById(variant.templateId);
-          setIsSerialized(templateRes.data.data?.type === "serialized");
+          setIsSerialized(templateRes.data.data?.type === 'serialized');
         } else if (variant.templateId?.type) {
-          setIsSerialized(variant.templateId.type === "serialized");
+          setIsSerialized(variant.templateId.type === 'serialized');
         }
       };
       checkSerialization();
@@ -44,7 +44,7 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
 
   useEffect(() => {
     const getSerials = async () => {
-      if (selectedBranchId != "") {
+      if (selectedBranchId != '') {
         const stock = await tenantStockService.getAvailableSerials(variant._id, selectedBranchId, null);
 
         if (stock.data?.data) {
@@ -55,12 +55,12 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
       }
     };
 
-    if (selectedBranchId != "") getSerials();
+    if (selectedBranchId != '') getSerials();
   }, [selectedBranchId, variant, variant?._id]);
 
   const handleConfirm = () => {
     const itemToPrint = {
-      ProductVariantId: variant._id,
+      productVariantId: variant._id,
       variantName: variant.variantName,
       sku: variant.sku,
       isSerialized,
@@ -77,13 +77,13 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} title={`Configure Print Job for: ${variant.variantName}`}>
-        <div className="space-y-6">
+        <div className='space-y-6'>
           {/* --- THE DEFINITIVE FIX: Branch Selector --- */}
           <div>
-            <Label htmlFor="branch-select">Select Stock Location</Label>
+            <Label htmlFor='branch-select'>Select Stock Location</Label>
             <Select onValueChange={setSelectedBranchId} value={selectedBranchId} required>
-              <SelectTrigger id="branch-select">
-                <SelectValue placeholder="Choose a branch..." />
+              <SelectTrigger id='branch-select'>
+                <SelectValue placeholder='Choose a branch...' />
               </SelectTrigger>
               <SelectContent>
                 {branches.map((b) => (
@@ -95,27 +95,27 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
             </Select>
           </div>
 
-          <div className={!selectedBranchId ? "opacity-50 pointer-events-none" : ""}>
+          <div className={!selectedBranchId ? 'opacity-50 pointer-events-none' : ''}>
             {isSerialized ? (
               <div>
                 <Label>Select Serial Numbers to Print</Label>
-                <div className="p-3 mt-1 bg-slate-800 rounded-md flex justify-between items-center">
-                  <p className="text-sm">{selectedSerials.length} serial(s) selected.</p>
-                  <Button variant="outline" onClick={() => setIsSerialSelectorOpen(true)} disabled={!selectedBranchId}>
+                <div className='p-3 mt-1 bg-slate-800 rounded-md flex justify-between items-center'>
+                  <p className='text-sm'>{selectedSerials.length} serial(s) selected.</p>
+                  <Button variant='outline' onClick={() => setIsSerialSelectorOpen(true)} disabled={!selectedBranchId}>
                     Edit Selection
                   </Button>
                 </div>
                 {!selectedBranchId && (
-                  <p className="text-xs text-amber-400 mt-1">Please select a branch to view available serials.</p>
+                  <p className='text-xs text-amber-400 mt-1'>Please select a branch to view available serials.</p>
                 )}
               </div>
             ) : (
               <div>
-                <Label htmlFor="print-quantity">Quantity to Print</Label>
+                <Label htmlFor='print-quantity'>Quantity to Print</Label>
                 <Input
-                  id="print-quantity"
-                  type="number"
-                  min="1"
+                  id='print-quantity'
+                  type='number'
+                  min='1'
                   value={quantity}
                   onChange={(e) => setQuantity(Number(e.target.value))}
                   disabled={!selectedBranchId}
@@ -123,8 +123,8 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
               </div>
             )}
           </div>
-          <div className="pt-4 flex justify-end space-x-4">
-            <Button variant="outline" onClick={onClose}>
+          <div className='pt-4 flex justify-end space-x-4'>
+            <Button variant='outline' onClick={onClose}>
               Cancel
             </Button>
             <Button
@@ -143,7 +143,7 @@ const PrintConfigModal = ({ isOpen, onClose, variant, onConfirm }) => {
           isOpen={isSerialSelectorOpen}
           onClose={() => setIsSerialSelectorOpen(false)}
           onConfirm={setSelectedSerials}
-          ProductVariantId={variant._id}
+          productVariantId={variant._id}
           branchId={selectedBranchId} // <-- THE CRITICAL FIX
           initialSelection={selectedSerials}
         />

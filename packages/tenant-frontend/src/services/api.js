@@ -404,6 +404,9 @@ export const tenantInventoryService = {
   batchUpdateVariants: (variants) => {
     return api.patch('/tenant/inventory/variants/batch-update', { variants });
   },
+  getStockBreakdown: async (variantId, branchId) => {
+    return api.get(`/tenant/inventory/stock/breakdown/${variantId}`, { params: { branchId } });
+  },
 };
 
 // ---  PRODUCT SERVICE ---
@@ -682,26 +685,26 @@ export const tenantStockService = {
 
   /**
    * Submits a manual stock adjustment.
-   * @param {object} adjustmentData - { ProductVariantId, branchId, quantityChange, notes, reason }
+   * @param {object} adjustmentData - { productVariantId, branchId, quantityChange, notes, reason }
    */
   createAdjustment: async (adjustmentData) => {
     return api.post('/tenant/inventory/stock/adjustments', adjustmentData);
   },
 
-  getLotQuantity: async (ProductVariantId, branchId) => {
+  getLotQuantity: async (productVariantId, branchId) => {
     return api.get('/tenant/inventory/stock/lot-quantity', {
-      params: { ProductVariantId, branchId },
+      params: { productVariantId, branchId },
     });
   },
-  getAvailableSerials: async (ProductVariantId, branchId, params) => {
+  getAvailableSerials: async (productVariantId, branchId, params) => {
     return api.get('/tenant/inventory/stock/available-serials', {
-      params: { ProductVariantId, branchId, ...params },
+      params: { productVariantId, branchId, ...params },
     });
   },
 
-  getLotsForVariant: async (ProductVariantId, branchId) => {
+  getLotsForVariant: async (productVariantId, branchId) => {
     return api.get('/tenant/inventory/stock/lots-for-variant', {
-      params: { ProductVariantId, branchId },
+      params: { productVariantId, branchId },
     });
   },
 
@@ -1237,8 +1240,45 @@ export const tenantBudgetService = {
 
 export const tenantReturnsService = {
   // We need a way to find the original invoice first
-  findInvoice: async (invoiceNumber) => api.get(`/tenant/sales`, { params: { invoiceNumber } }),
+  findInvoice: async (invoiceId) => api.get(`/tenant/sales`, { params: { invoiceId } }),
   processReturn: async (returnData) => api.post('/tenant/sales/returns', returnData),
+};
+
+export const tenantTaxRuleService = {
+  getAll: async () => api.get('/tenant/accounting/tax-rules'),
+  create: async (data) => api.post('/tenant/accounting/tax-rules', data),
+  update: async (id, data) => api.put(`/tenant/accounting/tax-rules/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/accounting/tax-rules/${id}`),
+};
+
+export const tenantTaxCategoryService = {
+  getAll: async () => api.get('/tenant/accounting/tax-categories'),
+  create: async (data) => api.post('/tenant/accounting/tax-categories', data),
+  update: async (id, data) => api.put(`/tenant/accounting/tax-categories/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/accounting/tax-categories/${id}`),
+};
+
+export const tenantSalesService = {
+  /**
+   * Calculates all totals, discounts, and taxes for a given cart.
+   * @param {object} payload - { cartData, customerId, branchId }
+   */
+  calculateTotals: async (payload) => {
+    return api.post('/tenant/sales/calculate-totals', payload);
+  },
+
+  /**
+   * Finalizes a complete sale transaction.
+   * @param {object} saleData - The full sale object including cart, payment, etc.
+   */
+  finalizeSale: async (saleData) => {
+    return api.post('/tenant/sales', saleData);
+  },
+  createDraft: async (data) => api.post('/tenant/sales/drafts', data),
+  createQuotation: async (data) => api.post('/tenant/sales/quotations', data),
+  getHeldSales: async () => api.get('/tenant/sales/held'),
+  updateStatus: async (id, data) => api.patch(`/tenant/sales/${id}/status`, data),
+  deleteHeldSale: async (id) => api.delete(`/tenant/sales/${id}`),
 };
 
 export default api;

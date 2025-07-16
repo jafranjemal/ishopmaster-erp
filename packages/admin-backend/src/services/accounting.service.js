@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require("uuid");
 const exchangeRateService = require("./exchangeRate.service");
+const { default: mongoose } = require("mongoose");
 
 /**
  * The AccountingService handles all core financial logic. It is the only
@@ -41,10 +42,12 @@ class AccountingService {
       credit: Number(e.credit || 0),
     }));
 
+    console.log(entries);
     // 1. Validate that the entries are balanced
     const totalDebits = entries.reduce((sum, entry) => sum + (entry.debit || 0), 0);
     const totalCredits = entries.reduce((sum, entry) => sum + (entry.credit || 0), 0);
-
+    console.log("Total Debits:", totalDebits);
+    console.log("Total Credits:", totalCredits);
     if (Math.abs(totalDebits - totalCredits) > 1e-9 || totalDebits === 0) {
       throw new Error("Journal entry is unbalanced. Debits must equal credits.");
     }
@@ -54,7 +57,7 @@ class AccountingService {
 
     const transactionId = uuidv4();
     const ledgerDocs = [];
-
+    const accountUpdates = new Map();
     // // 2. Create the individual ledger entry documents
     // for (const entry of entries) {
     //   // Determine the debit and credit accounts for this specific transaction line
@@ -112,6 +115,16 @@ class AccountingService {
           exchangeRate: exchangeRateToBase,
           ...refs,
         });
+
+        // ✅ Track account balance changes
+        accountUpdates.set(
+          debit.accountId,
+          (accountUpdates.get(debit.accountId) || 0) + amountInBaseCurrency
+        );
+        accountUpdates.set(
+          credit.accountId,
+          (accountUpdates.get(credit.accountId) || 0) - amountInBaseCurrency
+        );
 
         // Reduce matched amounts
         debit.debit -= amount;

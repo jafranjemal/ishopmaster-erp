@@ -102,7 +102,8 @@ class InventoryService {
    */
   async decreaseStock(
     models,
-    { productVariantId, branchId, quantity, serialNumber, userId, refs = {} }
+    { productVariantId, branchId, quantity, serialNumber, userId, refs = {} },
+    session = null
   ) {
     const { ProductVariants, InventoryLot, InventoryItem } = models;
 
@@ -128,15 +129,19 @@ class InventoryService {
         const componentQtyToDeduct = bundleItem.quantity * quantity; // e.g., sell 2 kits, deduct 2 * 2 = 4 batteries
 
         // Recursively call decreaseStock for each component
-        const componentResult = await this.decreaseStock(models, {
-          productVariantId: bundleItem.productVariantId._id,
-          branchId,
-          quantity: componentQtyToDeduct,
-          // Note: This simplified version assumes non-serialized components in bundles.
-          // A full implementation would require passing serials for components from the POS.
-          userId,
-          refs,
-        });
+        const componentResult = await this.decreaseStock(
+          models,
+          {
+            productVariantId: bundleItem.productVariantId._id,
+            branchId,
+            quantity: componentQtyToDeduct,
+            // Note: This simplified version assumes non-serialized components in bundles.
+            // A full implementation would require passing serials for components from the POS.
+            userId,
+            refs,
+          },
+          session
+        );
         totalCostOfDeductedItems += componentResult.costOfGoodsSold;
         if (componentResult.deductedItemIds) {
           deductedItemIds.push(...componentResult.deductedItemIds);
@@ -157,21 +162,25 @@ class InventoryService {
         const qtyToDeductFromLot = Math.min(lot.quantityInStock, remainingQtyToDeduct);
 
         lot.quantityInStock -= qtyToDeductFromLot;
-        await lot.save();
+        await lot.save({ session });
 
         totalCostOfDeductedItems += qtyToDeductFromLot * lot.costPriceInBaseCurrency;
         remainingQtyToDeduct -= qtyToDeductFromLot;
 
-        await this._logMovement(models, {
-          productVariantId,
-          branchId,
-          userId,
-          refs,
-          inventoryLotId: lot._id,
-          type: movementType,
-          quantityChange: -qtyToDeductFromLot,
-          costPriceInBaseCurrency: lot.costPriceInBaseCurrency,
-        });
+        await this._logMovement(
+          models,
+          {
+            productVariantId,
+            branchId,
+            userId,
+            refs,
+            inventoryLotId: lot._id,
+            type: movementType,
+            quantityChange: -qtyToDeductFromLot,
+            costPriceInBaseCurrency: lot.costPriceInBaseCurrency,
+          },
+          session
+        );
       }
 
       if (remainingQtyToDeduct > 0)
@@ -191,20 +200,24 @@ class InventoryService {
       if (!item) throw new Error(`Serialized item with serial #${serialNumber} is not in stock.`);
 
       item.status = movementType === "sale" ? "sold" : "in_transit";
-      await item.save();
+      await item.save({ session });
 
       totalCostOfDeductedItems = item.costPriceInBaseCurrency;
       deductedItemIds.push(item._id);
-      await this._logMovement(models, {
-        productVariantId,
-        branchId: item.branchId,
-        userId,
-        refs,
-        inventoryItemId: item._id,
-        type: movementType,
-        quantityChange: -1,
-        costPriceInBaseCurrency: item.costPriceInBaseCurrency,
-      });
+      await this._logMovement(
+        models,
+        {
+          productVariantId,
+          branchId: item.branchId,
+          userId,
+          refs,
+          inventoryItemId: item._id,
+          type: movementType,
+          quantityChange: -1,
+          costPriceInBaseCurrency: item.costPriceInBaseCurrency,
+        },
+        session
+      );
     }
 
     return { costOfGoodsSold: totalCostOfDeductedItems, deductedItemIds };
@@ -376,7 +389,7 @@ class InventoryService {
    * Internal helper method to create a StockMovement audit record(s).
    * @private
    */
-  async _logMovement(models, movementData, actionType) {
+  async _logMovement(models, movementData, session = null) {
     const { StockMovement } = models;
     const dataToLog = Array.isArray(movementData) ? movementData : [movementData];
 
@@ -393,7 +406,7 @@ class InventoryService {
       ...data.refs,
     }));
 
-    await StockMovement.insertMany(logs);
+    await StockMovement.insertMany(logs, { session });
   }
 }
 

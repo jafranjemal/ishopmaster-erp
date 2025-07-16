@@ -17,7 +17,7 @@ import {
 } from 'ui-library';
 import CompatibilitySelector from './CompatibilitySelector';
 import FileUploader from 'ui-library/components/FileUploader';
-import { Loader2, Trash2, X, PlusCircle, ShieldCheck } from 'lucide-react';
+import { Loader2, Trash2, X, PlusCircle, ShieldCheck, Percent } from 'lucide-react';
 import ProductVariantSearch from '../procurement/ProductVariantSearch';
 import { toast } from 'react-hot-toast';
 import { tenantBrandService, tenantCategoryService, tenantDeviceService } from '../../services/api';
@@ -27,6 +27,7 @@ import BrandQuickForm from './products/BrandQuickForm';
 const generateCategoryOptions = (categories, level = 0) => {
   let options = [];
   for (const category of categories) {
+    if (!category || !category._id || !category.name) continue; // Skip invalid categories
     options.push(
       <SelectItem key={category._id} value={category._id}>
         {'\u00A0'.repeat(level * 4)} {level > 0 ? '↳ ' : ''}
@@ -73,6 +74,7 @@ const ProductTemplateForm = ({
   getSignatureFunc,
   onDataRefresh,
   warrantyPolicies,
+  taxCategories,
 }) => {
   const initialFormData = React.useMemo(
     () => ({
@@ -81,6 +83,7 @@ const ProductTemplateForm = ({
       type: 'non-serialized',
       brandId: '',
       categoryId: '',
+      taxCategoryId: null,
       attributeSetId: '',
       costPrice: 0,
       sellingPrice: 0,
@@ -128,6 +131,7 @@ const ProductTemplateForm = ({
         compatibility: templateToEdit.compatibility?.map((t) => t._id) || [],
         images: templateToEdit.images || [],
         description: templateToEdit.description || '',
+        taxCategoryId: templateToEdit.taxCategoryId?._id || null,
         // Ensure bundleItems is an array for edit mode
         bundleItems: templateToEdit.bundleItems || [],
         deviceId: templateToEdit.deviceId?._id || '',
@@ -186,12 +190,12 @@ const ProductTemplateForm = ({
     // Prevent adding a bundle inside another bundle or adding duplicates
     if (
       variant.templateId?.type === 'bundle' ||
-      formData.bundleItems.some((item) => item.ProductVariantId === variant._id)
+      formData.bundleItems.some((item) => item.productVariantId === variant._id)
     ) {
       return;
     }
     const newItem = {
-      ProductVariantId: variant._id,
+      productVariantId: variant._id,
       variantName: variant.variantName, // For display purposes in the form
       quantity: 1,
     };
@@ -200,13 +204,13 @@ const ProductTemplateForm = ({
 
   const handleBundleItemQtyChange = (variantId, newQty) => {
     const newItems = formData.bundleItems.map((item) =>
-      item.ProductVariantId === variantId ? { ...item, quantity: Number(newQty) } : item,
+      item.productVariantId === variantId ? { ...item, quantity: Number(newQty) } : item,
     );
     handleArrayChange('bundleItems', newItems);
   };
 
   const handleRemoveBundleItem = (variantId) => {
-    const newItems = formData.bundleItems.filter((item) => item.ProductVariantId !== variantId);
+    const newItems = formData.bundleItems.filter((item) => item.productVariantId !== variantId);
     handleArrayChange('bundleItems', newItems);
   };
 
@@ -338,6 +342,7 @@ const ProductTemplateForm = ({
                       {c.name}
                     </SelectItem>
                   ))} */}
+
                 {generateCategoryOptions([serviceCategoryTree])}
               </SelectContent>
             </Select>
@@ -349,6 +354,8 @@ const ProductTemplateForm = ({
                 <SelectValue placeholder='Select...' />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem>None (No Brand)</SelectItem>
+
                 {(brands || []).map((m) => (
                   <SelectItem key={m._id} value={m._id}>
                     {m.name}
@@ -371,6 +378,7 @@ const ProductTemplateForm = ({
                 <SelectValue placeholder={isDevicesLoading ? 'Loading devices...' : 'Select manufacturer first'} />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem>None (All Device)</SelectItem>
                 {(devicesForManufacturer || []).map((d) => (
                   <SelectItem key={d._id} value={d._id}>
                     {d.name}
@@ -401,6 +409,19 @@ const ProductTemplateForm = ({
               </Select>
             </div>
           ) : null}
+
+          {formData.type === 'non-serialized' && (
+            <div className='flex items-center space-x-2 p-4 border-t border-slate-700'>
+              <Checkbox
+                id='hasBatches'
+                checked={formData.hasBatches}
+                onCheckedChange={(checked) => setFormData({ ...formData, hasBatches: checked })}
+              />
+              <Label htmlFor='hasBatches'>
+                Track this product by batches? (For different costs, suppliers, or expiry dates)
+              </Label>
+            </div>
+          )}
         </div>
       </div>
 
@@ -467,27 +488,27 @@ const ProductTemplateForm = ({
               )}
               {formData.bundleItems.map((item) => (
                 <div
-                  key={item.ProductVariantId}
+                  key={item.productVariantId}
                   className='flex items-center justify-between p-2 bg-slate-800 rounded-md'
                 >
                   <span className='text-sm font-medium'>{item.variantName}</span>
                   <div className='flex items-center gap-2'>
-                    <Label htmlFor={`qty-${item.ProductVariantId}`} className='text-xs'>
+                    <Label htmlFor={`qty-${item.productVariantId}`} className='text-xs'>
                       Qty:
                     </Label>
                     <Input
-                      id={`qty-${item.ProductVariantId}`}
+                      id={`qty-${item.productVariantId}`}
                       type='number'
                       min='1'
                       value={item.quantity}
-                      onChange={(e) => handleBundleItemQtyChange(item.ProductVariantId, e.target.value)}
+                      onChange={(e) => handleBundleItemQtyChange(item.productVariantId, e.target.value)}
                       className='h-8 w-20'
                     />
                     <Button
                       type='button'
                       variant='ghost'
                       size='icon'
-                      onClick={() => handleRemoveBundleItem(item.ProductVariantId)}
+                      onClick={() => handleRemoveBundleItem(item.productVariantId)}
                     >
                       <Trash2 className='h-4 w-4 text-red-500' />
                     </Button>
@@ -504,31 +525,68 @@ const ProductTemplateForm = ({
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <ShieldCheck className='h-5 w-5 text-indigo-400' />
-              Post-Sales
+              <ShieldCheck className='h-5 w-5 text-indigo-500' />
+              Post-Sales Configuration
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Label>Default Warranty Policy (Optional)</Label>
-            <Select
-              onValueChange={(val) => setFormData({ ...formData, defaultWarrantyPolicyId: val })}
-              value={formData.defaultWarrantyPolicyId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder='No default warranty' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={null}>None</SelectItem>
-                {warrantyPolicies.map((p) => (
-                  <SelectItem key={p._id} value={p._id}>
-                    {p.name} ({p.durationValue} {p.durationUnit})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className='text-xs text-slate-400 mt-1'>
-              This warranty will be automatically suggested when selling this item.
-            </p>
+
+          <CardContent className='space-y-5'>
+            {/* --- Warranty Selector --- */}
+            <div>
+              <Label className='block mb-1'>Default Warranty Policy (Optional)</Label>
+              <Select
+                onValueChange={(val) => setFormData({ ...formData, defaultWarrantyPolicyId: val })}
+                value={formData.defaultWarrantyPolicyId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder='Select default warranty...' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>None</SelectItem>
+                  {warrantyPolicies.map((p) => (
+                    <SelectItem key={p._id} value={p._id}>
+                      {p.name} ({p.durationValue} {p.durationUnit})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className='text-xs text-muted-foreground mt-1'>
+                This warranty will be automatically applied when selling this item.
+              </p>
+            </div>
+
+            {/* --- Tax Category Selector --- */}
+            <div>
+              <Label className='mb-1 flex items-center gap-1'>
+                <Percent className='w-4 h-4 text-muted-foreground' />
+                Tax Category
+              </Label>
+
+              <Select
+                onValueChange={(val) =>
+                  formData.taxCategoryId !== val && setFormData({ ...formData, taxCategoryId: val })
+                }
+                value={formData.taxCategoryId}
+              >
+                <SelectTrigger
+                  suffixIcon={PlusCircle}
+                  onSuffixIconClick={() => alert('Open Quick Create for Tax Category')}
+                >
+                  <SelectValue placeholder='Select tax category...' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem>None (No Tax)</SelectItem>
+                  {taxCategories.map((tc) => (
+                    <SelectItem key={tc._id} value={tc._id}>
+                      {tc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className='text-xs text-muted-foreground mt-1'>
+                This category determines what tax rules apply to this item.
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}

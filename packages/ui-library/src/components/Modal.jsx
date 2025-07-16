@@ -1,10 +1,11 @@
 // --- Modal.js (Production-grade) ---
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { Expand, ExpandIcon, LucideExpand, Maximize2, Maximize2Icon, X } from "lucide-react";
 import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import FocusTrap from "focus-trap-react";
+import Button from "./Button";
 
 const sizeClasses = {
   full: "w-full h-full rounded-none",
@@ -25,7 +26,7 @@ const Modal = ({
   size = "l", // default size
 }) => {
   const modalRef = useRef(null);
-
+  const [defaultSize, setDefaultSize] = useState(size);
   useEffect(() => {
     const handleEsc = (event) => {
       if (event.key === "Escape") {
@@ -56,7 +57,7 @@ const Modal = ({
             ref={modalRef}
             className={cn(
               "relative w-auto max-w-full border border-slate-700 bg-slate-800 shadow-lg text-slate-100 flex flex-col overflow-hidden",
-              sizeClasses[size],
+              sizeClasses[defaultSize],
               className
             )}
             style={{ maxHeight: "90vh", margin: "2rem" }}
@@ -71,10 +72,7 @@ const Modal = ({
             transition={{ duration: 0.2 }}
           >
             <div className="flex flex-col space-y-1.5 p-6 border-b border-slate-700">
-              <h3
-                id="modal-title"
-                className="text-2xl font-semibold leading-none tracking-tight"
-              >
+              <h3 id="modal-title" className="text-2xl font-semibold leading-none tracking-tight">
                 {title}
               </h3>
               {description && (
@@ -84,27 +82,37 @@ const Modal = ({
               )}
             </div>
 
-            <div
-              className="p-6 overflow-y-auto"
-              style={{ flex: 1, minHeight: 0 }}
-            >
+            <div className="p-6 overflow-y-auto" style={{ flex: 1, minHeight: 0 }}>
               {children}
             </div>
 
             {footer && (
-              <div className="flex items-center p-6 border-t border-slate-700">
-                {footer}
-              </div>
+              <div className="flex items-center p-6 border-t border-slate-700">{footer}</div>
             )}
 
-            <button
-              onClick={onClose}
-              style={{ top: "1rem", right: "1rem" }}
-              className="absolute right-0 border text-slate-400 hover:text-white transition-colors"
-              aria-label="Close modal"
+            <div
+              style={{ right: "0.5rem" }}
+              className="w-[60px] absolute flex items-center gap-1  z-10"
             >
-              <X className="h-5 w-5" />
-            </button>
+              <Button
+                className=" text-slate-400 hover:text-white"
+                size="icon"
+                variant="ghost"
+                onClick={() => setDefaultSize(defaultSize === "l" ? "full" : "l")}
+                aria-label="Close modal"
+              >
+                <Maximize2Icon className="border h-7 w-7 p-1" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="text-slate-400 hover:text-white"
+                aria-label="Close modal"
+              >
+                <X className="border h-7 w-7" />
+              </Button>
+            </div>
           </motion.div>
         </motion.div>
       )}

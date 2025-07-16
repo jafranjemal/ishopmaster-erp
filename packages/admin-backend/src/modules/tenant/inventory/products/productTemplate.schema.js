@@ -43,6 +43,11 @@ const productTemplateSchema = new mongoose.Schema(
       ref: "WarrantyPolicy",
       default: null,
     },
+    taxCategoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TaxCategory", // This will be a new, simple model
+      default: null,
+    },
     /**
      * For 'service' type products, this stores the "Bill of Materials" -
      * the spare parts consumed when this service is performed.
@@ -107,7 +112,10 @@ const productTemplateSchema = new mongoose.Schema(
     assetAccountId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
     revenueAccountId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
     cogsAccountId: { type: mongoose.Schema.Types.ObjectId, ref: "Account" },
-
+    hasBatches: {
+      type: Boolean,
+      default: false,
+    },
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

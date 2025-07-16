@@ -1,108 +1,115 @@
 const mongoose = require("mongoose");
 
 class PricingService {
-  /**
-   * Takes a cart and customer, applies all valid pricing rules and promotions,
-   * and returns a new cart object with final calculated prices.
-   */
   async calculatePrices(models, { cartData, customerId }) {
     const { PricingRule, Promotion, Customer, ProductVariants } = models;
     const now = new Date();
 
-    // 1. Fetch all relevant data in parallel for performance
+    console.log("Calculating prices for cart data:", cartData);
     const [customer, activeRules, activePromotions, cartVariants] = await Promise.all([
       Customer.findById(customerId).lean(),
       PricingRule.find({ isActive: true }).sort({ priority: -1 }).lean(),
       Promotion.find({ isActive: true, startDate: { $lte: now }, endDate: { $gte: now } }).lean(),
-      // Fetch full variant details for every item in the cart to check their categories
       ProductVariants.find({ _id: { $in: cartData.items.map((i) => i.productVariantId) } })
         .populate("templateId")
         .lean(),
     ]);
 
+    let subTotal = 0;
+    let totalLineDiscount = 0;
     const pricedCartItems = [];
-    let totalDiscountAmount = 0;
 
-    // 2. Loop through each item in the original cart
+    // --- PASS 1 & 2: Automatic Promotions & Rules + Manual Line Discounts ---
     for (const item of cartData.items) {
       const variantDetails = cartVariants.find(
         (v) => v._id.toString() === item.productVariantId.toString()
       );
       if (!variantDetails) continue;
 
-      let currentPrice = item.unitPrice;
-      let appliedDiscounts = [];
+      let lineSubtotal = item.unitPrice * item.quantity;
+      subTotal += lineSubtotal;
+      let currentLinePrice = lineSubtotal;
 
-      // --- PASS 1: APPLY THE BEST PROMOTION ---
+      // Apply automatic promotions first
       let bestPromotionDiscount = 0;
-      let appliedPromotion = null;
-
       for (const promo of activePromotions) {
-        const appliesToAll = promo.conditions.appliesTo === "all_products";
-        const appliesToCategory =
-          promo.conditions.appliesTo === "specific_categories" &&
-          promo.conditions.items.some((id) => id.equals(variantDetails.templateId.categoryId));
-        const appliesToProduct =
-          promo.conditions.appliesTo === "specific_products" &&
-          promo.conditions.items.some((id) => id.equals(variantDetails._id));
-
-        if (appliesToAll || appliesToCategory || appliesToProduct) {
+        const applies = promo.conditions?.items.some((id) => id.equals(variantDetails._id)); // Simplified
+        if (applies) {
           const discount =
             promo.discount.type === "percentage"
-              ? currentPrice * (promo.discount.value / 100)
+              ? lineSubtotal * (promo.discount.value / 100)
               : promo.discount.value;
-          if (discount > bestPromotionDiscount) {
-            bestPromotionDiscount = discount;
-            appliedPromotion = promo;
-          }
+          if (discount > bestPromotionDiscount) bestPromotionDiscount = discount;
         }
       }
+      currentLinePrice -= bestPromotionDiscount;
 
-      if (appliedPromotion) {
-        currentPrice -= bestPromotionDiscount;
-        appliedDiscounts.push({ name: appliedPromotion.name, amount: bestPromotionDiscount });
-      }
-
-      // --- PASS 2: APPLY CUSTOMER-LEVEL RULES (to the already discounted price) ---
-      const applicableRules = activeRules.filter((rule) => {
-        const customerMatch =
-          !rule.customerGroupId || rule.customerGroupId.equals(customer?.customerGroupId);
-        const categoryMatch =
+      // Then apply automatic customer rules
+      const applicableRules = activeRules.filter(
+        (rule) =>
           !rule.productCategoryId ||
-          rule.productCategoryId.equals(variantDetails.templateId.categoryId);
-        return customerMatch && categoryMatch;
-      });
-
+          rule.productCategoryId.equals(variantDetails.templateId.categoryId)
+      );
       for (const rule of applicableRules) {
         const ruleDiscount =
           rule.discount.type === "percentage"
-            ? currentPrice * (rule.discount.value / 100)
+            ? currentLinePrice * (rule.discount.value / 100)
             : rule.discount.value;
-        if (ruleDiscount > 0) {
-          currentPrice -= ruleDiscount;
-          appliedDiscounts.push({ name: rule.name, amount: ruleDiscount });
-        }
+        currentLinePrice -= ruleDiscount;
       }
 
-      const finalLinePrice = currentPrice * item.quantity;
-      const totalLineDiscount = item.unitPrice * item.quantity - finalLinePrice;
-      totalDiscountAmount += totalLineDiscount;
+      // Then apply manual line-item discounts
+      if (item.lineDiscount) {
+        const manualDiscount =
+          item.lineDiscount.type === "percentage"
+            ? currentLinePrice * (item.lineDiscount.value / 100)
+            : item.lineDiscount.value * item.quantity;
+        currentLinePrice -= manualDiscount;
+      }
 
-      pricedCartItems.push({
-        ...item,
-        finalPrice: parseFloat(currentPrice.toFixed(2)),
-        appliedDiscounts, // For receipt transparency
-      });
+      const totalDiscountForLine = lineSubtotal - currentLinePrice;
+      totalLineDiscount += totalDiscountForLine;
+
+      pricedCartItems.push({ ...item, finalPrice: currentLinePrice / item.quantity });
     }
 
-    const subTotal = cartData.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-    const totalAmount = subTotal - totalDiscountAmount;
+    // --- PASS 3 & 4: Global Discounts & Charges ---
+    const subtotalAfterLineDiscounts = subTotal - totalLineDiscount;
+    let totalGlobalDiscount = 0;
+    if (cartData.globalDiscount) {
+      totalGlobalDiscount =
+        cartData.globalDiscount.type === "percentage"
+          ? subtotalAfterLineDiscounts * (cartData.globalDiscount.value / 100)
+          : cartData.globalDiscount.value;
+    }
 
+    const totalCharges = (cartData.additionalCharges || []).reduce(
+      (sum, charge) => sum + charge.amount,
+      0
+    );
+
+    // --- PASS 5: Final Calculation (Pre-Tax) ---
+    const totalAmount = subtotalAfterLineDiscounts - totalGlobalDiscount + totalCharges;
+    console.log("Total amount after all calculations:", parseFloat(totalAmount.toFixed(2)));
+    console.log("Total totalGlobalDiscount:", totalGlobalDiscount);
+
+    console.log("Total totalCharges:", totalCharges);
+    console.log("Total totalLineDiscount:", totalLineDiscount);
+    console.log("Total cartData.globalDiscount:", cartData.globalDiscount);
+    console.log("Total cartData.additionalCharges:", cartData.additionalCharges);
     return {
       items: pricedCartItems,
       subTotal: parseFloat(subTotal.toFixed(2)),
-      totalDiscount: parseFloat(totalDiscountAmount.toFixed(2)),
-      totalAmount: parseFloat(totalAmount.toFixed(2)),
+      totalLineDiscount: parseFloat(totalLineDiscount.toFixed(2)),
+      totalGlobalDiscount: parseFloat(totalGlobalDiscount.toFixed(2)),
+      totalCharges: parseFloat(totalCharges.toFixed(2)),
+      totalTax: 0, // or your tax calculation
+      taxBreakdown: [],
+      grandTotal: parseFloat(totalAmount.toFixed(2)),
+
+      // 👇 Add these to preserve structure
+      globalDiscount: cartData.globalDiscount || null,
+      additionalCharges: cartData.additionalCharges || [],
     };
   }
 }

@@ -18,6 +18,7 @@ import {
   Landmark,
   CalendarOff,
   UserCog,
+  Percent,
   BarChart3,
   Settings,
   ShieldCheck,
@@ -65,6 +66,7 @@ import {
   Clock11,
   Undo2,
   Contact2,
+  Bookmark,
 } from 'lucide-react';
 import useAuth from '../../context/useAuth';
 
@@ -390,6 +392,15 @@ const Sidebar = () => {
           icon: UserCog,
           permission: 'setting:user:manage',
         },
+        {
+          name: 'Tax Categories',
+          href: '/settings/tax-categories',
+          icon: Bookmark,
+          permission: 'accounting:tax:manage',
+        },
+
+        { name: 'Tax Rules', href: '/settings/taxes', icon: Percent, permission: 'accounting:tax:manage' },
+
         {
           name: t('sidebar.sub_menu.payment_methods'),
           href: '/settings/payment-methods',

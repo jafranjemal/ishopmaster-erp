@@ -1,28 +1,39 @@
-// --- Select (Production-Grade with Empty Support) ---
 import * as React from "react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "../lib/utils";
 
-const Select = SelectPrimitive.Root;
+// --- Utility ---
+const normalizeValue = (v) => (v === undefined || v === null ? "" : v);
+const isEqual = (a, b) => String(a) === String(b); // Loose comparison
+
+// --- Select Root with optimization ---
+const Select = ({ value, onValueChange, allowEmptyString = true, optimize = true, ...props }) => {
+  const safeValue = normalizeValue(value);
+
+  const handleValueChange = React.useCallback(
+    (incomingValue) => {
+      const denormalized =
+        incomingValue === "__none__" ? (allowEmptyString ? "" : null) : incomingValue;
+
+      if (optimize && isEqual(denormalized, value)) return;
+
+      onValueChange?.(denormalized);
+    },
+    [value, onValueChange, allowEmptyString, optimize]
+  );
+
+  return (
+    <SelectPrimitive.Root
+      value={safeValue === "" ? "__none__" : safeValue}
+      onValueChange={handleValueChange}
+      {...props}
+    />
+  );
+};
+
 const SelectGroup = SelectPrimitive.Group;
 const SelectValue = SelectPrimitive.Value;
-
-const SelectTriggerold = React.forwardRef(({ className, children, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "flex h-10 w-full items-center justify-between rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-sm ring-offset-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-      className
-    )}
-    {...props}
-  >
-    {children}
-    <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50" />
-    </SelectPrimitive.Icon>
-  </SelectPrimitive.Trigger>
-));
 
 const SelectTrigger = React.forwardRef(
   ({ className, children, suffixIcon: SuffixIcon, onSuffixIconClick, ...props }, ref) => (
@@ -39,12 +50,10 @@ const SelectTrigger = React.forwardRef(
       </SelectPrimitive.Trigger>
 
       <div className="absolute inset-y-0 right-2 flex items-center space-x-2">
-        {/* ChevronDown icon (default dropdown) */}
         <SelectPrimitive.Icon asChild>
           <ChevronDown className="h-4 w-4 text-slate-400" />
         </SelectPrimitive.Icon>
 
-        {/* Suffix Icon */}
         {SuffixIcon && (
           <button
             type="button"
@@ -99,8 +108,10 @@ const SelectLabel = React.forwardRef(({ className, ...props }, ref) => (
 SelectLabel.displayName = SelectPrimitive.Label.displayName;
 
 const SelectItem = React.forwardRef(({ className, children, value, ...props }, ref) => {
-  if (value === "") {
-    // Handle empty string as special "None" value
+  const normalizedValue = normalizeValue(value);
+
+  if (normalizedValue === "") {
+    // Handle empty string explicitly
     return (
       <SelectPrimitive.Item
         ref={ref}
@@ -116,7 +127,7 @@ const SelectItem = React.forwardRef(({ className, children, value, ...props }, r
             <Check className="h-4 w-4" />
           </SelectPrimitive.ItemIndicator>
         </span>
-        <SelectPrimitive.ItemText>{children || "None"}</SelectPrimitive.ItemText>
+        <SelectPrimitive.ItemText>{children ?? "None"}</SelectPrimitive.ItemText>
       </SelectPrimitive.Item>
     );
   }
@@ -124,7 +135,7 @@ const SelectItem = React.forwardRef(({ className, children, value, ...props }, r
   return (
     <SelectPrimitive.Item
       ref={ref}
-      value={value}
+      value={normalizedValue}
       className={cn(
         "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-slate-700 focus:text-slate-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className

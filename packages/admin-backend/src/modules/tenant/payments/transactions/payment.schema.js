@@ -9,6 +9,8 @@ const paymentLineSchema = new mongoose.Schema(
     },
     amount: { type: Number, required: true, min: 0.01, set: (v) => parseFloat(v) },
     referenceNumber: { type: String, trim: true }, // For Cheque No., Card TXN ID, etc.
+    bankName: { type: String, trim: true }, // For Cheques
+    chequeDate: { type: Date }, // For Post-dated cheques
     status: {
       type: String,
       enum: ["cleared", "bounced", "pending"],

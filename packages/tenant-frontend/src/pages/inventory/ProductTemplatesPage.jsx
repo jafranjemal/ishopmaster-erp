@@ -9,6 +9,7 @@ import {
   tenantAccountingService,
   tenantUploadService,
   tenantWarrantyPolicyService,
+  tenantTaxCategoryService,
 } from '../../services/api';
 import {
   Button,
@@ -40,6 +41,7 @@ const ProductTemplatesPage = () => {
     attributeSets: [],
     accounts: [],
     warrantyPolicies: [],
+    taxCategories: [],
   });
   const [paginationData, setPaginationData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -54,6 +56,7 @@ const ProductTemplatesPage = () => {
     search: '',
     brandId: '',
     categoryId: '',
+    taxCategoryId: '',
     type: '',
     isActive: '',
     searchTerm: '',
@@ -69,16 +72,25 @@ const ProductTemplatesPage = () => {
           ...overrideFilters, // Send filters to backend
         };
 
-        const [templatesRes, summaryRes, brandsRes, categoriesRes, attributeSetsRes, accountsRes, warrantiesRes] =
-          await Promise.all([
-            tenantProductService.getAllTemplates(params),
-            tenantProductService.getSummary(),
-            tenantBrandService.getAll(),
-            tenantCategoryService.getAll(),
-            tenantAttributeService.getAllAttributeSets(),
-            tenantAccountingService.getAllAccounts(),
-            tenantWarrantyPolicyService.getAll(),
-          ]);
+        const [
+          templatesRes,
+          summaryRes,
+          brandsRes,
+          categoriesRes,
+          attributeSetsRes,
+          accountsRes,
+          warrantiesRes,
+          taxCatRes,
+        ] = await Promise.all([
+          tenantProductService.getAllTemplates(params),
+          tenantProductService.getSummary(),
+          tenantBrandService.getAll(),
+          tenantCategoryService.getAll(),
+          tenantAttributeService.getAllAttributeSets(),
+          tenantAccountingService.getAllAccounts(),
+          tenantWarrantyPolicyService.getAll(),
+          tenantTaxCategoryService.getAll(),
+        ]);
 
         setTemplates(templatesRes.data.data);
         setPaginationData(templatesRes.data.pagination);
@@ -89,6 +101,7 @@ const ProductTemplatesPage = () => {
           attributeSets: attributeSetsRes.data.data,
           accounts: accountsRes.data.data,
           warrantyPolicies: warrantiesRes.data.data,
+          taxCategories: taxCatRes.data.data,
         });
       } catch (error) {
         console.log(error);
@@ -307,6 +320,7 @@ const ProductTemplatesPage = () => {
           onSave={handleSave}
           onCancel={handleCloseModals}
           isSaving={isSaving}
+          taxCategories={prereqData.taxCategories}
           getSignatureFunc={tenantUploadService.getCloudinarySignature}
         />
       </Modal>

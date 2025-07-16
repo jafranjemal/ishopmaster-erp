@@ -176,6 +176,9 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
             { $size: { $ifNull: ["$items", []] } },
           ],
         },
+        hasBatches: {
+          $gt: [{ $size: { $ifNull: ["$lots", []] } }, 1],
+        },
       },
     },
     {

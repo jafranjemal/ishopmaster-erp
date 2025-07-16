@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Button,
   Input,
@@ -13,28 +13,28 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "ui-library";
+} from 'ui-library';
 
-import { GitCommitVertical } from "lucide-react";
-import ProductVariantSearch from "../procurement/ProductVariantSearch";
+import { GitCommitVertical } from 'lucide-react';
+import ProductVariantSearch from '../procurement/ProductVariantSearch';
 
 const ADJUSTMENT_REASONS = [
-  { value: "recount_add", label: "Stock Recount (Found)", type: "in" },
-  { value: "recount_remove", label: "Stock Recount (Missing)", type: "out" },
-  { value: "damaged", label: "Damaged Goods", type: "out" },
-  { value: "theft_loss", label: "Theft or Loss", type: "out" },
-  { value: "other_in", label: "Other (Add Stock)", type: "in" },
-  { value: "other_out", label: "Other (Remove Stock)", type: "out" },
+  { value: 'recount_add', label: 'Stock Recount (Found)', type: 'in' },
+  { value: 'recount_remove', label: 'Stock Recount (Missing)', type: 'out' },
+  { value: 'damaged', label: 'Damaged Goods', type: 'out' },
+  { value: 'theft_loss', label: 'Theft or Loss', type: 'out' },
+  { value: 'other_in', label: 'Other (Add Stock)', type: 'in' },
+  { value: 'other_out', label: 'Other (Remove Stock)', type: 'out' },
 ];
 
 const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   const initialFormState = {
-    ProductVariantId: null,
-    ProductVariantsName: "",
-    branchId: "",
-    quantityChange: "",
+    productVariantId: null,
+    ProductVariantsName: '',
+    branchId: '',
+    quantityChange: '',
     reason: ADJUSTMENT_REASONS[0].value,
-    notes: "",
+    notes: '',
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -42,7 +42,7 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   const handleProductSelect = (variant) => {
     setFormData((prev) => ({
       ...prev,
-      ProductVariantId: variant._id,
+      productVariantId: variant._id,
       ProductVariantsName: variant.variantName,
     }));
   };
@@ -60,10 +60,10 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
 
     const selectedReason = ADJUSTMENT_REASONS.find((r) => r.value === formData.reason);
     const quantity = Number(formData.quantityChange);
-    const quantityWithDirection = selectedReason.type === "out" ? -Math.abs(quantity) : Math.abs(quantity);
+    const quantityWithDirection = selectedReason.type === 'out' ? -Math.abs(quantity) : Math.abs(quantity);
 
     const payload = {
-      ProductVariantId: formData.ProductVariantId,
+      productVariantId: formData.productVariantId,
       branchId: formData.branchId,
       quantityChange: quantityWithDirection,
       notes: `[${selectedReason.label}] ${formData.notes}`,
@@ -78,29 +78,29 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
   };
 
   const isFormInvalid =
-    isSaving || !formData.ProductVariantId || !formData.branchId || !formData.quantityChange || !formData.notes;
+    isSaving || !formData.productVariantId || !formData.branchId || !formData.quantityChange || !formData.notes;
 
   return (
-    <Card className="max-w-3xl mx-auto">
+    <Card className='max-w-3xl mx-auto'>
       <CardHeader>
         <CardTitle>Create New Adjustment</CardTitle>
         <CardDescription>All adjustments are logged in the audit trail. Please provide clear notes.</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className='space-y-6'>
           <div>
             <Label>1. Search for Product Variant</Label>
             {formData.ProductVariantsName ? (
-              <div className="flex items-center justify-between p-3 bg-slate-900/50 rounded-md mt-1">
-                <span className="font-medium">{formData.ProductVariantsName}</span>
+              <div className='flex items-center justify-between p-3 bg-slate-900/50 rounded-md mt-1'>
+                <span className='font-medium'>{formData.ProductVariantsName}</span>
                 <Button
-                  size="sm"
-                  variant="link"
+                  size='sm'
+                  variant='link'
                   onClick={() =>
                     setFormData((prev) => ({
                       ...prev,
-                      ProductVariantId: null,
-                      ProductVariantsName: "",
+                      productVariantId: null,
+                      ProductVariantsName: '',
                     }))
                   }
                 >
@@ -113,10 +113,10 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
           </div>
 
           <div>
-            <Label htmlFor="branchId">2. Select Branch of Adjustment</Label>
-            <Select onValueChange={(val) => handleSelectChange("branchId", val)} value={formData.branchId} required>
+            <Label htmlFor='branchId'>2. Select Branch of Adjustment</Label>
+            <Select onValueChange={(val) => handleSelectChange('branchId', val)} value={formData.branchId} required>
               <SelectTrigger>
-                <SelectValue placeholder="Select branch location..." />
+                <SelectValue placeholder='Select branch location...' />
               </SelectTrigger>
               <SelectContent>
                 {branches.map((b) => (
@@ -128,23 +128,23 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
             </Select>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div>
-              <Label htmlFor="quantityChange">3. Quantity to Adjust</Label>
+              <Label htmlFor='quantityChange'>3. Quantity to Adjust</Label>
               <Input
-                id="quantityChange"
-                name="quantityChange"
-                type="number"
-                min="1"
+                id='quantityChange'
+                name='quantityChange'
+                type='number'
+                min='1'
                 value={formData.quantityChange}
                 onChange={handleChange}
                 required
-                placeholder="e.g., 5"
+                placeholder='e.g., 5'
               />
             </div>
             <div>
-              <Label htmlFor="reason">4. Reason for Adjustment</Label>
-              <Select onValueChange={(val) => handleSelectChange("reason", val)} value={formData.reason} required>
+              <Label htmlFor='reason'>4. Reason for Adjustment</Label>
+              <Select onValueChange={(val) => handleSelectChange('reason', val)} value={formData.reason} required>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -160,21 +160,21 @@ const StockAdjustmentForm = ({ branches, onSave, isSaving }) => {
           </div>
 
           <div>
-            <Label htmlFor="notes">5. Notes for Audit Trail (Required)</Label>
+            <Label htmlFor='notes'>5. Notes for Audit Trail (Required)</Label>
             <Input
-              id="notes"
-              name="notes"
+              id='notes'
+              name='notes'
               value={formData.notes}
               onChange={handleChange}
               required
-              placeholder="e.g., Found during weekly stock count in warehouse section A."
+              placeholder='e.g., Found during weekly stock count in warehouse section A.'
             />
           </div>
 
-          <div className="pt-4 flex justify-end">
-            <Button type="submit" disabled={isFormInvalid}>
-              <GitCommitVertical className="h-4 w-4 mr-2" />
-              {isSaving ? "Submitting..." : "Submit Adjustment"}
+          <div className='pt-4 flex justify-end'>
+            <Button type='submit' disabled={isFormInvalid}>
+              <GitCommitVertical className='h-4 w-4 mr-2' />
+              {isSaving ? 'Submitting...' : 'Submit Adjustment'}
             </Button>
           </div>
         </form>

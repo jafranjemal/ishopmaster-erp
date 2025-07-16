@@ -232,7 +232,7 @@ exports.getAllTemplates = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/tenant/inventory/products/templates/:id
 exports.getTemplateById = asyncHandler(async (req, res, next) => {
   const { ProductTemplates } = req.models;
-  console.log("Fetching template with ID:", req.params.id);
+
   const template = await ProductTemplates.findById(req.params.id)
     .populate("brandId", "name")
     .populate("categoryId", "name")
@@ -245,6 +245,8 @@ exports.getTemplateById = asyncHandler(async (req, res, next) => {
     .populate("assetAccountId", "name")
     .populate("revenueAccountId", "name")
     .populate("cogsAccountId", "name")
+    .populate("taxCategoryId")
+    .populate("defaultWarrantyPolicyId")
     .lean();
 
   if (!template)

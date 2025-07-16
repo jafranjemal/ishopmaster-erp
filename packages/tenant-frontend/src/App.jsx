@@ -85,6 +85,9 @@ import PortalLayout from './components/layout/PortalLayout';
 import PortalLoginPage from './pages/portal/PortalLoginPage';
 import RequestPortalLinkPage from './pages/portal/RequestPortalLinkPage';
 import { CustomerAuthProvider } from './context/CustomerAuthProvider';
+import TaxRulePage from './pages/settings/TaxRulePage';
+import TaxCategoryPage from './pages/settings/TaxCategoryPage';
+import { PosSessionProvider } from './context/PosSessionContext';
 
 function App() {
   const [posLayout, setPosLayout] = useState('default');
@@ -125,19 +128,21 @@ function App() {
           path='/pos/*'
           element={
             <ProtectedRoute>
-              <PosLayout onLayoutToggle={togglePosLayout}>
-                <Routes>
-                  {/* The main entry point is now the shifts page (the gatekeeper) */}
-                  <Route path='shifts' element={<ShiftManagementPage />} />
-                  {/* The actual sales terminal is on a nested route */}
-                  <Route path='terminal' element={<PosPage layout={posLayout} />} />
-                  {/* Add other POS-related routes like sales history here in the future */}
-                  {/* <Route path="sales-history" element={<SalesHistoryPage />} /> */}
+              <PosSessionProvider>
+                <PosLayout onLayoutToggle={togglePosLayout}>
+                  <Routes>
+                    {/* The main entry point is now the shifts page (the gatekeeper) */}
+                    <Route path='shifts' element={<ShiftManagementPage />} />
+                    {/* The actual sales terminal is on a nested route */}
+                    <Route path='terminal' element={<PosPage layout={posLayout} />} />
+                    {/* Add other POS-related routes like sales history here in the future */}
+                    {/* <Route path="sales-history" element={<SalesHistoryPage />} /> */}
 
-                  {/* A fallback to redirect any old /pos links to the correct gatekeeper */}
-                  <Route path='*' element={<Navigate to='/pos/shifts' replace />} />
-                </Routes>
-              </PosLayout>
+                    {/* A fallback to redirect any old /pos links to the correct gatekeeper */}
+                    <Route path='*' element={<Navigate to='/pos/shifts' replace />} />
+                  </Routes>
+                </PosLayout>
+              </PosSessionProvider>
             </ProtectedRoute>
           }
         />
@@ -178,6 +183,8 @@ function App() {
                   <Route path='/settings/printing/new' element={<LabelDesignerPage />} />{' '}
                   <Route path='/settings/printing/:id' element={<LabelDesignerPage />} />
                   <Route path='/settings/payroll-rules' element={<DeductionRulesPage />} />
+                  <Route path='/settings/taxes' element={<TaxRulePage />} />
+                  <Route path='/settings/tax-categories' element={<TaxCategoryPage />} />
                   {/* --- accounting routes --- */}
                   <Route path='/accounting/budgets' element={<BudgetingPage />} />
                   <Route path='/accounting/period-closing' element={<PeriodClosingPage />} />

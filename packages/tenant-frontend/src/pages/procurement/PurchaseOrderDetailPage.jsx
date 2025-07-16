@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
-import { toast } from "react-hot-toast";
-import { tenantPurchaseOrderService } from "../../services/api";
-import { ArrowLeft } from "lucide-react";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { tenantPurchaseOrderService } from '../../services/api';
+import { ArrowLeft } from 'lucide-react';
 
-import PurchaseOrderDetailView from "../../components/procurement/PurchaseOrderDetailView";
-import GoodsReceivingForm from "../../components/procurement/GoodsReceivingForm";
-import PrintModal from "../../components/inventory/printing/PrintModal"; // <-- 1. IMPORT NEW COMPONENT
+import PurchaseOrderDetailView from '../../components/procurement/PurchaseOrderDetailView';
+import GoodsReceivingForm from '../../components/procurement/GoodsReceivingForm';
+import PrintModal from '../../components/inventory/printing/PrintModal'; // <-- 1. IMPORT NEW COMPONENT
 
 const PurchaseOrderDetailPage = () => {
   const { id: poId } = useParams();
@@ -27,10 +27,10 @@ const PurchaseOrderDetailPage = () => {
       if (response.data.success) {
         setPurchaseOrder(response.data.data);
       } else {
-        throw new Error("Could not fetch purchase order details.");
+        throw new Error('Could not fetch purchase order details.');
       }
     } catch (err) {
-      const errorMessage = err.response?.data?.error || "Failed to load purchase order.";
+      const errorMessage = err.response?.data?.error || 'Failed to load purchase order.';
       toast.error(errorMessage);
       setError(errorMessage);
     } finally {
@@ -46,21 +46,21 @@ const PurchaseOrderDetailPage = () => {
     setIsSaving(true);
     try {
       await toast.promise(tenantPurchaseOrderService.receiveGoods(poId, receivedData), {
-        loading: "Processing receipt...",
-        success: "Goods received and stock updated successfully!",
-        error: (err) => err.response?.data?.error || "Failed to process receipt.",
+        loading: 'Processing receipt...',
+        success: 'Goods received and stock updated successfully!',
+        error: (err) => err.response?.data?.error || 'Failed to process receipt.',
       });
       // After success, refetch the PO data to show its updated status
       await fetchData();
 
       const printQueueItems = receivedData.receivedItems.map((item) => {
-        const poItem = purchaseOrder.items.find((pi) => pi.ProductVariantId._id === item.ProductVariantId);
+        const poItem = purchaseOrder.items.find((pi) => pi.productVariantId._id === item.productVariantId);
         return {
-          ProductVariantId: item.ProductVariantId,
+          productVariantId: item.productVariantId,
           variantName: poItem.description,
-          sku: poItem.ProductVariantId.sku,
+          sku: poItem.productVariantId.sku,
           quantity: item.quantityReceived,
-          isSerialized: poItem.ProductVariantId.templateId?.type === "serialized",
+          isSerialized: poItem.productVariantId.templateId?.type === 'serialized',
           serials: item.serials || [],
           batchNumber: purchaseOrder.poNumber,
         };
@@ -68,22 +68,22 @@ const PurchaseOrderDetailPage = () => {
       setItemsToPrint(printQueueItems);
       setIsPrintModalOpen(true);
     } catch (error) {
-      console.error("Receipt failed:", error);
+      console.error('Receipt failed:', error);
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (isLoading) return <div className="p-8 text-center">Loading Purchase Order...</div>;
-  if (error) return <div className="p-8 text-center text-red-400">Error: {error}</div>;
-  if (!purchaseOrder) return <div className="p-8 text-center">Purchase Order not found.</div>;
+  if (isLoading) return <div className='p-8 text-center'>Loading Purchase Order...</div>;
+  if (error) return <div className='p-8 text-center text-red-400'>Error: {error}</div>;
+  if (!purchaseOrder) return <div className='p-8 text-center'>Purchase Order not found.</div>;
 
-  const canReceiveGoods = !["fully_received", "cancelled"].includes(purchaseOrder.status);
+  const canReceiveGoods = !['fully_received', 'cancelled'].includes(purchaseOrder.status);
 
   return (
-    <div className="space-y-8">
-      <Link to="/procurement/po" className="flex items-center text-sm text-indigo-400 hover:underline">
-        <ArrowLeft className="h-4 w-4 mr-2" />
+    <div className='space-y-8'>
+      <Link to='/procurement/po' className='flex items-center text-sm text-indigo-400 hover:underline'>
+        <ArrowLeft className='h-4 w-4 mr-2' />
         Back to all Purchase Orders
       </Link>
 

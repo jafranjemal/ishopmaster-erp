@@ -718,3 +718,26 @@ exports.getLotsForVariant = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ success: true, data: lots });
 });
+
+// @desc    Get a detailed stock breakdown for a specific product variant at a branch
+// @route   GET /api/v1/tenant/inventory/stock/breakdown/:variantId?branchId=...
+exports.getStockBreakdown = asyncHandler(async (req, res, next) => {
+  const { InventoryLot, InventoryItem } = req.models;
+  const { variantId } = req.params;
+  const { branchId } = req.query;
+
+  if (!branchId) {
+    return res.status(400).json({ success: false, error: "Branch ID is required." });
+  }
+
+  const [lots, items] = await Promise.all([
+    InventoryLot.find({
+      productVariantId: variantId,
+      branchId,
+      quantityInStock: { $gt: 0 },
+    }).lean(),
+    InventoryItem.find({ productVariantId: variantId, branchId, status: "in_stock" }).lean(),
+  ]);
+
+  res.status(200).json({ success: true, data: { lots, items } });
+});

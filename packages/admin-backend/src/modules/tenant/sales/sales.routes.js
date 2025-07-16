@@ -5,6 +5,8 @@ const {
   createQuotation,
   getHeldSales,
   updateSaleStatus,
+  calculateTotals,
+  deleteDraftOrHold,
 } = require("./sales.controller");
 const { protect, authorize } = require("../../../middleware/auth.middleware");
 
@@ -19,7 +21,8 @@ router.route("/drafts").post(createDraft);
 router.route("/quotations").post(createQuotation);
 router.route("/held").get(getHeldSales);
 router.route("/:id/status").patch(updateSaleStatus);
-
+router.route("/:id").delete(deleteDraftOrHold);
+router.post("/calculate-totals", calculateTotals);
 // We will add routes for getting and converting quotations later
 
 module.exports = router;

@@ -17,7 +17,7 @@ exports.findDocumentByNumber = asyncHandler(async (req, res, next) => {
   if (document) docType = "RepairTicket";
 
   if (!document) {
-    document = await SalesInvoice.findOne({ invoiceNumber: query });
+    document = await SalesInvoice.findOne({ invoiceId: query });
     if (document) docType = "SalesInvoice";
   }
 

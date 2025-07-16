@@ -29,7 +29,7 @@ const salesOrderSchema = new mongoose.Schema(
 
     items: [
       {
-        ProductVariantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariants" },
+        productVariantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariants" },
         description: { type: String },
         quantity: { type: Number },
         unitPrice: { type: Number },

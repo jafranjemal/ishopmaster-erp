@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 const ReturnsPage = () => {
   const [step, setStep] = useState(1);
-  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [invoiceId, setInvoiceNumber] = useState('');
   const [originalInvoice, setOriginalInvoice] = useState(null);
   const [selectedItems, setSelectedItems] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -17,7 +17,7 @@ const ReturnsPage = () => {
 
   const handleFindInvoice = async () => {
     try {
-      const res = await tenantReturnsService.findInvoice(invoiceNumber);
+      const res = await tenantReturnsService.findInvoice(invoiceId);
       if (res.data.data.length === 0) throw new Error('Invoice not found.');
       setOriginalInvoice(res.data.data[0]);
       setStep(2);
@@ -78,7 +78,7 @@ const ReturnsPage = () => {
           {step === 1 && (
             <div className='flex gap-2'>
               <Input
-                value={invoiceNumber}
+                value={invoiceId}
                 onChange={(e) => setInvoiceNumber(e.target.value)}
                 placeholder='Enter Invoice Number...'
               />

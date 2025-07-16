@@ -12,6 +12,10 @@ const financialPeriodRoutes = require("./closing/financialPeriod.routes");
 const budgetSchema = require("./budget/budget.schema");
 const budgetRoutes = require("./budget/budget.routes");
 const reportingRoutes = require("./reporting/reporting.routes");
+const taxCategorySchema = require("./tax/taxCategory.schema");
+const taxRuleRoutes = require("./tax/taxRule.routes");
+const taxRuleSchema = require("./tax/taxRule.schema");
+const taxCategoryRoutes = require("./tax/taxCategory.routes");
 
 const mainRouter = express.Router();
 
@@ -21,6 +25,8 @@ mainRouter.use("/closing", closingRoutes);
 mainRouter.use("/periods", financialPeriodRoutes);
 mainRouter.use("/budgets", budgetRoutes);
 mainRouter.use("/reports", reportingRoutes);
+mainRouter.use("/tax-rules", taxRuleRoutes);
+mainRouter.use("/tax-categories", taxCategoryRoutes);
 module.exports = {
   schemas: {
     Account: accountSchema,
@@ -30,6 +36,8 @@ module.exports = {
     FinancialPeriod: financialPeriodSchema,
     ClosingChecklist: closingChecklistSchema,
     Budget: budgetSchema,
+    TaxCategory: taxCategorySchema,
+    TaxRule: taxRuleSchema,
   },
   router: mainRouter,
 };

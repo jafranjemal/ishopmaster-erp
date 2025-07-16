@@ -1,30 +1,37 @@
-import React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "ui-library";
-import JobSheetItem from "./JobSheetItem";
+import React, { useState } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'ui-library';
+import JobSheetItem from './JobSheetItem';
+import useAuth from '../../context/useAuth';
 
-const JobSheet = ({ items, onRemoveItem, onQuantityChange }) => {
+const JobSheet = ({ items, onRemoveItem, onQuantityChange, onEditItem }) => {
   return (
-    <div className="border border-slate-700 rounded-lg overflow-hidden h-full flex flex-col">
-      <div className="flex-grow overflow-y-auto">
+    <div className='border border-slate-700 rounded-lg overflow-hidden h-full flex flex-col'>
+      <div className='flex-grow overflow-y-auto'>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Item / Service</TableHead>
-              <TableHead className="w-24 text-center">Qty</TableHead>
-              <TableHead className="w-32 text-right">Price</TableHead>
-              <TableHead className="w-12"></TableHead>
+              <TableHead className='w-24 text-center'>Qty</TableHead>
+              <TableHead className='w-32 text-right'>Price</TableHead>
+              <TableHead className='w-12'></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {items.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center h-48 text-slate-400">
+                <TableCell colSpan={4} className='text-center h-48 text-slate-400'>
                   Use the workspace on the right to add items or start a repair job.
                 </TableCell>
               </TableRow>
             )}
             {items.map((item) => (
-              <JobSheetItem key={item.cartId} item={item} onRemove={onRemoveItem} onQuantityChange={onQuantityChange} />
+              <JobSheetItem
+                key={item.cartId}
+                item={item}
+                onRemove={onRemoveItem}
+                onQuantityChange={onQuantityChange}
+                onEdit={onEditItem}
+              />
             ))}
           </TableBody>
         </Table>

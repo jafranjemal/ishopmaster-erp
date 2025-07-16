@@ -8,140 +8,6 @@ const { recalculateInvoicePayments } = require("./utils/paymentUtils");
  */
 class PaymentsService {
   /**
-   * Records a payment against a source document, handles split payments, and creates
-   * the necessary accounting journal entries.
-   * @param {object} models - The tenant's compiled models.
-   * @param {object} paymentData - The complete data for the payment.
-   * @param {string} paymentData.paymentSourceId - The ID of the document being paid (e.g., an invoice).
-   * @param {string} paymentData.paymentSourceType - The model name of the source ('SupplierInvoice', 'SalesInvoice').
-   * @param {Array<object>} paymentData.paymentLines - The array of payment methods and amounts.
-   * @param {string} userId - The ID of the user processing the payment.
-   * @param {string} baseCurrency - The tenant's base currency.
-   */
-  async recordPaymentOld(
-    models,
-    { paymentSourceId, paymentSourceType, paymentLines, ...restOfPaymentData },
-    userId,
-    baseCurrency,
-    tenant
-  ) {
-    const { Payment, PaymentMethod, Cheque, Account, SupplierInvoice } = models; // Add other source models as needed
-
-    // 1. Validate and fetch all payment methods being used.
-    const methodIds = paymentLines.map((line) => line.paymentMethodId);
-    const paymentMethods = await PaymentMethod.find({
-      _id: { $in: methodIds },
-    });
-    if (paymentMethods.length !== methodIds.length) {
-      throw new Error("One or more payment methods are invalid.");
-    }
-    const methodMap = new Map(paymentMethods.map((m) => [m._id.toString(), m]));
-
-    // 2. Fetch the source document to get its details and ledger account.
-    // This is a simplified polymorphic fetch. A real system might have a helper function.
-    let sourceDocument;
-    if (paymentSourceType === "SupplierInvoice") {
-      sourceDocument = await SupplierInvoice.findById(paymentSourceId).populate({
-        path: "supplierId",
-        select: "ledgerAccountId name",
-      });
-    } // Add else-if for 'SalesInvoice' etc. later
-
-    if (!sourceDocument)
-      throw new Error("The source document for this payment could not be found.");
-
-    const sourceLedgerAccountId = sourceDocument.supplierId?.ledgerAccountId; // For AP Invoices
-    if (!sourceLedgerAccountId)
-      throw new Error(`The source document is not linked to a financial account.`);
-
-    // 3. Create the main Payment document "header".
-    const totalAmount = paymentLines.reduce((sum, line) => sum + line.amount, 0);
-
-    // This must be wrapped in an array for Mongoose transactions
-    const [newPayment] = await Payment.create([
-      {
-        ...restOfPaymentData,
-        paymentSourceId,
-        paymentSourceType,
-        paymentLines,
-        totalAmount,
-        processedBy: userId,
-        // If any line is a cheque, the overall status is pending.
-        status: paymentLines.some(
-          (line) => methodMap.get(line.paymentMethodId.toString())?.type === "cheque"
-        )
-          ? "pending_clearance"
-          : "completed",
-      },
-    ]);
-
-    // 4. Process each payment line to create journal entries and other records.
-    for (const line of paymentLines) {
-      const method = methodMap.get(line.paymentMethodId.toString());
-      // --- UPGRADED ACCOUNTING LOGIC ---
-      let creditAccountId;
-      let journalDescription = `Payment for ${paymentSourceType} #${
-        sourceDocument.invoiceId || sourceDocument.poNumber
-      }`;
-
-      // CRITICAL LOGIC: Choose the correct account to credit based on payment type
-      if (method.type === "cheque") {
-        creditAccountId = method.holdingAccountId; // Credit "Cheques Payable" liability account
-        journalDescription += ` via Cheque #${line.referenceNumber}`;
-
-        // --- CRITICAL INTEGRATION STEP ---
-        // Create the corresponding Cheque document
-        await Cheque.create([
-          {
-            paymentId: newPayment._id,
-            chequeNumber: line.referenceNumber,
-            bankName: line.bankName, // Frontend must send this
-            chequeDate: line.chequeDate, // Frontend must send this
-          },
-        ]);
-      } else {
-        // For Cash, Card, Bank Transfer, credit the direct asset account
-        creditAccountId = method.linkedAccountId;
-      }
-
-      if (!creditAccountId)
-        throw new Error(`Payment method "${method.name}" is not configured correctly.`);
-
-      // Create the journal entry for this specific payment line.
-      // All amounts are assumed to be in the tenant's base currency for now.
-      await accountingService.createJournalEntry(
-        models,
-        {
-          description: journalDescription,
-          entries: [
-            { accountId: sourceLedgerAccountId, debit: line.amount },
-            { accountId: creditAccountId, credit: line.amount },
-          ],
-          currency: baseCurrency,
-          exchangeRateToBase: 1, // Assume internal transfers are at a 1:1 rate with base
-          refs: {
-            paymentId: newPayment._id,
-            [paymentSourceType.toLowerCase() + "Id"]: paymentSourceId,
-          },
-        },
-        session,
-        tenant
-      );
-    }
-
-    // 5. Update the status of the source document
-    sourceDocument.amountPaid = (sourceDocument.amountPaid || 0) + totalAmount;
-    if (sourceDocument.amountPaid >= sourceDocument.totalAmount) {
-      sourceDocument.status = "fully_paid";
-    } else {
-      sourceDocument.status = "partially_paid";
-    }
-    await sourceDocument.save();
-
-    return newPayment;
-  }
-
-  /**
    * Records a payment against a source document, correctly handles split payments,
    * creates special records for complex types like cheques, and posts a single,
    * balanced, compound journal entry to the ledger.
@@ -149,22 +15,65 @@ class PaymentsService {
    */
   async recordPayment(
     models,
-    { paymentSourceId, paymentSourceType, paymentLines, ...restOfPaymentData },
+    {
+      sourceDocumentObject,
+      paymentSourceId,
+      paymentSourceType,
+      paymentLines,
+      ...restOfPaymentData
+    },
     userId,
     baseCurrency,
-    tenant
+    tenant,
+    session = null
   ) {
-    const { Payment, PaymentMethod, Cheque, Account, SupplierInvoice } = models; // Add other source models as needed
+    const {
+      Supplier,
+      Customer,
+      Payment,
+      PaymentMethod,
+      Cheque,
+      Account,
+      SupplierInvoice,
+      SalesInvoice,
+    } = models; // Add other source models as needed
 
-    // 1. Fetch the source document to get its details and ledger account.
-    let sourceDocument;
-    if (paymentSourceType === "SupplierInvoice") {
-      sourceDocument = await SupplierInvoice.findById(paymentSourceId).populate({
-        path: "supplierId",
-        select: "ledgerAccountId name",
-      });
+    // 1. Validate and fetch all payment methods being used.
+    const methodIds = paymentLines.map((line) => line.paymentMethodId);
+    const paymentMethods = await PaymentMethod.find({ _id: { $in: methodIds } }).session(session);
+    if (paymentMethods.length !== methodIds.length)
+      throw new Error("One or more payment methods are invalid.");
+    const methodMap = new Map(paymentMethods.map((m) => [m._id.toString(), m]));
+
+    let sourceDocument = sourceDocumentObject; // Use the passed object if it exists
+
+    const isOutflow = restOfPaymentData.direction === "outflow";
+
+    if (!sourceDocument) {
+      const SourceModel = paymentSourceType === "SupplierInvoice" ? SupplierInvoice : SalesInvoice;
+      sourceDocument = await SourceModel.findById(paymentSourceId).session(session);
     }
+
+    let sourceLedgerAccountId = null;
+
+    if (paymentSourceType === "SupplierInvoice" && sourceDocument?.supplierId) {
+      const supplier = await Supplier.findById(sourceDocument.supplierId)
+        .select("ledgerAccountId name")
+        .session(session);
+      sourceLedgerAccountId = supplier?.ledgerAccountId;
+    } else if (paymentSourceType === "SalesInvoice" && sourceDocument?.customerId) {
+      const customer = await Customer.findById(sourceDocument.customerId)
+        .select("ledgerAccountId name")
+        .session(session);
+      sourceLedgerAccountId = customer?.ledgerAccountId;
+    }
+
+    const paymentMethodTypes = paymentMethods.map((m) => m.type);
     // Add else-if for 'SalesInvoice' etc. later
+    console.log("paymentSourceId ", paymentSourceId);
+    console.log("paymentSourceType ", paymentSourceType);
+    console.log("sourceLedgerAccountId ", sourceLedgerAccountId);
+    console.log("sourceDocument ", sourceDocument);
 
     if (!sourceDocument) throw new Error("The source document could not be found.");
 
@@ -184,12 +93,6 @@ class PaymentsService {
     }
     // --- END VALIDATION ---
 
-    // 1. Validate and fetch all payment methods being used.
-    const methodIds = paymentLines.map((line) => line.paymentMethodId);
-    const paymentMethods = await PaymentMethod.find({
-      _id: { $in: methodIds },
-    });
-
     const uniqueMethodIds = new Set(methodIds);
 
     if (uniqueMethodIds.size !== methodIds.length) {
@@ -203,20 +106,19 @@ class PaymentsService {
         "Validation failed: One or more payment method IDs are invalid or unrecognized."
       );
     }
-    const methodMap = new Map(paymentMethods.map((m) => [m._id.toString(), m]));
 
     // 2. Fetch the source document to get its details and ledger account.
 
-    if (paymentSourceType === "SupplierInvoice") {
-      sourceDocument = await SupplierInvoice.findById(paymentSourceId).populate({
-        path: "supplierId",
-        select: "ledgerAccountId name",
-      });
-    } // Add else-if for 'SalesInvoice' etc. later
+    // if (paymentSourceType === "SupplierInvoice") {
+    //   sourceDocument = await SupplierInvoice.findById(paymentSourceId).populate({
+    //     path: "supplierId",
+    //     select: "ledgerAccountId name",
+    //   });
+    // }
+    // Add else-if for 'SalesInvoice' etc. later
 
     if (!sourceDocument) throw new Error("The source document could not be found.");
 
-    const sourceLedgerAccountId = sourceDocument.supplierId?.ledgerAccountId; // For AP Invoices
     if (!sourceLedgerAccountId)
       throw new Error(`The source document is not linked to a financial account.`);
 
@@ -234,17 +136,20 @@ class PaymentsService {
       };
     });
 
-    const [newPayment] = await Payment.create([
-      {
-        ...restOfPaymentData,
-        paymentSourceId,
-        paymentSourceType,
-        paymentLines: enrichedPaymentLines,
-        totalAmount,
-        processedBy: userId,
-        status: hasCheque ? "pending_clearance" : "completed",
-      },
-    ]);
+    const [newPayment] = await Payment.create(
+      [
+        {
+          ...restOfPaymentData,
+          paymentSourceId,
+          paymentSourceType,
+          paymentLines: enrichedPaymentLines,
+          totalAmount,
+          processedBy: userId,
+          status: hasCheque ? "pending_clearance" : "completed",
+        },
+      ],
+      { session }
+    );
 
     // --- THE DEFINITIVE FIX: BUILD A COMPOUND JOURNAL ENTRY ---
 
@@ -269,16 +174,19 @@ class PaymentsService {
 
       // If it's a cheque, create the separate Cheque tracking document.
       if (method.type === "cheque") {
-        await Cheque.create([
-          {
-            paymentId: newPayment._id,
-            chequeNumber: line.referenceNumber,
-            bankName: line.bankName,
-            chequeDate: line.chequeDate,
-            status: "pending_clearance",
-            direction: restOfPaymentData.direction,
-          },
-        ]);
+        await Cheque.create(
+          [
+            {
+              paymentId: newPayment._id,
+              chequeNumber: line.referenceNumber,
+              bankName: line.bankName,
+              chequeDate: line.chequeDate,
+              status: "pending_clearance",
+              direction: restOfPaymentData.direction,
+            },
+          ],
+          { session }
+        );
       }
     }
 
@@ -298,28 +206,20 @@ class PaymentsService {
           [`${paymentSourceType.toLowerCase()}Id`]: paymentSourceId,
         },
       },
-      null,
+      session,
       tenant
     );
-    // --- END OF FIX ---
 
-    // --- STATUS UPDATE LOGIC ---
-    // 7. Update the status of the source document
-    // sourceDocument.amountPaid = (sourceDocument.amountPaid || 0) + totalAmount;
-    // // Check if fully paid, allowing for tiny floating point discrepancies
-    // if (
-    //   Math.abs(sourceDocument.totalAmount - sourceDocument.amountPaid) < 0.01
-    // ) {
-    //   sourceDocument.status = "fully_paid";
-    // } else {
-    //   sourceDocument.status = "partially_paid";
-    // }
-    await sourceDocument.save();
+    await sourceDocument.save({ session });
 
-    await recalculateInvoicePayments(models, {
-      sourceId: paymentSourceId,
-      sourceType: paymentSourceType,
-    });
+    await recalculateInvoicePayments(
+      models,
+      {
+        sourceId: paymentSourceId,
+        sourceType: paymentSourceType,
+      },
+      session
+    );
 
     // --- END STATUS UPDATE ---
     return newPayment;

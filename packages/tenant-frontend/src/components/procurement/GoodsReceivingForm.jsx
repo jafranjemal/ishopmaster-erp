@@ -38,7 +38,7 @@
 //     setReceivedItems((prev) => ({
 //       ...prev,
 //       [key]: {
-//         ProductVariantId: poItem.ProductVariantId._id,
+//         productVariantId: poItem.productVariantId._id,
 //         quantityReceived: validatedQty,
 //         type: variant.templateId.type,
 //         serials:
@@ -135,7 +135,7 @@
 //               {itemsToReceive.map((item) => {
 //                 const currentEntry = receivedItems[item._id];
 //                 console.log(`Rendering item:`, item);
-//                 const variant = item.ProductVariantId;
+//                 const variant = item.productVariantId;
 //                 return (
 //                   <React.Fragment key={item._id}>
 //                     <TableRow>
@@ -251,7 +251,7 @@
 
 // export default GoodsReceivingForm;
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from 'react';
 import {
   Button,
   Input,
@@ -266,9 +266,9 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "ui-library";
-import { CheckCircle } from "lucide-react";
-import useAuth from "../../context/useAuth";
+} from 'ui-library';
+import { CheckCircle, ScanBarcode, WandSparkles } from 'lucide-react';
+import useAuth from '../../context/useAuth';
 
 const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
   const { formatCurrency } = useAuth();
@@ -276,7 +276,7 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
 
   const itemsToReceive = useMemo(
     () => purchaseOrder.items.filter((item) => item.quantityOrdered > item.quantityReceived),
-    [purchaseOrder.items]
+    [purchaseOrder.items],
   );
 
   const handleQuantityChange = (poItemId, variant, value) => {
@@ -289,12 +289,12 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
     setReceivedItems((prev) => ({
       ...prev,
       [variantId]: {
-        ProductVariantId: variantId,
+        productVariantId: variantId,
         quantityReceived: validatedQty,
         type: variant.templateId.type,
-        serials: variant.templateId.type === "serialized" ? Array(validatedQty).fill("") : [],
+        serials: variant.templateId.type === 'serialized' ? Array(validatedQty).fill('') : [],
         sellingPrice: variant.defaultSellingPrice,
-        overrideSellingPrice: "",
+        overrideSellingPrice: '',
       },
     }));
   };
@@ -320,33 +320,39 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
   const isFormValid = () => {
     return Object.values(receivedItems).every((item) => {
       if (item.quantityReceived <= 0) return true;
-      if (item.type !== "serialized") return true;
+      if (item.type !== 'serialized') return true;
       if (!item.serials || item.serials.length !== item.quantityReceived) return false;
-      return item.serials.every((s) => s.trim() !== "");
+      return item.serials.every((s) => s.trim() !== '');
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isFormValid()) {
-      alert("Please ensure all serial numbers are entered correctly.");
+      alert('Please ensure all serial numbers are entered correctly.');
       return;
     }
     const itemsToSubmit = Object.values(receivedItems).filter((item) => item.quantityReceived > 0);
     if (itemsToSubmit.length === 0) {
-      alert("No items selected for receipt.");
+      alert('No items selected for receipt.');
       return;
     }
     onReceive({ receivedItems: itemsToSubmit });
   };
 
+  const generateSerialNumber = (variantId, index) => {
+    const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const shortId = Math.random().toString(36).substring(2, 7).toUpperCase();
+    return `SN-${datePart}-${shortId}-${index + 1}`;
+  };
+
   return (
-    <Card className="mt-8">
+    <Card className='mt-8'>
       <CardHeader>
         <CardTitle>Receive Items into Stock</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className='space-y-4'>
           <Table>
             <TableHeader>
               <TableRow>
@@ -357,61 +363,72 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
             </TableHeader>
             <TableBody>
               {itemsToReceive.map((item) => {
-                const variant = item.ProductVariantId;
+                const variant = item.productVariantId;
                 const variantId = variant._id;
                 const currentEntry = receivedItems[variantId];
                 return (
                   <React.Fragment key={variantId}>
                     <TableRow>
-                      <TableCell className="font-medium">{item.description}</TableCell>
+                      <TableCell className='font-medium'>{item.description}</TableCell>
                       <TableCell>
                         <Input
-                          type="number"
+                          type='number'
                           placeholder={`Max Qty: ${item.quantityOrdered - item.quantityReceived}`}
                           max={item.quantityOrdered - item.quantityReceived}
-                          min="0"
-                          className="h-8 w-20"
-                          value={currentEntry?.quantityReceived || ""}
+                          min='0'
+                          className='h-8 w-20'
+                          value={currentEntry?.quantityReceived || ''}
                           onChange={(e) => handleQuantityChange(item._id, variant, e.target.value)}
                         />
                       </TableCell>
                       <TableCell>
-                        {variant.templateId.type !== "serialized" && (
+                        {variant.templateId.type !== 'serialized' && (
                           <Input
-                            type="number"
+                            type='number'
                             placeholder={`Default Selling Price: ${formatCurrency(variant.sellingPrice)}`}
-                            onChange={(e) => handlePriceChange(variantId, "overrideSellingPrice", e.target.value)}
-                            className="h-8 w-32"
+                            onChange={(e) => handlePriceChange(variantId, 'overrideSellingPrice', e.target.value)}
+                            className='h-8 w-32'
                           />
                         )}
                       </TableCell>
                     </TableRow>
 
-                    {variant.templateId.type === "serialized" && currentEntry?.quantityReceived > 0 && (
-                      <TableRow className="bg-slate-900/50">
-                        <TableCell colSpan={3} className="p-4">
-                          <div className="space-y-2">
-                            <Label className="font-semibold mb-2 block">
+                    {variant.templateId.type === 'serialized' && currentEntry?.quantityReceived > 0 && (
+                      <TableRow className='bg-slate-900/50'>
+                        <TableCell colSpan={3} className='p-4'>
+                          <div className='space-y-2'>
+                            <Label className='font-semibold mb-2 block'>
                               Enter Serial Numbers & Optional Override Prices:
                             </Label>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+                            <div className='grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2'>
                               {[...Array(currentEntry.quantityReceived)].map((_, i) => (
-                                <div key={i} className="flex items-center gap-2">
-                                  <Input
-                                    placeholder={`Serial #${i + 1}`}
-                                    value={currentEntry.serials[i] || ""}
-                                    onChange={(e) => handleSerialChange(variantId, i, e.target.value)}
-                                    required
-                                    className="h-8 flex-grow"
-                                  />
-                                  <Input
-                                    type="number"
-                                    placeholder="Override Price"
-                                    onChange={(e) =>
-                                      handlePriceChange(variantId, "overrideSellingPrice", e.target.value)
-                                    }
-                                    className="h-8 w-32"
-                                  />
+                                <div key={i} className='flex flex-col gap-1'>
+                                  <div className='flex items-start gap-2'>
+                                    <Input
+                                      placeholder={`Serial #${i + 1}`}
+                                      value={currentEntry.serials[i] || ''}
+                                      onChange={(e) => handleSerialChange(variantId, i, e.target.value)}
+                                      required
+                                      className='h-8 flex-grow'
+                                      suffixIcon={<ScanBarcode size={16} />}
+                                      onSuffixClick={() =>
+                                        handleSerialChange(variantId, i, generateSerialNumber(variantId, i))
+                                      }
+                                    />
+                                    <div className='flex flex-col items-start gap-[1opx]'>
+                                      <Input
+                                        placeholder={`Default Selling Price: ${formatCurrency(variant.sellingPrice)}`}
+                                        type='number'
+                                        onChange={(e) =>
+                                          handlePriceChange(variantId, 'overrideSellingPrice', e.target.value)
+                                        }
+                                        className='text-xs h-8 w-50'
+                                      />
+                                      <span className='text-xs text-slate-500 pl-1'>
+                                        Default Price: {formatCurrency(variant.sellingPrice)}
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
                               ))}
                             </div>
@@ -425,10 +442,10 @@ const GoodsReceivingForm = ({ purchaseOrder, onReceive, isSaving }) => {
             </TableBody>
           </Table>
 
-          <div className="pt-4 flex justify-end">
-            <Button type="submit" disabled={isSaving || !isFormValid()}>
-              <CheckCircle className="mr-2 h-4 w-4" />
-              {isSaving ? "Processing..." : "Confirm Receipt & Add to Stock"}
+          <div className='pt-4 flex justify-end'>
+            <Button type='submit' disabled={isSaving || !isFormValid()}>
+              <CheckCircle className='mr-2 h-4 w-4' />
+              {isSaving ? 'Processing...' : 'Confirm Receipt & Add to Stock'}
             </Button>
           </div>
         </form>

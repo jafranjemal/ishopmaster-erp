@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const couponService = require("./coupon.service");
 const taxService = require("./tax.service");
 const pricingService = require("./pricing.service");
+const salesCalculationService = require("./salesCalculation.service");
 
 /**
  * The SalesService handles all complex business logic related to sales,
@@ -43,18 +44,25 @@ class SalesService {
     models,
     { cartData, paymentData, customerId, branchId, userId, couponId },
     baseCurrency,
-    tenant
+    tenant,
+    session = null
   ) {
     try {
       const { SalesInvoice, Account, Customer, Employee, Commission } = models;
 
-      const pricedCart = await pricingService.calculatePrices(models, { cartData, customerId });
-      const { totalTax, taxBreakdown } = await taxService.calculateTax(models, {
+      // const pricedCart = await pricingService.calculatePrices(models, { cartData, customerId });
+      const pricedCart = await salesCalculationService.calculateCartTotals(models, {
         cartData,
+        customerId,
         branchId,
       });
-      const finalTotalAmount = pricedCart.totalAmount + totalTax;
-
+      const { grandTotal, totalTax, taxBreakdown } = pricedCart;
+      // const { totalTax, taxBreakdown } = await taxService.calculateTax(models, {
+      //   cartData,
+      //   branchId,
+      // });
+      const finalTotalAmount = grandTotal;
+      // const grandTotal = pricedCart.totalAmount + totalTax;
       // --- 1. CREDIT LIMIT VALIDATION ---
       const amountPaid = paymentData.paymentLines.reduce((sum, line) => sum + line.amount, 0);
       const amountDue = cartData.totalAmount - amountPaid;
@@ -89,65 +97,42 @@ class SalesService {
             branchId,
             quantity: item.quantity,
             serialNumber: item.serialNumber,
+            batchInfo: item?.batchInfo,
             userId,
+            refs: { salesInvoice: true }, // A flag for the ledger
           },
           session
         );
         totalCostOfGoodsSold += costOfGoodsSold;
-        saleItems.push({ ...item, costPriceInBaseCurrency: costOfGoodsSold / item.quantity });
+        // If the item is serialized or has batch info, we need to track it
+        // Create the invoice item, now including the traceability fields
+        saleItems.push({
+          ...item,
+          costPriceInBaseCurrency: costOfGoodsSold / item.quantity,
+          serialNumber: item.serialNumber,
+          batchNumber: item.batchInfo?.batchNumber,
+          inventoryLotId: item.batchInfo?.lotId,
+        });
+
         if (deductedItemIds) inventoryItemIds.push(...deductedItemIds);
       }
-
-      // 1. Process cart items to prepare for invoice and deduct stock
-      // for (const item of cartData.items) {
-      //   const { costOfGoodsSold } = await inventoryService.decreaseStock(models, {
-      //     ProductVariantId: item.ProductVariantId,
-      //     branchId,
-      //     quantity: item.quantity,
-      //     serialNumber: item.serialNumber, // Will be present for serialized items
-      //     userId,
-      //     // We will link the sale ID later
-      //   });
-
-      //   totalCostOfGoodsSold += costOfGoodsSold;
-      //   saleItems.push({
-      //     ProductVariantId: item.ProductVariantId,
-      //     description: item.variantName,
-      //     quantity: item.quantity,
-      //     unitPrice: item.unitPrice,
-      //     discount: item.discount,
-      //     finalPrice: item.finalPrice,
-      //     costPriceInBaseCurrency: costOfGoodsSold / item.quantity,
-      //   });
-      // }
-
-      // 2. Create the Sales Invoice with status 'completed'
-      // const [salesInvoice] = await SalesInvoice.create([
-      //   {
-      //     customerId,
-      //     branchId,
-      //     items: saleItems,
-      //     subTotal: cartData.subTotal,
-      //     totalDiscount: cartData.totalDiscount,
-      //     totalTax: totalTax,//cartData.totalTax,
-      //     totalAmount:  finalTotalAmount, //cartData.totalAmount,
-      //     soldBy: userId,
-      //     status: "completed",
-      //   },
-      // ]);
 
       const [salesInvoice] = await SalesInvoice.create(
         [
           {
             customerId,
             branchId,
-            items: saleItems,
             soldBy: userId,
             status: "completed",
+            items: pricedCart.items,
             subTotal: pricedCart.subTotal,
-            totalDiscount: pricedCart.totalDiscount,
+            totalLineDiscount: pricedCart.totalLineDiscount,
+            totalGlobalDiscount: pricedCart.totalGlobalDiscount,
+            globalDiscount: cartData.globalDiscount, // Save the rule itself
+            totalCharges: pricedCart.totalCharges,
+            additionalCharges: cartData.additionalCharges, // Save the charge details
             totalTax,
-            totalAmount: finalTotalAmount,
+            totalAmount: grandTotal, // Use the final calculated grand total
           },
         ],
         { session }
@@ -174,31 +159,31 @@ class SalesService {
 
       // Revenue & Tax Journal Entry
       const revenueEntries = [
-        { accountId: arAccount._id, debit: finalTotalAmount },
-        {
-          accountId: salesRevenueAccount._id,
-          credit: pricedCart.subTotal - pricedCart.totalDiscount,
-        },
+        { accountId: arAccount._id, debit: grandTotal },
+        // The actual revenue we earned (after discounts, before tax).
+        { accountId: salesRevenueAccount._id, credit: pricedCart.grandTotal },
       ];
 
+      // Add a separate credit line for each tax liability.
       taxBreakdown.forEach((tax) =>
         revenueEntries.push({ accountId: tax.linkedAccountId, credit: tax.amount })
       );
 
+      // This entry is now guaranteed to be balanced.
       await accountingService.createJournalEntry(
         models,
         {
-          description: `Sale - Invoice #${salesInvoice.invoiceNumber}`,
+          description: `Sale - Invoice #${salesInvoice.invoiceId}`,
           entries: revenueEntries,
           currency: baseCurrency,
           refs: { salesInvoiceId: salesInvoice._id },
         },
-        null,
+        session,
         tenant
       );
 
       // await accountingService.createJournalEntry(models, {
-      //   description: `Sale to customer for Invoice #${salesInvoice.invoiceNumber}`,
+      //   description: `Sale to customer for Invoice #${salesInvoice.invoiceId}`,
       //   entries: revenueEntries,
       //   refs: { salesInvoiceId: salesInvoice._id },
       // });
@@ -206,7 +191,7 @@ class SalesService {
       await accountingService.createJournalEntry(
         models,
         {
-          description: `COGS for Invoice #${salesInvoice.invoiceNumber}`,
+          description: `COGS for Invoice #${salesInvoice.invoiceId}`,
           entries: [
             { accountId: cogsAccount._id, debit: totalCostOfGoodsSold },
             { accountId: inventoryAssetAccount._id, credit: totalCostOfGoodsSold },
@@ -218,6 +203,7 @@ class SalesService {
         tenant
       );
 
+      console.log("salesInvoice._id ", salesInvoice?._id);
       // 6. Record Payment & Finalize Coupon
       if (amountPaid > 0)
         await paymentsService.recordPayment(
@@ -227,9 +213,11 @@ class SalesService {
             paymentSourceType: "SalesInvoice",
             paymentLines: paymentData.paymentLines,
             direction: "inflow",
+            sourceDocumentObject: salesInvoice, // Pass the sales invoice object directly
           },
           userId,
           baseCurrency,
+          tenant,
           session
         );
       if (couponId)

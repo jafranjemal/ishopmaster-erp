@@ -3,7 +3,7 @@ const getOverdueInvoiceReminderTemplate = (customerName, invoices) => {
 
   let invoiceListHtml = "<ul>";
   invoices.forEach((inv) => {
-    invoiceListHtml += `<li>Invoice #${inv.invoiceNumber} - Due: ${new Date(inv.dueDate).toLocaleDateString()} - Amount: ${inv.totalAmount}</li>`;
+    invoiceListHtml += `<li>Invoice #${inv.invoiceId} - Due: ${new Date(inv.dueDate).toLocaleDateString()} - Amount: ${inv.totalAmount}</li>`;
   });
   invoiceListHtml += "</ul>";
 
