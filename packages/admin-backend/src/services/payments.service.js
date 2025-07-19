@@ -1,18 +1,31 @@
+const Decimal = require("decimal.js");
 const accountingService = require("./accounting.service");
 const { recalculateInvoicePayments } = require("./utils/paymentUtils");
+const { PaymentError } = require("../errors/paymentErrors");
+const logger = require("../config/logger");
+const metrics = require("../config/metrics");
 
-/**
- * The PaymentsService is the central engine for processing all financial payments,
- * whether for sales, purchases, or other expenses. It orchestrates the creation
- * of payment records and their corresponding financial ledger entries.
- */
+// Status rules configuration
+const STATUS_RULES = {
+  cheque: "pending_clearance",
+  card: "completed",
+  cash: "completed",
+  credit: "pending_clearance",
+  default: "completed",
+};
+
+// Reference number validation patterns
+const REFERENCE_PATTERNS = {
+  cheque: /^[0-9]{6,12}$/,
+  card: /^(tx|ch)_[a-zA-Z0-9]{24}$/,
+  default: /^[a-zA-Z0-9\-_]{1,50}$/,
+};
+
 class PaymentsService {
-  /**
-   * Records a payment against a source document, correctly handles split payments,
-   * creates special records for complex types like cheques, and posts a single,
-   * balanced, compound journal entry to the ledger.
-   * Assumes it is being called from within a withTransaction block.
-   */
+  constructor() {
+    this.methodCache = new Map();
+  }
+
   async recordPayment(
     models,
     {
@@ -27,202 +40,500 @@ class PaymentsService {
     tenant,
     session = null
   ) {
-    const {
-      Supplier,
-      Customer,
-      Payment,
-      PaymentMethod,
-      Cheque,
-      Account,
-      SupplierInvoice,
-      SalesInvoice,
-    } = models; // Add other source models as needed
+    const startTime = Date.now();
+    let payment;
+    const auditTrail = [];
 
-    // 1. Validate and fetch all payment methods being used.
-    const methodIds = paymentLines.map((line) => line.paymentMethodId);
+    try {
+      // 1. Validate core parameters
+      this._validateCoreParameters(paymentSourceId, paymentSourceType, paymentLines);
+
+      // 2. Initialize models with session
+      const { Supplier, Customer, Payment, PaymentMethod, Cheque, SupplierInvoice, SalesInvoice } =
+        this._initModels(models, session);
+
+      // 3. Process payment methods
+      const { methodMap, methodIds } = await this._processPaymentMethods(
+        PaymentMethod,
+        paymentLines,
+        session
+      );
+
+      // 4. Handle source document
+      const { sourceDocument, sourceLedgerAccountId } = await this._handleSourceDocument(
+        sourceDocumentObject,
+        paymentSourceId,
+        paymentSourceType,
+        SupplierInvoice,
+        SalesInvoice,
+        Supplier,
+        Customer,
+        session
+      );
+
+      // 5. Validate payment amounts
+      this._validatePaymentAmounts(paymentLines, sourceDocument);
+
+      // 6. Create enriched payment lines
+      const enrichedPaymentLines = this._createEnrichedPaymentLines(paymentLines, methodMap);
+
+      const existingPayment = await Payment.findOne({
+        "paymentLines.referenceNumber": { $in: enrichedPaymentLines.map((l) => l.referenceNumber) },
+        paymentSourceId, // ✅ Also check same invoice
+        paymentSourceType,
+        status: { $ne: "voided" }, // Ignore voided payments
+      }).session(session);
+
+      if (existingPayment) throw new PaymentError("DUPLICATE_PAYMENT");
+
+      // 7. Create payment record
+      payment = await this._createPaymentRecord(
+        Payment,
+        {
+          ...restOfPaymentData,
+          paymentSourceId,
+          paymentSourceType,
+          paymentLines: enrichedPaymentLines,
+          processedBy: userId,
+        },
+        methodMap,
+        session
+      );
+
+      // 8. Process cheques if any
+      await this._processCheques(
+        Cheque,
+        paymentLines,
+        methodMap,
+        payment._id,
+        restOfPaymentData.direction,
+        session
+      );
+
+      // 9. Create journal entries
+      const journalEntries = this._buildJournalEntries(
+        sourceLedgerAccountId,
+        paymentLines,
+        methodMap,
+        restOfPaymentData.direction
+      );
+
+      // 10. Post accounting entries
+      await this._postAccountingEntries(
+        accountingService,
+        models,
+        journalEntries,
+        sourceDocument,
+        paymentSourceType,
+        payment._id,
+        paymentSourceId,
+        baseCurrency,
+        session,
+        tenant
+      );
+
+      // 11. Update source document
+      await this._updateSourceDocument(sourceDocument, session);
+
+      // 12. Recalculate invoice payments
+      await recalculateInvoicePayments(
+        models,
+        { sourceId: paymentSourceId, sourceType: paymentSourceType },
+        session
+      );
+
+      // 13. Log successful processing
+      metrics.timing("payment.processing.time", Date.now() - startTime);
+      logger.info("Payment processed successfully", {
+        paymentId: payment._id,
+        amount: payment.totalAmount,
+        methods: methodIds,
+      });
+
+      return payment;
+    } catch (error) {
+      // Enhanced error handling
+      logger.error("Payment processing failed", {
+        error: error.message,
+        stack: error.stack,
+        auditTrail,
+      });
+
+      metrics.increment("payment.processing.failure");
+      throw this._normalizeError(error);
+    }
+  }
+
+  // --- Private Methods --- //
+
+  _initModels(models, session) {
+    return {
+      Supplier: models.Supplier,
+      Customer: models.Customer,
+      Payment: models.Payment,
+      PaymentMethod: models.PaymentMethod,
+      Cheque: models.Cheque,
+      Account: models.Account,
+      SupplierInvoice: models.SupplierInvoice,
+      SalesInvoice: models.SalesInvoice,
+      session,
+    };
+  }
+
+  async _processPaymentMethods(PaymentMethod, paymentLines, session) {
+    const methodIds = [...new Set(paymentLines.map((line) => line.paymentMethodId))];
+
     const paymentMethods = await PaymentMethod.find({ _id: { $in: methodIds } }).session(session);
-    if (paymentMethods.length !== methodIds.length)
-      throw new Error("One or more payment methods are invalid.");
+
+    if (paymentMethods.length !== methodIds.length) {
+      const missingIds = methodIds.filter((id) => !paymentMethods.some((m) => m._id.equals(id)));
+      throw new PaymentError({
+        code: "INVALID_PAYMENT_METHODS",
+        details: { missingIds },
+        message: "One or more payment methods are invalid",
+      });
+    }
+
     const methodMap = new Map(paymentMethods.map((m) => [m._id.toString(), m]));
+    return { methodMap, methodIds };
+  }
 
-    let sourceDocument = sourceDocumentObject; // Use the passed object if it exists
-
-    const isOutflow = restOfPaymentData.direction === "outflow";
+  async _handleSourceDocument(
+    sourceDocumentObject,
+    paymentSourceId,
+    paymentSourceType,
+    SupplierInvoice,
+    SalesInvoice,
+    Supplier,
+    Customer,
+    session
+  ) {
+    let sourceDocument = sourceDocumentObject;
+    let sourceLedgerAccountId = null;
 
     if (!sourceDocument) {
       const SourceModel = paymentSourceType === "SupplierInvoice" ? SupplierInvoice : SalesInvoice;
       sourceDocument = await SourceModel.findById(paymentSourceId).session(session);
     }
 
-    let sourceLedgerAccountId = null;
+    if (!sourceDocument) {
+      throw new PaymentError({
+        code: "SOURCE_DOCUMENT_NOT_FOUND",
+        details: { paymentSourceId, paymentSourceType },
+        message: "The source document could not be found",
+      });
+    }
 
-    if (paymentSourceType === "SupplierInvoice" && sourceDocument?.supplierId) {
+    // Get ledger account based on document type
+    if (paymentSourceType === "SupplierInvoice" && sourceDocument.supplierId) {
       const supplier = await Supplier.findById(sourceDocument.supplierId)
         .select("ledgerAccountId name")
         .session(session);
       sourceLedgerAccountId = supplier?.ledgerAccountId;
-    } else if (paymentSourceType === "SalesInvoice" && sourceDocument?.customerId) {
+    } else if (paymentSourceType === "SalesInvoice" && sourceDocument.customerId) {
       const customer = await Customer.findById(sourceDocument.customerId)
         .select("ledgerAccountId name")
         .session(session);
       sourceLedgerAccountId = customer?.ledgerAccountId;
     }
 
-    const paymentMethodTypes = paymentMethods.map((m) => m.type);
-    // Add else-if for 'SalesInvoice' etc. later
-    console.log("paymentSourceId ", paymentSourceId);
-    console.log("paymentSourceType ", paymentSourceType);
-    console.log("sourceLedgerAccountId ", sourceLedgerAccountId);
-    console.log("sourceDocument ", sourceDocument);
-
-    if (!sourceDocument) throw new Error("The source document could not be found.");
-
-    console.log(paymentLines);
-    // --- VALIDATION LOGIC ---
-    const totalPayment = paymentLines.reduce((sum, line) => sum + parseFloat(line.amount), 0);
-    const totalAmount = parseFloat(totalPayment);
-    const amountDue = sourceDocument.totalAmount - (sourceDocument.amountPaid || 0);
-
-    // Use a small epsilon for floating point comparisons to avoid precision errors
-    if (totalAmount > amountDue + 1e-9) {
-      throw new Error(
-        `Payment amount (${totalAmount}) exceeds amount due (${amountDue.toFixed(
-          2
-        )}). Overpayment is not allowed.`
-      );
-    }
-    // --- END VALIDATION ---
-
-    const uniqueMethodIds = new Set(methodIds);
-
-    if (uniqueMethodIds.size !== methodIds.length) {
-      throw new Error(
-        "Invalid split payment: Duplicate payment methods detected. Please use each method only once."
-      );
+    if (!sourceLedgerAccountId) {
+      throw new PaymentError({
+        code: "MISSING_LEDGER_ACCOUNT",
+        details: {
+          documentType: paymentSourceType,
+          documentId: paymentSourceId,
+        },
+        message: "The source document is not linked to a financial account",
+      });
     }
 
-    if (paymentMethods.length !== methodIds.length) {
-      throw new Error(
-        "Validation failed: One or more payment method IDs are invalid or unrecognized."
-      );
+    return { sourceDocument, sourceLedgerAccountId };
+  }
+
+  _validatePaymentAmounts(paymentLines, sourceDocument) {
+    const totalPayment = paymentLines.reduce(
+      (sum, line) => sum.plus(new Decimal(line.amount)),
+      new Decimal(0)
+    );
+
+    const amountDue = new Decimal(sourceDocument.totalAmount).minus(sourceDocument.amountPaid || 0);
+
+    if (totalPayment.gt(amountDue)) {
+      throw new PaymentError({
+        code: "PAYMENT_AMOUNT_EXCEEDED",
+        details: {
+          totalPayment: totalPayment.toNumber(),
+          amountDue: amountDue.toNumber(),
+          maxAllowed: amountDue.toNumber(),
+        },
+        message: `Payment amount exceeds amount due by ${totalPayment.minus(amountDue).toNumber()}`,
+      });
     }
+  }
 
-    // 2. Fetch the source document to get its details and ledger account.
+  _createEnrichedPaymentLines(paymentLines, methodMap) {
+    return paymentLines.map((line) => {
+      const method = methodMap.get(line.paymentMethodId.toString());
 
-    // if (paymentSourceType === "SupplierInvoice") {
-    //   sourceDocument = await SupplierInvoice.findById(paymentSourceId).populate({
-    //     path: "supplierId",
-    //     select: "ledgerAccountId name",
-    //   });
-    // }
-    // Add else-if for 'SalesInvoice' etc. later
+      const amount =
+        typeof line.amount === "string" ? parseFloat(line.amount.replace(/,/g, "")) : line.amount;
 
-    if (!sourceDocument) throw new Error("The source document could not be found.");
+      // Validate reference number format
+      if (line.referenceNumber) {
+        const pattern = REFERENCE_PATTERNS[method.type] || REFERENCE_PATTERNS.default;
+        if (!pattern.test(line.referenceNumber)) {
+          throw new PaymentError({
+            code: "INVALID_REFERENCE_FORMAT",
+            details: {
+              methodType: method.type,
+              reference: line.referenceNumber,
+              expectedPattern: pattern.toString(),
+            },
+            message: `Invalid reference number format for ${method.type} payment`,
+          });
+        }
+      }
 
-    if (!sourceLedgerAccountId)
-      throw new Error(`The source document is not linked to a financial account.`);
+      return {
+        ...line,
+        amount,
+        status: line.status || STATUS_RULES[method.type] || STATUS_RULES.default, // ✅ Preserves existing status
+        processedAt: new Date(),
+      };
+    });
+  }
 
-    // 3. Create the main Payment document "header".
-
-    const hasCheque = paymentLines.some(
+  async _createPaymentRecord(Payment, paymentData, methodMap, session) {
+    const hasCheque = paymentData.paymentLines.some(
       (line) => methodMap.get(line.paymentMethodId.toString())?.type === "cheque"
     );
 
-    const enrichedPaymentLines = paymentLines.map((line) => {
-      const method = methodMap.get(line.paymentMethodId.toString());
-      return {
-        ...line,
-        status: method.type === "cheque" ? "pending" : "cleared",
-      };
-    });
-
-    const [newPayment] = await Payment.create(
+    const [payment] = await Payment.create(
       [
         {
-          ...restOfPaymentData,
-          paymentSourceId,
-          paymentSourceType,
-          paymentLines: enrichedPaymentLines,
-          totalAmount,
-          processedBy: userId,
-          status: hasCheque ? "pending_clearance" : "completed",
+          ...paymentData,
+          totalAmount: paymentData.paymentLines.reduce(
+            (sum, line) => sum + parseFloat(line.amount),
+            0
+          ),
+          // status: hasCheque ? STATUS_RULES.cheque : "pending",
         },
       ],
       { session }
     );
 
-    // --- THE DEFINITIVE FIX: BUILD A COMPOUND JOURNAL ENTRY ---
-
-    // 4. Prepare the journal entry. Start with the single debit.
-    const journalEntries = [
-      // Debit the source account (e.g., Accounts Payable) for the total amount.
-      { accountId: sourceLedgerAccountId, debit: totalAmount },
-    ];
-
-    // 5. Loop through each payment line to build the credits.
-    for (const line of paymentLines) {
-      const method = methodMap.get(line.paymentMethodId.toString());
-
-      // Determine which account to credit (the holding account for cheques, or the direct asset account for others)
-      const creditAccountId =
-        method.type === "cheque" ? method.holdingAccountId : method.linkedAccountId;
-      if (!creditAccountId)
-        throw new Error(`Payment method "${method.name}" is not configured correctly.`);
-
-      // Add a credit line for this payment method.
-      journalEntries.push({ accountId: creditAccountId, credit: parseFloat(line.amount) });
-
-      // If it's a cheque, create the separate Cheque tracking document.
-      if (method.type === "cheque") {
-        await Cheque.create(
-          [
-            {
-              paymentId: newPayment._id,
-              chequeNumber: line.referenceNumber,
-              bankName: line.bankName,
-              chequeDate: line.chequeDate,
-              status: "pending_clearance",
-              direction: restOfPaymentData.direction,
-            },
-          ],
-          { session }
-        );
-      }
+    // Then update to completed AFTER successful processing
+    if (!hasCheque) {
+      payment.status = "completed";
+      await payment.save({ session });
     }
 
-    console.log("🧾 Journal Entries Before Save:", JSON.stringify(journalEntries, null, 2));
-    // 6. Post the single, balanced, compound journal entry.
+    return payment;
+  }
+
+  async _processCheques(Cheque, paymentLines, methodMap, paymentId, direction, session) {
+    const chequesToCreate = paymentLines
+      .filter((line) => methodMap.get(line.paymentMethodId.toString())?.type === "cheque")
+      .map((line) => ({
+        paymentId,
+        chequeNumber: line.referenceNumber,
+        bankName: line.bankName,
+        chequeDate: line.chequeDate,
+        amount: line.amount,
+        status: "pending_clearance",
+        direction,
+        metadata: {
+          payer: line.payerDetails,
+          processedAt: new Date(),
+        },
+      }));
+
+    if (chequesToCreate.length > 0) {
+      await Cheque.create(chequesToCreate, { session });
+    }
+  }
+
+  _buildJournalEntriesOld(sourceLedgerAccountId, paymentLines, methodMap) {
+    const journalEntries = [
+      { accountId: sourceLedgerAccountId, debit: 0 }, // Initialize debit
+    ];
+
+    const totalAmount = paymentLines.reduce((sum, line) => {
+      const amount = new Decimal(line.amount);
+      const method = methodMap.get(line.paymentMethodId.toString());
+
+      // Credit line for each payment method
+      journalEntries.push({
+        accountId: method.type === "cheque" ? method.holdingAccountId : method.linkedAccountId,
+        credit: amount.toNumber(),
+        metadata: {
+          paymentMethod: method.name,
+          reference: line.referenceNumber,
+          paymentLineStatus: line.status, // ✅ Track status
+          timestamp: new Date().toISOString(),
+        },
+      });
+
+      return sum.plus(amount);
+    }, new Decimal(0));
+
+    // Set the debit amount
+    journalEntries[0].debit = totalAmount.toNumber();
+
+    return journalEntries;
+  }
+
+  _buildJournalEntries(sourceLedgerAccountId, paymentLines, methodMap, direction) {
+    const journalEntries = [];
+    const totalAmount = paymentLines.reduce(
+      (sum, line) => sum.plus(new Decimal(line.amount)),
+      new Decimal(0)
+    );
+
+    if (!direction) {
+      throw new PaymentError("MISSING_DIRECTION", "Payment direction is required");
+    }
+
+    if (direction === "inflow") {
+      // CUSTOMER PAYMENT (RECEIVING MONEY)
+      // 1. Debit cash/bank accounts (increase assets)
+      paymentLines.forEach((line) => {
+        const amount = new Decimal(line.amount);
+        const method = methodMap.get(line.paymentMethodId.toString());
+
+        journalEntries.push({
+          accountId: method.type === "cheque" ? method.holdingAccountId : method.linkedAccountId,
+          debit: amount.toNumber(), // DEBIT cash/bank
+          metadata: {
+            paymentMethod: method.name,
+            reference: line.referenceNumber,
+            paymentLineStatus: line.status,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      });
+
+      // 2. Credit accounts receivable (decrease assets)
+      journalEntries.push({
+        accountId: sourceLedgerAccountId,
+        credit: totalAmount.toNumber(), // CREDIT AR
+        metadata: {
+          description: "Payment received",
+          isReconciliationEntry: true,
+        },
+      });
+    } else {
+      // SUPPLIER PAYMENT (PAYING MONEY) - unchanged
+      journalEntries.push({ accountId: sourceLedgerAccountId, debit: totalAmount.toNumber() });
+
+      paymentLines.forEach((line) => {
+        const amount = new Decimal(line.amount);
+        const method = methodMap.get(line.paymentMethodId.toString());
+
+        journalEntries.push({
+          accountId: method.type === "cheque" ? method.holdingAccountId : method.linkedAccountId,
+          credit: amount.toNumber(),
+          metadata: {
+            paymentMethod: method.name,
+            reference: line.referenceNumber,
+            paymentLineStatus: line.status,
+            timestamp: new Date().toISOString(),
+          },
+        });
+      });
+    }
+
+    return journalEntries;
+  }
+
+  async _postAccountingEntries(
+    accountingService,
+    models,
+    journalEntries,
+    sourceDocument,
+    paymentSourceType,
+    paymentId,
+    paymentSourceId,
+    baseCurrency,
+    session,
+    tenant
+  ) {
     await accountingService.createJournalEntry(
       models,
       {
         description: `Payment for ${paymentSourceType} #${
-          sourceDocument.invoiceId || sourceDocument.poNumber
+          sourceDocument.invoiceId || sourceDocument.poNumber || paymentSourceId
         }`,
         entries: journalEntries,
         currency: baseCurrency,
-        exchangeRateToBase: 1, // Assumes payment is in base currency for simplicity
+        exchangeRateToBase: 1,
         refs: {
-          paymentId: newPayment._id,
+          paymentId,
           [`${paymentSourceType.toLowerCase()}Id`]: paymentSourceId,
+        },
+        auditTrail: {
+          userId: session?.user?._id,
+          tenantId: tenant,
         },
       },
       session,
       tenant
     );
+  }
 
+  async _updateSourceDocument(sourceDocument, session) {
     await sourceDocument.save({ session });
+  }
 
-    await recalculateInvoicePayments(
-      models,
-      {
-        sourceId: paymentSourceId,
-        sourceType: paymentSourceType,
+  _normalizeError(error) {
+    if (error instanceof PaymentError) return error;
+
+    return new PaymentError({
+      code: "PROCESSING_FAILURE",
+      details: {
+        originalError: error.message,
+        stack: error.stack,
       },
-      session
-    );
+      message: "Payment processing failed",
+    });
+  }
 
-    // --- END STATUS UPDATE ---
-    return newPayment;
+  _validateCoreParameters(paymentSourceId, paymentSourceType, paymentLines) {
+    if (!paymentSourceId || !paymentSourceType) {
+      throw new PaymentError({
+        code: "MISSING_REQUIRED_FIELD",
+        details: { paymentSourceId, paymentSourceType },
+        message: "Payment source ID and type are required",
+      });
+    }
+
+    paymentLines.forEach((line, index) => {
+      if (isNaN(parseFloat(line.amount))) {
+        throw new PaymentError({
+          code: "INVALID_AMOUNT",
+          details: { index, amount: line.amount },
+          message: `Payment line ${index} has invalid amount`,
+        });
+      }
+    });
+    paymentLines.forEach((line, index) => {
+      if (!line.paymentMethodId) {
+        throw new PaymentError({
+          code: "MISSING_PAYMENT_METHOD",
+          details: { index },
+          message: `Payment line ${index} is missing paymentMethodId`,
+        });
+      }
+    });
+
+    if (!paymentLines || !Array.isArray(paymentLines)) {
+      throw new PaymentError({
+        code: "INVALID_PAYMENT_LINES",
+        details: { paymentLines },
+        message: "Payment lines must be a non-empty array",
+      });
+    }
   }
 }
 

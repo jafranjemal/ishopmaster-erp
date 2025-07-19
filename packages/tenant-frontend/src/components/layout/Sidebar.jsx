@@ -67,6 +67,7 @@ import {
   Undo2,
   Contact2,
   Bookmark,
+  Coins,
 } from 'lucide-react';
 import useAuth from '../../context/useAuth';
 
@@ -386,6 +387,8 @@ const Sidebar = () => {
           icon: Globe,
           permission: 'settings:access',
         },
+        { name: 'Cash Drawer', href: '/settings/cash-drawer', icon: Coins, permission: 'settings:pos:manage' },
+
         {
           name: t('sidebar.sub_menu.users'),
           href: '/settings/users',

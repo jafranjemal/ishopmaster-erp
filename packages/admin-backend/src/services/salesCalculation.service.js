@@ -30,7 +30,14 @@ class SalesCalculationService {
       ...pricedCart,
       totalTax,
       taxBreakdown,
-      //grandTotal: pricedCart.totalAmount + totalTax,
+      grandTotal: pricedCart.grandTotal + totalTax || 0,
+      taxAuditTrail: taxBreakdown?.map((t) => ({
+        ruleName: t.ruleName,
+        rate: t.rate,
+        taxableAmount: t.taxableAmount,
+        taxAmount: t.amount,
+        calculationTimestamp: new Date(),
+      })),
     };
   }
 }

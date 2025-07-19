@@ -1,7 +1,8 @@
 const { v4: uuidv4 } = require("uuid");
 const exchangeRateService = require("./exchangeRate.service");
 const { default: mongoose } = require("mongoose");
-
+const { default: Decimal } = require("decimal.js");
+Decimal.set({ precision: 20, rounding: 4 });
 /**
  * The AccountingService handles all core financial logic. It is the only
  * service allowed to write directly to the Ledger, ensuring financial integrity.
@@ -38,19 +39,46 @@ class AccountingService {
 
     entries = entries.map((e) => ({
       ...e,
-      debit: Number(e.debit || 0),
-      credit: Number(e.credit || 0),
+      debit: new Decimal(e.debit || 0),
+      credit: new Decimal(e.credit || 0),
     }));
 
     console.log(entries);
     // 1. Validate that the entries are balanced
-    const totalDebits = entries.reduce((sum, entry) => sum + (entry.debit || 0), 0);
-    const totalCredits = entries.reduce((sum, entry) => sum + (entry.credit || 0), 0);
+    // const totalDebits = entries.reduce((sum, entry) => sum + (entry.debit || 0), 0);
+    // const totalCredits = entries.reduce((sum, entry) => sum + (entry.credit || 0), 0);
+
+    const totalDebits = entries.reduce(
+      (sum, entry) => sum.plus(new Decimal(entry.debit || 0)),
+      new Decimal(0)
+    );
+    const totalCredits = entries.reduce(
+      (sum, entry) => sum.plus(new Decimal(entry.credit || 0)),
+      new Decimal(0)
+    );
+
     console.log("Total Debits:", totalDebits);
     console.log("Total Credits:", totalCredits);
-    if (Math.abs(totalDebits - totalCredits) > 1e-9 || totalDebits === 0) {
-      throw new Error("Journal entry is unbalanced. Debits must equal credits.");
+
+    if (!totalDebits.minus(totalCredits).equals(0)) {
+      throw new AccountingError(
+        "UNBALANCED_ENTRY",
+        `Imbalance of ${totalDebits.minus(totalCredits)} detected`
+      );
     }
+
+    if (!totalDebits.equals(totalCredits)) {
+      throw new AccountingError(
+        "UNBALANCED_ENTRY",
+        `Debits (${totalDebits}) do not equal credits (${totalCredits})`,
+        {
+          totalDebits: totalDebits.toString(),
+          totalCredits: totalCredits.toString(),
+          entries, // Include original entries for debugging
+        }
+      );
+    }
+
     if (!currency || !exchangeRateToBase) {
       throw new Error("Currency and exchange rate are required for journal entries.");
     }
@@ -140,7 +168,7 @@ class AccountingService {
     }
 
     // 4. Create all entries within the provided transaction session
-    await LedgerEntry.create(ledgerDocs, { session });
+    await LedgerEntry.create(ledgerDocs, { session, ordered: true });
 
     // --- THE DEFINITIVE FIX: UPDATE ACCOUNT BALANCES ---
     const bulkOps = [];

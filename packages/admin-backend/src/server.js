@@ -29,6 +29,7 @@ const { receiveDevicePunch } = require("./modules/tenant/hr/attendance.controlle
 const dunningService = require("./services/dunning.service.js");
 const portalAuthRoutes = require("./modules/tenant/portal/customerAuth.routes.js");
 const customerAuthTokenSchema = require("./modules/tenant/portal/customerAuthToken.schema.js");
+const { metricsMiddleware } = require("./config/metrics.js");
 
 // CORS configuration
 const allowedOrigins = [
@@ -57,7 +58,14 @@ connectAdminDB();
 const app = express();
 app.use(express.json());
 app.use(cors(corsOptions));
+// Metrics endpoint
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", register.contentType);
+  res.end(await register.metrics());
+});
 
+// Apply middleware
+app.use(metricsMiddleware);
 const portalApiRouter = express.Router();
 const publicApiRouter = express.Router();
 publicApiRouter.post("/attendance/punch", tenantResolver, apiKeyAuth, receiveDevicePunch);

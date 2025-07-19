@@ -1,6 +1,8 @@
 const { default: mongoose } = require("mongoose");
 const asyncHandler = require("../../../../middleware/asyncHandler");
-
+const {
+  Types: { ObjectId },
+} = mongoose;
 // @desc    Get all product variants, with optional filtering
 // @route   GET /api/v1/tenant/inventory/products/variants
 exports.getAllVariants_old = asyncHandler(async (req, res, next) => {
@@ -32,23 +34,7 @@ exports.getAllVariants_old = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/tenant/inventory/products/variants?templateId=&search=&page=1&limit=20
 //
 
-const getAllDescendantCategoryIds = async (Category, categoryId) => {
-  const queue = [categoryId];
-  const result = new Set();
-
-  while (queue.length) {
-    const current = queue.shift();
-    result.add(current);
-    const children = await Category.find({ parent: current }, "_id").lean();
-    for (const child of children) {
-      queue.push(child._id.toString());
-    }
-  }
-
-  return Array.from(result); // Includes original ID + all children
-};
-
-exports.getAllVariants = asyncHandler(async (req, res, next) => {
+exports.getAllVariantsOld_ = asyncHandler(async (req, res, next) => {
   const { ProductVariants, InventoryItem, Category } = req.models;
 
   const templateId = req.query.templateId || null;
@@ -106,6 +92,16 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
     },
     { $unwind: "$templateId" },
     { $match: postLookupMatch },
+    {
+      $lookup: {
+        from: "warrantypolicies", // Use the collection name (usually plural and lowercase)
+        localField: "templateId.defaultWarrantyPolicyId",
+        foreignField: "_id",
+        as: "templateId.defaultWarrantyPolicyId", // Replace the ID with the full document
+      },
+    },
+    { $unwind: { path: "$templateId.defaultWarrantyPolicyId", preserveNullAndEmptyArrays: true } },
+
     {
       $lookup: {
         from: "productvariants",
@@ -214,6 +210,325 @@ exports.getAllVariants = asyncHandler(async (req, res, next) => {
     },
   });
 });
+
+exports.getAllVariants = asyncHandler(async (req, res, next) => {
+  const { ProductVariants, InventoryItem, Category, ProductTemplates } = req.models;
+
+  // Parse and validate parameters
+  const {
+    templateId,
+    search = "",
+    categoryId,
+    brandId,
+    templateType,
+    page = 1,
+    limit = 20,
+    variantIds,
+  } = req.query;
+
+  const parsedLimit = parseInt(limit) || 20;
+  const parsedPage = parseInt(page) || 1;
+  const skip = (parsedPage - 1) * parsedLimit;
+  const cleanSearch = search.trim();
+  const matchStage = { isActive: true };
+  let serialNumberVariantId = null;
+
+  // Handle variant IDs filter
+  if (variantIds) {
+    try {
+      const idsArray = variantIds.split(",").map((id) => {
+        if (!ObjectId.isValid(id.trim())) {
+          throw new Error(`Invalid ObjectId: ${id}`);
+        }
+        return new ObjectId(id.trim());
+      });
+      matchStage._id = { $in: idsArray };
+    } catch (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message || "Invalid variant IDs format",
+      });
+    }
+  }
+
+  // Handle serial number search ONLY if variantIds not provided
+  if (!variantIds && cleanSearch) {
+    const serialItem = await InventoryItem.findOne(
+      { serialNumber: cleanSearch },
+      { productVariantId: 1 }
+    ).lean();
+
+    if (serialItem) {
+      serialNumberVariantId = serialItem.productVariantId;
+      matchStage._id = new ObjectId(serialNumberVariantId);
+    } else {
+      // Text search only if no serial match
+      const searchRegex = new RegExp(cleanSearch, "i");
+      matchStage.$or = [
+        { variantName: searchRegex },
+        { sku: searchRegex },
+        { "templateId.name": searchRegex },
+      ];
+    }
+  }
+
+  // Handle template ID (only if not filtering by variantIds)
+  if (templateId && !variantIds) {
+    if (!ObjectId.isValid(templateId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid template ID format",
+      });
+    }
+    matchStage.templateId = new ObjectId(templateId);
+  }
+
+  // Category hierarchy processing (skip if variantIds provided)
+  let categoryIds = [];
+  if (categoryId && !variantIds) {
+    if (!ObjectId.isValid(categoryId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid category ID format",
+      });
+    }
+    categoryIds = await getAllDescendantCategoryIds(Category, categoryId);
+  }
+
+  // Main aggregation pipeline
+  const aggregationPipeline = [];
+
+  // Initial match
+  aggregationPipeline.push({ $match: matchStage });
+
+  // Join with product templates
+  const templatePipeline = [{ $match: { isActive: true } }];
+
+  // Apply template-level filters only if not filtering by variantIds
+  if (!variantIds) {
+    if (categoryIds.length > 0) {
+      templatePipeline.push({
+        $match: {
+          categoryId: { $in: categoryIds.map((id) => new ObjectId(id)) },
+        },
+      });
+    }
+
+    if (brandId) {
+      if (!ObjectId.isValid(brandId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid brand ID format",
+        });
+      }
+      templatePipeline.push({
+        $match: { brandId: new ObjectId(brandId) },
+      });
+    }
+
+    if (templateType) {
+      templatePipeline.push({
+        $match: { type: templateType },
+      });
+    }
+  }
+
+  aggregationPipeline.push({
+    $lookup: {
+      from: ProductTemplates.collection.name,
+      localField: "templateId",
+      foreignField: "_id",
+      as: "templateId",
+      pipeline: templatePipeline,
+    },
+  });
+
+  // Unwind template and filter out nulls
+  aggregationPipeline.push({
+    $unwind: {
+      path: "$templateId",
+      preserveNullAndEmptyArrays: false,
+    },
+  });
+
+  // Join warranty policy
+  aggregationPipeline.push({
+    $lookup: {
+      from: "warrantypolicies",
+      localField: "templateId.defaultWarrantyPolicyId",
+      foreignField: "_id",
+      as: "defaultWarrantyPolicyId",
+    },
+  });
+
+  // Unwind warranty policy
+  aggregationPipeline.push({
+    $unwind: {
+      path: "$defaultWarrantyPolicyId",
+      preserveNullAndEmptyArrays: true,
+    },
+  });
+
+  // Join required parts
+  aggregationPipeline.push({
+    $lookup: {
+      from: ProductVariants.collection.name,
+      localField: "templateId.requiredParts.productVariantId",
+      foreignField: "_id",
+      as: "requiredPartsVariants",
+    },
+  });
+
+  // Map required parts with variants
+  aggregationPipeline.push({
+    $addFields: {
+      "templateId.requiredParts": {
+        $map: {
+          input: "$templateId.requiredParts",
+          as: "part",
+          in: {
+            $mergeObjects: [
+              "$$part",
+              {
+                productVariant: {
+                  $arrayElemAt: [
+                    {
+                      $filter: {
+                        input: "$requiredPartsVariants",
+                        as: "pv",
+                        cond: { $eq: ["$$pv._id", "$$part.productVariantId"] },
+                      },
+                    },
+                    0,
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  });
+
+  // Inventory calculations
+  aggregationPipeline.push({
+    $lookup: {
+      from: "inventorylots",
+      localField: "_id",
+      foreignField: "productVariantId",
+      as: "lots",
+      pipeline: [{ $match: { status: "active" } }],
+    },
+  });
+
+  aggregationPipeline.push({
+    $lookup: {
+      from: "inventoryitems",
+      localField: "_id",
+      foreignField: "productVariantId",
+      as: "items",
+      pipeline: [{ $match: { status: "in_stock" } }],
+    },
+  });
+
+  aggregationPipeline.push({
+    $addFields: {
+      quantityInStock: {
+        $add: [{ $size: "$items" }, { $sum: "$lots.quantityInStock" }],
+      },
+      hasBatches: { $gt: [{ $size: "$lots" }, 1] },
+    },
+  });
+
+  // Project final fields
+  aggregationPipeline.push({
+    $project: {
+      requiredPartsVariants: 0,
+      lots: 0,
+      items: 0,
+    },
+  });
+
+  // Sorting and pagination
+  const facetStage = {
+    $facet: {
+      data: [
+        { $sort: { "templateId.name": 1, variantName: 1 } },
+        { $skip: skip },
+        { $limit: parsedLimit },
+      ],
+      totalCount: [{ $count: "total" }],
+    },
+  };
+
+  aggregationPipeline.push(facetStage);
+
+  // Execute aggregation
+  let results;
+  try {
+    results = await ProductVariants.aggregate(aggregationPipeline);
+  } catch (error) {
+    console.error("Aggregation error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Database aggregation failed",
+      error: error.message,
+    });
+  }
+
+  const variants = results[0]?.data || [];
+  const totalCount = results[0]?.totalCount[0]?.total || 0;
+
+  // ERP-specific enhancements
+  const enhancedVariants = variants.map((variant) => {
+    const idString = variant._id.toString();
+    return {
+      ...variant,
+      erpCode: `PV-${idString.substring(idString.length - 6)}`,
+      stockStatus: getStockStatus(variant.quantityInStock),
+      lastInventorySync: new Date(),
+      // Add other ERP-specific fields as needed
+    };
+  });
+
+  res.status(200).json({
+    success: true,
+    data: enhancedVariants,
+    pagination: {
+      total: totalCount,
+      page: parsedPage,
+      limit: parsedLimit,
+      pages: Math.ceil(totalCount / parsedLimit),
+    },
+  });
+});
+
+// ERP Helper Functions
+function getStockStatus(quantity) {
+  if (quantity === 0) return "out_of_stock";
+  if (quantity <= 5) return "low_stock";
+  if (quantity <= 20) return "medium_stock";
+  return "high_stock";
+}
+
+async function getAllDescendantCategoryIds(Category, parentId) {
+  const results = await Category.aggregate([
+    { $match: { _id: new ObjectId(parentId) } },
+    {
+      $graphLookup: {
+        from: Category.collection.name,
+        startWith: "$_id",
+        connectFromField: "_id",
+        connectToField: "parent",
+        as: "descendants",
+      },
+    },
+    { $unwind: "$descendants" },
+    { $group: { _id: null, ids: { $push: "$descendants._id" } } },
+  ]);
+
+  return results.length > 0 ? [parentId, ...results[0].ids.map((id) => id.toString())] : [parentId];
+}
 
 // @desc    Update a single product variant
 // @route   PUT /api/v1/tenant/inventory/products/variants/:id

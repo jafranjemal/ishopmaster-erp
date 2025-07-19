@@ -190,3 +190,34 @@ exports.generatePortalToken = asyncHandler(async (req, res, next) => {
   const loginUrl = `${baseUrl}/portal/login?token=${oneTimeToken}&tenant=${req.tenant.subdomain}`;
   res.status(200).json({ success: true, data: { loginUrl, token: oneTimeToken } });
 });
+
+// @desc    Get a customer's credit limit and current A/R balance
+// @route   GET /api/v1/tenant/crm/customers/:id/credit-summary
+exports.getCreditSummary = asyncHandler(async (req, res, next) => {
+  const { Customer, Account } = req.models;
+  const customer = await Customer.findById(req.params.id)
+    .select("creditLimit ledgerAccountId")
+    .lean();
+
+  if (!customer) {
+    return res.status(404).json({ success: false, error: "Customer not found." });
+  }
+
+  console.log("customer ", customer);
+  let currentBalance = 0;
+  if (customer.ledgerAccountId) {
+    const arAccount = await Account.findById(customer.ledgerAccountId).select("balance").lean();
+    console.log(arAccount);
+    // Assuming base currency for now. A more advanced system would specify currency.
+    // currentBalance = arAccount.balance.get(req.tenant.settings.localization.baseCurrency) || 0;
+    currentBalance = arAccount?.balance?.[req.tenant.settings.localization.baseCurrency] || 0;
+  }
+
+  res.status(200).json({
+    success: true,
+    data: {
+      creditLimit: customer.creditLimit,
+      currentBalance: currentBalance,
+    },
+  });
+});

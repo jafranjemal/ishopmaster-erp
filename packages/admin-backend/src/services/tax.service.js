@@ -6,7 +6,10 @@ class TaxService {
     const _branchId = branchId ? new mongoose.Types.ObjectId(branchId) : null;
     const activeRules = await TaxRule.find({
       isActive: true,
-      $or: [{ branchId: null }, { _branchId }],
+      $or: [
+        { branchId: null },
+        { branchId: _branchId }, // <-- THIS was the missing part
+      ],
     }).sort({ priority: 1 });
 
     if (activeRules.length === 0) return { totalTax: 0, taxBreakdown: [] };

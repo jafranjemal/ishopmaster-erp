@@ -6,6 +6,7 @@ const couponService = require("./coupon.service");
 const taxService = require("./tax.service");
 const pricingService = require("./pricing.service");
 const salesCalculationService = require("./salesCalculation.service");
+const { ERPComplianceError } = require("../errors/erpComplianceError");
 
 /**
  * The SalesService handles all complex business logic related to sales,
@@ -15,18 +16,25 @@ class SalesService {
   /**
    * Creates a draft sale or a quotation without affecting stock or processing payments.
    */
-  async createQuoteOrDraft(models, { cartData, customerId, branchId, userId, status, expiryDate }) {
+  async createQuoteOrDraft(models, params) {
     const { SalesInvoice } = models;
+
+    // Destructure parameters safely
+    const { cartData, customerId, branchId, userId, status, expiryDate } = params || {};
+
+    // Add null checks and default values
+    if (!cartData) throw new Error("cartData is required");
+    if (!cartData.items) throw new Error("cartData.items is required");
 
     const [newDoc] = await SalesInvoice.create([
       {
         customerId,
         branchId,
         items: cartData.items,
-        subTotal: cartData.subTotal,
-        totalDiscount: cartData.totalDiscount,
-        totalTax: cartData.totalTax,
-        totalAmount: cartData.totalAmount,
+        subTotal: cartData.subTotal || 0,
+        totalDiscount: cartData.totalDiscount || 0,
+        totalTax: cartData.totalTax || 0,
+        totalAmount: cartData.totalAmount || cartData.grandTotal || 0,
         soldBy: userId,
         status, // 'draft' or 'quotation'
         expiryDate, // For quotations
@@ -48,7 +56,7 @@ class SalesService {
     session = null
   ) {
     try {
-      const { SalesInvoice, Account, Customer, Employee, Commission } = models;
+      const { ProductVariants, SalesInvoice, Account, Customer, Employee, Commission } = models;
 
       // const pricedCart = await pricingService.calculatePrices(models, { cartData, customerId });
       const pricedCart = await salesCalculationService.calculateCartTotals(models, {
@@ -84,46 +92,132 @@ class SalesService {
 
       // --- END OF CREDIT LIMIT VALIDATION ---
 
-      // 2. Deduct stock and create invoice items
-      let totalCostOfGoodsSold = 0;
-      const saleItems = [];
+      // 2. Verify inventory availability - skip pure service items
+      for (const item of cartData.items) {
+        const variant = await ProductVariants.findById(item.productVariantId)
+          .populate("templateId")
+          .lean();
 
-      const inventoryItemIds = []; // To track for the audit link
-      for (const item of pricedCart.items) {
-        const { costOfGoodsSold, deductedItemIds } = await inventoryService.decreaseStock(
+        // Skip inventory check for pure service items
+        if (variant.templateId.type === "service" && !variant.templateId.requiredParts?.length) {
+          continue;
+        }
+
+        const inventoryStatus = await inventoryService.checkAvailability(
           models,
           {
             productVariantId: item.productVariantId,
             branchId,
             quantity: item.quantity,
-            serialNumber: item.serialNumber,
-            batchInfo: item?.batchInfo,
-            userId,
-            refs: { salesInvoice: true }, // A flag for the ledger
           },
           session
         );
-        totalCostOfGoodsSold += costOfGoodsSold;
-        // If the item is serialized or has batch info, we need to track it
-        // Create the invoice item, now including the traceability fields
-        saleItems.push({
-          ...item,
-          costPriceInBaseCurrency: costOfGoodsSold / item.quantity,
-          serialNumber: item.serialNumber,
-          batchNumber: item.batchInfo?.batchNumber,
-          inventoryLotId: item.batchInfo?.lotId,
-        });
 
-        if (deductedItemIds) inventoryItemIds.push(...deductedItemIds);
+        if (!inventoryStatus.available) {
+          throw new ERPComplianceError("INV-102", {
+            productVariantId: item.productVariantId,
+            requested: item.quantity,
+            available: inventoryStatus.availableQuantity,
+            isBundle: inventoryStatus.isBundle,
+            components: inventoryStatus.components,
+          });
+        }
       }
+
+      // 3. Deduct stock and create invoice items and modified to handle services
+      let totalCostOfGoodsSold = 0;
+      const saleItems = [];
+
+      const inventoryItemIds = []; // To track for the audit link
+      for (const item of pricedCart.items) {
+        const variant = await ProductVariants.findById(item.productVariantId)
+          .populate("templateId")
+          .lean();
+
+        // Handle service items
+        if (variant.templateId.type === "service") {
+          let costOfGoodsSold = 0;
+          let partDeductedIds = [];
+
+          // Deduct required parts if any
+          if (variant.templateId.requiredParts?.length > 0) {
+            const result = await inventoryService.decreaseStock(
+              models,
+              {
+                productVariantId: item.productVariantId,
+                branchId,
+                quantity: item.quantity,
+                userId,
+                refs: { salesInvoice: true },
+              },
+              session
+            );
+            costOfGoodsSold = result.costOfGoodsSold;
+            partDeductedIds = result.deductedItemIds || [];
+          }
+
+          // Get the priced item for this service
+          const pricedItem = pricedCart.items.find((pi) => pi.cartId === item.cartId);
+          if (!pricedItem) throw new Error("Priced item not found");
+
+          saleItems.push({
+            ...pricedItem,
+            costPriceInBaseCurrency: costOfGoodsSold / item.quantity,
+            isService: true,
+            laborHours: item.laborHours,
+            laborRate: item.laborRate,
+            requiredParts: variant.templateId.requiredParts.map((part) => ({
+              productVariantId: part.productVariantId,
+              quantity: part.quantity * item.quantity,
+              costPrice: part.costPrice,
+            })),
+          });
+
+          if (partDeductedIds.length) inventoryItemIds.push(...partDeductedIds);
+        }
+        // Handle product items
+        else {
+          const pricedItem = pricedCart.items.find((pi) => pi.cartId === item.cartId);
+          if (!pricedItem) throw new Error("Priced item not found");
+
+          const { costOfGoodsSold, deductedItemIds } = await inventoryService.decreaseStock(
+            models,
+            {
+              productVariantId: item.productVariantId,
+              branchId,
+              quantity: item.quantity,
+              serialNumber: item.serialNumber,
+              batchInfo: item?.batchInfo,
+              userId,
+              refs: { salesInvoice: true }, // A flag for the ledger
+            },
+            session
+          );
+          totalCostOfGoodsSold += costOfGoodsSold;
+          // If the item is serialized or has batch info, we need to track it
+          // Create the invoice item, now including the traceability fields
+          saleItems.push({
+            ...item,
+            costPriceInBaseCurrency: costOfGoodsSold / item.quantity,
+            serialNumber: item.serialNumber,
+            batchNumber: item.batchInfo?.batchNumber,
+            inventoryLotId: item.batchInfo?.lotId,
+          });
+
+          if (deductedItemIds) inventoryItemIds.push(...deductedItemIds);
+        }
+      } //end of loop
 
       const [salesInvoice] = await SalesInvoice.create(
         [
           {
+            paymentStatus:
+              amountDue <= 0.01 ? "paid" : amountPaid > 0 ? "partially_paid" : "unpaid",
             customerId,
             branchId,
             soldBy: userId,
             status: "completed",
+            workflowStatus: "completed",
             items: pricedCart.items,
             subTotal: pricedCart.subTotal,
             totalLineDiscount: pricedCart.totalLineDiscount,
@@ -161,7 +255,11 @@ class SalesService {
       const revenueEntries = [
         { accountId: arAccount._id, debit: grandTotal },
         // The actual revenue we earned (after discounts, before tax).
-        { accountId: salesRevenueAccount._id, credit: pricedCart.grandTotal },
+        {
+          accountId: salesRevenueAccount._id,
+          credit:
+            pricedCart.subTotal - pricedCart.totalLineDiscount - pricedCart.totalGlobalDiscount,
+        },
       ];
 
       // Add a separate credit line for each tax liability.

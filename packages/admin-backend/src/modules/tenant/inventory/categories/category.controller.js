@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const asyncHandler = require("../../../../middleware/asyncHandler");
 
 // @desc    Get all categories
@@ -27,7 +28,11 @@ exports.getCategoryById = asyncHandler(async (req, res, next) => {
 exports.createCategory = asyncHandler(async (req, res, next) => {
   const { Category } = req.models;
   // The request body can now include an optional `parent` ID
-  const newCategory = await Category.create(req.body);
+  const newCategory = await Category.create({
+    ...req.body,
+    linkedBrands: req.body.linkedBrands || [],
+    linkedDevices: req.body.linkedDevices || [],
+  });
   res.status(201).json({ success: true, data: newCategory });
 });
 
@@ -35,7 +40,12 @@ exports.createCategory = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/tenant/inventory/categories/:id
 exports.updateCategory = asyncHandler(async (req, res, next) => {
   const { Category } = req.models;
-  const updatedCategory = await Category.findByIdAndUpdate(req.params.id, req.body, {
+  const updatedData = {
+    ...req.body,
+    linkedBrands: req.body.linkedBrands || [],
+    linkedDevices: req.body.linkedDevices || [],
+  };
+  const updatedCategory = await Category.findByIdAndUpdate(req.params.id, updatedData, {
     new: true,
     runValidators: true,
   });
@@ -97,3 +107,127 @@ const buildCategoryTree = (categories, parentId = null) => {
   }
   return tree;
 };
+
+// @desc    Get brands linked to a category through products
+// @route   GET /api/v1/tenant/inventory/categories/:id/brands
+exports.getLinkedBrands = asyncHandler(async (req, res, next) => {
+  const { ProductTemplates } = req.models;
+  const categoryId = req.params.id;
+
+  console.log("getLinkedBrands-> categoryId  ", categoryId);
+  // Get distinct brands with products in this category
+  const brands = await ProductTemplates.aggregate([
+    {
+      $match: {
+        categoryId: new mongoose.Types.ObjectId(categoryId),
+        isActive: true,
+      },
+    },
+    {
+      $group: {
+        _id: "$brandId",
+      },
+    },
+    {
+      $lookup: {
+        from: "brands",
+        localField: "_id",
+        foreignField: "_id",
+        as: "brand",
+      },
+    },
+    {
+      $unwind: "$brand",
+    },
+    {
+      $replaceRoot: { newRoot: "$brand" },
+    },
+  ]);
+
+  console.log("all brands for this categroy ", brands);
+  res.status(200).json({
+    success: true,
+    data: brands,
+  });
+});
+
+// @desc    Get devices linked to a category through products
+// @route   GET /api/v1/tenant/inventory/categories/:id/devices
+exports.getLinkedDevices = asyncHandler(async (req, res, next) => {
+  const { ProductTemplates } = req.models;
+  const categoryId = req.params.id;
+
+  // Get distinct devices with products in this category
+  const devices = await ProductTemplates.aggregate([
+    {
+      $match: {
+        categoryId: new mongoose.Types.ObjectId(categoryId),
+        deviceId: { $ne: null },
+        isActive: true,
+      },
+    },
+    {
+      $group: {
+        _id: "$deviceId",
+      },
+    },
+    {
+      $lookup: {
+        from: "devices",
+        localField: "_id",
+        foreignField: "_id",
+        as: "device",
+      },
+    },
+    {
+      $unwind: "$device",
+    },
+    {
+      $replaceRoot: { newRoot: "$device" },
+    },
+  ]);
+
+  res.status(200).json({
+    success: true,
+    data: devices,
+  });
+});
+
+// @desc    Get direct children of a category
+// @route   GET /api/v1/tenant/inventory/categories/children/:parentId
+exports.getChildren = asyncHandler(async (req, res, next) => {
+  const { Category } = req.models;
+  const { parentId } = req.params;
+  console.log("parent id ", parentId);
+  // Handle root categories
+  if (parentId === "root") {
+    const rootCategories = await Category.find({
+      parent: null,
+    }).lean();
+
+    console.log("rootCategories ", rootCategories);
+    return res.status(200).json({
+      success: true,
+      data: rootCategories,
+    });
+  }
+
+  // Validate parent category exists
+  const parentCategory = await Category.findById(parentId);
+  if (!parentCategory) {
+    return res.status(404).json({
+      success: false,
+      error: "ERP_CATEGORY_NOT_FOUND: Parent category not found",
+    });
+  }
+
+  // Get direct children
+  const children = await Category.find({
+    parent: parentId,
+  }).lean();
+
+  res.status(200).json({
+    success: true,
+    data: children,
+  });
+});

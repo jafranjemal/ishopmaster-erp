@@ -1,37 +1,32 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import TotalsPanel from '../../components/pos/TotalsPanel';
+import useAuth from '../../context/useAuth';
 import {
   tenantCustomerService,
   tenantPaymentMethodService,
   tenantProductService,
   tenantSalesService,
+  tenantSettingsService,
 } from '../../services/api';
-import useAuth from '../../context/useAuth';
-import CartView from '../../components/pos/CartView';
-import TotalsPanel from '../../components/pos/TotalsPanel';
-import ProductGrid from '../../components/pos/ProductGrid';
 
-import { cn } from 'ui-library/lib/utils'; // Assuming you have this utility
-import ProductVariantSearch from '../../components/procurement/ProductVariantSearch';
-import ProductSearchPanel from '../../components/pos/ProductSearchPanel';
-import JobRecall from '../../components/pos/JobRecall';
+import { FileText, Hand, Plus, Tag, XCircle } from 'lucide-react';
+import { Button, Modal } from 'ui-library';
+import AdditionalChargeForm from '../../components/pos/AdditionalChargeForm';
 import CustomerContext from '../../components/pos/CustomerContext';
 import CustomerSearchModal from '../../components/pos/CustomerSearchModal';
-import QuickCustomerCreateForm from '../../components/pos/QuickCustomerCreateForm';
-import { Button, Modal } from 'ui-library';
-import JobSheet from '../../components/pos/JobSheet';
-import WorkspaceTabs from '../../components/pos/WorkspaceTabs';
-import RepairWizard from '../../components/pos/wizard/RepairWizard';
-import UniversalSearch from '../../components/pos/UniversalSearch';
 import DiscoveryPanel from '../../components/pos/DiscoveryPanel';
-import PaymentModal from '../../components/pos/payments/PaymentModal';
-import StockBreakdownModal from '../../components/pos/StockBreakdownModal';
-import { useCartCalculator } from '../../hooks/useCartCalculator';
-import { FileText, Hand, Plus, Tag, XCircle } from 'lucide-react';
-import { usePosSession } from '../../context/PosSessionContext';
-import JobSheetEditorModal from '../../components/pos/JobSheetEditorModal';
 import GlobalDiscountForm from '../../components/pos/GlobalDiscountForm';
-import AdditionalChargeForm from '../../components/pos/AdditionalChargeForm';
+import JobRecall from '../../components/pos/JobRecall';
+import JobSheet from '../../components/pos/JobSheet';
+import JobSheetEditorModal from '../../components/pos/JobSheetEditorModal';
+import PaymentModal from '../../components/pos/payments/PaymentModal';
+import QuickCustomerCreateForm from '../../components/pos/QuickCustomerCreateForm';
+import StockBreakdownModal from '../../components/pos/StockBreakdownModal';
+import UniversalSearch from '../../components/pos/UniversalSearch';
+import ConfirmationModal from '../../components/shared/ConfirmationModal';
+import { usePosSession } from '../../context/PosSessionContext';
+import { useCartCalculator } from '../../hooks/useCartCalculator';
 
 /**
  * The definitive "smart" page orchestrator for the Point of Sale terminal.
@@ -49,6 +44,9 @@ const PosPage = ({ layout }) => {
     selectedCustomer,
     setGlobalDiscount,
     setAdditionalCharges,
+    removeGlobalDiscount,
+    removeAdditionalCharge,
+    creditSummary,
     ...posSession
   } = usePosSession();
 
@@ -59,6 +57,7 @@ const PosPage = ({ layout }) => {
     posSession.globalDiscount,
     posSession.additionalCharges,
   );
+
   const [cartItems, setCartItems] = useState([]);
   const [popularItems, setPopularItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -81,28 +80,84 @@ const PosPage = ({ layout }) => {
   const [editingJobItem, setEditingJobItem] = useState(null);
   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
   const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [pendingSaleData, setPendingSaleData] = useState(null);
+  const canSellOnCredit = useMemo(() => (selectedCustomer?.creditLimit || 0) > 0, [selectedCustomer]);
+  const [denominations, setDenominations] = useState([]);
+  useEffect(() => {
+    tenantSettingsService.getDenominations().then((res) => setDenominations(res.data.data));
+  }, []);
 
-  // const resetPos = () => {
-  //   setJobItems([]);
-  //   setSelectedCustomer(defaultCustomer);
-  //   setActiveSaleId(null);
-  // };
+  const handleFinalizeOnCredit = async () => {
+    if (!canSellOnCredit) return toast.error('This customer is not eligible for credit sales.');
+    if (!window.confirm("This will add the full amount to the customer's account. Proceed?")) return;
 
-  const handleHoldSale = async () => {
-    if (!posSession.activeSaleId) {
-      // First, create a draft to get an ID
-      const draft = await tenantSalesService.createDraft({
-        cartData: calculatedCart,
-        customerId: selectedCustomer._id,
-      });
-      await tenantSalesService.updateStatus(draft.data.data._id, { status: 'on_hold' });
-    } else {
-      await tenantSalesService.updateStatus(posSession.activeSaleId, { status: 'on_hold' });
+    const availableCredit = (selectedCustomer?.creditLimit || 0) - (creditSummary.balance || 0);
+
+    if (calculatedCart.grandTotal > availableCredit) {
+      return toast.error('Credit limit exceeded');
     }
-    toast.success('Sale put on hold.');
-    posSession.resetPos();
+    const saleData = {
+      cart: calculatedCart,
+      paymentData: { paymentLines: [] }, // Pass empty payment data
+      customerId: selectedCustomer._id,
+      // couponId can be handled here as well
+    };
+    try {
+      await toast.promise(tenantSalesService.finalizeSale(saleData), {
+        loading: 'Finalizing sale...',
+        success: 'Sale completed on credit!',
+        error: 'Sale failed.',
+      });
+      posSession.resetPos();
+    } catch (err) {
+      /* handled by toast */
+    }
   };
 
+  const handleHoldSale = useCallback(
+    async (e) => {
+      if (e) e.preventDefault();
+      if (isSaving) return;
+
+      setIsSaving(true);
+      try {
+        if (!posSession.activeSaleId) {
+          // Create draft payload
+
+          if (!calculatedCart || !Array.isArray(calculatedCart.items) || calculatedCart.items.length === 0) {
+            return toast.error('Cart is empty or invalid. Please review your selection.');
+          }
+
+          const draftPayload = {
+            cartData: {
+              ...calculatedCart,
+              totalTax: calculatedCart.taxBreakdown?.reduce((sum, t) => sum + t.amount, 0) || 0,
+              totalDiscount: calculatedCart.totalGlobalDiscount || 0,
+              totalAmount: calculatedCart.grandTotal,
+            },
+            customerId: selectedCustomer._id,
+          };
+
+          // Only call createDraft ONCE with the payload
+          const draftResponse = await tenantSalesService.createDraft(draftPayload);
+          const draft = draftResponse.data.data;
+
+          await tenantSalesService.updateStatus(draft._id, { status: 'on_hold' });
+        } else {
+          await tenantSalesService.updateStatus(posSession.activeSaleId, { status: 'on_hold' });
+        }
+        toast.success('Sale put on hold.');
+        posSession.resetPos();
+      } catch (error) {
+        console.error('Hold sale error:', error);
+        toast.error('Failed to hold sale');
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [posSession.activeSaleId, calculatedCart, selectedCustomer?._id, isSaving],
+  );
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -140,7 +195,7 @@ const PosPage = ({ layout }) => {
     // This function now receives an array from the modal or a single item from search/grid
     const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
 
-    console.log('itemsToAdd ', itemsToAdd);
+    console.log('itemsToAdd ', itemsToAdd[0]);
     setJobItems((prev) => {
       const updatedItems = [...prev];
 
@@ -161,9 +216,12 @@ const PosPage = ({ layout }) => {
           cartId: Date.now() + Math.random(),
           isSerialized: item.templateId?.type === 'serialized',
           serialNumber: item.serialNumber, // From modal
+          batchNumber: item?.batchInfo?.batchNumber || null,
+
           batchInfo: item.batchInfo, // From modal
           lineType: item.templateId?.type === 'bundle' ? 'bundle' : lineType,
           bundleItems: item.templateId?.bundleItems || [],
+          warrantyInfo: item?.defaultWarrantyPolicyId || item.templateId?.defaultWarrantyPolicyId || null,
         };
         updatedItems.push(newItem);
       });
@@ -192,13 +250,49 @@ const PosPage = ({ layout }) => {
     [],
   );
 
-  const handleProductSelect = (variant) => {
+  const handleProductSelectO = (variant) => {
     console.log('Selected variant:', variant);
     const isTracked = variant.templateId?.type === 'serialized' || variant?.hasBatches;
+    const itemType = variant.type || variant.variant?.templateId?.type || 'product';
+
     if (isTracked) {
       setModalState({ isOpen: true, variant: variant, unavailableSerials: serialsInCart });
     } else {
       handleAddItemToJob(variant);
+    }
+  };
+
+  const handleProductSelect = (item) => {
+    console.log('Selected item:', item);
+
+    // Determine item type from the item object
+    const itemType = item.type || item?.template?.type || item?.templateId?.type || 'product';
+    console.log('itemType', itemType);
+
+    if (itemType === 'service' || itemType === 'bundle') {
+      // Services and bundles don't need tracking
+      handleAddItemToJob({
+        ...item,
+        itemType: itemType, // Add explicit type
+      });
+    } else {
+      // Handle products
+      const isTracked = itemType === 'serialized' || item?.hasBatches;
+      console.log('isTracked', isTracked);
+      if (isTracked) {
+        setModalState({
+          isOpen: true,
+          item: item,
+          itemType: itemType,
+          variant: item,
+          unavailableSerials: serialsInCart,
+        });
+      } else {
+        handleAddItemToJob({
+          ...item,
+          itemType: itemType, // Add explicit type
+        });
+      }
     }
   };
 
@@ -231,7 +325,8 @@ const PosPage = ({ layout }) => {
     }
   };
 
-  const handleConfirmPayment = async (paymentData, couponId) => {
+  const finalizeSale = async (paymentData, couponId) => {
+    setIsSaving(true);
     const saleData = {
       cartData: calculatedCart,
       paymentData,
@@ -248,11 +343,27 @@ const PosPage = ({ layout }) => {
       });
       // Reset POS state for next sale
       setJobItems([]);
-      setSelectedCustomer(defaultCustomer);
+      setSelectedCustomer(posSession.defaultCustomer);
       setIsPaymentModalOpen(false);
+      setIsConfirmModalOpen(false);
     } catch (err) {
       console.error('Payment error:', err);
       toast.error('Failed to complete sale. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handlePartialPaymentAttempt = (paymentData, couponId) => {
+    // When a partial payment is attempted, store the data and open the confirmation modal
+    setPendingSaleData({ paymentData, couponId });
+    setIsPaymentModalOpen(false); // Close the payment modal
+    setIsConfirmModalOpen(true); // Open the confirmation modal
+  };
+
+  const handleConfirmPartialPayment = () => {
+    if (pendingSaleData) {
+      finalizeSale(pendingSaleData.paymentData, pendingSaleData.couponId);
     }
   };
 
@@ -289,6 +400,8 @@ const PosPage = ({ layout }) => {
 
           <div className='flex-grow overflow-y-auto pr-2'>
             <JobSheet
+              taxBreakdown={calculatedCart.taxBreakdown}
+              taxMode={calculatedCart.taxMode}
               items={jobItems}
               onEditItem={(item) => setEditingJobItem(item)}
               onRemoveItem={handleRemoveItem}
@@ -297,11 +410,17 @@ const PosPage = ({ layout }) => {
           </div>
           <div className='flex-shrink-0'>
             <div className='flex gap-2'>
-              <Button variant='outline' className='flex-1' onClick={handleHoldSale}>
+              <Button
+                disabled={!Array.isArray(calculatedCart.items)}
+                type='button'
+                variant='outline'
+                className='flex-1'
+                onClick={handleHoldSale}
+              >
                 <Hand className='h-4 w-4 mr-2' />
                 Hold
               </Button>
-              <Button variant='outline' className='flex-1'>
+              <Button disabled={!Array.isArray(calculatedCart.items)} variant='outline' className='flex-1'>
                 <FileText className='h-4 w-4 mr-2' />
                 Save as Quote
               </Button>
@@ -314,6 +433,11 @@ const PosPage = ({ layout }) => {
               totals={totals}
               onPay={() => setIsPaymentModalOpen(true)}
               cartItemCount={cartItems.length}
+              onRemoveGlobalDiscount={removeGlobalDiscount}
+              onRemoveCharge={removeAdditionalCharge}
+              onFinalizeOnCredit={handleFinalizeOnCredit}
+              canSellOnCredit={canSellOnCredit}
+              creditSummary={creditSummary}
             />
           </div>
         </div>
@@ -325,7 +449,7 @@ const PosPage = ({ layout }) => {
           <div className="flex-grow overflow-y-auto pt-4 pr-2">
             <ProductGrid items={popularItems} onAddItem={handleAddItemToCart} />
           </div> */}
-          <DiscoveryPanel onAddItem={handleAddItemToJob} onItemsSelected={handleAddItemsToJob} />
+          <DiscoveryPanel onAddItem={handleProductSelect} onItemsSelected={handleAddItemsToJob} />
         </div>
 
         <Modal isOpen={isDiscountModalOpen} onClose={() => setIsDiscountModalOpen(false)} title='Apply Global Discount'>
@@ -361,16 +485,18 @@ const PosPage = ({ layout }) => {
         <PaymentModal
           isOpen={isPaymentModalOpen}
           onClose={() => setIsPaymentModalOpen(false)}
-          onConfirm={handleConfirmPayment}
+          onConfirm={finalizeSale}
           totalAmount={calculatedCart.grandTotal}
           paymentMethods={paymentMethods}
           customer={selectedCustomer}
+          creditSummary={creditSummary}
+          denominations={denominations}
         />
 
         <CustomerSearchModal
           isOpen={isCustomerSearchOpen}
           onClose={() => setIsCustomerSearchOpen(false)}
-          onSelectCustomer={posSession.setSelectedCustomer}
+          onSelectCustomer={setSelectedCustomer}
         />
         <Modal isOpen={isQuickCreateOpen} onClose={() => setIsQuickCreateOpen(false)} title='Create New Customer'>
           <QuickCustomerCreateForm
@@ -385,6 +511,17 @@ const PosPage = ({ layout }) => {
           onClose={() => setEditingJobItem(null)}
           onSave={handleUpdateJobItem}
           item={editingJobItem}
+        />
+
+        {/* --- 3. RENDER THE NEW CONFIRMATION MODAL --- */}
+        <ConfirmationModal
+          isOpen={isConfirmModalOpen}
+          onClose={() => setIsConfirmModalOpen(false)}
+          onConfirm={handleConfirmPartialPayment}
+          title='Confirm Partial Payment'
+          message={`This will leave an outstanding balance. Are you sure you want to proceed?`}
+          confirmText='Proceed'
+          isConfirming={isSaving}
         />
       </div>
     );
@@ -411,6 +548,8 @@ const PosPage = ({ layout }) => {
         </div>
         <div className='flex-grow overflow-y-auto pr-2'>
           <JobSheet
+            taxBreakdown={calculatedCart.taxBreakdown}
+            taxMode={calculatedCart.taxMode}
             items={jobItems}
             onEditItem={(item) => setEditingJobItem(item)}
             onRemoveItem={handleRemoveItem}
@@ -419,11 +558,17 @@ const PosPage = ({ layout }) => {
         </div>
         <div className='flex-shrink-0'>
           <div className='flex gap-2'>
-            <Button variant='outline' className='flex-1' onClick={handleHoldSale}>
+            <Button
+              disabled={!Array.isArray(calculatedCart.items)}
+              type='button'
+              variant='outline'
+              className='flex-1'
+              onClick={handleHoldSale}
+            >
               <Hand className='h-4 w-4 mr-2' />
               Hold
             </Button>
-            <Button variant='outline' className='flex-1'>
+            <Button disabled={!Array.isArray(calculatedCart.items)} variant='outline' className='flex-1'>
               <FileText className='h-4 w-4 mr-2' />
               Save as Quote
             </Button>
@@ -447,6 +592,11 @@ const PosPage = ({ layout }) => {
             totals={totals}
             onPay={() => setIsPaymentModalOpen(true)}
             cartItemCount={cartItems.length}
+            onRemoveGlobalDiscount={removeGlobalDiscount}
+            onRemoveCharge={removeAdditionalCharge}
+            onFinalizeOnCredit={handleFinalizeOnCredit}
+            canSellOnCredit={canSellOnCredit}
+            creditSummary={creditSummary}
           />
         </div>
       </div>
@@ -507,16 +657,18 @@ const PosPage = ({ layout }) => {
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
-        onConfirm={handleConfirmPayment}
+        onConfirm={finalizeSale}
         totalAmount={calculatedCart.grandTotal}
         paymentMethods={paymentMethods}
         customer={selectedCustomer}
+        creditSummary={creditSummary}
+        denominations={denominations}
       />
 
       <CustomerSearchModal
         isOpen={isCustomerSearchOpen}
         onClose={() => setIsCustomerSearchOpen(false)}
-        onSelectCustomer={posSession.setSelectedCustomer}
+        onSelectCustomer={setSelectedCustomer}
       />
       <Modal isOpen={isQuickCreateOpen} onClose={() => setIsQuickCreateOpen(false)} title='Create New Customer'>
         <QuickCustomerCreateForm
@@ -525,6 +677,17 @@ const PosPage = ({ layout }) => {
           isSaving={isSaving}
         />
       </Modal>
+
+      {/* --- 3. RENDER THE NEW CONFIRMATION MODAL --- */}
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmPartialPayment}
+        title='Confirm Partial Payment'
+        message={`This will leave an outstanding balance. Are you sure you want to proceed?`}
+        confirmText='Proceed'
+        isConfirming={isSaving}
+      />
     </div>
   );
 };

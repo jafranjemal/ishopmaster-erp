@@ -60,7 +60,8 @@ const customerSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
-
+    creditTerms: { type: Number, default: 30 }, // days
+    allowCredit: { type: Boolean, default: false },
     /**
      * Tracks the current stage of the dunning (payment reminder) process for this customer.
      */

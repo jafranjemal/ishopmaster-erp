@@ -14,6 +14,7 @@ import {
   SelectValue,
   Modal,
   CardDescription,
+  Checkbox,
 } from 'ui-library';
 import CompatibilitySelector from './CompatibilitySelector';
 import FileUploader from 'ui-library/components/FileUploader';

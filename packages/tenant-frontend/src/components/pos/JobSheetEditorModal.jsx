@@ -20,6 +20,11 @@ const JobSheetEditorModal = ({ isOpen, onClose, onSave, item }) => {
     onClose();
   };
 
+  const handleClearDiscount = () => {
+    onSave(item.cartId, { quantity, lineDiscount: null }); // Set discount to null
+    onClose();
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`Edit: ${item?.description}`}>
       <div className='space-y-4'>
@@ -30,7 +35,7 @@ const JobSheetEditorModal = ({ isOpen, onClose, onSave, item }) => {
         {canApplyDiscount && (
           <div className='border-t border-slate-700 pt-4 space-y-2'>
             <Label>Apply Line-Item Discount</Label>
-            <div className='grid grid-cols-2 gap-2'>
+            <div className='grid grid-cols-3 gap-2'>
               <Select onValueChange={(val) => setDiscount((prev) => ({ ...prev, type: val }))} value={discount.type}>
                 <SelectTrigger>
                   <SelectValue />
@@ -45,6 +50,11 @@ const JobSheetEditorModal = ({ isOpen, onClose, onSave, item }) => {
                 value={discount.value}
                 onChange={(e) => setDiscount((prev) => ({ ...prev, value: Number(e.target.value) }))}
               />
+              {discount.value > 0 && (
+                <Button className='w-[150px]' type='button' variant='destructive' onClick={handleClearDiscount}>
+                  Clear Discount
+                </Button>
+              )}
             </div>
           </div>
         )}

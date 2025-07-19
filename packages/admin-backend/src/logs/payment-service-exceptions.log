@@ -1,0 +1,161 @@
+2025-07-18 10:12:02 [error] uncaughtException: Cannot find module '../errors/saleErrors'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+Error: Cannot find module '../errors/saleErrors'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:7:40)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32) 
+Error: Cannot find module '../errors/saleErrors'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:7:40)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+{
+  "error": {
+    "code": "MODULE_NOT_FOUND",
+    "requireStack": [
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.routes.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\index.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ]
+  },
+  "exception": true,
+  "date": "Fri Jul 18 2025 10:12:02 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 10448,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 102871040,
+      "heapTotal": 62574592,
+      "heapUsed": 40898096,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1440946.718
+  },
+  "trace": [
+    {
+      "column": 15,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._resolveFilename",
+      "line": 1225,
+      "method": "_resolveFilename",
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1055,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 40,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js",
+      "function": null,
+      "line": 7,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}

@@ -10,14 +10,7 @@ const paymentMethodSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: [
-        "cash",
-        "card",
-        "bank_transfer",
-        "cheque",
-        "loyalty_points",
-        "custom",
-      ],
+      enum: ["cash", "card", "bank_transfer", "cheque", "loyalty_points", "custom"],
     },
     /**
      * The crucial link to the financial ledger. This is the Asset account that is
@@ -27,6 +20,16 @@ const paymentMethodSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Account",
       required: true,
+    },
+    /**
+     * Determines which type of customer can use this payment method.
+     * 'all' -> Everyone, including Walk-in Customers
+     * 'registered_customers' -> Only customers with an account
+     */
+    allowedFor: {
+      type: String,
+      enum: ["all", "registered_customers"],
+      default: "all",
     },
     /**
      * For payment types that require a temporary holding account, like Cheques.

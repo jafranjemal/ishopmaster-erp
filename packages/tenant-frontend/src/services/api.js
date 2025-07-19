@@ -252,6 +252,9 @@ export const tenantCustomerService = {
   generatePortalToken: async (customerId) => {
     return api.post(`/tenant/crm/customers/${customerId}/generate-portal-token`);
   },
+  getCreditSummary: async (customerId) => {
+    return api.get(`/tenant/crm/customers/${customerId}/credit-summary`);
+  },
 };
 
 export const tenantCustomerGroupService = {
@@ -299,6 +302,51 @@ export const tenantCategoryService = {
   create: async (data) => api.post('/tenant/inventory/categories', data),
   update: async (id, data) => api.put(`/tenant/inventory/categories/${id}`, data),
   delete: async (id) => api.delete(`/tenant/inventory/categories/${id}`),
+  getLinkedBrands: async (categoryId, options = {}) => {
+    try {
+      const response = await api.get(`/tenant/inventory/categories/${categoryId}/brands`, {
+        params: {
+          includeInactive: options.includeInactive || false,
+          ...options.params,
+        },
+        signal: options.signal, // For abort controller
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(`ERP getLinkedBrands failed for category ${categoryId}:`, error);
+      throw new Error(`BRAND_FETCH_FAILED: ${error.message}`);
+    }
+  },
+  getLinkedDevices: async (categoryId, options = {}) => {
+    try {
+      const response = await api.get(`/tenant/inventory/categories/${categoryId}/devices`, {
+        params: {
+          includeVariants: options.includeVariants || false,
+          ...options.params,
+        },
+        signal: options.signal,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(`ERP getLinkedDevices failed for category ${categoryId}:`, error);
+      throw new Error(`DEVICE_FETCH_FAILED: ${error.message}`);
+    }
+  },
+  getChildren: async (parentId, params, options = {}) => {
+    try {
+      const response = await api.get(`/tenant/inventory/categories/children/${parentId || 'root'}`, {
+        params,
+        signal: options.signal,
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(`ERP getChildren failed for parent ${parentId}:`, error);
+      throw new Error(`HIERARCHY_FETCH_FAILED: ${error.message}`);
+    }
+  },
 };
 
 export const tenantDeviceService = {
@@ -1279,6 +1327,13 @@ export const tenantSalesService = {
   getHeldSales: async () => api.get('/tenant/sales/held'),
   updateStatus: async (id, data) => api.patch(`/tenant/sales/${id}/status`, data),
   deleteHeldSale: async (id) => api.delete(`/tenant/sales/${id}`),
+};
+
+export const tenantSettingsService = {
+  getDenominations: async () => api.get('/tenant/settings/cash-drawer-denominations'),
+  createDenomination: async (data) => api.post('/tenant/settings/cash-drawer-denominations', data),
+  updateDenomination: async (id, data) => api.put(`/tenant/settings/cash-drawer-denominations/${id}`, data),
+  deleteDenomination: async (id) => api.delete(`/tenant/settings/cash-drawer-denominations/${id}`),
 };
 
 export default api;

@@ -112,6 +112,49 @@ class PricingService {
       additionalCharges: cartData.additionalCharges || [],
     };
   }
+
+  /**
+   * Special pricing for service items
+   */
+  calculateServicePricing(item, variant, customer) {
+    const basePrice = item.unitPrice;
+
+    // Calculate labor cost
+    const laborHours = item.laborHours || 1;
+    const laborRate = item.laborRate || variant.defaultLaborRate || 50;
+    const laborCost = laborHours * laborRate;
+
+    // Calculate parts cost
+    let partsCost = 0;
+    let partsMarkup = 0;
+
+    if (item.requiredParts && item.requiredParts.length > 0) {
+      partsCost = item.requiredParts.reduce(
+        (total, part) => total + part.quantity * part.costPrice,
+        0
+      );
+
+      // Apply markup to parts
+      const partsMarkupRate = item.partsMarkup || variant.defaultPartsMarkup || 0.2;
+      partsMarkup = partsCost * partsMarkupRate;
+    }
+
+    // Calculate final price
+    const finalPrice = basePrice + laborCost + partsCost + partsMarkup;
+
+    return {
+      ...item,
+      unitPrice: basePrice,
+      finalPrice,
+      costComponents: {
+        basePrice,
+        laborCost,
+        partsCost,
+        partsMarkup,
+      },
+      isService: true,
+    };
+  }
 }
 
 module.exports = new PricingService();

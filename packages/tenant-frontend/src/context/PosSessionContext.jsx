@@ -76,8 +76,9 @@
 
 //
 
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
+import { tenantCustomerService } from '../services/api';
 
 const PosSessionContext = createContext(null);
 
@@ -90,6 +91,32 @@ export const PosSessionProvider = ({ children }) => {
   // --- THE DEFINITIVE FIX: State for global adjustments lives here ---
   const [globalDiscount, setGlobalDiscount] = useState(null);
   const [additionalCharges, setAdditionalCharges] = useState([]);
+
+  const [creditSummary, setCreditSummary] = useState({ limit: 0, balance: 0 });
+  const [isCreditLoading, setIsCreditLoading] = useState(false);
+
+  const removeGlobalDiscount = useCallback(() => setGlobalDiscount(null), []);
+  const removeAdditionalCharge = useCallback((indexToRemove) => {
+    setAdditionalCharges((prev) => prev.filter((_, index) => index !== indexToRemove));
+  }, []);
+
+  useEffect(() => {
+    if (selectedCustomer && selectedCustomer._id) {
+      setIsCreditLoading(true);
+      tenantCustomerService
+        .getCreditSummary(selectedCustomer._id)
+        .then((res) => {
+          setCreditSummary({
+            limit: res.data.data.creditLimit,
+            balance: res.data.data.currentBalance,
+          });
+        })
+        .catch(() => toast.error('Could not fetch customer credit info.'))
+        .finally(() => setIsCreditLoading(false));
+    } else {
+      setCreditSummary({ limit: 0, balance: 0 }); // Reset for walk-in customer
+    }
+  }, [selectedCustomer]);
 
   const handleRecallSale = useCallback((sale) => {
     const itemsWithCartId = sale.items.map((item) => ({ ...item, cartId: Math.random() }));
@@ -124,6 +151,10 @@ export const PosSessionProvider = ({ children }) => {
     setAdditionalCharges,
     handleRecallSale,
     resetPos,
+    removeGlobalDiscount,
+    removeAdditionalCharge,
+    creditSummary,
+    isCreditLoading,
   };
 
   return <PosSessionContext.Provider value={value}>{children}</PosSessionContext.Provider>;

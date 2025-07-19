@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'ui-library';
 import JobSheetItem from './JobSheetItem';
-import useAuth from '../../context/useAuth';
 
-const JobSheet = ({ items, onRemoveItem, onQuantityChange, onEditItem }) => {
+const JobSheet = ({ items, onRemoveItem, onQuantityChange, onEditItem, taxBreakdown, taxMode }) => {
   return (
     <div className='border border-slate-700 rounded-lg overflow-hidden h-full flex flex-col'>
       <div className='flex-grow overflow-y-auto'>
@@ -26,6 +25,8 @@ const JobSheet = ({ items, onRemoveItem, onQuantityChange, onEditItem }) => {
             )}
             {items.map((item) => (
               <JobSheetItem
+                taxBreakdown={taxBreakdown}
+                taxMode={taxMode}
                 key={item.cartId}
                 item={item}
                 onRemove={onRemoveItem}

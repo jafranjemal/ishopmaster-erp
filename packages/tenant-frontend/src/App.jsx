@@ -88,6 +88,7 @@ import { CustomerAuthProvider } from './context/CustomerAuthProvider';
 import TaxRulePage from './pages/settings/TaxRulePage';
 import TaxCategoryPage from './pages/settings/TaxCategoryPage';
 import { PosSessionProvider } from './context/PosSessionContext';
+import DrawerConfigurationPage from './pages/settings/DrawerConfigurationPage';
 
 function App() {
   const [posLayout, setPosLayout] = useState('default');
@@ -165,6 +166,7 @@ function App() {
                   <Route path='/inventory/assembly' element={<AssemblyPage />} />
                   <Route path='/inventory/products/templates/:id' element={<ProductTemplateDetailPage />} />
                   {/* Settings Module Routes */}
+                  <Route path='/settings/cash-drawer' element={<DrawerConfigurationPage />} />
                   <Route path='/settings/financial-periods' element={<FinancialPeriodsPage />} />
                   <Route path='/settings/coupons' element={<CouponManagementPage />} />
                   <Route path='/settings/coupons/:batchId' element={<CouponBatchDetailPage />} />

@@ -7,6 +7,108 @@ const mongoose = require("mongoose");
  */
 class InventoryService {
   /**
+   * Checks inventory availability before processing sales
+   * ERP-102 Compliance: Must verify stock before allowing sales
+   */
+  async checkAvailability(models, { productVariantId, branchId, quantity }, session = null) {
+    const { ProductVariants, InventoryLot, InventoryItem } = models;
+
+    const variant = await ProductVariants.findById(productVariantId)
+      .populate({
+        path: "templateId",
+        populate: {
+          path: "bundleItems.productVariantId",
+          model: "ProductVariants",
+        },
+      })
+      .session(session)
+      .lean();
+
+    if (!variant) {
+      return {
+        available: false,
+        availableQuantity: 0,
+        reason: `Product variant not found`,
+      };
+    }
+
+    // Handle bundle products
+    if (variant.templateId.type === "bundle") {
+      const componentStatus = await Promise.all(
+        variant.templateId.bundleItems.map(async (bundleItem) => {
+          const componentQty = bundleItem.quantity * quantity;
+          const status = await this.checkAvailability(
+            models,
+            {
+              productVariantId: bundleItem.productVariantId._id,
+              branchId,
+              quantity: componentQty,
+            },
+            session
+          );
+          return {
+            componentId: bundleItem.productVariantId._id,
+            required: componentQty,
+            ...status,
+          };
+        })
+      );
+
+      const unavailableComponents = componentStatus.filter((c) => !c.available);
+      return {
+        available: unavailableComponents.length === 0,
+        availableQuantity: Math.min(
+          ...componentStatus.map((c) =>
+            Math.floor(
+              c.availableQuantity /
+                variant.templateId.bundleItems.find((b) =>
+                  b.productVariantId._id.equals(c.componentId)
+                ).quantity
+            )
+          )
+        ),
+        components: componentStatus,
+        isBundle: true,
+      };
+    }
+
+    // Handle serialized products
+    if (variant.templateId.type === "serialized") {
+      const availableItems = await InventoryItem.countDocuments({
+        productVariantId,
+        branchId,
+        status: "in_stock",
+      }).session(session);
+
+      return {
+        available: availableItems >= quantity,
+        availableQuantity: availableItems,
+        isSerialized: true,
+      };
+    }
+
+    // Handle regular/non-serialized products
+    const availableStock = await InventoryLot.aggregate([
+      {
+        $match: {
+          productVariantId: new mongoose.Types.ObjectId(productVariantId),
+          branchId: new mongoose.Types.ObjectId(branchId),
+          quantityInStock: { $gt: 0 },
+        },
+      },
+      { $group: { _id: null, total: { $sum: "$quantityInStock" } } },
+    ]).session(session);
+
+    const totalAvailable = availableStock.length > 0 ? availableStock[0].total : 0;
+
+    return {
+      available: totalAvailable >= quantity,
+      availableQuantity: totalAvailable,
+      isSerialized: false,
+    };
+  }
+
+  /**
    * Increases stock for a product variant, typically from a purchase order receipt.
    * Handles both non-serialized (lots) and serialized (items) logic.
    * For serialized items, it acts on a specific serial number.
@@ -111,7 +213,7 @@ class InventoryService {
       .populate({
         path: "templateId",
         populate: {
-          path: "bundleItems.productVariantId",
+          path: "bundleItems.productVariantId requiredParts.productVariantId",
           model: "ProductVariants",
         },
       })
@@ -122,7 +224,34 @@ class InventoryService {
     const movementType = refs.relatedSaleId ? "sale" : "transfer_out";
     let totalCostOfDeductedItems = 0;
     const deductedItemIds = [];
-    // --- NEW BUNDLE LOGIC ---
+
+    // Handle service items
+    if (variant.templateId.type === "service") {
+      // Process required parts if any
+      if (variant.templateId.requiredParts?.length > 0) {
+        for (const part of variant.templateId.requiredParts) {
+          const partQtyToDeduct = part.quantity * quantity;
+          const partResult = await this.decreaseStock(
+            models,
+            {
+              productVariantId: part.productVariantId._id,
+              branchId,
+              quantity: partQtyToDeduct,
+              userId,
+              refs,
+            },
+            session
+          );
+          totalCostOfDeductedItems += partResult.costOfGoodsSold;
+          if (partResult.deductedItemIds) {
+            deductedItemIds.push(...(partResult.deductedItemIds || []));
+          }
+        }
+      }
+      // Service items themselves don't consume stock
+      return { costOfGoodsSold: 0, deductedItemIds: [] };
+    }
+    // Handle Regular items
     if (productType === "bundle") {
       // If the item is a bundle, decrease stock for its components instead.
       for (const bundleItem of variant.templateId.bundleItems) {
@@ -147,9 +276,7 @@ class InventoryService {
           deductedItemIds.push(...componentResult.deductedItemIds);
         }
       }
-    }
-    // --- END OF NEW BUNDLE LOGIC ---
-    else if (productType === "non-serialized") {
+    } else if (productType === "non-serialized") {
       const lots = await InventoryLot.find({
         productVariantId,
         branchId,

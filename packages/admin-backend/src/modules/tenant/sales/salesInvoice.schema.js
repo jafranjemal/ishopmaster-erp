@@ -1,5 +1,15 @@
 const mongoose = require("mongoose");
 
+const servicePartSchema = new mongoose.Schema(
+  {
+    productVariantId: mongoose.Schema.Types.ObjectId,
+    description: String,
+    quantity: Number,
+    costPrice: Number,
+  },
+  { _id: false }
+);
+
 const discountSchema = new mongoose.Schema(
   {
     type: { type: String, required: true, enum: ["percentage", "fixed"] },
@@ -50,6 +60,10 @@ const saleItemSchema = new mongoose.Schema(
     },
     inventoryLotId: { type: mongoose.Schema.Types.ObjectId, ref: "InventoryLot" },
     inventoryItemId: { type: mongoose.Schema.Types.ObjectId, ref: "InventoryItem" },
+    isService: Boolean,
+    laborHours: Number,
+    laborRate: Number,
+    requiredParts: [servicePartSchema],
   },
   { _id: false }
 );
@@ -84,6 +98,13 @@ const salesInvoiceSchema = new mongoose.Schema(
       index: true,
     },
 
+    workflowStatus: {
+      type: String,
+      enum: ["draft", "sent", "approved", "processing", "completed", "disputed", "cancelled"],
+      default: "draft",
+      index: true,
+    },
+
     // --- NEW FIELDS FOR ADVANCED WORKFLOWS ---
     type: {
       type: String,
@@ -92,6 +113,10 @@ const salesInvoiceSchema = new mongoose.Schema(
       default: "direct_sale",
     },
     expiryDate: {
+      // Primarily for quotations
+      type: Date,
+    },
+    dueDate: {
       // Primarily for quotations
       type: Date,
     },
@@ -117,13 +142,51 @@ const salesInvoiceSchema = new mongoose.Schema(
 
     // Link to payments
     amountPaid: { type: Number, default: 0 },
-    paymentStatus: { type: String, enum: ["unpaid", "partially_paid", "paid"], default: "unpaid" },
-
+    //paymentStatus: { type: String, enum: ["unpaid", "partially_paid", "paid"], default: "unpaid" },
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "partially_paid", "paid", "overdue", "refunded", "failed"],
+      default: "unpaid",
+      index: true,
+    },
     notes: { type: String, trim: true },
     soldBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
 );
+
+salesInvoiceSchema.pre("save", function (next) {
+  // Store the original status to compare against on update
+  if (!this.isNew) {
+    this._originalStatus = this.get("workflowStatus", null, { getters: false });
+  }
+  next();
+});
+
+salesInvoiceSchema.pre("save", function (next) {
+  if (this.isModified("workflowStatus")) {
+    const allowedTransitions = {
+      draft: ["sent", "cancelled", "completed"], // 'completed' for direct POS sales
+      sent: ["approved", "disputed", "cancelled"],
+      approved: ["processing", "disputed", "cancelled"],
+      processing: ["completed", "disputed"],
+      completed: [], // Cannot change workflow status after completion, only payment/refund status
+      disputed: ["cancelled", "processing"],
+    };
+
+    const original = this._originalStatus || "draft";
+    if (
+      allowedTransitions[original] &&
+      !allowedTransitions[original].includes(this.workflowStatus)
+    ) {
+      const err = new Error(
+        `Invalid status change from "${original}" to "${this.workflowStatus}".`
+      );
+      return next(err);
+    }
+  }
+  next();
+});
 
 // Intelligent pre-save hook to generate sequential IDs based on status
 salesInvoiceSchema.pre("save", async function (next) {

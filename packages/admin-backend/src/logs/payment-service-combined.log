@@ -1,0 +1,1137 @@
+2025-07-18 10:02:22 [error] Payment processing failed 
+TypeError: PaymentMethod.find(...).session(...).cache is not a function
+    at PaymentsService._processPaymentMethods (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\payments.service.js:178:8)
+    at PaymentsService.recordPayment (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\payments.service.js:56:51)
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:209:31)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:12:24
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:11:5
+{
+  "service": "payment-service",
+  "error": "PaymentMethod.find(...).session(...).cache is not a function",
+  "auditTrail": []
+}
+2025-07-18 10:13:01 [error] Payment processing failed 
+ValidationError: Payment validation failed: status: `processed` is not a valid enum value for path `status`., paymentLines.0.status: `completed` is not a valid enum value for path `status`.
+    at Document.invalidate (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3352:32)
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3113:17
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+{
+  "service": "payment-service",
+  "error": "Payment validation failed: status: `processed` is not a valid enum value for path `status`., paymentLines.0.status: `completed` is not a valid enum value for path `status`.",
+  "auditTrail": []
+}
+2025-07-18 10:13:01 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:284:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "686eb674a64962f9313605a5",
+          "description": "9H TEMPERED GLASS FOR IPHONE 12",
+          "taxCategoryId": null,
+          "quantity": 1,
+          "unitPrice": 2000,
+          "finalPrice": 2000,
+          "cartId": 1752812817732.5715,
+          "isSerialized": false,
+          "batchNumber": "PO-000002",
+          "batchInfo": {
+            "lotId": "686f57ceb88a8b5e001232d8",
+            "batchNumber": "PO-000002",
+            "cartId": "686eb674a64962f9313605a5-686f57ceb88a8b5e001232d8"
+          },
+          "lineType": "sale_item",
+          "bundleItems": [],
+          "warrantyInfo": {
+            "_id": "68723a428fcd1a5101621bb5",
+            "name": "3 Month Warranty",
+            "description": "",
+            "durationValue": 3,
+            "durationUnit": "months",
+            "isActive": true,
+            "createdAt": "2025-07-12T10:34:42.505Z",
+            "updatedAt": "2025-07-12T10:34:42.505Z",
+            "__v": 0
+          }
+        }
+      ],
+      "subTotal": 2000,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 0,
+      "taxBreakdown": [],
+      "grandTotal": 2000,
+      "globalDiscount": null,
+      "additionalCharges": []
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "2000.00",
+          "referenceNumber": "",
+          "cashTendered": "10000",
+          "changeDue": 8000,
+          "changeBreakdown": [
+            {
+              "_id": "68792b6cfe3949232d2b48cd",
+              "name": "5000 LKR Notes",
+              "value": 5000,
+              "type": "bill",
+              "isActive": true,
+              "createdAt": "2025-07-17T16:57:16.221Z",
+              "updatedAt": "2025-07-17T16:57:16.221Z",
+              "__v": 0,
+              "count": 1
+            },
+            {
+              "_id": "68792b83fe3949232d2b48d6",
+              "name": "1000 LKR Note",
+              "value": 1000,
+              "type": "bill",
+              "isActive": true,
+              "createdAt": "2025-07-17T16:57:39.204Z",
+              "updatedAt": "2025-07-17T16:57:39.204Z",
+              "__v": 0,
+              "count": 3
+            }
+          ],
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-18 10:25:00 [error] Payment processing failed 
+ValidationError: Payment validation failed: paymentLines.0.amount: Cast to Number failed for value "2000.00" (type string) at path "amount" because of "TypeError", status: `processed` is not a valid enum value for path `status`.
+    at Document.invalidate (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3352:32)
+    at Subdocument.invalidate (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\types\subdocument.js:229:12)
+    at EmbeddedDocument.$set (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:1486:12)
+    at EmbeddedDocument.$set (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:1132:16)
+    at EmbeddedDocument.Document (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:178:12)
+    at EmbeddedDocument.Subdocument (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\types\subdocument.js:34:12)
+    at EmbeddedDocument.ArraySubdocument [as constructor] (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\types\arraySubdocument.js:44:15)
+    at new EmbeddedDocument (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema\documentArray.js:131:17)
+    at SchemaDocumentArray.cast (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema\documentArray.js:496:22)
+    at SchemaType.applySetters (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schemaType.js:1255:12)
+{
+  "service": "payment-service",
+  "error": "Payment validation failed: paymentLines.0.amount: Cast to Number failed for value \"2000.00\" (type string) at path \"amount\" because of \"TypeError\", status: `processed` is not a valid enum value for path `status`.",
+  "auditTrail": []
+}
+2025-07-18 10:25:00 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:284:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "686eb674a64962f9313605a5",
+          "description": "9H TEMPERED GLASS FOR IPHONE 12",
+          "taxCategoryId": null,
+          "quantity": 1,
+          "unitPrice": 2000,
+          "finalPrice": 2000,
+          "cartId": 1752812817732.5715,
+          "isSerialized": false,
+          "batchNumber": "PO-000002",
+          "batchInfo": {
+            "lotId": "686f57ceb88a8b5e001232d8",
+            "batchNumber": "PO-000002",
+            "cartId": "686eb674a64962f9313605a5-686f57ceb88a8b5e001232d8"
+          },
+          "lineType": "sale_item",
+          "bundleItems": [],
+          "warrantyInfo": {
+            "_id": "68723a428fcd1a5101621bb5",
+            "name": "3 Month Warranty",
+            "description": "",
+            "durationValue": 3,
+            "durationUnit": "months",
+            "isActive": true,
+            "createdAt": "2025-07-12T10:34:42.505Z",
+            "updatedAt": "2025-07-12T10:34:42.505Z",
+            "__v": 0
+          }
+        }
+      ],
+      "subTotal": 2000,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 0,
+      "taxBreakdown": [],
+      "grandTotal": 2000,
+      "globalDiscount": null,
+      "additionalCharges": []
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "2000.00",
+          "referenceNumber": "",
+          "cashTendered": "10000",
+          "changeDue": 8000,
+          "changeBreakdown": [
+            {
+              "_id": "68792b6cfe3949232d2b48cd",
+              "name": "5000 LKR Notes",
+              "value": 5000,
+              "type": "bill",
+              "isActive": true,
+              "createdAt": "2025-07-17T16:57:16.221Z",
+              "updatedAt": "2025-07-17T16:57:16.221Z",
+              "__v": 0,
+              "count": 1
+            },
+            {
+              "_id": "68792b83fe3949232d2b48d6",
+              "name": "1000 LKR Note",
+              "value": 1000,
+              "type": "bill",
+              "isActive": true,
+              "createdAt": "2025-07-17T16:57:39.204Z",
+              "updatedAt": "2025-07-17T16:57:39.204Z",
+              "__v": 0,
+              "count": 3
+            }
+          ],
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-18 10:34:01 [error] Payment processing failed 
+ValidationError: SalesInvoice validation failed: status: `pending_payment` is not a valid enum value for path `status`.
+    at Document.invalidate (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3352:32)
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3113:17
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+{
+  "service": "payment-service",
+  "error": "SalesInvoice validation failed: status: `pending_payment` is not a valid enum value for path `status`.",
+  "auditTrail": []
+}
+2025-07-18 10:34:01 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:284:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "686eb674a64962f9313605a5",
+          "description": "9H TEMPERED GLASS FOR IPHONE 12",
+          "taxCategoryId": null,
+          "quantity": 1,
+          "unitPrice": 2000,
+          "finalPrice": 2000,
+          "cartId": 1752812817732.5715,
+          "isSerialized": false,
+          "batchNumber": "PO-000002",
+          "batchInfo": {
+            "lotId": "686f57ceb88a8b5e001232d8",
+            "batchNumber": "PO-000002",
+            "cartId": "686eb674a64962f9313605a5-686f57ceb88a8b5e001232d8"
+          },
+          "lineType": "sale_item",
+          "bundleItems": [],
+          "warrantyInfo": {
+            "_id": "68723a428fcd1a5101621bb5",
+            "name": "3 Month Warranty",
+            "description": "",
+            "durationValue": 3,
+            "durationUnit": "months",
+            "isActive": true,
+            "createdAt": "2025-07-12T10:34:42.505Z",
+            "updatedAt": "2025-07-12T10:34:42.505Z",
+            "__v": 0
+          }
+        }
+      ],
+      "subTotal": 2000,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 0,
+      "taxBreakdown": [],
+      "grandTotal": 2000,
+      "globalDiscount": null,
+      "additionalCharges": []
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "2000.00",
+          "referenceNumber": "",
+          "cashTendered": "10000",
+          "changeDue": 8000,
+          "changeBreakdown": [
+            {
+              "_id": "68792b6cfe3949232d2b48cd",
+              "name": "5000 LKR Notes",
+              "value": 5000,
+              "type": "bill",
+              "isActive": true,
+              "createdAt": "2025-07-17T16:57:16.221Z",
+              "updatedAt": "2025-07-17T16:57:16.221Z",
+              "__v": 0,
+              "count": 1
+            },
+            {
+              "_id": "68792b83fe3949232d2b48d6",
+              "name": "1000 LKR Note",
+              "value": 1000,
+              "type": "bill",
+              "isActive": true,
+              "createdAt": "2025-07-17T16:57:39.204Z",
+              "updatedAt": "2025-07-17T16:57:39.204Z",
+              "__v": 0,
+              "count": 3
+            }
+          ],
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-18 10:54:44 [info] Payment processed successfully 
+{
+  "service": "payment-service",
+  "paymentId": "6879da9cc3d0dda3b38f2f7d",
+  "amount": 2000,
+  "methods": [
+    "686eb675a64962f931360637"
+  ]
+}
+2025-07-18 12:06:50 [info] Payment processed successfully 
+{
+  "service": "payment-service",
+  "paymentId": "6879eb8147f8eff30ba90886",
+  "amount": 2000,
+  "methods": [
+    "686eb675a64962f931360637"
+  ]
+}
+2025-07-18 16:07:15 [error] Payment processing failed 
+Error: Invalid status change from undefined to completed
+    at model.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\payments\transactions\payment.schema.js:108:11)
+    at callMiddlewareFunction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\kareem\index.js:628:27)
+    at model.next (D:\JJSOFT_GLOBAL\ishop-master\node_modules\kareem\index.js:93:7)
+    at _next (D:\JJSOFT_GLOBAL\ishop-master\node_modules\kareem\index.js:146:10)
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\kareem\index.js:653:30
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+{
+  "service": "payment-service",
+  "error": "Invalid status change from undefined to completed",
+  "auditTrail": []
+}
+2025-07-18 16:07:15 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:314:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "686f68c75a37fd5e0ebfdf44",
+          "description": "20W USB-C 3-PIN POWER ADAPTER - 5W - 3.7V - USB-C - 1 Year",
+          "taxCategoryId": "687642f2366458f956ca0723",
+          "quantity": 1,
+          "unitPrice": 450,
+          "finalPrice": 450,
+          "cartId": 1752834989713.3662,
+          "isSerialized": true,
+          "serialNumber": "123456546576786",
+          "batchNumber": null,
+          "lineType": "sale_item",
+          "bundleItems": [],
+          "warrantyInfo": {
+            "_id": "68723a428fcd1a5101621bb5",
+            "name": "3 Month Warranty",
+            "description": "",
+            "durationValue": 3,
+            "durationUnit": "months",
+            "isActive": true,
+            "createdAt": "2025-07-12T10:34:42.505Z",
+            "updatedAt": "2025-07-12T10:34:42.505Z",
+            "__v": 0
+          }
+        }
+      ],
+      "subTotal": 450,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 67.5,
+      "taxBreakdown": [
+        {
+          "ruleName": "VAT 15%",
+          "rate": 15,
+          "amount": 67.5,
+          "linkedAccountId": "686eb673a64962f931360274"
+        }
+      ],
+      "grandTotal": 517.5,
+      "globalDiscount": null,
+      "additionalCharges": [],
+      "taxAuditTrail": [
+        {
+          "ruleName": "VAT 15%",
+          "rate": 15,
+          "taxAmount": 67.5,
+          "calculationTimestamp": "2025-07-18T10:36:30.323Z"
+        }
+      ]
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "400",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "status": "cleared"
+        },
+        {
+          "paymentMethodId": "686eb675a64962f931360639",
+          "amount": "117.50",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "bankName": "",
+          "chequeDate": "",
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-18 16:22:49 [error] Payment processing failed 
+ValidationError: Payment validation failed: status: `pending` is not a valid enum value for path `status`.
+    at Document.invalidate (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3352:32)
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3113:17
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+{
+  "service": "payment-service",
+  "error": "Payment validation failed: status: `pending` is not a valid enum value for path `status`.",
+  "auditTrail": []
+}
+2025-07-18 16:22:49 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:314:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "686f68c75a37fd5e0ebfdf44",
+          "description": "20W USB-C 3-PIN POWER ADAPTER - 5W - 3.7V - USB-C - 1 Year",
+          "taxCategoryId": "687642f2366458f956ca0723",
+          "quantity": 1,
+          "unitPrice": 450,
+          "finalPrice": 450,
+          "cartId": 1752834989713.3662,
+          "isSerialized": true,
+          "serialNumber": "123456546576786",
+          "batchNumber": null,
+          "lineType": "sale_item",
+          "bundleItems": [],
+          "warrantyInfo": {
+            "_id": "68723a428fcd1a5101621bb5",
+            "name": "3 Month Warranty",
+            "description": "",
+            "durationValue": 3,
+            "durationUnit": "months",
+            "isActive": true,
+            "createdAt": "2025-07-12T10:34:42.505Z",
+            "updatedAt": "2025-07-12T10:34:42.505Z",
+            "__v": 0
+          }
+        }
+      ],
+      "subTotal": 450,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 67.5,
+      "taxBreakdown": [
+        {
+          "ruleName": "VAT 15%",
+          "rate": 15,
+          "amount": 67.5,
+          "linkedAccountId": "686eb673a64962f931360274"
+        }
+      ],
+      "grandTotal": 517.5,
+      "globalDiscount": null,
+      "additionalCharges": [],
+      "taxAuditTrail": [
+        {
+          "ruleName": "VAT 15%",
+          "rate": 15,
+          "taxAmount": 67.5,
+          "calculationTimestamp": "2025-07-18T10:36:30.323Z"
+        }
+      ]
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "400",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "status": "cleared"
+        },
+        {
+          "paymentMethodId": "686eb675a64962f931360639",
+          "amount": "117.50",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "bankName": "",
+          "chequeDate": "",
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-18 16:30:52 [error] Payment processing failed 
+ValidationError: Payment validation failed: status: `pending` is not a valid enum value for path `status`.
+    at Document.invalidate (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3352:32)
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3113:17
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+{
+  "service": "payment-service",
+  "error": "Payment validation failed: status: `pending` is not a valid enum value for path `status`.",
+  "auditTrail": []
+}
+2025-07-18 16:30:52 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:314:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "686f68c75a37fd5e0ebfdf44",
+          "description": "20W USB-C 3-PIN POWER ADAPTER - 5W - 3.7V - USB-C - 1 Year",
+          "taxCategoryId": "687642f2366458f956ca0723",
+          "quantity": 1,
+          "unitPrice": 450,
+          "finalPrice": 450,
+          "cartId": 1752834989713.3662,
+          "isSerialized": true,
+          "serialNumber": "123456546576786",
+          "batchNumber": null,
+          "lineType": "sale_item",
+          "bundleItems": [],
+          "warrantyInfo": {
+            "_id": "68723a428fcd1a5101621bb5",
+            "name": "3 Month Warranty",
+            "description": "",
+            "durationValue": 3,
+            "durationUnit": "months",
+            "isActive": true,
+            "createdAt": "2025-07-12T10:34:42.505Z",
+            "updatedAt": "2025-07-12T10:34:42.505Z",
+            "__v": 0
+          }
+        }
+      ],
+      "subTotal": 450,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 67.5,
+      "taxBreakdown": [
+        {
+          "ruleName": "VAT 15%",
+          "rate": 15,
+          "amount": 67.5,
+          "linkedAccountId": "686eb673a64962f931360274"
+        }
+      ],
+      "grandTotal": 517.5,
+      "globalDiscount": null,
+      "additionalCharges": [],
+      "taxAuditTrail": [
+        {
+          "ruleName": "VAT 15%",
+          "rate": 15,
+          "taxAmount": 67.5,
+          "calculationTimestamp": "2025-07-18T10:36:30.323Z"
+        }
+      ]
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "400",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "status": "cleared"
+        },
+        {
+          "paymentMethodId": "686eb675a64962f931360639",
+          "amount": "117.50",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "bankName": "",
+          "chequeDate": "",
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-18 16:30:53 [error] Sale processing failed 
+{
+  "service": "payment-service",
+  "error": "Error: Failed to finalize sale. Please try again.\n    at SalesService.finalizeSale (D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\sales.service.js:314:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:23:26\n    at async ClientSession.withTransaction (D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongodb\\lib\\sessions.js:511:30)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:21:5",
+  "userId": "686eb673a64962f93136028e",
+  "body": "{\"cartData\":{\"items\":[{\"productVariantId\":\"686f68c75a37fd5e0ebfdf44\",\"description\":\"20W USB-C 3-PIN POWER ADAPTER - 5W - 3.7V - USB-C - 1 Year\",\"taxCategoryId\":\"687642f2366458f956ca0723\",\"quantity\":1,\"unitPrice\":450,\"finalPrice\":450,\"cartId\":1752834989713.3662,\"isSerialized\":true,\"serialNumber\":\"123456546576786\",\"batchNumber\":null,\"lineType\":\"sale_item\",\"bundleItems\":[],\"warrantyInfo\":{\"_id\":\"68723a428fcd1a5101621bb5\",\"name\":\"3 Month Warranty\",\"description\":\"\",\"durationValue\":3,\"durationUnit\":\"months\",\"isActive\":true,\"createdAt\":\"2025-07-12T10:34:42.505Z\",\"updatedAt\":\"2025-07-12T10:34:42.505Z\",\"__v\":0}}],\"subTotal\":450,\"totalLineDiscount\":0,\"totalGlobalDiscount\":0,\"totalCharges\":0,\"totalTax\":67.5,\"taxBreakdown\":[{\"ruleName\":\"VAT 15%\",\"rate\":15,\"amount\":67.5,\"linkedAccountId\":\"686eb673a64962f931360274\"}],\"grandTotal\":517.5,\"globalDiscount\":null,\"additionalCharges\":[],\"taxAuditTrail\":[{\"ruleName\":\"VAT 15%\",\"rate\":15,\"taxAmount\":67.5,\"calculationTimestamp\":\"2025-07-18T10:36:30.323Z\"}]},\"paymentData\":{\"paymentLines\":[{\"paymentMethodId\":\"686eb675a64962f931360637\",\"amount\":\"400\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"status\":\"cleared\"},{\"paymentMethodId\":\"686eb675a64962f931360639\",\"amount\":\"117.50\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"bankName\":\"\",\"chequeDate\":\"\",\"status\":\"cleared\"}],\"notes\":\"POS Sale\"},\"customerId\":\"686eb673a64962f93136028c\",\"couponId\":null}"
+}
+2025-07-18 16:32:01 [error] Payment processing failed 
+ValidationError: Payment validation failed: status: `pending` is not a valid enum value for path `status`.
+    at Document.invalidate (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3352:32)
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\document.js:3113:17
+    at D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schemaType.js:1407:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:85:11)
+{
+  "service": "payment-service",
+  "error": "Payment validation failed: status: `pending` is not a valid enum value for path `status`.",
+  "auditTrail": []
+}
+2025-07-18 16:32:01 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:314:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "686f68c75a37fd5e0ebfdf44",
+          "description": "20W USB-C 3-PIN POWER ADAPTER - 5W - 3.7V - USB-C - 1 Year",
+          "taxCategoryId": "687642f2366458f956ca0723",
+          "quantity": 1,
+          "unitPrice": 450,
+          "finalPrice": 450,
+          "cartId": 1752834989713.3662,
+          "isSerialized": true,
+          "serialNumber": "123456546576786",
+          "batchNumber": null,
+          "lineType": "sale_item",
+          "bundleItems": [],
+          "warrantyInfo": {
+            "_id": "68723a428fcd1a5101621bb5",
+            "name": "3 Month Warranty",
+            "description": "",
+            "durationValue": 3,
+            "durationUnit": "months",
+            "isActive": true,
+            "createdAt": "2025-07-12T10:34:42.505Z",
+            "updatedAt": "2025-07-12T10:34:42.505Z",
+            "__v": 0
+          }
+        }
+      ],
+      "subTotal": 450,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 67.5,
+      "taxBreakdown": [
+        {
+          "ruleName": "VAT 15%",
+          "rate": 15,
+          "amount": 67.5,
+          "linkedAccountId": "686eb673a64962f931360274"
+        }
+      ],
+      "grandTotal": 517.5,
+      "globalDiscount": null,
+      "additionalCharges": [],
+      "taxAuditTrail": [
+        {
+          "ruleName": "VAT 15%",
+          "rate": 15,
+          "taxAmount": 67.5,
+          "calculationTimestamp": "2025-07-18T10:36:30.323Z"
+        }
+      ]
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "400",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "status": "cleared"
+        },
+        {
+          "paymentMethodId": "686eb675a64962f931360639",
+          "amount": "117.50",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "bankName": "",
+          "chequeDate": "",
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-18 16:32:01 [error] Sale processing failed 
+{
+  "service": "payment-service",
+  "error": "Error: Failed to finalize sale. Please try again.\n    at SalesService.finalizeSale (D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\sales.service.js:314:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:23:26\n    at async ClientSession.withTransaction (D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongodb\\lib\\sessions.js:511:30)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:21:5",
+  "userId": "686eb673a64962f93136028e",
+  "body": "{\"cartData\":{\"items\":[{\"productVariantId\":\"686f68c75a37fd5e0ebfdf44\",\"description\":\"20W USB-C 3-PIN POWER ADAPTER - 5W - 3.7V - USB-C - 1 Year\",\"taxCategoryId\":\"687642f2366458f956ca0723\",\"quantity\":1,\"unitPrice\":450,\"finalPrice\":450,\"cartId\":1752834989713.3662,\"isSerialized\":true,\"serialNumber\":\"123456546576786\",\"batchNumber\":null,\"lineType\":\"sale_item\",\"bundleItems\":[],\"warrantyInfo\":{\"_id\":\"68723a428fcd1a5101621bb5\",\"name\":\"3 Month Warranty\",\"description\":\"\",\"durationValue\":3,\"durationUnit\":\"months\",\"isActive\":true,\"createdAt\":\"2025-07-12T10:34:42.505Z\",\"updatedAt\":\"2025-07-12T10:34:42.505Z\",\"__v\":0}}],\"subTotal\":450,\"totalLineDiscount\":0,\"totalGlobalDiscount\":0,\"totalCharges\":0,\"totalTax\":67.5,\"taxBreakdown\":[{\"ruleName\":\"VAT 15%\",\"rate\":15,\"amount\":67.5,\"linkedAccountId\":\"686eb673a64962f931360274\"}],\"grandTotal\":517.5,\"globalDiscount\":null,\"additionalCharges\":[],\"taxAuditTrail\":[{\"ruleName\":\"VAT 15%\",\"rate\":15,\"taxAmount\":67.5,\"calculationTimestamp\":\"2025-07-18T10:36:30.323Z\"}]},\"paymentData\":{\"paymentLines\":[{\"paymentMethodId\":\"686eb675a64962f931360637\",\"amount\":\"400\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"status\":\"cleared\"},{\"paymentMethodId\":\"686eb675a64962f931360639\",\"amount\":\"117.50\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"bankName\":\"\",\"chequeDate\":\"\",\"status\":\"cleared\"}],\"notes\":\"POS Sale\"},\"customerId\":\"686eb673a64962f93136028c\",\"couponId\":null}"
+}
+2025-07-18 16:40:12 [info] Payment processed successfully 
+{
+  "service": "payment-service",
+  "paymentId": "687a2b94967d238718d6bfb4",
+  "amount": 517.5,
+  "methods": [
+    "686eb675a64962f931360637",
+    "686eb675a64962f931360639"
+  ]
+}
+2025-07-18 16:45:05 [info] Payment processed successfully 
+{
+  "service": "payment-service",
+  "paymentId": "687a2cb9967d238718d6c141",
+  "amount": 1500,
+  "methods": [
+    "686eb675a64962f931360637"
+  ]
+}
+2025-07-18 17:18:33 [info] Payment processed successfully 
+{
+  "service": "payment-service",
+  "paymentId": "687a3491cb8d862e4b56d2ae",
+  "amount": 1500,
+  "methods": [
+    "686eb675a64962f931360637"
+  ]
+}
+2025-07-19 13:08:19 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:321:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "68722401ae9624259efb199a",
+          "description": "WINDOWS/MACOS RE-INSTALLATION & SETUP",
+          "quantity": 1,
+          "unitPrice": 2500,
+          "lineDiscount": {
+            "type": "fixed",
+            "value": 0
+          },
+          "finalPrice": 2500,
+          "serialNumber": null,
+          "batchNumber": null,
+          "cartId": 0.003324227192191942
+        }
+      ],
+      "subTotal": 2500,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 0,
+      "taxBreakdown": [],
+      "grandTotal": 2500,
+      "globalDiscount": null,
+      "additionalCharges": [],
+      "taxAuditTrail": [],
+      "totalAmount": 2500
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "2500.00",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-19 13:08:19 [error] Sale processing failed 
+{
+  "service": "payment-service",
+  "error": "Error: Failed to finalize sale. Please try again.\n    at SalesService.finalizeSale (D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\sales.service.js:321:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:23:26\n    at async ClientSession.withTransaction (D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongodb\\lib\\sessions.js:511:30)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:21:5",
+  "userId": "686eb673a64962f93136028e",
+  "body": "{\"cartData\":{\"items\":[{\"productVariantId\":\"68722401ae9624259efb199a\",\"description\":\"WINDOWS/MACOS RE-INSTALLATION & SETUP\",\"quantity\":1,\"unitPrice\":2500,\"lineDiscount\":{\"type\":\"fixed\",\"value\":0},\"finalPrice\":2500,\"serialNumber\":null,\"batchNumber\":null,\"cartId\":0.003324227192191942}],\"subTotal\":2500,\"totalLineDiscount\":0,\"totalGlobalDiscount\":0,\"totalCharges\":0,\"totalTax\":0,\"taxBreakdown\":[],\"grandTotal\":2500,\"globalDiscount\":null,\"additionalCharges\":[],\"taxAuditTrail\":[],\"totalAmount\":2500},\"paymentData\":{\"paymentLines\":[{\"paymentMethodId\":\"686eb675a64962f931360637\",\"amount\":\"2500.00\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"status\":\"cleared\"}],\"notes\":\"POS Sale\"},\"customerId\":\"686eb673a64962f93136028c\",\"couponId\":null}"
+}
+2025-07-19 13:10:23 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:321:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "68722401ae9624259efb199a",
+          "description": "WINDOWS/MACOS RE-INSTALLATION & SETUP",
+          "quantity": 1,
+          "unitPrice": 2500,
+          "lineDiscount": {
+            "type": "fixed",
+            "value": 0
+          },
+          "finalPrice": 2500,
+          "serialNumber": null,
+          "batchNumber": null,
+          "cartId": 0.003324227192191942
+        }
+      ],
+      "subTotal": 2500,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 0,
+      "taxBreakdown": [],
+      "grandTotal": 2500,
+      "globalDiscount": null,
+      "additionalCharges": [],
+      "taxAuditTrail": [],
+      "totalAmount": 2500
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "2500.00",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-19 13:10:23 [error] Sale processing failed 
+{
+  "service": "payment-service",
+  "error": "Error: Failed to finalize sale. Please try again.\n    at SalesService.finalizeSale (D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\sales.service.js:321:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:23:26\n    at async ClientSession.withTransaction (D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongodb\\lib\\sessions.js:511:30)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:21:5",
+  "userId": "686eb673a64962f93136028e",
+  "body": "{\"cartData\":{\"items\":[{\"productVariantId\":\"68722401ae9624259efb199a\",\"description\":\"WINDOWS/MACOS RE-INSTALLATION & SETUP\",\"quantity\":1,\"unitPrice\":2500,\"lineDiscount\":{\"type\":\"fixed\",\"value\":0},\"finalPrice\":2500,\"serialNumber\":null,\"batchNumber\":null,\"cartId\":0.003324227192191942}],\"subTotal\":2500,\"totalLineDiscount\":0,\"totalGlobalDiscount\":0,\"totalCharges\":0,\"totalTax\":0,\"taxBreakdown\":[],\"grandTotal\":2500,\"globalDiscount\":null,\"additionalCharges\":[],\"taxAuditTrail\":[],\"totalAmount\":2500},\"paymentData\":{\"paymentLines\":[{\"paymentMethodId\":\"686eb675a64962f931360637\",\"amount\":\"2500.00\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"status\":\"cleared\"}],\"notes\":\"POS Sale\"},\"customerId\":\"686eb673a64962f93136028c\",\"couponId\":null}"
+}
+2025-07-19 13:12:56 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:322:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "68722401ae9624259efb199a",
+          "description": "WINDOWS/MACOS RE-INSTALLATION & SETUP",
+          "quantity": 1,
+          "unitPrice": 2500,
+          "lineDiscount": {
+            "type": "fixed",
+            "value": 0
+          },
+          "finalPrice": 2500,
+          "serialNumber": null,
+          "batchNumber": null,
+          "cartId": 0.003324227192191942
+        }
+      ],
+      "subTotal": 2500,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 0,
+      "taxBreakdown": [],
+      "grandTotal": 2500,
+      "globalDiscount": null,
+      "additionalCharges": [],
+      "taxAuditTrail": [],
+      "totalAmount": 2500
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "2500.00",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-19 13:12:56 [error] Sale processing failed 
+{
+  "service": "payment-service",
+  "error": "Error: Failed to finalize sale. Please try again.\n    at SalesService.finalizeSale (D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\sales.service.js:322:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:23:26\n    at async ClientSession.withTransaction (D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongodb\\lib\\sessions.js:511:30)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:21:5",
+  "userId": "686eb673a64962f93136028e",
+  "body": "{\"cartData\":{\"items\":[{\"productVariantId\":\"68722401ae9624259efb199a\",\"description\":\"WINDOWS/MACOS RE-INSTALLATION & SETUP\",\"quantity\":1,\"unitPrice\":2500,\"lineDiscount\":{\"type\":\"fixed\",\"value\":0},\"finalPrice\":2500,\"serialNumber\":null,\"batchNumber\":null,\"cartId\":0.003324227192191942}],\"subTotal\":2500,\"totalLineDiscount\":0,\"totalGlobalDiscount\":0,\"totalCharges\":0,\"totalTax\":0,\"taxBreakdown\":[],\"grandTotal\":2500,\"globalDiscount\":null,\"additionalCharges\":[],\"taxAuditTrail\":[],\"totalAmount\":2500},\"paymentData\":{\"paymentLines\":[{\"paymentMethodId\":\"686eb675a64962f931360637\",\"amount\":\"2500.00\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"status\":\"cleared\"}],\"notes\":\"POS Sale\"},\"customerId\":\"686eb673a64962f93136028c\",\"couponId\":null}"
+}
+2025-07-19 13:14:19 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:322:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "68722401ae9624259efb199a",
+          "description": "WINDOWS/MACOS RE-INSTALLATION & SETUP",
+          "quantity": 1,
+          "unitPrice": 2500,
+          "lineDiscount": {
+            "type": "fixed",
+            "value": 0
+          },
+          "finalPrice": 2500,
+          "serialNumber": null,
+          "batchNumber": null,
+          "cartId": 0.003324227192191942
+        }
+      ],
+      "subTotal": 2500,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 0,
+      "taxBreakdown": [],
+      "grandTotal": 2500,
+      "globalDiscount": null,
+      "additionalCharges": [],
+      "taxAuditTrail": [],
+      "totalAmount": 2500
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "2500.00",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-19 13:14:19 [error] Sale processing failed 
+{
+  "service": "payment-service",
+  "error": "Error: Failed to finalize sale. Please try again.\n    at SalesService.finalizeSale (D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\sales.service.js:322:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:23:26\n    at async ClientSession.withTransaction (D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongodb\\lib\\sessions.js:511:30)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:21:5",
+  "userId": "686eb673a64962f93136028e",
+  "body": "{\"cartData\":{\"items\":[{\"productVariantId\":\"68722401ae9624259efb199a\",\"description\":\"WINDOWS/MACOS RE-INSTALLATION & SETUP\",\"quantity\":1,\"unitPrice\":2500,\"lineDiscount\":{\"type\":\"fixed\",\"value\":0},\"finalPrice\":2500,\"serialNumber\":null,\"batchNumber\":null,\"cartId\":0.003324227192191942}],\"subTotal\":2500,\"totalLineDiscount\":0,\"totalGlobalDiscount\":0,\"totalCharges\":0,\"totalTax\":0,\"taxBreakdown\":[],\"grandTotal\":2500,\"globalDiscount\":null,\"additionalCharges\":[],\"taxAuditTrail\":[],\"totalAmount\":2500},\"paymentData\":{\"paymentLines\":[{\"paymentMethodId\":\"686eb675a64962f931360637\",\"amount\":\"2500.00\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"status\":\"cleared\"}],\"notes\":\"POS Sale\"},\"customerId\":\"686eb673a64962f93136028c\",\"couponId\":null}"
+}
+2025-07-19 13:16:21 [error] Sale transaction failed 
+Error: Failed to finalize sale. Please try again.
+    at SalesService.finalizeSale (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\sales.service.js:322:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:23:26
+    at async ClientSession.withTransaction (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sessions.js:511:30)
+    at async D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\sales\sales.controller.js:21:5
+{
+  "service": "payment-service",
+  "error": "Failed to finalize sale. Please try again.",
+  "userId": "686eb673a64962f93136028e",
+  "body": {
+    "cartData": {
+      "items": [
+        {
+          "productVariantId": "68722401ae9624259efb199a",
+          "description": "WINDOWS/MACOS RE-INSTALLATION & SETUP",
+          "quantity": 1,
+          "unitPrice": 2500,
+          "lineDiscount": {
+            "type": "fixed",
+            "value": 0
+          },
+          "finalPrice": 2500,
+          "serialNumber": null,
+          "batchNumber": null,
+          "cartId": 0.003324227192191942
+        }
+      ],
+      "subTotal": 2500,
+      "totalLineDiscount": 0,
+      "totalGlobalDiscount": 0,
+      "totalCharges": 0,
+      "totalTax": 0,
+      "taxBreakdown": [],
+      "grandTotal": 2500,
+      "globalDiscount": null,
+      "additionalCharges": [],
+      "taxAuditTrail": [],
+      "totalAmount": 2500
+    },
+    "paymentData": {
+      "paymentLines": [
+        {
+          "paymentMethodId": "686eb675a64962f931360637",
+          "amount": "2500.00",
+          "referenceNumber": "",
+          "cashTendered": "",
+          "changeDue": 0,
+          "status": "cleared"
+        }
+      ],
+      "notes": "POS Sale"
+    },
+    "customerId": "686eb673a64962f93136028c",
+    "couponId": null
+  }
+}
+2025-07-19 13:16:21 [error] Sale processing failed 
+{
+  "service": "payment-service",
+  "error": "Error: Failed to finalize sale. Please try again.\n    at SalesService.finalizeSale (D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\sales.service.js:322:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:23:26\n    at async ClientSession.withTransaction (D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongodb\\lib\\sessions.js:511:30)\n    at async D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\sales\\sales.controller.js:21:5",
+  "userId": "686eb673a64962f93136028e",
+  "body": "{\"cartData\":{\"items\":[{\"productVariantId\":\"68722401ae9624259efb199a\",\"description\":\"WINDOWS/MACOS RE-INSTALLATION & SETUP\",\"quantity\":1,\"unitPrice\":2500,\"lineDiscount\":{\"type\":\"fixed\",\"value\":0},\"finalPrice\":2500,\"serialNumber\":null,\"batchNumber\":null,\"cartId\":0.003324227192191942}],\"subTotal\":2500,\"totalLineDiscount\":0,\"totalGlobalDiscount\":0,\"totalCharges\":0,\"totalTax\":0,\"taxBreakdown\":[],\"grandTotal\":2500,\"globalDiscount\":null,\"additionalCharges\":[],\"taxAuditTrail\":[],\"totalAmount\":2500},\"paymentData\":{\"paymentLines\":[{\"paymentMethodId\":\"686eb675a64962f931360637\",\"amount\":\"2500.00\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"status\":\"cleared\"}],\"notes\":\"POS Sale\"},\"customerId\":\"686eb673a64962f93136028c\",\"couponId\":null}"
+}

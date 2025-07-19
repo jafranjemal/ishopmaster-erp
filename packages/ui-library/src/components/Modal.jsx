@@ -91,8 +91,8 @@ const Modal = ({
             )}
 
             <div
-              style={{ right: "0.5rem" }}
-              className="w-[60px] absolute flex items-center gap-1  z-10"
+              style={{ top: -5, right: "0.5rem" }}
+              className="w-[40px] absolute flex items-center gap-1  z-10"
             >
               <Button
                 className=" text-slate-400 hover:text-white"
@@ -101,16 +101,16 @@ const Modal = ({
                 onClick={() => setDefaultSize(defaultSize === "l" ? "full" : "l")}
                 aria-label="Close modal"
               >
-                <Maximize2Icon className="border h-7 w-7 p-1" />
+                <Maximize2Icon className="border h-5 w-5 p-1" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white hover:bg-red-500/10 rounded  transition-colors duration-200 cursor-pointer"
                 aria-label="Close modal"
               >
-                <X className="border h-7 w-7" />
+                <X className="border h-5 w-5" />
               </Button>
             </div>
           </motion.div>
