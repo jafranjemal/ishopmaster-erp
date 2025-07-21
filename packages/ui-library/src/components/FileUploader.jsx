@@ -1,12 +1,12 @@
-import React, { useState, useCallback, useRef } from "react";
-import PropTypes from "prop-types";
 import axios from "axios";
+import { Camera, LoaderCircle, UploadCloud, X } from "lucide-react";
+import PropTypes from "prop-types";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
-import { UploadCloud, File as FileIcon, X, LoaderCircle } from "lucide-react";
-import { Button } from "./Button";
-import { cn } from "../lib/utils";
 import { useCustomDropzone } from "../hooks/useCustomDropzone";
-import { useEffect } from "react";
+import { cn } from "../lib/utils";
+import { Button } from "./Button";
+import { CameraCaptureModal } from "./CameraCaptureModal";
 
 export const FileUploader = ({
   onUploadComplete,
@@ -16,15 +16,21 @@ export const FileUploader = ({
   maxSize = 10 * 1024 * 1024,
   multiple = false,
 }) => {
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState([
+    // {
+    //   name: "9H Steve Glass Strong Full Screen Protector (1)",
+    //   url: "https://res.cloudinary.com/dpkxck2uh/image/upload/v1752984796/xtppxarqlfvcpnzz4saw.jpg",
+    // },
+  ]);
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef(null);
-
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   useEffect(() => {
-    setFiles((prev) => {
-      const isSame = JSON.stringify(prev) === JSON.stringify(initialFiles);
-      return isSame ? prev : initialFiles;
-    });
+    if (initialFiles.length > 0)
+      setFiles((prev) => {
+        const isSame = JSON.stringify(prev) === JSON.stringify(initialFiles);
+        return isSame ? prev : initialFiles;
+      });
   }, [initialFiles]);
 
   const uploadFile = useCallback(
@@ -89,6 +95,7 @@ export const FileUploader = ({
         const newFiles = multiple ? [...files, ...uploadedFiles] : uploadedFiles;
         setFiles(newFiles);
         onUploadComplete?.(newFiles);
+        console.log(newFiles);
         toast.success("Upload complete", { id: toastId });
       } catch (error) {
         toast.error(error?.response?.data?.error?.message || error.message || "Upload failed", {
@@ -121,39 +128,46 @@ export const FileUploader = ({
   };
 
   return (
-    <div>
-      <div
-        {...getRootProps()}
-        onClick={openFileDialog}
-        className={cn(
-          "p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors",
-          isDraggingOver
-            ? "border-indigo-500 bg-indigo-900/10"
-            : "border-slate-700 hover:border-indigo-600",
-          isUploading && "cursor-wait opacity-50"
-        )}
-        aria-disabled={isUploading}
-        role="button"
-        tabIndex={0}
-      >
-        <input
-          {...getInputProps()}
-          ref={inputRef}
-          aria-hidden="true"
-          type="file"
-          accept="image/png,image/jpeg,image/webp,application/pdf"
-        />
-        <div className="text-center">
-          {isUploading ? (
-            <LoaderCircle className="mx-auto h-12 w-12 animate-spin text-slate-400" />
-          ) : (
-            <UploadCloud className="mx-auto h-12 w-12 text-slate-400" />
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+        <div
+          {...getRootProps()}
+          onClick={openFileDialog}
+          className={cn(
+            "p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors h-full flex flex-col justify-center",
+            isDraggingOver
+              ? "border-indigo-500 bg-indigo-900/10"
+              : "border-slate-700 hover:border-indigo-600",
+            isUploading && "cursor-wait opacity-50"
           )}
-          <p className="mt-2 text-sm text-slate-400">
-            {isUploading ? "Uploading..." : "Drag & drop or click to upload"}
-          </p>
-          <p className="text-xs text-slate-500">Max {Math.round(maxSize / (1024 * 1024))}MB</p>
+          aria-disabled={isUploading}
+          role="button"
+          tabIndex={0}
+        >
+          <input {...getInputProps()} ref={inputRef} />
+          <div className="text-center">
+            {isUploading ? (
+              <LoaderCircle className="mx-auto h-8 w-8 animate-spin" />
+            ) : (
+              <UploadCloud className="mx-auto h-8 w-8" />
+            )}
+            <p className="mt-2 text-sm">Drag & drop or click to upload</p>
+            <p className="text-xs text-slate-500">Max {Math.round(maxSize / (1024 * 1024))}MB</p>
+          </div>
         </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="h-full"
+          onClick={() => setIsCameraOpen(true)}
+          disabled={isUploading}
+        >
+          <div className="text-center">
+            <Camera className="mx-auto h-8 w-8" />
+            <p className="mt-2 text-sm">Take a Picture</p>
+            <p className="text-xs text-slate-500">Use your device's camera</p>
+          </div>
+        </Button>
       </div>
 
       {files.length > 0 && (
@@ -171,7 +185,6 @@ export const FileUploader = ({
               <div className="p-2 text-xs text-slate-300 truncate text-center">
                 {file.name || "Unnamed"}
               </div>
-
               <button
                 onClick={() => removeFile(file.url)}
                 className="absolute top-1 right-1 bg-slate-900/60 rounded-full p-1 hover:bg-red-600 transition"
@@ -183,7 +196,15 @@ export const FileUploader = ({
           ))}
         </div>
       )}
-    </div>
+
+      <CameraCaptureModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onCaptureComplete={(file) => {
+          handleFilesUpload([file]); // Pass the captured file to your existing upload logic
+        }}
+      />
+    </>
   );
 };
 

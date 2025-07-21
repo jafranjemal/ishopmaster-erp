@@ -1,8 +1,10 @@
 const nodemailer = require("nodemailer");
+require("dotenv").config(); // Ensure .env is loaded here if it's not already
 
 class NotificationService {
   constructor() {
     // Create a reusable transporter object using the SMTP transport
+
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: process.env.SMTP_PORT,
@@ -22,6 +24,12 @@ class NotificationService {
     if (!to || !subject || !html) {
       throw new Error("To, subject, and html are required for sending email.");
     }
+
+    console.log("SMTP config", {
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      user: process.env.SMTP_USER,
+    });
 
     const info = await this.transporter.sendMail({
       from: process.env.EMAIL_FROM,

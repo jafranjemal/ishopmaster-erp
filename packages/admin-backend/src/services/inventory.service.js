@@ -60,10 +60,7 @@ class InventoryService {
         availableQuantity: Math.min(
           ...componentStatus.map((c) =>
             Math.floor(
-              c.availableQuantity /
-                variant.templateId.bundleItems.find((b) =>
-                  b.productVariantId._id.equals(c.componentId)
-                ).quantity
+              c.availableQuantity / variant.templateId.bundleItems.find((b) => b.productVariantId._id.equals(c.componentId)).quantity
             )
           )
         ),
@@ -169,9 +166,7 @@ class InventoryService {
       });
     } else if (productType === "serialized") {
       if (serials.length !== quantity)
-        throw new Error(
-          `Quantity (${quantity}) does not match the number of serials provided (${serials.length}).`
-        );
+        throw new Error(`Quantity (${quantity}) does not match the number of serials provided (${serials.length}).`);
 
       const itemsToCreate = serials.map((serialNumber) => ({
         productVariantId,
@@ -202,11 +197,7 @@ class InventoryService {
    * Decreases stock for a product variant, from a sale or transfer.
    * For non-serialized items, it uses a FIFO (First-In, First-Out) strategy.
    */
-  async decreaseStock(
-    models,
-    { productVariantId, branchId, quantity, serialNumber, userId, refs = {} },
-    session = null
-  ) {
+  async decreaseStock(models, { productVariantId, branchId, quantity, serialNumber, userId, refs = {} }, session = null) {
     const { ProductVariants, InventoryLot, InventoryItem } = models;
 
     const variant = await ProductVariants.findById(productVariantId)
@@ -311,14 +302,9 @@ class InventoryService {
       }
 
       if (remainingQtyToDeduct > 0)
-        throw new Error(
-          `Insufficient stock for variant ${variant.variantName}. Only ${
-            quantity - remainingQtyToDeduct
-          } units available.`
-        );
+        throw new Error(`Insufficient stock for variant ${variant.variantName}. Only ${quantity - remainingQtyToDeduct} units available.`);
     } else if (productType === "serialized") {
-      if (!serialNumber)
-        throw new Error("Serial number is required for serialized item stock movement.");
+      if (!serialNumber) throw new Error("Serial number is required for serialized item stock movement.");
       const item = await InventoryItem.findOne({
         productVariantId,
         serialNumber,
@@ -371,8 +357,7 @@ class InventoryService {
       });
     } else {
       const cost = data.costPriceInBaseCurrency;
-      if (!cost && cost !== 0)
-        throw new Error("Cost price is required when manually adding stock.");
+      if (!cost && cost !== 0) throw new Error("Cost price is required when manually adding stock.");
       await this.increaseStock(models, {
         ...logData,
         quantity: quantityChange,
@@ -389,9 +374,7 @@ class InventoryService {
   async dispatchTransfer(models, { transfer, userId }) {
     const { ProductVariants } = models;
     for (const item of transfer.items) {
-      const variant = await ProductVariants.findById(item.productVariantId)
-        .populate("templateId")
-        .lean();
+      const variant = await ProductVariants.findById(item.productVariantId).populate("templateId").lean();
       if (!variant) continue;
 
       const isSerialized = variant.templateId.type === "serialized";
@@ -438,9 +421,7 @@ class InventoryService {
     const { InventoryLot, InventoryItem, ProductVariants } = models;
 
     for (const item of transfer.items) {
-      const variant = await ProductVariants.findById(item.productVariantId)
-        .populate("templateId")
-        .lean();
+      const variant = await ProductVariants.findById(item.productVariantId).populate("templateId").lean();
       if (!variant) continue;
       const isSerialized = variant.templateId.type === "serialized";
 
@@ -451,10 +432,8 @@ class InventoryService {
             productVariantId: item.productVariantId,
             serialNumber: serial,
           });
-          if (!inventoryItem)
-            throw new Error(`Transferred item with serial ${serial} not found in database.`);
-          if (inventoryItem.status !== "in_transit")
-            throw new Error(`Item ${serial} is not currently in transit.`);
+          if (!inventoryItem) throw new Error(`Transferred item with serial ${serial} not found in database.`);
+          if (inventoryItem.status !== "in_transit") throw new Error(`Item ${serial} is not currently in transit.`);
 
           // Update the location and status of the EXISTING item
           inventoryItem.branchId = transfer.toBranchId;
@@ -510,6 +489,207 @@ class InventoryService {
       { $set: { salesInvoiceId: saleId } },
       { session }
     );
+  }
+
+  /**
+   * Reserves stock for a specific reference (e.g., a Repair Ticket).
+   * This is a new, fully implemented method.
+   */
+  async reserveStock(models, { productVariantId, branchId, quantity, serialNumber, refs, userId }, session) {
+    const { InventoryItem, InventoryLot, ProductVariants } = models;
+    const variant = await ProductVariants.findById(productVariantId).populate("templateId").lean();
+    if (!variant) throw new Error(`Product Variant ${productVariantId} not found.`);
+
+    const isSerialized = variant.templateId.type === "serialized";
+
+    if (isSerialized) {
+      const item = await InventoryItem.findOne({ serialNumber, status: "in_stock", branchId }).session(session);
+      if (!item) throw new Error(`Serialized item ${serialNumber} not found or not in stock at this branch.`);
+
+      item.status = "reserved_for_service";
+      item.reservationRef = { kind: "RepairTicket", item: refs.repairTicketId };
+      await item.save({ session });
+
+      await this._logMovement(
+        models,
+        [
+          {
+            productVariantId,
+            branchId,
+            inventoryItemId: item._id,
+            type: "reserve",
+            quantityChange: -1,
+            costPriceInBaseCurrency: item.costPriceInBaseCurrency,
+            userId,
+            notes: `Reserved for Repair Ticket`,
+          },
+        ],
+        session
+      );
+      return { reservedItems: [item] };
+    } else {
+      const lots = await InventoryLot.find({ productVariantId, branchId, quantityInStock: { $gte: quantity } })
+        .sort({ createdAt: 1 })
+        .session(session);
+      if (lots.length === 0) throw new Error(`Insufficient stock to reserve ${quantity} units.`);
+
+      const lotToReserveFrom = lots[0]; // Use the first available lot (FIFO)
+      lotToReserveFrom.quantityInStock -= quantity;
+      lotToReserveFrom.quantityReserved += quantity;
+      await lotToReserveFrom.save({ session });
+
+      await this._logMovement(
+        models,
+        [
+          {
+            productVariantId,
+            branchId,
+            inventoryLotId: lotToReserveFrom._id,
+            type: "reserve",
+            quantityChange: -quantity,
+            costPriceInBaseCurrency: lotToReserveFrom.costPriceInBaseCurrency,
+            userId,
+            notes: `Reserved for Repair Ticket`,
+          },
+        ],
+        session
+      );
+      return { success: true };
+    }
+  }
+
+  /**
+   * Releases a stock reservation, making the item available again.
+   * This is a new, fully implemented method.
+   */
+  async releaseStockReservation(models, { productVariantId, branchId, quantity, serialNumber, refs, userId }, session) {
+    const { InventoryItem, InventoryLot, ProductVariants } = models;
+    const variant = await ProductVariants.findById(productVariantId).populate("templateId").lean();
+    if (!variant) throw new Error(`Product Variant ${productVariantId} not found.`);
+
+    const isSerialized = variant.templateId.type === "serialized";
+
+    if (isSerialized) {
+      const item = await InventoryItem.findOne({
+        serialNumber,
+        status: "reserved_for_service",
+        "reservationRef.item": refs.repairTicketId,
+      }).session(session);
+      if (!item) throw new Error(`Reserved item with serial ${serialNumber} for this ticket not found.`);
+
+      item.status = "in_stock";
+      item.reservationRef = undefined;
+      await item.save({ session });
+
+      await this._logMovement(
+        models,
+        [
+          {
+            productVariantId,
+            branchId: item.branchId,
+            inventoryItemId: item._id,
+            type: "release_reserve",
+            quantityChange: 1,
+            costPriceInBaseCurrency: item.costPriceInBaseCurrency,
+            userId,
+            notes: `Reservation released from Repair Ticket`,
+          },
+        ],
+        session
+      );
+    } else {
+      const lot = await InventoryLot.findOne({ productVariantId, branchId, quantityReserved: { $gte: quantity } }).session(session);
+      if (!lot) throw new Error(`No lot with sufficient reserved quantity found.`);
+
+      lot.quantityReserved -= quantity;
+      lot.quantityInStock += quantity;
+      await lot.save({ session });
+
+      await this._logMovement(
+        models,
+        [
+          {
+            productVariantId,
+            branchId,
+            inventoryLotId: lot._id,
+            type: "release_reserve",
+            quantityChange: quantity,
+            costPriceInBaseCurrency: lot.costPriceInBaseCurrency,
+            userId,
+            notes: `Reservation released from Repair Ticket`,
+          },
+        ],
+        session
+      );
+    }
+    return { success: true };
+  }
+
+  /**
+   * Commits a stock reservation, permanently deducting the stock (e.g., marking as 'sold').
+   * This is a new, fully implemented method.
+   */
+  async commitStockReservation(models, { productVariantId, branchId, quantity, serialNumber, refs, userId }, session) {
+    const { InventoryItem, InventoryLot, ProductVariants } = models;
+    const variant = await ProductVariants.findById(productVariantId).populate("templateId").lean();
+    if (!variant) throw new Error(`Product Variant ${productVariantId} not found.`);
+
+    const isSerialized = variant.templateId.type === "serialized";
+
+    if (isSerialized) {
+      const item = await InventoryItem.findOne({
+        serialNumber,
+        status: "reserved_for_service",
+        "reservationRef.item": refs.repairTicketId,
+      }).session(session);
+      if (!item) throw new Error(`Reserved item with serial ${serialNumber} for this ticket not found.`);
+
+      item.status = "sold";
+      await item.save({ session });
+
+      await this._logMovement(
+        models,
+        [
+          {
+            ...refs,
+            productVariantId,
+            branchId: item.branchId,
+            inventoryItemId: item._id,
+            type: "sale",
+            quantityChange: -1,
+            costPriceInBaseCurrency: item.costPriceInBaseCurrency,
+            userId,
+            notes: `Committed from Repair Ticket`,
+          },
+        ],
+        session
+      );
+    } else {
+      const lot = await InventoryLot.findOne({ productVariantId, branchId, quantityReserved: { $gte: quantity } }).session(session);
+      if (!lot) throw new Error(`No lot with sufficient reserved quantity to commit.`);
+
+      lot.quantityReserved -= quantity;
+      await lot.save({ session });
+
+      await this._logMovement(
+        models,
+        [
+          {
+            ...refs,
+            productVariantId,
+            branchId,
+            inventoryLotId: lot._id,
+            type: "sale",
+            quantityChange: -quantity,
+            costPriceInBaseCurrency: lot.costPriceInBaseCurrency,
+            userId,
+            notes: `Committed from Repair Ticket`,
+          },
+        ],
+        session
+      );
+    }
+    return { success: true };
   }
 
   /**

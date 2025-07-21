@@ -1,7 +1,7 @@
 import axios from 'axios'; // Portal might use a separate axios instance
 import { jwtDecode } from 'jwt-decode';
 //const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1/portal';
-const API_URL = 'http://localhost:5001/api/v1/portal';
+const API_URL = 'http://localhost:5001/api/v1/public/portal';
 const portalApi = axios.create({ baseURL: API_URL });
 // This function runs before every single request sent by this portalApi instance.
 portalApi.interceptors.request.use(
@@ -50,4 +50,11 @@ export const portalAuthService = {
   requestNewLink: (data) => portalApi.post('/auth/resend-link', data),
   trackRepair: (ticketId) => portalApi.get(`/repair/${ticketId}`),
   generatePortalToken: (customerId) => portalApi.post(`/crm/customers/${customerId}/generate-portal-token`),
+  getQuoteDetails: (quoteId) => {
+    return portalApi.get(`/quotes/${quoteId}`);
+  },
+  approveQuote: (quoteId, signature) => {
+    return portalApi.post(`/quotes/${quoteId}/approve`, { signature });
+  },
+  getTenantProfile: () => portalApi.get('/tenant-profile'),
 };

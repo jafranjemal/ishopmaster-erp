@@ -16,15 +16,16 @@ const stockRoutes = require("./stock/stock.routes"); // <-- 1. IMPORT NEW ROUTES
 const stockAdjustmentRoutes = require("./adjustments/stockAdjustment.routes"); // <-- 1. IMPORT NEW ROUTES
 const printRoutes = require("./print/print.routes"); // <-- IMPORT
 const deviceSchema = require("./devices/device.schema");
-const repairTypeSchema = require("./repairs/repairType.schema");
+
 const deviceRoutes = require("./devices/device.routes");
-const repairTypeRoutes = require("./repairs/repairType.routes");
+
 const assemblyRoutes = require("./assemblies/assembly.routes"); // <-- 1. IMPORT NEW ROUTES
 const warrantyRoutes = require("./warranties/warrantyPolicy.routes"); // <-- 1. IMPORT
 const warrantyPolicySchema = require("./warranties/warrantyPolicy.schema");
 const inventoryLedgerSchema = require("./inventoryLedger/inventoryLedger.schema");
 const inventoryLedgerRoutes = require("./inventoryLedger/inventoryLedger.routes"); // <-- 1. IMPORT NEW ROUTES
-
+const assetSchema = require("./assets/asset.schema");
+const assetRoutes = require("./assets/asset.routes");
 const mainRouter = express.Router();
 
 // Mount the sub-module routers
@@ -41,10 +42,11 @@ mainRouter.use("/stock", stockRoutes);
 mainRouter.use("/adjustments", stockAdjustmentRoutes);
 mainRouter.use("/print", printRoutes);
 mainRouter.use("/devices", deviceRoutes);
-mainRouter.use("/repairs", repairTypeRoutes);
+
 mainRouter.use("/assemblies", assemblyRoutes);
 mainRouter.use("/warranties", warrantyRoutes);
 mainRouter.use("/ledger", inventoryLedgerRoutes);
+mainRouter.use("/assets", assetRoutes);
 module.exports = {
   schemas: {
     ProductTemplates: productTemplateSchema,
@@ -56,9 +58,10 @@ module.exports = {
     StockMovement: stockMovementSchema,
     Device: deviceSchema,
     StockTransfer: stockTransferSchema,
-    RepairType: repairTypeSchema,
+
     WarrantyPolicy: warrantyPolicySchema,
     InventoryLedger: inventoryLedgerSchema,
+    Asset: assetSchema,
   },
   router: mainRouter,
 };

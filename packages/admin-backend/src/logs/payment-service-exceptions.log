@@ -159,3 +159,3203 @@ Require stack:
   ],
   "service": "payment-service"
 }
+2025-07-19 23:45:19 [error] uncaughtException: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+Error: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js:3:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32) 
+Error: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js:3:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+{
+  "error": {
+    "code": "MODULE_NOT_FOUND",
+    "requireStack": [
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.controller.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.routes.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\index.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ]
+  },
+  "exception": true,
+  "date": "Sat Jul 19 2025 23:45:19 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 13576,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 104452096,
+      "heapTotal": 63885312,
+      "heapUsed": 34137688,
+      "external": 20861330,
+      "arrayBuffers": 18299259
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1576139.578
+  },
+  "trace": [
+    {
+      "column": 15,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._resolveFilename",
+      "line": 1225,
+      "method": "_resolveFilename",
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1055,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.controller.js",
+      "function": null,
+      "line": 3,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-19 23:46:37 [error] uncaughtException: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+Error: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js:3:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32) 
+Error: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js:3:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+{
+  "error": {
+    "code": "MODULE_NOT_FOUND",
+    "requireStack": [
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.controller.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.routes.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\index.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ]
+  },
+  "exception": true,
+  "date": "Sat Jul 19 2025 23:46:37 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 35172,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 108863488,
+      "heapTotal": 62574592,
+      "heapUsed": 40285632,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1576217.046
+  },
+  "trace": [
+    {
+      "column": 15,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._resolveFilename",
+      "line": 1225,
+      "method": "_resolveFilename",
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1055,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.controller.js",
+      "function": null,
+      "line": 3,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-19 23:49:26 [error] uncaughtException: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+Error: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js:3:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32) 
+Error: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js:3:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+{
+  "error": {
+    "code": "MODULE_NOT_FOUND",
+    "requireStack": [
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.controller.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.routes.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\index.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ]
+  },
+  "exception": true,
+  "date": "Sat Jul 19 2025 23:49:26 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 35204,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 108683264,
+      "heapTotal": 62574592,
+      "heapUsed": 40282728,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1576386.437
+  },
+  "trace": [
+    {
+      "column": 15,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._resolveFilename",
+      "line": 1225,
+      "method": "_resolveFilename",
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1055,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.controller.js",
+      "function": null,
+      "line": 3,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-19 23:49:42 [error] uncaughtException: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+Error: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js:3:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32) 
+Error: Cannot find module './services/technician.service'
+Require stack:
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.routes.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js
+- D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1225:15)
+    at Function._load (node:internal/modules/cjs/loader:1055:27)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\repair.controller.js:3:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+{
+  "error": {
+    "code": "MODULE_NOT_FOUND",
+    "requireStack": [
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.controller.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.routes.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\index.js",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ]
+  },
+  "exception": true,
+  "date": "Sat Jul 19 2025 23:49:42 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 36848,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 110100480,
+      "heapTotal": 62312448,
+      "heapUsed": 40900928,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1576401.953
+  },
+  "trace": [
+    {
+      "column": 15,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._resolveFilename",
+      "line": 1225,
+      "method": "_resolveFilename",
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1055,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\repair.controller.js",
+      "function": null,
+      "line": 3,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:41:15 [error] uncaughtException: Identifier 'repairRoutes' has already been declared
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20 
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:41:15 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 36220,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 108756992,
+      "heapTotal": 62312448,
+      "heapUsed": 40233760,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1626295.125
+  },
+  "trace": [
+    {
+      "column": 18,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapSafe",
+      "line": 1486,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1528,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 82,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:43:36 [error] uncaughtException: Identifier 'repairRoutes' has already been declared
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20 
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:43:36 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 35944,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 109101056,
+      "heapTotal": 62312448,
+      "heapUsed": 40374968,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1626436.468
+  },
+  "trace": [
+    {
+      "column": 18,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapSafe",
+      "line": 1486,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1528,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 82,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:47:37 [error] uncaughtException: Identifier 'repairRoutes' has already been declared
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20 
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:47:37 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 4820,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 109105152,
+      "heapTotal": 62312448,
+      "heapUsed": 40130712,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1626677.218
+  },
+  "trace": [
+    {
+      "column": 18,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapSafe",
+      "line": 1486,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1528,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 82,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:47:56 [error] uncaughtException: Identifier 'repairRoutes' has already been declared
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20 
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:47:56 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 33604,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 108675072,
+      "heapTotal": 62574592,
+      "heapUsed": 40148320,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1626696.453
+  },
+  "trace": [
+    {
+      "column": 18,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapSafe",
+      "line": 1486,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1528,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 82,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:48:16 [error] uncaughtException: Identifier 'repairRoutes' has already been declared
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20 
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:48:16 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 33980,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 108601344,
+      "heapTotal": 62312448,
+      "heapUsed": 40133272,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1626716.718
+  },
+  "trace": [
+    {
+      "column": 18,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapSafe",
+      "line": 1486,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1528,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 82,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:48:34 [error] uncaughtException: Identifier 'repairRoutes' has already been declared
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20 
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:48:34 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 21096,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 108650496,
+      "heapTotal": 62312448,
+      "heapUsed": 40140288,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1626734.828
+  },
+  "trace": [
+    {
+      "column": 18,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapSafe",
+      "line": 1486,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1528,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 82,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:49:48 [error] uncaughtException: Identifier 'repairRoutes' has already been declared
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20 
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:49:48 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 35612,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 108904448,
+      "heapTotal": 62312448,
+      "heapUsed": 40251216,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1626807.937
+  },
+  "trace": [
+    {
+      "column": 18,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapSafe",
+      "line": 1486,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1528,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 82,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:53:42 [error] uncaughtException: Identifier 'repairRoutes' has already been declared
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20 
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:53:42 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 35268,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 108974080,
+      "heapTotal": 62312448,
+      "heapUsed": 40272184,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1627042.359
+  },
+  "trace": [
+    {
+      "column": 18,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapSafe",
+      "line": 1486,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1528,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 82,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:54:01 [error] uncaughtException: Identifier 'repairRoutes' has already been declared
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20 
+D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\index.js:6
+const repairRoutes = require("./repair.routes");
+      ^
+
+SyntaxError: Identifier 'repairRoutes' has already been declared
+    at wrapSafe (node:internal/modules/cjs/loader:1486:18)
+    at Module._compile (node:internal/modules/cjs/loader:1528:20)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:82:20
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:54:01 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 19644,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 109043712,
+      "heapTotal": 62312448,
+      "heapUsed": 40386320,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1627061.859
+  },
+  "trace": [
+    {
+      "column": 18,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapSafe",
+      "line": 1486,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1528,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 20,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 82,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:58:04 [error] uncaughtException: Invalid value for schema Array path `lineItems`, got value "undefined"
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12) 
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:58:04 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 35216,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 104075264,
+      "heapTotal": 64409600,
+      "heapUsed": 34141928,
+      "external": 20861330,
+      "arrayBuffers": 18299259
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1627304.765
+  },
+  "trace": [
+    {
+      "column": 13,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "Schema.add",
+      "line": 782,
+      "method": "add",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "new Schema",
+      "line": 145,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\schemas\\repairQuote.schema.js",
+      "function": null,
+      "line": 7,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 13:59:23 [error] uncaughtException: Invalid value for schema Array path `lineItems`, got value "undefined"
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12) 
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 13:59:23 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 35984,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 109219840,
+      "heapTotal": 62574592,
+      "heapUsed": 40739128,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1627382.953
+  },
+  "trace": [
+    {
+      "column": 13,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "Schema.add",
+      "line": 782,
+      "method": "add",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "new Schema",
+      "line": 145,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\schemas\\repairQuote.schema.js",
+      "function": null,
+      "line": 7,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 14:01:58 [error] uncaughtException: Invalid value for schema Array path `lineItems`, got value "undefined"
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12) 
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 14:01:58 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 26144,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 109371392,
+      "heapTotal": 62574592,
+      "heapUsed": 40674384,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1627538.687
+  },
+  "trace": [
+    {
+      "column": 13,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "Schema.add",
+      "line": 782,
+      "method": "add",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "new Schema",
+      "line": 145,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\schemas\\repairQuote.schema.js",
+      "function": null,
+      "line": 7,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 14:02:16 [error] uncaughtException: Invalid value for schema Array path `lineItems`, got value "undefined"
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12) 
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 14:02:16 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 32464,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 104361984,
+      "heapTotal": 64147456,
+      "heapUsed": 34065824,
+      "external": 20861330,
+      "arrayBuffers": 18299259
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1627556.718
+  },
+  "trace": [
+    {
+      "column": 13,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "Schema.add",
+      "line": 782,
+      "method": "add",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "new Schema",
+      "line": 145,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\schemas\\repairQuote.schema.js",
+      "function": null,
+      "line": 7,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 14:02:48 [error] uncaughtException: Invalid value for schema Array path `lineItems`, got value "undefined"
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12) 
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 14:02:48 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 25708,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 103952384,
+      "heapTotal": 63885312,
+      "heapUsed": 34281456,
+      "external": 20861330,
+      "arrayBuffers": 18299259
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1627588.046
+  },
+  "trace": [
+    {
+      "column": 13,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "Schema.add",
+      "line": 782,
+      "method": "add",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "new Schema",
+      "line": 145,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\schemas\\repairQuote.schema.js",
+      "function": null,
+      "line": 7,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 14:03:10 [error] uncaughtException: Invalid value for schema Array path `lineItems`, got value "undefined"
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12) 
+TypeError: Invalid value for schema Array path `lineItems`, got value "undefined"
+    at Schema.add (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:782:13)
+    at new Schema (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongoose\lib\schema.js:145:10)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\modules\tenant\repairs\schemas\repairQuote.schema.js:7:27)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 14:03:10 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 18524,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 109268992,
+      "heapTotal": 62574592,
+      "heapUsed": 40604664,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1627610.218
+  },
+  "trace": [
+    {
+      "column": 13,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "Schema.add",
+      "line": 782,
+      "method": "add",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\mongoose\\lib\\schema.js",
+      "function": "new Schema",
+      "line": 145,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 27,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\modules\\tenant\\repairs\\schemas\\repairQuote.schema.js",
+      "function": null,
+      "line": 7,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 15:42:45 [error] uncaughtException: Cannot convert undefined or null to object
+TypeError: Cannot convert undefined or null to object
+    at Function.keys (<anonymous>)
+    at Object.registerSchema (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\database.service.js:18:69)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:87:25
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:78:35)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) 
+TypeError: Cannot convert undefined or null to object
+    at Function.keys (<anonymous>)
+    at Object.registerSchema (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\database.service.js:18:69)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:87:25
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:78:35)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 15:42:45 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 20916,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 104394752,
+      "heapTotal": 64147456,
+      "heapUsed": 35385864,
+      "external": 20869522,
+      "arrayBuffers": 18307451
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1633585.812
+  },
+  "trace": [
+    {
+      "column": null,
+      "file": null,
+      "function": "Function.keys",
+      "line": null,
+      "method": "keys",
+      "native": false
+    },
+    {
+      "column": 69,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\database.service.js",
+      "function": "Object.registerSchema",
+      "line": 18,
+      "method": "registerSchema",
+      "native": false
+    },
+    {
+      "column": 25,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 87,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": null,
+      "file": null,
+      "function": "Array.forEach",
+      "line": null,
+      "method": "forEach",
+      "native": false
+    },
+    {
+      "column": 35,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 78,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 15:49:51 [error] uncaughtException: Cannot convert undefined or null to object
+TypeError: Cannot convert undefined or null to object
+    at Function.keys (<anonymous>)
+    at Object.registerSchema (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\database.service.js:32:19)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:87:25
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:78:35)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) 
+TypeError: Cannot convert undefined or null to object
+    at Function.keys (<anonymous>)
+    at Object.registerSchema (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\database.service.js:32:19)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:87:25
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:78:35)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 15:49:51 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 36668,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 112189440,
+      "heapTotal": 62574592,
+      "heapUsed": 43016752,
+      "external": 23020117,
+      "arrayBuffers": 20458046
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1634011.218
+  },
+  "trace": [
+    {
+      "column": null,
+      "file": null,
+      "function": "Function.keys",
+      "line": null,
+      "method": "keys",
+      "native": false
+    },
+    {
+      "column": 19,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\database.service.js",
+      "function": "Object.registerSchema",
+      "line": 32,
+      "method": "registerSchema",
+      "native": false
+    },
+    {
+      "column": 25,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 87,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": null,
+      "file": null,
+      "function": "Array.forEach",
+      "line": null,
+      "method": "forEach",
+      "native": false
+    },
+    {
+      "column": 35,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 78,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-20 15:50:05 [error] uncaughtException: Cannot convert undefined or null to object
+TypeError: Cannot convert undefined or null to object
+    at Function.keys (<anonymous>)
+    at Object.registerSchema (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\database.service.js:32:19)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:87:25
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:78:35)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14) 
+TypeError: Cannot convert undefined or null to object
+    at Function.keys (<anonymous>)
+    at Object.registerSchema (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\database.service.js:32:19)
+    at D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:87:25
+    at Array.forEach (<anonymous>)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\server.js:78:35)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+{
+  "error": {},
+  "exception": true,
+  "date": "Sun Jul 20 2025 15:50:05 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 27588,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 104558592,
+      "heapTotal": 63885312,
+      "heapUsed": 36429200,
+      "external": 20861330,
+      "arrayBuffers": 18299259
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1634025.859
+  },
+  "trace": [
+    {
+      "column": null,
+      "file": null,
+      "function": "Function.keys",
+      "line": null,
+      "method": "keys",
+      "native": false
+    },
+    {
+      "column": 19,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\database.service.js",
+      "function": "Object.registerSchema",
+      "line": 32,
+      "method": "registerSchema",
+      "native": false
+    },
+    {
+      "column": 25,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 87,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": null,
+      "file": null,
+      "function": "Array.forEach",
+      "line": null,
+      "method": "forEach",
+      "native": false
+    },
+    {
+      "column": 35,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "function": null,
+      "line": 78,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}

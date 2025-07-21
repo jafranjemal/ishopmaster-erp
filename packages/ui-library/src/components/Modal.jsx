@@ -1,10 +1,9 @@
-// --- Modal.js (Production-grade) ---
-import React, { useEffect, useRef, useState } from "react";
+// --- Updated Modal.js ---
+import { AnimatePresence, motion } from "framer-motion";
+import { Maximize2Icon, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Expand, ExpandIcon, LucideExpand, Maximize2, Maximize2Icon, X } from "lucide-react";
 import { cn } from "../lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import FocusTrap from "focus-trap-react";
 import Button from "./Button";
 
 const sizeClasses = {
@@ -23,20 +22,22 @@ const Modal = ({
   description,
   footer,
   className,
-  size = "l", // default size
+  size = "l",
 }) => {
   const modalRef = useRef(null);
   const [defaultSize, setDefaultSize] = useState(size);
+  const isFull = defaultSize === "full";
+
   useEffect(() => {
     const handleEsc = (event) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
+      if (event.key === "Escape") onClose();
     };
+
     if (isOpen) {
       window.addEventListener("keydown", handleEsc);
-      document.body.style.overflow = "hidden"; // prevent background scroll
+      document.body.style.overflow = "hidden";
     }
+
     return () => {
       window.removeEventListener("keydown", handleEsc);
       document.body.style.overflow = "auto";
@@ -56,11 +57,12 @@ const Modal = ({
           <motion.div
             ref={modalRef}
             className={cn(
-              "relative w-auto max-w-full border border-slate-700 bg-slate-800 shadow-lg text-slate-100 flex flex-col overflow-hidden",
+              "relative border border-slate-700 bg-slate-800 shadow-lg text-slate-100 flex flex-col overflow-hidden",
               sizeClasses[defaultSize],
-              className
+              className,
+              isFull ? "fixed inset-8" : "max-h-[90vh]"
             )}
-            style={{ maxHeight: "90vh", margin: "2rem" }}
+            style={isFull ? {} : { margin: "2rem" }}
             onMouseDown={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -82,35 +84,30 @@ const Modal = ({
               )}
             </div>
 
-            <div className="p-6 overflow-y-auto" style={{ flex: 1, minHeight: 0 }}>
-              {children}
-            </div>
+            <div className="p-6 overflow-y-auto flex-1 min-h-0">{children}</div>
 
             {footer && (
               <div className="flex items-center p-6 border-t border-slate-700">{footer}</div>
             )}
 
-            <div
-              style={{ top: -5, right: "0.5rem" }}
-              className="w-[40px] absolute flex items-center gap-1  z-10"
-            >
+            <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
               <Button
-                className=" text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white"
                 size="icon"
                 variant="ghost"
                 onClick={() => setDefaultSize(defaultSize === "l" ? "full" : "l")}
-                aria-label="Close modal"
+                aria-label="Toggle size"
               >
-                <Maximize2Icon className="border h-5 w-5 p-1" />
+                <Maximize2Icon className="h-5 w-5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="text-slate-400 hover:text-white hover:bg-red-500/10 rounded  transition-colors duration-200 cursor-pointer"
+                className="text-slate-400 hover:text-white hover:bg-red-500/10 rounded transition-colors duration-200"
                 aria-label="Close modal"
               >
-                <X className="border h-5 w-5" />
+                <X className="h-5 w-5" />
               </Button>
             </div>
           </motion.div>

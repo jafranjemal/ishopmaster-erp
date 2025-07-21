@@ -61,6 +61,10 @@ const employeeSchema = new mongoose.Schema(
       baseSalary: { type: Number, default: 0 },
       commissionRate: { type: Number, default: 0 }, // Percentage, e.g., 5 for 5%
       hourlyRate: { type: Number, default: 0 },
+      billingRate: {
+        type: Number,
+        default: 0, // This is the rate billed to customers per hour
+      },
     },
 
     dateOfJoining: { type: Date, default: Date.now },

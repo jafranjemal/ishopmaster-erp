@@ -1,51 +1,248 @@
-import React from "react";
-import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge } from "ui-library";
-import useAuth from "../../context/useAuth";
-import { PlusCircle, Trash2 } from "lucide-react";
+// import { PlusCircle, Trash2 } from 'lucide-react';
+// import { useState } from 'react';
+// import { Button, Modal, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'ui-library';
 
-const JobSheetEditor = ({ items = [], onAddItem, onRemoveItem }) => {
-  const { formatCurrency } = useAuth();
+// import { toast } from 'react-hot-toast';
+// import useAuth from '../../context/useAuth';
+// import { tenantRepairService } from '../../services/api';
+// import DiscoveryPanel from '../pos/DiscoveryPanel';
+
+// const JobSheetEditor = ({ ticket, onUpdate }) => {
+//   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+//   const { formatCurrency } = useAuth();
+
+//   const handleAddItem = async (variant) => {
+//     console.log('item added on service ', variant);
+//     console.log('item added on service ticket', ticket);
+//     const itemData = {
+//       productVariantId: variant.map((x) => x._id).join(''),
+//       description: variant.map((x) => x.variantName).join(''),
+//       quantity: 1, // Default to 1, can be edited later
+//       // The backend will fetch the latest prices
+//     };
+//     try {
+//       const res = await toast.promise(tenantRepairService.addItemToJobSheet(ticket._id, itemData), {
+//         loading: 'Adding item...',
+//         success: 'Item added to Job Sheet!',
+//         error: 'Failed to add item.',
+//       });
+//       onUpdate(res.data.data); // Update the parent page's state with the new ticket
+//       setIsAddModalOpen(false);
+//     } catch (err) {
+//       /* Handled by toast */
+//     }
+//   };
+
+//   const handleRemoveItem = async (itemId) => {
+//     if (!window.confirm('Are you sure you want to remove this item from the job sheet?')) return;
+//     try {
+//       const res = await toast.promise(tenantRepairService.removeItemFromJobSheet(ticket._id, itemId), {
+//         loading: 'Removing item...',
+//         success: 'Item removed!',
+//         error: 'Failed to remove item.',
+//       });
+//       onUpdate(res.data.data);
+//     } catch (err) {
+//       /* Handled by toast */
+//     }
+//   };
+
+//   return (
+//     <div>
+//       <div className='flex justify-end mb-4'>
+//         <Button onClick={() => setIsAddModalOpen(true)}>
+//           <PlusCircle className='h-4 w-4 mr-2' />
+//           Add Part / Service
+//         </Button>
+//       </div>
+//       <div className='border border-slate-700 rounded-lg'>
+//         <Table>
+//           <TableHeader>
+//             <TableRow>
+//               <TableHead>Item/Service</TableHead>
+//               <TableHead>Qty</TableHead>
+//               <TableHead className='text-right'>Price</TableHead>
+//               <TableHead className='w-12'></TableHead>
+//             </TableRow>
+//           </TableHeader>
+//           <TableBody>
+//             {ticket.jobSheet.length === 0 && (
+//               <TableRow>
+//                 <TableCell colSpan={4} className='text-center h-24'>
+//                   No parts or services added yet.
+//                 </TableCell>
+//               </TableRow>
+//             )}
+//             {ticket.jobSheet.map((item) => (
+//               <TableRow key={item._id}>
+//                 <TableCell className='font-medium'>{item.description}</TableCell>
+//                 <TableCell>{item.quantity}</TableCell>
+//                 <TableCell className='text-right font-mono'>{formatCurrency(item.unitPrice * item.quantity)}</TableCell>
+//                 <TableCell>
+//                   <Button variant='ghost' size='icon' onClick={() => handleRemoveItem(item._id)}>
+//                     <Trash2 className='h-4 w-4 text-red-500' />
+//                   </Button>
+//                 </TableCell>
+//               </TableRow>
+//             ))}
+//           </TableBody>
+//         </Table>
+//       </div>
+//       <Modal
+//         isOpen={isAddModalOpen}
+//         onClose={() => setIsAddModalOpen(false)}
+//         title='Add Part or Service to Job Sheet'
+//         size='full'
+//       >
+//         <div className='h-[70vh]'>
+//           <DiscoveryPanel onItemsSelected={handleAddItem} />
+//         </div>
+//       </Modal>
+//     </div>
+//   );
+// };
+// export default JobSheetEditor;
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
+import { PlusCircle, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { Button, Modal, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'ui-library';
+import useAuth from '../../context/useAuth';
+import { tenantHrService, tenantRepairService } from '../../services/api';
+import DiscoveryPanel from '../pos/DiscoveryPanel';
+import AddLaborForm from './AddLaborForm';
+
+/**
+ * The definitive, interactive "workbench" for a technician to manage a repair's job sheet.
+ * It allows adding parts, services, and labor, and removing any item.
+ *
+ * @param {object} props
+ * @param {object} props.ticket - The full repair ticket object.
+ * @param {Function} props.onUpdate - Callback to notify the parent page of any changes to the ticket.
+ */
+const JobSheetEditor = ({ ticket, onUpdate, isLocked = false }) => {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [technicians, setTechnicians] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const { user, formatCurrency } = useAuth();
+
+  // Fetch the list of technicians only when the user intends to open the modal.
+  useEffect(() => {
+    if (isAddModalOpen && technicians.length === 0) {
+      tenantHrService
+        .getAllEmployees()
+        .then((res) => {
+          // Pre-filter for employees who are technicians to populate the labor form.
+          const techEmployees = res.data.data.employees.filter((emp) =>
+            emp.designation?.title.toLowerCase().includes('technician'),
+          );
+          setTechnicians(techEmployees);
+        })
+        .catch(() => toast.error('Could not load list of technicians.'));
+    }
+  }, [isAddModalOpen, technicians.length]);
+
+  /**
+   * Handles adding any type of item (part, service, or labor) to the job sheet.
+   * This single function is used by both the DiscoveryPanel and the AddLaborForm.
+   */
+  const handleAddItem = async (itemData) => {
+    setIsSaving(true);
+    // Determine the payload structure based on whether it's a product variant or a labor entry.
+    const isLabor = itemData.itemType === 'labor';
+    const payload = isLabor
+      ? itemData
+      : {
+          itemType: itemData.templateId?.type === 'service' ? 'service' : 'part',
+          productVariantId: itemData._id,
+          description: itemData.variantName,
+          quantity: 1,
+          serialNumber: itemData.serialNumber, // Will be undefined for non-serialized
+        };
+
+    try {
+      const res = await toast.promise(tenantRepairService.addItemToJobSheet(ticket._id, payload), {
+        loading: 'Adding item to job sheet...',
+        success: 'Item added successfully!',
+        error: (err) => err.response?.data?.error || 'Failed to add item.',
+      });
+      onUpdate(res.data.data); // Update the parent page's state with the new ticket
+      setIsAddModalOpen(false);
+    } catch (err) {
+      // Error is handled by the toast promise.
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  /**
+   * Handles removing an item from the job sheet.
+   */
+  const handleRemoveItem = async (itemId) => {
+    if (
+      !window.confirm(
+        'Are you sure you want to remove this item from the job sheet? This will release any stock reservation.',
+      )
+    )
+      return;
+
+    setIsSaving(true);
+    try {
+      const res = await toast.promise(tenantRepairService.removeItemFromJobSheet(ticket._id, itemId), {
+        loading: 'Removing item...',
+        success: 'Item removed successfully!',
+        error: (err) => err.response?.data?.error || 'Failed to remove item.',
+      });
+      onUpdate(res.data.data);
+    } catch (err) {
+      // Error is handled by the toast promise.
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Job Sheet</h3>
-        <Button size="sm" onClick={onAddItem}>
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add Part / Service
+      <div className='flex justify-end mb-4'>
+        <Button onClick={() => setIsAddModalOpen(true)} disabled={isSaving || isLocked}>
+          <PlusCircle className='h-4 w-4 mr-2' />
+          Add Part / Labor
         </Button>
       </div>
-      <div className="border border-slate-700 rounded-lg">
+      <div className='border border-slate-700 rounded-lg'>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Item</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="text-right">Qty</TableHead>
-              <TableHead className="text-right">Price</TableHead>
-              <TableHead></TableHead>
+              <TableHead>Item/Service/Labor</TableHead>
+              <TableHead className='text-center'>Qty</TableHead>
+              <TableHead className='text-right'>Price</TableHead>
+              <TableHead className='w-12'></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.length === 0 && (
+            {ticket.jobSheet.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-slate-400">
-                  No items added to job sheet.
+                <TableCell colSpan={4} className='text-center h-24 text-slate-400'>
+                  No parts or services added yet.
                 </TableCell>
               </TableRow>
             )}
-            {items.map((item) => (
-              <TableRow key={item._id}>
-                <TableCell>{item.description}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary" className="capitalize">
-                    {item.itemType}
-                  </Badge>
+            {ticket.jobSheet.map((item, i) => (
+              <TableRow key={item._id || i}>
+                <TableCell className='font-medium'>{item.description}</TableCell>
+                <TableCell className='text-center'>{item.quantity || item.laborHours}</TableCell>
+                <TableCell className='text-right font-mono'>
+                  {formatCurrency((item.unitPrice || item.laborRate) * (item.quantity || item.laborHours))}
                 </TableCell>
-                <TableCell className="text-right">{item.quantity}</TableCell>
-                <TableCell className="text-right font-mono">{formatCurrency(item.unitPrice)}</TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => onRemoveItem(item._id)}>
-                    <Trash2 className="h-4 w-4 text-red-500" />
+                <TableCell>
+                  <Button
+                    disabled={isSaving || isLocked}
+                    variant='ghost'
+                    size='icon'
+                    onClick={() => handleRemoveItem(item._id)}
+                  >
+                    <Trash2 className='h-4 w-4 text-red-500' />
                   </Button>
                 </TableCell>
               </TableRow>
@@ -53,7 +250,28 @@ const JobSheetEditor = ({ items = [], onAddItem, onRemoveItem }) => {
           </TableBody>
         </Table>
       </div>
+      <Modal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} title='Add to Job Sheet' size='3xl'>
+        <Tabs defaultValue='part' className='w-full'>
+          <TabsList className='grid w-full grid-cols-2'>
+            <TabsTrigger value='part'>Add Part / Service</TabsTrigger>
+            <TabsTrigger value='labor'>Add Labor</TabsTrigger>
+          </TabsList>
+          <TabsContent value='part' className='h-[60vh] mt-4'>
+            <DiscoveryPanel onAddItem={handleAddItem} />
+          </TabsContent>
+          <TabsContent value='labor' className='mt-4'>
+            <AddLaborForm
+              onSave={handleAddItem}
+              onCancel={() => setIsAddModalOpen(false)}
+              isSaving={isSaving}
+              technicians={technicians}
+              defaultEmployeeId={ticket.assignedTo?._id || user.employeeId}
+            />
+          </TabsContent>
+        </Tabs>
+      </Modal>
     </div>
   );
 };
+
 export default JobSheetEditor;

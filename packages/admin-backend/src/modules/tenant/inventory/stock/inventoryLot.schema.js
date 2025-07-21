@@ -24,6 +24,10 @@ const inventoryLotSchema = new mongoose.Schema(
       min: 0,
       default: 0,
     },
+    quantityReserved: {
+      type: Number,
+      default: 0,
+    },
     // The actual historical cost for items in this specific batch, in the tenant's base currency.
     costPriceInBaseCurrency: {
       type: Number,

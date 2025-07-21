@@ -1,95 +1,100 @@
 import './App.css';
 
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import RolesPage from './pages/RolesPage';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import LocationsPage from './pages/LocationsPage';
-import CompanyProfilePage from './pages/CompanyProfilePage';
-import UsersPage from './pages/UsersPage';
-import ChartOfAccountsPage from './pages/ChartOfAccountsPage';
-import GeneralLedgerPage from './pages/GeneralLedgerPage';
-import CustomersPage from './pages/crm/CustomersPage';
-import SuppliersPage from './pages/procurement/SuppliersPage';
-import LocalizationPage from './pages/settings/LocalizationPage';
-import CustomerProfilePage from './pages/crm/CustomerProfilePage';
-import SupplierProfilePage from './pages/procurement/SupplierProfilePage';
-import BrandsPage from './pages/settings/inventory/BrandsPage';
-import CategoriesPage from './pages/settings/inventory/CategoriesPage';
-import AttributesPage from './pages/settings/inventory/AttributesPage';
-import ProductTemplatesPage from './pages/inventory/ProductTemplatesPage';
-import ProductTemplateDetailPage from './pages/inventory/ProductTemplateDetailPage';
-import PurchaseOrdersPage from './pages/procurement/PurchaseOrdersPage';
-import PurchaseOrderDetailPage from './pages/procurement/PurchaseOrderDetailPage';
-import CurrenciesPage from './pages/settings/CurrenciesPage';
-import PayablesPage from './pages/accounting/PayablesPage';
-import SupplierInvoiceReconciliationPage from './pages/accounting/SupplierInvoiceReconciliationPage';
-import IndividualLedgerPage from './pages/IndividualLedgerPage';
-import PaymentMethodsPage from './pages/settings/payments/PaymentMethodsPage';
+import Layout from './components/layout/Layout';
 import ChequeManagementPage from './pages/accounting/ChequeManagementPage';
-import SupplierInvoiceDetailPage from './pages/procurement/SupplierInvoiceDetailPage';
-import InvoicesListPage from './pages/procurement/InvoicesListPage';
-import PaymentsListPage from './pages/accounting/PaymentsListPage';
+import InstallmentPlanDetailPage from './pages/accounting/InstallmentPlanDetailPage';
+import PayablesPage from './pages/accounting/PayablesPage';
 import PaymentDetailPage from './pages/accounting/PaymentDetailPage';
-import StockLevelsPage from './pages/inventory/StockLevelsPage';
-import StockDetailPage from './pages/inventory/StockDetailPage';
-import StockAdjustmentsPage from './pages/inventory/StockAdjustmentsPage';
+import PaymentsListPage from './pages/accounting/PaymentsListPage';
+import SupplierInvoiceReconciliationPage from './pages/accounting/SupplierInvoiceReconciliationPage';
+import ChartOfAccountsPage from './pages/ChartOfAccountsPage';
+import CompanyProfilePage from './pages/CompanyProfilePage';
+import CustomerProfilePage from './pages/crm/CustomerProfilePage';
+import CustomersPage from './pages/crm/CustomersPage';
+import DashboardPage from './pages/DashboardPage';
+import GeneralLedgerPage from './pages/GeneralLedgerPage';
+import IndividualLedgerPage from './pages/IndividualLedgerPage';
 import AdjustmentHistoryPage from './pages/inventory/AdjustmentHistoryPage';
-import StockTransfersPage from './pages/inventory/StockTransfersPage';
+import AssemblyPage from './pages/inventory/AssemblyPage';
+import PrintHubPage from './pages/inventory/PrintHubPage';
+import ProductTemplateDetailPage from './pages/inventory/ProductTemplateDetailPage';
+import ProductTemplatesPage from './pages/inventory/ProductTemplatesPage';
+import StockAdjustmentsPage from './pages/inventory/StockAdjustmentsPage';
+import StockDetailPage from './pages/inventory/StockDetailPage';
+import StockLevelsPage from './pages/inventory/StockLevelsPage';
 import StockTransferDetailPage from './pages/inventory/StockTransferDetailPage';
+import StockTransfersPage from './pages/inventory/StockTransfersPage';
+import LocationsPage from './pages/LocationsPage';
+import LoginPage from './pages/LoginPage';
+import PosPage from './pages/pos/PosPage';
+import ShiftManagementPage from './pages/pos/ShiftManagementPage';
 import GoodsReceiptsPage from './pages/procurement/GoodsReceiptsPage';
 import GRNDetailPage from './pages/procurement/GRNDetailPage';
-import InstallmentPlanDetailPage from './pages/accounting/InstallmentPlanDetailPage';
-import PrintingPage from './pages/settings/PrintingPage';
+import InvoicesListPage from './pages/procurement/InvoicesListPage';
+import PurchaseOrderDetailPage from './pages/procurement/PurchaseOrderDetailPage';
+import PurchaseOrdersPage from './pages/procurement/PurchaseOrdersPage';
+import SupplierInvoiceDetailPage from './pages/procurement/SupplierInvoiceDetailPage';
+import SupplierProfilePage from './pages/procurement/SupplierProfilePage';
+import SuppliersPage from './pages/procurement/SuppliersPage';
+import RolesPage from './pages/RolesPage';
+import CurrenciesPage from './pages/settings/CurrenciesPage';
+import AttributesPage from './pages/settings/inventory/AttributesPage';
+import BrandsPage from './pages/settings/inventory/BrandsPage';
+import CategoriesPage from './pages/settings/inventory/CategoriesPage';
 import LabelDesignerPage from './pages/settings/LabelDesignerPage';
-import PrintHubPage from './pages/inventory/PrintHubPage';
+import LocalizationPage from './pages/settings/LocalizationPage';
 import MyProfilePage from './pages/settings/MyProfilePage';
-import ShiftManagementPage from './pages/pos/ShiftManagementPage';
-import PosPage from './pages/pos/PosPage';
-import AssemblyPage from './pages/inventory/AssemblyPage';
-import RepairTicketIntakePage from './pages/service/RepairTicketIntakePage';
-import ServiceKanbanPage from './pages/service/ServiceKanbanPage';
-import RepairTicketDetailPage from './pages/service/RepairTicketDetailPage';
-import HierarchyManagementPage from './pages/settings/hierarchy/HierarchyManagementPage';
-import EmployeesPage from './pages/hr/EmployeesPage';
+import PaymentMethodsPage from './pages/settings/payments/PaymentMethodsPage';
+import PrintingPage from './pages/settings/PrintingPage';
+import UsersPage from './pages/UsersPage';
+//import RepairTicketIntakePage from './pages/service/RepairTicketIntakePage';
+//import ServiceKanbanPage from './pages/service/ServiceKanbanPage';
+//import RepairTicketDetailPage from './pages/service/Old_RepairTicketDetailPage';
+import { useState } from 'react';
+import PortalLayout from './components/layout/PortalLayout';
+import PosLayout from './components/layout/PosLayout';
+import { CustomerAuthProvider } from './context/CustomerAuthProvider';
+import { PosSessionProvider } from './context/PosSessionContext';
+import BankReconciliationPage from './pages/accounting/BankReconciliationPage';
+import BudgetingPage from './pages/accounting/BudgetingPage';
 import PayrollPage from './pages/accounting/PayrollPage';
-import EmployeeDetailPage from './pages/hr/EmployeeDetailPage';
-import PayrollRunDetailsPage from './pages/hr/PayrollRunDetailsPage';
-import PayslipDetailPage from './pages/hr/PayslipDetailPage';
+import PeriodClosingPage from './pages/accounting/PeriodClosingPage';
+import CustomerGroupsPage from './pages/crm/CustomerGroupsPage';
+import LeadManagementPage from './pages/crm/LeadManagementPage';
+import OpportunityDetailPage from './pages/crm/OpportunityDetailPage';
+import OpportunityKanbanPage from './pages/crm/OpportunityKanbanPage';
 import AttendancePage from './pages/hr/AttendancePage';
+import EmployeeDetailPage from './pages/hr/EmployeeDetailPage';
+import EmployeesPage from './pages/hr/EmployeesPage';
 import LeaveManagementPage from './pages/hr/LeaveManagementPage';
 import OrganizationPage from './pages/hr/OrganizationPage';
-import DeductionRulesPage from './pages/settings/payroll/DeductionRulesPage';
-import CustomerGroupsPage from './pages/crm/CustomerGroupsPage';
-import PricingManagementPage from './pages/settings/PricingManagementPage';
-import LeadManagementPage from './pages/crm/LeadManagementPage';
-import OpportunityKanbanPage from './pages/crm/OpportunityKanbanPage';
-import OpportunityDetailPage from './pages/crm/OpportunityDetailPage';
-import PosLayout from './components/layout/PosLayout';
-import BenefitsPage from './pages/settings/BenefitsPage';
-import { useState } from 'react';
-import WarrantyPoliciesPage from './pages/settings/WarrantyPoliciesPage';
-import CouponManagementPage from './pages/settings/CouponManagementPage';
-import CouponBatchDetailPage from './pages/settings/CouponBatchDetailPage';
-import BankReconciliationPage from './pages/accounting/BankReconciliationPage';
-import PeriodClosingPage from './pages/accounting/PeriodClosingPage';
-import FinancialPeriodsPage from './pages/settings/FinancialPeriodsPage';
-import BudgetingPage from './pages/accounting/BudgetingPage';
+import PayrollRunDetailsPage from './pages/hr/PayrollRunDetailsPage';
+import PayslipDetailPage from './pages/hr/PayslipDetailPage';
 import InventoryLedgerPage from './pages/inventory/InventoryLedgerPage';
-import ReturnsPage from './pages/sales/ReturnsPage';
-import TrackRepairPage from './pages/portal/TrackRepairPage';
 import CustomerDashboardPage from './pages/portal/CustomerDashboardPage';
-import PortalLayout from './components/layout/PortalLayout';
 import PortalLoginPage from './pages/portal/PortalLoginPage';
 import RequestPortalLinkPage from './pages/portal/RequestPortalLinkPage';
-import { CustomerAuthProvider } from './context/CustomerAuthProvider';
-import TaxRulePage from './pages/settings/TaxRulePage';
-import TaxCategoryPage from './pages/settings/TaxCategoryPage';
-import { PosSessionProvider } from './context/PosSessionContext';
+import TrackRepairPage from './pages/portal/TrackRepairPage';
+import ReturnsPage from './pages/sales/ReturnsPage';
+import RepairTicketsPage from './pages/service/RepairTicketsPage';
+import BenefitsPage from './pages/settings/BenefitsPage';
+import CouponBatchDetailPage from './pages/settings/CouponBatchDetailPage';
+import CouponManagementPage from './pages/settings/CouponManagementPage';
 import DrawerConfigurationPage from './pages/settings/DrawerConfigurationPage';
+import FinancialPeriodsPage from './pages/settings/FinancialPeriodsPage';
+import HierarchyManagementPage from './pages/settings/hierarchy/HierarchyManagementPage';
+import DeductionRulesPage from './pages/settings/payroll/DeductionRulesPage';
+import PricingManagementPage from './pages/settings/PricingManagementPage';
+import TaxCategoryPage from './pages/settings/TaxCategoryPage';
+import TaxRulePage from './pages/settings/TaxRulePage';
+import WarrantyPoliciesPage from './pages/settings/WarrantyPoliciesPage';
 
+import RepairQuotePage from './pages/portal/RepairQuotePage';
+import RepairTicketDetailPage from './pages/service/RepairTicketDetailPage';
+import RepairTicketIntakePage from './pages/service/RepairTicketIntakePage';
+import QcTemplatesPage from './pages/settings/QcTemplatesPage';
 function App() {
   const [posLayout, setPosLayout] = useState('default');
   const togglePosLayout = () => setPosLayout((prev) => (prev === 'default' ? 'cartFocus' : 'default'));
@@ -112,7 +117,7 @@ function App() {
                   <Route path='track' element={<TrackRepairPage />} />
                   <Route path='login' element={<PortalLoginPage />} />
                   <Route path='request-link' element={<RequestPortalLinkPage />} />
-
+                  <Route path='quotes/:id' element={<RepairQuotePage />} />
                   {/* The dashboard would have its own internal session check */}
                   <Route path='dashboard' element={<CustomerDashboardPage />} />
 
@@ -187,6 +192,7 @@ function App() {
                   <Route path='/settings/payroll-rules' element={<DeductionRulesPage />} />
                   <Route path='/settings/taxes' element={<TaxRulePage />} />
                   <Route path='/settings/tax-categories' element={<TaxCategoryPage />} />
+                  <Route path='/settings/qc-templates' element={<QcTemplatesPage />} />
                   {/* --- accounting routes --- */}
                   <Route path='/accounting/budgets' element={<BudgetingPage />} />
                   <Route path='/accounting/period-closing' element={<PeriodClosingPage />} />
@@ -231,7 +237,10 @@ function App() {
                   <Route path='/pos' element={<PosPage />} />
                   <Route path='/shifts' element={<ShiftManagementPage />} /> {/* <-- 2. ADD THE NEW ROUTE */}
                   {/* SERVICE */}
-                  <Route path='/service/dashboard' element={<ServiceKanbanPage />} />
+                  {/* <Route path='/service/dashboard' element={<ServiceKanbanPage />} />
+                  <Route path='/service/tickets/new' element={<RepairTicketIntakePage />} />
+                  <Route path='/service/tickets/:id' element={<RepairTicketDetailPage />} /> */}
+                  <Route path='/service/dashboard' element={<RepairTicketsPage />} />
                   <Route path='/service/tickets/new' element={<RepairTicketIntakePage />} />
                   <Route path='/service/tickets/:id' element={<RepairTicketDetailPage />} />
                   <Route path='/settings/product-hierarchy' element={<HierarchyManagementPage />} />

@@ -64,9 +64,7 @@ const productTemplateSchema = new mongoose.Schema(
       ref: "Device",
       required: function () {
         // A device link is required for physical products, but not for abstract services.
-        return (
-          this.type === "non-serialized" || this.type === "serialized" || this.type === "bundle"
-        );
+        return this.type === "non-serialized" || this.type === "serialized" || this.type === "bundle";
       },
     },
 
@@ -116,6 +114,13 @@ const productTemplateSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    defaultQcTemplateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "QcChecklistTemplate",
+      default: null,
+    },
+
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }

@@ -127,6 +127,9 @@ exports.createEmployee = asyncHandler(async (req, res, next) => {
   if (employeeData.userId === "") {
     employeeData.userId = null;
   }
+  if (employeeData.reportsTo === "") {
+    employeeData.reportsTo = null;
+  }
 
   // --- THE DEFINITIVE FIX: DATA INTEGRITY CHECK ---
   if (employeeData.userId) {

@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { jwtDecode } from "jwt-decode";
-import { authEvents, tenantProfileService } from "../services/api";
-import axiosInstance from "../services/api";
-import { AuthContext } from "./AuthContext"; // ✅ Import the separated context
+import { jwtDecode } from 'jwt-decode';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  formatCurrencyCompact as formatCurrencyCompactUtil,
   formatCurrency as formatCurrencyUtil,
   formatDate,
   formatNumber,
-  formatCurrencyCompact as formatCurrencyCompactUtil,
-} from "../lib/formatters";
+} from '../lib/formatters';
+import axiosInstance, { authEvents, tenantProfileService } from '../services/api';
+import { AuthContext } from './AuthContext'; // ✅ Import the separated context
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(() => localStorage.getItem("tenant_token"));
+  const [token, setToken] = useState(() => localStorage.getItem('tenant_token'));
   const [user, setUser] = useState(null);
   const [tenantProfile, setTenantProfile] = useState(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
@@ -19,13 +18,13 @@ export const AuthProvider = ({ children }) => {
   // --- NEW, DEDICATED REFRESH FUNCTION ---
   const refreshTenantProfile = useCallback(async () => {
     try {
-      console.log("Refreshing tenant profile...");
+      console.log('Refreshing tenant profile...');
       const response = await tenantProfileService.getMyProfile();
       if (response.data.success) {
         setTenantProfile(response.data.data);
       }
     } catch (error) {
-      console.error("Could not refresh tenant profile.", error);
+      console.error('Could not refresh tenant profile.', error);
       // Optional: handle logout if profile fetch fails
     }
   }, []);
@@ -35,7 +34,7 @@ export const AuthProvider = ({ children }) => {
       if (currentToken) {
         try {
           const decodedUser = jwtDecode(currentToken);
-          console.log("Decoded User:", decodedUser);
+          console.log('Decoded User:', decodedUser);
           setUser({
             id: decodedUser.id.id,
             name: decodedUser.id.name,
@@ -46,32 +45,33 @@ export const AuthProvider = ({ children }) => {
             role: decodedUser.id.role,
             branchId: decodedUser.id.branchId,
             permissions: decodedUser.id.permissions || [],
+            employeeId: decodedUser.id.employeeId || null,
           });
 
-          axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${currentToken}`;
-          axiosInstance.defaults.headers.common["X-Tenant-ID"] = decodedUser.id.subdomain;
+          axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${currentToken}`;
+          axiosInstance.defaults.headers.common['X-Tenant-ID'] = decodedUser.id.subdomain;
 
-          localStorage.setItem("tenant_token", currentToken);
-          localStorage.setItem("tenant_subdomain", decodedUser.id.subdomain);
+          localStorage.setItem('tenant_token', currentToken);
+          localStorage.setItem('tenant_subdomain', decodedUser.id.subdomain);
 
           await refreshTenantProfile();
 
           // const response = await tenantProfileService.getMyProfile();
           // setTenantProfile(response.data.data);
         } catch (error) {
-          console.error("Session load failed:", error);
-          localStorage.removeItem("tenant_token");
-          localStorage.removeItem("tenant_subdomain");
+          console.error('Session load failed:', error);
+          localStorage.removeItem('tenant_token');
+          localStorage.removeItem('tenant_subdomain');
           setToken(null);
           setUser(null);
           setTenantProfile(null);
-          delete axiosInstance.defaults.headers.common["Authorization"];
-          delete axiosInstance.defaults.headers.common["X-Tenant-ID"];
+          delete axiosInstance.defaults.headers.common['Authorization'];
+          delete axiosInstance.defaults.headers.common['X-Tenant-ID'];
         }
       }
       setIsLoadingSession(false);
     },
-    [refreshTenantProfile]
+    [refreshTenantProfile],
   );
 
   useEffect(() => {
@@ -92,12 +92,12 @@ export const AuthProvider = ({ children }) => {
     const handleLogout = () => logout();
     const handleLicenseExpired = () => setIsLicenseExpired(true);
 
-    authEvents.addEventListener("logout", handleLogout);
-    authEvents.addEventListener("license_expired", handleLicenseExpired);
+    authEvents.addEventListener('logout', handleLogout);
+    authEvents.addEventListener('license_expired', handleLicenseExpired);
 
     return () => {
-      authEvents.removeEventListener("logout", handleLogout);
-      authEvents.removeEventListener("license_expired", handleLicenseExpired);
+      authEvents.removeEventListener('logout', handleLogout);
+      authEvents.removeEventListener('license_expired', handleLicenseExpired);
     };
   }, [logout]);
 
@@ -105,12 +105,12 @@ export const AuthProvider = ({ children }) => {
     // --- 2. CREATE THE CONTEXT-AWARE FORMATTING FUNCTION ---
 
     const formatCurrencyForTenant = (amount) => {
-      const currencyCode = tenantProfile?.settings?.localization?.baseCurrency || "USD";
+      const currencyCode = tenantProfile?.settings?.localization?.baseCurrency || 'USD';
       return formatCurrencyUtil(amount, currencyCode);
     };
 
     const formatCurrencyCompactForTenant = (amount, digits = 1) => {
-      const currencyCode = tenantProfile?.settings?.localization?.baseCurrency || "USD";
+      const currencyCode = tenantProfile?.settings?.localization?.baseCurrency || 'USD';
       return formatCurrencyCompactUtil(amount, currencyCode, digits);
     };
 

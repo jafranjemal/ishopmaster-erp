@@ -937,7 +937,7 @@ export const tenantAssemblyService = {
   },
 };
 
-export const tenantRepairService = {
+export const tenantRepairServiceOld = {
   getAll: async (params) => api.get('/tenant/service/tickets', { params }),
   getById: async (ticketId) => api.get(`/tenant/service/tickets/${ticketId}`),
   createTicket: async (ticketData) => api.post('/tenant/service/tickets', ticketData),
@@ -945,6 +945,41 @@ export const tenantRepairService = {
     api.patch(`/tenant/service/tickets/${ticketId}/status`, statusData),
   addItemToJobSheet: async (ticketId, itemData) => api.post(`/tenant/service/tickets/${ticketId}/jobsheet`, itemData),
   removeJobSheetItem: async (ticketId, itemId) => api.delete(`/tenant/service/tickets/${ticketId}/jobsheet/${itemId}`),
+};
+
+export const tenantRepairService = {
+  createTicket: async (data) => api.post('/tenant/repairs/tickets', data),
+  getAllTickets: async (params) => api.get('/tenant/repairs/tickets', { params }),
+  getTicketById: async (id) => api.get(`/tenant/repairs/tickets/${id}`),
+  updateStatus: async (id, newStatus) => api.patch(`/tenant/repairs/tickets/${id}/status`, { newStatus }),
+  assignTechnician: async (id, employeeId) => api.put(`/tenant/repairs/tickets/${id}/assign`, { employeeId }),
+
+  generateQuote: async (ticketId, data) => api.post(`/tenant/repairs/quotes/from-ticket/${ticketId}`, data),
+  sendQuote: async (quoteId) => api.post(`/tenant/repairs/quotes/${quoteId}/send`),
+  getQuotesForTicket: async (ticketId) => api.get(`/tenant/repairs/quotes`, { params: { ticketId } }),
+
+  addItemToJobSheet: async (ticketId, itemData) =>
+    api.post(`/tenant/repairs/tickets/${ticketId}/jobsheet/items`, itemData),
+  removeItemFromJobSheet: async (ticketId, itemId) =>
+    api.delete(`/tenant/repairs/tickets/${ticketId}/jobsheet/items/${itemId}`),
+  getQcDetails: async (ticketId) => {
+    return api.get(`/tenant/repairs/tickets/${ticketId}/qc-details`);
+  },
+  submitQcCheck: async (ticketId, qcData) => {
+    return api.post(`/tenant/repairs/tickets/${ticketId}/submit-qc`, qcData);
+  },
+  stopTimer: async (ticketId) => {
+    return api.post(`/tenant/repairs/time-tracking/tickets/${ticketId}/timer/stop`);
+  },
+  startTimer: async (ticketId) => {
+    return api.post(`/tenant/repairs/time-tracking/tickets/${ticketId}/timer/start`);
+  },
+  flagForRequote: async (ticketId, data) => {
+    return api.post(`/tenant/repairs/tickets/${ticketId}/flag-for-requote`, data);
+  },
+  getActiveTimer: async (ticketId) => {
+    return api.get(`/tenant/repairs/time-tracking/tickets/${ticketId}/timer/active`);
+  },
 };
 
 export const tenantHrService = {
@@ -1334,6 +1369,13 @@ export const tenantSettingsService = {
   createDenomination: async (data) => api.post('/tenant/settings/cash-drawer-denominations', data),
   updateDenomination: async (id, data) => api.put(`/tenant/settings/cash-drawer-denominations/${id}`, data),
   deleteDenomination: async (id) => api.delete(`/tenant/settings/cash-drawer-denominations/${id}`),
+};
+
+export const tenantQcTemplateService = {
+  getAll: async () => api.get('/tenant/repairs/qc-templates'),
+  create: async (data) => api.post('/tenant/repairs/qc-templates', data),
+  update: async (id, data) => api.put(`/tenant/repairs/qc-templates/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/repairs/qc-templates/${id}`),
 };
 
 export default api;

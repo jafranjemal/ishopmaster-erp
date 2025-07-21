@@ -1,7 +1,8 @@
 const express = require("express");
 const customerAuthTokenSchema = require("./customerAuthToken.schema");
 const customerAuthRoutes = require("./customerAuth.routes");
-
+const portalQuoteRoutes = require("./portalQuote.routes");
+const portalRoutes = require("./portal.routes");
 /**
  * This is the manifest file for the new, public-facing Customer Portal module.
  * It exports its schemas and router to be discovered and registered
@@ -13,6 +14,8 @@ const mainRouter = express.Router();
 // Mount the routes for this module.
 // The dynamic loader will mount this mainRouter under `/portal`.
 mainRouter.use("/auth", customerAuthRoutes);
+mainRouter.use("/quotes", portalQuoteRoutes);
+mainRouter.use("/", portalRoutes);
 
 module.exports = {
   // --- THE DEFINITIVE FIX: EXPORTING THE SCHEMA FOR THE LOADER ---

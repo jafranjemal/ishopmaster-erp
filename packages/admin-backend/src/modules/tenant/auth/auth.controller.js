@@ -22,6 +22,7 @@ exports.login = asyncHandler(async (req, res, next) => {
   if (!user.isActive) {
     return res.status(403).json({ success: false, error: "Your account is disabled." });
   }
+  const employee = await req.models.Employee.findOne({ userId: user._id });
 
   // Prepare the JWT payload with all necessary info for the frontend
   const payload = {
@@ -36,6 +37,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     branchId: user.assignedBranchId, // For later use
     enabledModules: req.tenant.enabledModules,
     localization: req.tenant.settings.localization,
+    employeeId: employee?.employeeId || null,
   };
 
   const token = generateToken(payload);
@@ -50,9 +52,7 @@ exports.validateAccessCard = asyncHandler(async (req, res, next) => {
   const { cardId, requiredPermission } = req.body;
 
   if (!cardId || !requiredPermission) {
-    return res
-      .status(400)
-      .json({ success: false, error: "Card ID and required permission are required." });
+    return res.status(400).json({ success: false, error: "Card ID and required permission are required." });
   }
 
   // 1. Find the employee by their access card
@@ -75,9 +75,7 @@ exports.validateAccessCard = asyncHandler(async (req, res, next) => {
   // 3. Check if the user has the required permission
   const userPermissions = new Set([...(user.permissions || []), ...(user.role?.permissions || [])]);
   if (!userPermissions.has(requiredPermission)) {
-    return res
-      .status(403)
-      .json({ success: false, error: "Authorization failed: Insufficient permissions." });
+    return res.status(403).json({ success: false, error: "Authorization failed: Insufficient permissions." });
   }
 
   // On success, return the name of the authorizing user

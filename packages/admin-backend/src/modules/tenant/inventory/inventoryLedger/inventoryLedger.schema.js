@@ -13,6 +13,8 @@ const inventoryLedgerSchema = new mongoose.Schema(
         "adjustment_out",
         "transfer_out",
         "transfer_in",
+        "reserve",
+        "release_reserve",
       ],
     },
     productVariantId: {

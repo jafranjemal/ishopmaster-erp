@@ -27,8 +27,13 @@ const inventoryItemSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["in_stock", "sold", "damaged", "in_transit", "returned"],
+      enum: ["in_stock", "sold", "damaged", "in_transit", "reserved_for_service", "defective", "returned"],
       default: "in_stock",
+      index: true,
+    },
+    reservationRef: {
+      kind: { type: String, enum: ["RepairTicket", "SalesOrder"] },
+      item: { type: mongoose.Schema.Types.ObjectId, refPath: "reservationRef.kind" },
     },
     // The exact historical cost of this specific unit.
     costPriceInBaseCurrency: {
@@ -48,7 +53,7 @@ const inventoryItemSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true, collection: "inventoryitems" }
 );
 
 module.exports = inventoryItemSchema;

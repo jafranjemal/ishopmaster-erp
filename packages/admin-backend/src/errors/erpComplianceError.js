@@ -5,7 +5,7 @@ class ERPComplianceError extends Error {
     this.code = code;
     this.details = details;
     this.isERPCompliance = true;
-
+    this.statusCode = 400;
     // Capture stack trace (excluding constructor call)
     Error.captureStackTrace(this, this.constructor);
   }

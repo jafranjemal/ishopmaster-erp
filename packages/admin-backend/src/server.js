@@ -30,7 +30,7 @@ const dunningService = require("./services/dunning.service.js");
 const portalAuthRoutes = require("./modules/tenant/portal/customerAuth.routes.js");
 const customerAuthTokenSchema = require("./modules/tenant/portal/customerAuthToken.schema.js");
 const { metricsMiddleware } = require("./config/metrics.js");
-
+const chalk = require("chalk");
 // CORS configuration
 const allowedOrigins = [
   "http://localhost:5173", // Vite's default dev port
@@ -38,16 +38,30 @@ const allowedOrigins = [
   "https://ishop-master-frontend.onrender.com", // Example production frontend URL
 ];
 
+// Regex patterns for dynamic subdomains
+const allowedPatterns = [
+  /^https?:\/\/([a-z0-9-]+\.)?localhost:5173$/, // Local subdomains
+  /^https?:\/\/([a-z0-9-]+\.)?localhost:5174$/, // Local subdomains
+  /^https?:\/\/([a-z0-9-]+\.)?your-production-domain\.com$/, // Production subdomains
+];
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    // or requests from our whitelisted origins.
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+
+    // Check explicit allowlist
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
+    // Check regex patterns for dynamic subdomains
+    if (allowedPatterns.some((pattern) => pattern.test(origin))) {
+      return callback(null, true);
     }
+
+    callback(new Error("Not allowed by CORS"));
   },
+  credentials: true, // Enable if using cookies/auth
+  optionsSuccessStatus: 200, // Legacy browser support
 };
 
 // Load env vars
@@ -75,36 +89,133 @@ app.use("/api/v1/public", publicApiRouter);
 const tenantModulesPath = path.join(__dirname, "modules", "tenant");
 const tenantRouter = express.Router(); // Create a dedicated router for all tenant modules
 
-fs.readdirSync(tenantModulesPath).forEach((moduleName) => {
-  const modulePath = path.join(tenantModulesPath, moduleName);
-  if (fs.statSync(modulePath).isDirectory()) {
-    console.log(`Loading tenant module: ${moduleName}`);
-    const module = require(path.join(modulePath, "index.js"));
+// fs.readdirSync(tenantModulesPath).forEach((moduleName) => {
+//   const modulePath = path.join(tenantModulesPath, moduleName);
+//   if (fs.statSync(modulePath).isDirectory()) {
+//     console.log(`Loading tenant module: ${moduleName}`);
+//     const module = require(path.join(modulePath, "index.js"));
 
-    // 1. Register all schemas from the module
-    if (module.schemas) {
-      for (const [name, schema] of Object.entries(module.schemas)) {
-        databaseService.registerSchema(name, schema);
-        console.log(`  - Registered schema: ${name}`);
-      }
-    }
+//     // 1. Register all schemas from the module
+//     if (module.schemas) {
+//       for (const [name, schema] of Object.entries(module.schemas)) {
+//         databaseService.registerSchema(name, schema);
+//         console.log(`  - Registered schema: ${name}`);
+//       }
+//     }
 
-    // 2. Mount the module's router on a sub-path
-    if (module.router) {
-      if (module.isPublic) {
-        // Public routes are mounted on the public router, which only uses the tenantResolver
-        publicApiRouter.use(`/${moduleName}`, tenantResolver, module.router);
-        console.log(`  - Mounted PUBLIC routes at /api/v1/public/${moduleName}`);
-      } else {
-        tenantRouter.use(`/${moduleName}`, module.router);
-        console.log(`  - Mounted routes at /${moduleName}`);
-      }
-    }
-  }
-});
-// --- END OF LOADER ---
+//     // 2. Mount the module's router on a sub-path
+//     if (module.router) {
+//       if (module.isPublic) {
+//         // Public routes are mounted on the public router, which only uses the tenantResolver
+//         publicApiRouter.use(`/${moduleName}`, tenantResolver, module.router);
+//         console.log(`  - Mounted PUBLIC routes at /api/v1/public/${moduleName}`);
+//       } else {
+//         tenantRouter.use(`/${moduleName}`, module.router);
+//         console.log(`  - Mounted routes at /${moduleName}`);
+//       }
+//     }
+//   }
+// });
+// // --- END OF LOADER ---
 
 // Body Parser Middleware
+
+// Improved module loader with debug information
+console.log(chalk.yellow.bold(`\n⏳ Starting module discovery in: ${tenantModulesPath}`));
+
+try {
+  const modules = fs.readdirSync(tenantModulesPath);
+  console.log(chalk.gray(`Found ${modules.length} potential modules`));
+
+  modules.forEach((moduleName, index) => {
+    try {
+      const modulePath = path.join(tenantModulesPath, moduleName);
+      console.log(chalk.cyan(`\n[${index + 1}/${modules.length}] Processing: ${moduleName}`));
+      console.log(chalk.gray(`  Path: ${modulePath}`));
+
+      if (!fs.statSync(modulePath).isDirectory()) {
+        console.log(chalk.gray(`  SKIPPED: Not a directory`));
+        return;
+      }
+
+      console.log(chalk.green(`  ✓ Valid module directory`));
+      const moduleIndexPath = path.join(modulePath, "index.js");
+
+      if (!fs.existsSync(moduleIndexPath)) {
+        console.log(chalk.yellow(`  WARNING: Missing index.js in ${moduleName}`));
+        return;
+      }
+
+      console.log(chalk.green(`  ✓ Found index.js`));
+      const module = require(moduleIndexPath);
+
+      // --- Schema Registration ---
+      if (module.schemas) {
+        const schemaCount = Object.keys(module.schemas).length;
+        console.log(chalk.blue(`  🗂️ Found ${schemaCount} schemas:`));
+
+        for (const [name, schema] of Object.entries(module.schemas)) {
+          try {
+            databaseService.registerSchema(name, schema);
+            console.log(chalk.green(`    ✔ Registered: ${name}`));
+
+            // Debug schema structure
+            if (process.env.DEBUG_SCHEMAS === "true") {
+              console.log(chalk.gray(`      - Paths: ${Object.keys(schema.paths).join(", ")}`));
+              console.log(chalk.gray(`      - Statics: ${Object.keys(schema.statics || {}).join(", ")}`));
+            }
+          } catch (schemaErr) {
+            console.error(chalk.red(`    ❌ FAILED to register schema ${name}: ${schemaErr.message}`));
+            console.error(chalk.gray(`      Error detail: ${schemaErr.stack}`));
+          }
+        }
+      } else {
+        console.log(chalk.gray(`  No schemas found in ${moduleName}`));
+      }
+
+      // --- Router Mounting ---
+      if (module.router) {
+        try {
+          if (module.isPublic) {
+            publicApiRouter.use(`/${moduleName}`, tenantResolver, module.router);
+            cons;
+            ole.log(chalk.magenta(`  🌐 Mounted PUBLIC routes at /api/v1/public/${moduleName}`));
+          } else {
+            tenantRouter.use(`/${moduleName}`, module.router);
+            console.log(chalk.magenta(`  🔐 Mounted PRIVATE routes at /${moduleName}`));
+          }
+
+          // Debug route information
+          if (process.env.DEBUG_ROUTES === "true" && module.router.stack) {
+            module.router.stack.forEach((layer) => {
+              if (layer.route) {
+                const methods = Object.keys(layer.route.methods).join(", ").toUpperCase();
+                console.log(chalk.gray(`      ${methods.padEnd(6)} → ${layer.route.path}`));
+              }
+            });
+          }
+        } catch (routerErr) {
+          console.error(chalk.red(`  ❌ FAILED to mount routes for ${moduleName}: ${routerErr.message}`));
+        }
+      } else {
+        console.log(chalk.gray(`  No router found in ${moduleName}`));
+      }
+    } catch (moduleErr) {
+      console.error(chalk.red.bold(`\n🔥 CRITICAL ERROR in module ${moduleName}:`));
+      console.error(chalk.red(`  ${moduleErr.message}`));
+      console.error(chalk.gray(`  Stack trace: ${moduleErr.stack}`));
+    }
+  });
+
+  console.log(chalk.green.bold(`\n✅ Module loading completed successfully!`));
+} catch (dirErr) {
+  console.error(chalk.red.bold(`\n🚨 FATAL ERROR loading modules:`));
+  console.error(chalk.red(`  ${dirErr.message}`));
+  console.error(chalk.gray(`  Path: ${tenantModulesPath}`));
+  console.error(chalk.gray(`  Ensure the directory exists and has proper permissions`));
+  process.exit(1); // Critical failure
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -189,6 +300,15 @@ cron.schedule(
     timezone: "Asia/Colombo", // Use the appropriate timezone
   }
 );
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception:", err);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
+});
+
 // Custom Error Handler Middleware (must be after routes)
 app.use(errorHandler);
 

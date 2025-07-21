@@ -1,27 +1,30 @@
 const mongoose = require("mongoose");
 
 /**
- * Defines a department within the company's organizational structure.
- * e.g., "Sales", "Service & Repairs", "Administration"
+ * Defines a specific job title or position within a department.
+ * e.g., "Senior Technician", "Head Cashier", "Store Manager"
  */
-const departmentSchema = new mongoose.Schema(
+const jobPositionSchema = new mongoose.Schema(
   {
-    name: {
+    title: {
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
-    description: {
+    departmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+      required: true,
+    },
+    jobDescription: {
       type: String,
       trim: true,
     },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    // We can add fields for salary ranges, etc., here in the future
   },
   { timestamps: true }
 );
 
-module.exports = departmentSchema;
+jobPositionSchema.index({ title: 1, departmentId: 1 }, { unique: true });
+
+module.exports = jobPositionSchema;
