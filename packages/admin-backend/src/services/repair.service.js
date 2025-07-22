@@ -3,16 +3,16 @@ const inventoryService = require("./inventory.service");
 const mongoose = require("mongoose");
 const notificationService = require("./notification.service");
 const tokenService = require("./token.service");
+const eventEmitter = require("../config/events");
 
 class RepairService {
   /**
    * Creates a new repair ticket.
    */
-  async createTicket(models, { customerId, assets, preRepairChecklist, customerSignature }, userId, branchId, session) {
-    const { RepairTicket, Asset, ProductVariants } = models;
+  async createTicket(models, { customerId, assets, ...intakeData }, userId, branchId, session) {
+    const { Device, RepairTicket, Asset, ProductVariants } = models;
 
     const assetIds = [];
-    let defaultQcTemplateId = null;
 
     for (const assetData of assets) {
       // 1. Try to find an existing asset with the same serial number
@@ -48,15 +48,24 @@ class RepairService {
       }
     }
 
+    // --- Definitive Fix #1: Intelligently assign the default QC Template ---
+    let defaultQcTemplateId = null;
+    if (primaryAssetDeviceId) {
+      // Find the device, then its template to get the default QC template
+      const device = await Device.findById(primaryAssetDeviceId).populate("templateId").lean();
+      if (device && device.templateId && device.templateId.defaultQcTemplateId) {
+        defaultQcTemplateId = device.templateId.defaultQcTemplateId;
+      }
+    }
+
     const ticketData = {
+      ...intakeData,
       customerId,
       assets: assetIds,
-      preRepairChecklist,
-      customerSignature,
       customerComplaint: assets.map((a) => a.complaint).join("; "),
       createdBy: userId,
       branchId,
-      defaultQcTemplateId: defaultQcTemplateId,
+      qcTemplateId: defaultQcTemplateId,
     };
 
     const [newTicket] = await RepairTicket.create([ticketData], { session });
@@ -263,6 +272,23 @@ class RepairService {
 
     // In a future chapter, this is where we would trigger the NotificationService
 
+    try {
+      const populatedTicket = await RepairTicket.findById(ticket._id)
+        .populate("customerId", "name email phone")
+        .populate({
+          path: "assignedTo",
+          select: "firstName lastName contactInfo",
+          populate: { path: "userId", select: "email" }, // Assuming user has email
+        })
+        .lean();
+
+      // Announce the event. The NotificationService will handle the rest.
+      await notificationService.triggerNotification(models, `repair.status_changed.${newStatus}`, { ticket: populatedTicket });
+    } catch (error) {
+      // Log the notification error, but do not fail the entire transaction.
+      console.error(`Failed to trigger notification for ticket ${ticketId}:`, error);
+    }
+
     return ticket;
   }
 
@@ -319,8 +345,8 @@ class RepairService {
       if (!employee) throw new Error("Employee for labor entry not found.");
 
       // For labor, the unit price is the rate, and quantity is the hours
-      newItemData.unitPrice = newItemData.laborRate;
-      newItemData.costPrice = employee.compensation?.hourlyRate || 0; // Use the employee's cost rate
+      newItemData.unitPrice = newItemData.laborRate || 0;
+      newItemData.costPrice = employee.compensation?.billRate || 0; // Use the employee's cost rate
     } else {
       throw new Error(`Invalid itemType: ${newItemData.itemType}`);
     }
@@ -344,13 +370,13 @@ class RepairService {
     const ticket = await RepairTicket.findById(ticketId).session(session);
     if (!ticket) throw new Error("Repair ticket not found.");
 
-    const itemToRemove = ticket.jobSheet.id(jobSheetItemId);
+    const itemToRemove = ticket.jobSheet.find((item) => item.description === jobSheetItemId);
+
     if (!itemToRemove) throw new Error("Job sheet item not found.");
 
     if (!ticket.jobSheetHistory) ticket.jobSheetHistory = [];
     ticket.jobSheetHistory.push({ items: ticket.jobSheet, createdBy: userId });
 
-    // Only release stock if the removed item was a physical part
     if (itemToRemove.itemType === "part") {
       await inventoryService.releaseStockReservation(
         models,
@@ -366,7 +392,9 @@ class RepairService {
       );
     }
 
-    itemToRemove.remove();
+    // Remove the item by filtering it out
+    ticket.jobSheet = ticket.jobSheet.filter((item) => item.description !== jobSheetItemId);
+
     await ticket.save({ session });
     return ticket;
   }
@@ -375,7 +403,7 @@ class RepairService {
    * Submits the results of a Quality Control check for a repair ticket.
    * Updates the ticket's main status based on the QC result.
    */
-  async submitQcCheck(models, { ticketId, qcData, userId }, session) {
+  async submitQcCheck(models, { ticketId, qcData, userId }, session, tenant) {
     const { RepairTicket } = models;
     const ticket = await RepairTicket.findById(ticketId).session(session);
 
@@ -414,7 +442,53 @@ class RepairService {
       { session }
     );
 
+    if (ticket.status === "pickup_pending") {
+      eventEmitter.emit("repair.qc_passed", { models, ticket, userId, session, tenant });
+    }
+
     return ticket;
+  }
+
+  /**
+   * Updates the core, non-status details of a repair ticket.
+   * @param {string} ticketId - The ID of the ticket to update.
+   * @param {object} updateData - The fields to update (e.g., customerComplaint).
+   */
+  async updateTicketDetails(models, { ticketId, updateData }, session) {
+    const { RepairTicket } = models;
+    const ticket = await RepairTicket.findById(ticketId).session(session);
+    if (!ticket) throw new Error("Repair ticket not found.");
+
+    // For now, we only allow editing a few safe fields.
+    // More complex edits would require their own services.
+    if (updateData.customerComplaint) {
+      ticket.customerComplaint = updateData.customerComplaint;
+    }
+    // Add other editable fields here, e.g., notes
+
+    await ticket.save({ session });
+    return ticket;
+  }
+
+  /**
+   * Deletes a repair ticket, but only if it's in a safe state to do so.
+   * @param {string} ticketId - The ID of the ticket to delete.
+   */
+  async deleteTicket(models, { ticketId }, session) {
+    const { RepairTicket } = models;
+    const ticket = await RepairTicket.findById(ticketId).session(session);
+    if (!ticket) throw new Error("Repair ticket not found.");
+
+    // --- Definitive Fix #1: CRITICAL SAFETY CHECK ---
+    // Only allow deletion of tickets that have not been processed.
+    const safeToDeleteStatuses = ["intake", "cancelled"];
+    if (!safeToDeleteStatuses.includes(ticket.status)) {
+      throw new Error(`Cannot delete. This ticket is in an active or completed state ('${ticket.status}').`);
+    }
+    // --- End of Fix ---
+
+    await ticket.deleteOne({ session });
+    return { message: `Ticket ${ticket.ticketNumber} has been permanently deleted.` };
   }
 }
 

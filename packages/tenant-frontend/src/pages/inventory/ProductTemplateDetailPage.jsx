@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, useParams } from 'react-router-dom';
 
-import VariantOptionSelector from '../../components/inventory/VariantOptionSelector';
 import VariantEditor from '../../components/inventory/VariantEditor';
+import VariantOptionSelector from '../../components/inventory/VariantOptionSelector';
 import {
   tenantAttributeSetService,
   tenantBrandService,
@@ -13,12 +13,12 @@ import {
   tenantProductService,
 } from '../../services/api';
 
-import { Button, Card, CardContent, Modal, AlertModal, CardHeader, CardTitle, Badge } from 'ui-library';
-import { ArrowLeft, Loader2, PlusCircle, FilePenLine } from 'lucide-react';
-import PrintModal from '../../components/inventory/printing/PrintModal';
+import { ArrowLeft, Loader2, PlusCircle } from 'lucide-react';
+import { AlertModal, Badge, Button, Card, CardContent, CardHeader, CardTitle, Modal } from 'ui-library';
 import PrintConfigModal from '../../components/inventory/printing/PrintConfigModal';
-import ProductTemplateForm from '../../components/inventory/ProductTemplateForm';
+import PrintModal from '../../components/inventory/printing/PrintModal';
 import RequiredPartsModal from '../../components/inventory/products/RequiredPartsModal';
+import ProductTemplateForm from '../../components/inventory/ProductTemplateForm';
 
 const ProductTemplateDetailPage = () => {
   const { t } = useTranslation();

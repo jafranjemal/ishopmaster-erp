@@ -2,29 +2,50 @@ const asyncHandler = require("../../../middleware/asyncHandler");
 const timeTrackingService = require("../../../services/timeTracking.service");
 
 exports.startTimer = asyncHandler(async (req, res, next) => {
-  const { Employee } = req.models;
-  const employee = await Employee.findOne({ userId: req.user._id });
-  if (!employee) return res.status(403).json({ success: false, error: "Only employees can track time." });
+  const employee = await getEmployee(req.models, req.user._id);
+  const session = await req.dbConnection.startSession();
+  try {
+    await session.withTransaction(async () => {
+      const newLog = await timeTrackingService.startTimer(req.models, { ticketId: req.params.ticketId, employeeId: employee._id }, session);
+      res.status(201).json({ success: true, data: newLog });
+    });
+  } finally {
+    session.endSession();
+  }
+});
 
-  const newLog = await timeTrackingService.startTimer(req.models, {
-    ticketId: req.params.ticketId,
-    employeeId: employee._id,
-    userId: req.user._id,
-  });
-  res.status(201).json({ success: true, data: newLog });
+exports.pauseTimer = asyncHandler(async (req, res, next) => {
+  const employee = await getEmployee(req.models, req.user._id);
+  const session = await req.dbConnection.startSession();
+  try {
+    await session.withTransaction(async () => {
+      const pausedLog = await timeTrackingService.pauseTimer(
+        req.models,
+        { ticketId: req.params.ticketId, employeeId: employee._id },
+        session
+      );
+      res.status(200).json({ success: true, data: pausedLog });
+    });
+  } finally {
+    session.endSession();
+  }
 });
 
 exports.stopTimer = asyncHandler(async (req, res, next) => {
-  const { Employee } = req.models;
-  const employee = await Employee.findOne({ userId: req.user._id });
-  if (!employee) return res.status(403).json({ success: false, error: "Only employees can track time." });
-
-  const { ticket } = await timeTrackingService.stopTimer(req.models, {
-    ticketId: req.params.ticketId,
-    employeeId: employee._id,
-    userId: req.user._id,
-  });
-  res.status(200).json({ success: true, data: ticket });
+  const employee = await getEmployee(req.models, req.user._id);
+  const session = await req.dbConnection.startSession();
+  try {
+    await session.withTransaction(async () => {
+      const { ticket } = await timeTrackingService.stopTimer(
+        req.models,
+        { ticketId: req.params.ticketId, employeeId: employee._id },
+        session
+      );
+      res.status(200).json({ success: true, data: ticket });
+    });
+  } finally {
+    session.endSession();
+  }
 });
 
 /**
@@ -50,3 +71,9 @@ exports.getActiveTimer = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ success: true, data: activeTimer });
 });
+
+const getEmployee = async (models, userId) => {
+  const employee = await models.Employee.findOne({ userId });
+  if (!employee) throw new Error("Only employees can track time.");
+  return employee;
+};

@@ -1,7 +1,5 @@
-import React from "react";
-
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge, Button } from "ui-library";
-import { Eye, Edit, Trash2 } from "lucide-react";
+import { Edit, Eye, Trash2 } from 'lucide-react';
+import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'ui-library';
 
 /**
  * @desc A reusable component to display a list of employees in a table.
@@ -14,9 +12,9 @@ import { Eye, Edit, Trash2 } from "lucide-react";
 const EmployeeList = ({ employees, onEdit, onDelete, onView }) => {
   if (!employees || employees.length === 0) {
     return (
-      <div className="p-8 text-center text-slate-400">
+      <div className='p-8 text-center text-slate-400'>
         <p>No employees found.</p>
-        <p className="text-sm mt-1">Click "New Employee" to add your first staff member.</p>
+        <p className='text-sm mt-1'>Click "New Employee" to add your first staff member.</p>
       </div>
     );
   }
@@ -26,38 +24,46 @@ const EmployeeList = ({ employees, onEdit, onDelete, onView }) => {
       <TableHeader>
         <TableRow>
           <TableHead>Employee</TableHead>
-          <TableHead>Designation</TableHead>
+          <TableHead>JobPosition </TableHead>
           <TableHead>Branch</TableHead>
           <TableHead>Linked User</TableHead>
-          <TableHead className="text-center">Status</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead className='text-center'>Status</TableHead>
+          <TableHead className='text-right'>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {employees.map((employee) => (
           <TableRow key={employee._id}>
-            <TableCell className="font-medium">
-              <div className="flex flex-col">
-                <span className="text-white">{employee.name}</span>
-                <span className="text-xs text-slate-400 font-mono">{employee.employeeId}</span>
+            <TableCell className='font-medium'>
+              <div className='flex flex-col'>
+                <span className='text-white'>{employee.name}</span>
+                <span className='text-xs text-slate-400 font-mono'>{employee.employeeId}</span>
               </div>
             </TableCell>
-            <TableCell>{employee.designation?.name}</TableCell>
-            <TableCell>{employee.branchId?.name || "N/A"}</TableCell>
-            <TableCell>{employee.userId?.email || <span className="text-slate-500 italic">None</span>}</TableCell>
-            <TableCell className="text-center">
-              <Badge variant={employee.isActive ? "success" : "destructive"}>{employee.isActive ? "Active" : "Inactive"}</Badge>
+            <TableCell>{employee.jobPositionId?.title}</TableCell>
+            <TableCell>{employee.branchId?.name || 'N/A'}</TableCell>
+            <TableCell>{employee.userId?.email || <span className='text-slate-500 italic'>None</span>}</TableCell>
+            <TableCell className='text-center'>
+              <Badge variant={employee.isActive ? 'success' : 'destructive'}>
+                {employee.isActive ? 'Active' : 'Inactive'}
+              </Badge>
             </TableCell>
-            <TableCell className="text-right">
-              <div className="flex items-center justify-end gap-1">
-                <Button variant="ghost" size="sm" onClick={() => onView(employee._id)} title="View Details">
-                  <Eye className="h-4 w-4" />
+            <TableCell className='text-right'>
+              <div className='flex items-center justify-end gap-1'>
+                <Button variant='ghost' size='sm' onClick={() => onView(employee._id)} title='View Details'>
+                  <Eye className='h-4 w-4' />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => onEdit(employee)} title="Edit">
-                  <Edit className="h-4 w-4" />
+                <Button variant='ghost' size='sm' onClick={() => onEdit(employee)} title='Edit'>
+                  <Edit className='h-4 w-4' />
                 </Button>
-                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-400" onClick={() => onDelete(employee)} title="Delete">
-                  <Trash2 className="h-4 w-4" />
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='text-red-500 hover:text-red-400'
+                  onClick={() => onDelete(employee)}
+                  title='Delete'
+                >
+                  <Trash2 className='h-4 w-4' />
                 </Button>
               </div>
             </TableCell>

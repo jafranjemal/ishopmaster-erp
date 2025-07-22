@@ -135,7 +135,7 @@ const JobSheetEditor = ({ ticket, onUpdate, isLocked = false }) => {
         .then((res) => {
           // Pre-filter for employees who are technicians to populate the labor form.
           const techEmployees = res.data.data.employees.filter((emp) =>
-            emp.designation?.title.toLowerCase().includes('technician'),
+            emp.jobPositionId?.title.toLowerCase().includes('technician'),
           );
           setTechnicians(techEmployees);
         })
@@ -149,28 +149,44 @@ const JobSheetEditor = ({ ticket, onUpdate, isLocked = false }) => {
    */
   const handleAddItem = async (itemData) => {
     setIsSaving(true);
-    // Determine the payload structure based on whether it's a product variant or a labor entry.
-    const isLabor = itemData.itemType === 'labor';
-    const payload = isLabor
-      ? itemData
-      : {
-          itemType: itemData.templateId?.type === 'service' ? 'service' : 'part',
-          productVariantId: itemData._id,
-          description: itemData.variantName,
-          quantity: 1,
-          serialNumber: itemData.serialNumber, // Will be undefined for non-serialized
-        };
+
+    // Normalize to array for uniform handling
+    const items = Array.isArray(itemData) ? itemData : [itemData];
 
     try {
-      const res = await toast.promise(tenantRepairService.addItemToJobSheet(ticket._id, payload), {
-        loading: 'Adding item to job sheet...',
-        success: 'Item added successfully!',
-        error: (err) => err.response?.data?.error || 'Failed to add item.',
-      });
-      onUpdate(res.data.data); // Update the parent page's state with the new ticket
+      for (const item of items) {
+        console.log('Processing item:', item);
+
+        const isLabor = item.itemType === 'labor';
+
+        const payload =
+          isLabor || (item && item.productVariantId)
+            ? item
+            : {
+                itemType: item.templateId?.type === 'service' ? 'service' : 'part',
+                productVariantId: item._id,
+                description: item.variantName,
+                quantity: 1,
+                serialNumber: item.serialNumber,
+              };
+
+        console.log('Payload to send:', payload);
+
+        if (!ticket?._id) {
+          throw new Error('Ticket ID is missing.');
+        }
+
+        await toast.promise(tenantRepairService.addItemToJobSheet(ticket._id, payload), {
+          loading: 'Adding item to job sheet...',
+          success: 'Item added successfully!',
+          error: (err) => err.response?.data?.error || 'Failed to add item.',
+        });
+      }
+
+      onUpdate(); // optionally refresh the whole ticket data after all additions
       setIsAddModalOpen(false);
     } catch (err) {
-      // Error is handled by the toast promise.
+      console.error('Error adding items:', err);
     } finally {
       setIsSaving(false);
     }
@@ -210,6 +226,8 @@ const JobSheetEditor = ({ ticket, onUpdate, isLocked = false }) => {
           Add Part / Labor
         </Button>
       </div>
+
+      {JSON.stringify(ticket.jobSheet)}
       <div className='border border-slate-700 rounded-lg'>
         <Table>
           <TableHeader>
@@ -233,14 +251,18 @@ const JobSheetEditor = ({ ticket, onUpdate, isLocked = false }) => {
                 <TableCell className='font-medium'>{item.description}</TableCell>
                 <TableCell className='text-center'>{item.quantity || item.laborHours}</TableCell>
                 <TableCell className='text-right font-mono'>
-                  {formatCurrency((item.unitPrice || item.laborRate) * (item.quantity || item.laborHours))}
+                  {(() => {
+                    const total = (item.unitPrice || item.laborRate || 0) * (item.quantity || item.laborHours || 0);
+                    return total > 0 ? formatCurrency(total) : 'free';
+                  })()}
                 </TableCell>
                 <TableCell>
+                  {item._id}
                   <Button
                     disabled={isSaving || isLocked}
                     variant='ghost'
                     size='icon'
-                    onClick={() => handleRemoveItem(item._id)}
+                    onClick={() => handleRemoveItem(item.description)}
                   >
                     <Trash2 className='h-4 w-4 text-red-500' />
                   </Button>

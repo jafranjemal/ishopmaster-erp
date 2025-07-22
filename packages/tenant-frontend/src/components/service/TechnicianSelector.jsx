@@ -9,7 +9,7 @@ const TechnicianSelector = ({ onSelect, currentTechnicianId }) => {
     tenantHrService.getAllEmployees().then((res) => {
       // console.log('res ', res.data.data);
       setTechnicians(
-        res.data.data.employees.filter((emp) => emp.designation?.title.toLowerCase().includes('technician')),
+        res.data.data.employees.filter((emp) => emp.jobPositionId?.title.toLowerCase().includes('technician')),
       );
     });
   }, [currentTechnicianId]);
@@ -24,7 +24,8 @@ const TechnicianSelector = ({ onSelect, currentTechnicianId }) => {
           <SelectItem value={null}>Unassigned</SelectItem>
           {technicians.map((tech) => (
             <SelectItem key={tech._id} value={tech._id}>
-              {tech.name} ({tech?.designation?.title})
+              {tech.firstName}
+              {tech.lastName} ({tech?.jobPositionId?.title})
             </SelectItem>
           ))}
         </SelectContent>

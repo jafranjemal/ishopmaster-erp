@@ -49,5 +49,6 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "./components/DropdownMenu";
+export { ScrollArea, ScrollBar } from "./components/ScrollArea";
 export { Switch } from "./components/Switch";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/Tooltip";

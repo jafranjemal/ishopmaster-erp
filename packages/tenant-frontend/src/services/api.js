@@ -945,6 +945,22 @@ export const tenantRepairServiceOld = {
     api.patch(`/tenant/service/tickets/${ticketId}/status`, statusData),
   addItemToJobSheet: async (ticketId, itemData) => api.post(`/tenant/service/tickets/${ticketId}/jobsheet`, itemData),
   removeJobSheetItem: async (ticketId, itemId) => api.delete(`/tenant/service/tickets/${ticketId}/jobsheet/${itemId}`),
+  /**
+   * Updates the core details of a repair ticket.
+   * @param {string} ticketId - The ID of the ticket to update.
+   * @param {object} data - The fields to update.
+   */
+  updateTicketDetails: async (ticketId, data) => {
+    return api.put(`/tenant/repairs/tickets/${ticketId}`, data);
+  },
+
+  /**
+   * Deletes a repair ticket.
+   * @param {string} ticketId - The ID of the ticket to delete.
+   */
+  deleteTicket: async (ticketId) => {
+    return api.delete(`/tenant/repairs/tickets/${ticketId}`);
+  },
 };
 
 export const tenantRepairService = {
@@ -953,7 +969,12 @@ export const tenantRepairService = {
   getTicketById: async (id) => api.get(`/tenant/repairs/tickets/${id}`),
   updateStatus: async (id, newStatus) => api.patch(`/tenant/repairs/tickets/${id}/status`, { newStatus }),
   assignTechnician: async (id, employeeId) => api.put(`/tenant/repairs/tickets/${id}/assign`, { employeeId }),
-
+  getTicketHistory: async (ticketId) => {
+    return api.get(`/tenant/repairs/tickets/${ticketId}/history`);
+  },
+  generateInvoiceManually: async (ticketId) => {
+    return api.post(`/tenant/repairs/tickets/${ticketId}/generate-invoice`);
+  },
   generateQuote: async (ticketId, data) => api.post(`/tenant/repairs/quotes/from-ticket/${ticketId}`, data),
   sendQuote: async (quoteId) => api.post(`/tenant/repairs/quotes/${quoteId}/send`),
   getQuotesForTicket: async (ticketId) => api.get(`/tenant/repairs/quotes`, { params: { ticketId } }),
@@ -979,6 +1000,9 @@ export const tenantRepairService = {
   },
   getActiveTimer: async (ticketId) => {
     return api.get(`/tenant/repairs/time-tracking/tickets/${ticketId}/timer/active`);
+  },
+  getMyTickets: async () => {
+    return api.get('/tenant/repairs/tickets/my-queue');
   },
 };
 
@@ -1357,11 +1381,40 @@ export const tenantSalesService = {
   finalizeSale: async (saleData) => {
     return api.post('/tenant/sales', saleData);
   },
+  getInvoiceById: async (invoiceId) => {
+    return api.get(`/tenant/sales/${invoiceId}`); // Assuming a standard GET by ID endpoint exists
+  },
   createDraft: async (data) => api.post('/tenant/sales/drafts', data),
   createQuotation: async (data) => api.post('/tenant/sales/quotations', data),
   getHeldSales: async () => api.get('/tenant/sales/held'),
   updateStatus: async (id, data) => api.patch(`/tenant/sales/${id}/status`, data),
   deleteHeldSale: async (id) => api.delete(`/tenant/sales/${id}`),
+};
+
+export const tenantNotificationTemplateService = {
+  /**
+   * Gets all notification templates.
+   */
+  getAll: async () => api.get('/tenant/settings/notification-templates'),
+
+  /**
+   * Creates a new notification template.
+   * @param {object} data - The template data.
+   */
+  create: async (data) => api.post('/tenant/settings/notification-templates', data),
+
+  /**
+   * Updates an existing notification template.
+   * @param {string} id - The ID of the template to update.
+   * @param {object} data - The updated template data.
+   */
+  update: async (id, data) => api.put(`/tenant/settings/notification-templates/${id}`, data),
+
+  /**
+   * Deletes a notification template.
+   * @param {string} id - The ID of the template to delete.
+   */
+  delete: async (id) => api.delete(`/tenant/settings/notification-templates/${id}`),
 };
 
 export const tenantSettingsService = {

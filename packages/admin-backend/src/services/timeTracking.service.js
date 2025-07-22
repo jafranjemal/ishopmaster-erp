@@ -20,41 +20,51 @@ class TimeTrackingService {
     return newLog;
   }
 
-  async stopTimer(models, { ticketId, employeeId, userId }) {
-    const { LaborLog, RepairTicket, Employee } = models;
+  async pauseTimer(models, { ticketId, employeeId }, session) {
+    const { LaborLog } = models;
+    const timer = await LaborLog.findOne({ repairTicketId: ticketId, employeeId, status: "in_progress" }).session(session);
+    if (!timer) throw new Error("No active timer found to pause.");
 
-    const timer = await LaborLog.findOne({ repairTicketId: ticketId, employeeId, status: "in_progress" });
+    timer.endTime = new Date();
+    timer.status = "paused";
+    await timer.save({ session });
+    return timer;
+  }
+
+  async stopTimer(models, { ticketId, employeeId }, session) {
+    const { LaborLog, RepairTicket, Employee } = models;
+    const timer = await LaborLog.findOne({ repairTicketId: ticketId, employeeId, status: "in_progress" }).session(session);
     if (!timer) throw new Error("No active timer found to stop.");
 
     timer.endTime = new Date();
     timer.status = "completed";
-    await timer.save();
+    await timer.save({ session });
+
+    const allLogsForJob = await LaborLog.find({ repairTicketId: ticketId, employeeId, status: "completed" }).session(session);
+    const totalMinutes = allLogsForJob.reduce((sum, log) => sum + log.durationMinutes, 0);
+    const totalHours = parseFloat((totalMinutes / 60).toFixed(2));
 
     const employee = await Employee.findById(employeeId).lean();
-    const ticket = await RepairTicket.findById(ticketId);
+    const ticket = await RepairTicket.findById(ticketId).session(session);
 
-    // Find an existing labor item for this employee on the job sheet or create a new one
     let laborItem = ticket.jobSheet.find((item) => item.itemType === "labor" && item.employeeId.equals(employeeId));
-
     if (laborItem) {
-      laborItem.laborHours += timer.durationMinutes / 60;
+      laborItem.laborHours = totalHours;
+      laborItem.quantity = totalHours; // Sync quantity with hours for consistency
     } else {
       ticket.jobSheet.push({
         itemType: "labor",
         employeeId: employeeId,
         description: `${employee.firstName}'s Labor`,
-        quantity: 1, // Represents one block of labor
-        laborHours: timer.durationMinutes / 60,
+        quantity: totalHours,
+        laborHours: totalHours,
         laborRate: employee.compensation?.billingRate || 0,
         unitPrice: employee.compensation?.billingRate || 0,
         costPrice: employee.compensation?.payRate || 0,
       });
     }
 
-    // Round labor hours to 2 decimal places
-    if (laborItem) laborItem.laborHours = parseFloat(laborItem.laborHours.toFixed(2));
-
-    await ticket.save();
+    await ticket.save({ session });
     return { timer, ticket };
   }
 }

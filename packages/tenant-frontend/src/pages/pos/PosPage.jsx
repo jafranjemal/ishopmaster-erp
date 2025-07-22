@@ -47,6 +47,7 @@ const PosPage = ({ layout }) => {
     removeGlobalDiscount,
     removeAdditionalCharge,
     creditSummary,
+    loadInvoiceForPayment,
     ...posSession
   } = usePosSession();
 
@@ -84,6 +85,7 @@ const PosPage = ({ layout }) => {
   const [pendingSaleData, setPendingSaleData] = useState(null);
   const canSellOnCredit = useMemo(() => (selectedCustomer?.creditLimit || 0) > 0, [selectedCustomer]);
   const [denominations, setDenominations] = useState([]);
+
   useEffect(() => {
     tenantSettingsService.getDenominations().then((res) => setDenominations(res.data.data));
   }, []);
@@ -186,6 +188,23 @@ const PosPage = ({ layout }) => {
     () => jobItems.filter((item) => item.isSerialized && item.serialNumber).map((item) => item.serialNumber),
     [jobItems],
   );
+
+  useEffect(() => {
+    const invoiceIdToLoad = searchParams.get('loadInvoice');
+    if (invoiceIdToLoad) {
+      const loadInvoice = async () => {
+        try {
+          const res = await tenantSalesService.getInvoiceById(invoiceIdToLoad);
+          loadInvoiceForPayment(res.data.data);
+          // Clean the URL after loading
+          setSearchParams({}, { replace: true });
+        } catch (error) {
+          toast.error('Failed to load the specified invoice for payment.');
+        }
+      };
+      loadInvoice();
+    }
+  }, [searchParams, loadInvoiceForPayment, setSearchParams]);
 
   useEffect(() => {
     fetchData();

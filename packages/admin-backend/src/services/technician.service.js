@@ -15,34 +15,35 @@ class TechnicianAssignmentService {
   async assignTechnician(models, { ticketId, employeeId }) {
     const { RepairTicket, Employee } = models;
 
-    // 1. Fetch both documents in parallel for efficiency
-    const [ticket, employee] = await Promise.all([
-      RepairTicket.findById(ticketId),
-      Employee.findById(employeeId).populate("designation").lean(),
-    ]);
-
+    // Fetch the repair ticket first
+    const ticket = await RepairTicket.findById(ticketId);
     if (!ticket) throw new Error("Repair ticket not found.");
+
+    // ✅ If no employeeId provided or it's an empty string, unassign the ticket
+    if (!employeeId || employeeId.trim() === "") {
+      ticket.assignedTo = undefined; // Or null
+      // Optionally update status here if needed
+      await ticket.save();
+      return ticket;
+    }
+
+    // Fetch the employee if ID is present
+    const employee = await Employee.findById(employeeId).populate("jobPositionId").lean();
     if (!employee) throw new Error("Employee not found.");
 
-    console.log("employee ", employee);
-    console.log("employee.designation ", employee.designation);
-    console.log("employee.designation.title ", employee.designation.title);
-    // 2. CRITICAL VALIDATION: Ensure the employee is a technician
+    // ✅ Validate that the employee has a 'technician' jobPositionId
     if (
-      !employee.designation ||
-      !String(employee.designation?.title)?.toLowerCase().includes("technician")
+      !employee.jobPositionId ||
+      !String(employee.jobPositionId?.title || "")
+        .toLowerCase()
+        .includes("technician")
     ) {
       throw new Error(`Cannot assign. Employee ${employee.name} is not a registered technician.`);
     }
 
-    // 3. Update the ticket and save
+    // Assign the technician
     ticket.assignedTo = employeeId;
-    // Optionally, update the status if the business rule requires it
-    // ticket.status = 'diagnosing';
-
     await ticket.save();
-
-    // In a future chapter, we would create an audit log entry here.
 
     return ticket;
   }

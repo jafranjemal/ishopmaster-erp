@@ -171,9 +171,9 @@ class InventoryService {
       const itemsToCreate = serials.map((serialNumber) => ({
         productVariantId,
         branchId,
-        serialNumber,
+        serialNumber: serialNumber.number,
         costPriceInBaseCurrency,
-        overrideSellingPrice,
+        overrideSellingPrice: serialNumber.sellingPrice || overrideSellingPrice,
         status: "in_stock",
         batchNumber,
         supplierId: refs?.supplierId,

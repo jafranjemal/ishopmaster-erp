@@ -219,7 +219,7 @@ const LaborTimerWidget = ({ activeTimer, onStart, onStop, isTimerActive, totalHo
   //     </div>
   //   );
   return (
-    <div className='p-5 bg-slate-900 rounded-2xl border border-slate-800 shadow-lg'>
+    <div className='relative p-5 bg-slate-900 rounded-2xl border border-slate-800 shadow-lg'>
       {/* Floating status indicator */}
       {isActive && (
         <div className='absolute top-3 right-3 flex items-center gap-1 text-xs font-medium text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded-full'>

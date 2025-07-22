@@ -1,4 +1,5 @@
 const asyncHandler = require("../../../middleware/asyncHandler");
+const invoiceSynthesisService = require("../../../services/invoiceSynthesis.service");
 const repairService = require("../../../services/repair.service"); // Assuming service is in a central location
 const technicianService = require("../../../services/technician.service");
 
@@ -72,8 +73,50 @@ exports.getAllRepairTickets = asyncHandler(async (req, res, next) => {
   const tickets = await RepairTicket.find(req.query)
     .populate("customerId", "name")
     .populate("assignedTo", "firstName lastName")
+    .populate({
+      path: "assets",
+      populate: { path: "deviceId", select: "name" },
+    })
+    .populate("finalInvoiceId") // This will embed the full SalesInvoice object
+
     .sort({ createdAt: -1 });
   res.status(200).json({ success: true, data: tickets });
+});
+
+/**
+ * @desc    Update core details of a repair ticket
+ * @route   PUT /api/v1/tenant/repairs/tickets/:id
+ * @access  Private (Requires 'service:ticket:update' permission)
+ */
+exports.updateTicket = asyncHandler(async (req, res, next) => {
+  const session = await req.dbConnection.startSession();
+  let ticket;
+  try {
+    await session.withTransaction(async () => {
+      ticket = await repairService.updateTicketDetails(req.models, { ticketId: req.params.id, updateData: req.body }, session);
+    });
+    res.status(200).json({ success: true, data: ticket });
+  } finally {
+    session.endSession();
+  }
+});
+
+/**
+ * @desc    Delete a repair ticket
+ * @route   DELETE /api/v1/tenant/repairs/tickets/:id
+ * @access  Private (Requires 'service:ticket:delete' permission)
+ */
+exports.deleteTicket = asyncHandler(async (req, res, next) => {
+  const session = await req.dbConnection.startSession();
+  let result;
+  try {
+    await session.withTransaction(async () => {
+      result = await repairService.deleteTicket(req.models, { ticketId: req.params.id }, session);
+    });
+    res.status(200).json({ success: true, data: result });
+  } finally {
+    session.endSession();
+  }
 });
 
 // @desc    Get a single repair ticket by ID
@@ -81,10 +124,33 @@ exports.getAllRepairTickets = asyncHandler(async (req, res, next) => {
 exports.getRepairTicketById = asyncHandler(async (req, res, next) => {
   const { RepairTicket } = req.models;
   console.log("RepairTicket model paths:", Object.keys(req.models.RepairTicket.schema.paths));
-  const ticket = await RepairTicket.findById(req.params.id).populate("customerId").populate("assignedTo").populate("assets");
+  const ticket = await RepairTicket.findById(req.params.id)
+    .populate([
+      { path: "customerId" },
+      { path: "assignedTo" },
+      { path: "finalInvoiceId" },
+      {
+        path: "assets",
+        populate: { path: "deviceId" },
+      },
+    ])
+    .lean() // optional: returns plain JS objects rather than Mongoose Documents
+    .exec();
   console.log(ticket.assignedTo);
   if (!ticket) return res.status(404).json({ success: false, error: "Repair ticket not found." });
   res.status(200).json({ success: true, data: ticket });
+});
+
+/**
+ * @desc    Get the full status history for a single repair ticket
+ * @route   GET /api/v1/tenant/repairs/tickets/:id/history
+ * @access  Private (Requires 'service:ticket:view' permission)
+ */
+exports.getTicketHistory = asyncHandler(async (req, res, next) => {
+  const { RepairTicketHistory } = req.models;
+  const history = await RepairTicketHistory.find({ ticketId: req.params.id }).populate("changedBy", "name").sort({ createdAt: 1 }); // Sort oldest to newest for a chronological timeline
+
+  res.status(200).json({ success: true, data: history });
 });
 
 // @desc    Update the status of a repair ticket
@@ -94,8 +160,35 @@ exports.updateTicketStatus = asyncHandler(async (req, res, next) => {
   const updatedTicket = await repairService.updateTicketStatus(req.models, {
     ticketId: req.params.id,
     newStatus,
+    userId: req.user._id,
   });
   res.status(200).json({ success: true, data: updatedTicket });
+});
+
+/**
+ * @desc    Manually generate a SalesInvoice from a completed repair ticket.
+ * @route   POST /api/v1/tenant/repairs/tickets/:id/generate-invoice
+ * @access  Private (Requires 'sales:invoice:create' permission)
+ */
+exports.generateInvoice = asyncHandler(async (req, res, next) => {
+  const session = await req.dbConnection.startSession();
+  let salesInvoice;
+  try {
+    await session.withTransaction(async () => {
+      salesInvoice = await invoiceSynthesisService.createInvoiceFromRepair(
+        req.models,
+        {
+          ticketId: req.params.id,
+          userId: req.user._id,
+        },
+        session,
+        req.tenant
+      );
+    });
+    res.status(201).json({ success: true, data: salesInvoice });
+  } finally {
+    session.endSession();
+  }
 });
 
 // @desc    Assign a technician to a repair ticket
@@ -126,7 +219,8 @@ exports.submitQcCheck = asyncHandler(async (req, res, next) => {
           qcData: req.body,
           userId: req.user._id,
         },
-        session
+        session,
+        req.tenant
       );
     });
     res.status(200).json({ success: true, data: ticket });
@@ -140,17 +234,24 @@ exports.submitQcCheck = asyncHandler(async (req, res, next) => {
  * @route   GET /api/v1/tenant/repairs/tickets/:id/qc-details
  * @access  Private (Requires 'service:qc:perform' permission)
  */
+
+/**
+ * @desc    Get a ticket's details along with its assigned QC template
+ * @route   GET /api/v1/tenant/repairs/tickets/:id/qc-details
+ * @access  Private (Requires 'service:qc:perform' permission)
+ */
 exports.getQcDetails = asyncHandler(async (req, res, next) => {
   const { RepairTicket } = req.models;
-  const ticket = await RepairTicket.findById(req.params.id).populate("defaultQcTemplateId"); // Populate the full template document
+  const ticket = await RepairTicket.findById(req.params.id).populate("qcTemplateId"); // Populate the full template document
 
+  console.log("getQcDetails ==> ticket ", ticket);
   if (!ticket) {
     return res.status(404).json({ success: false, error: "Repair ticket not found." });
   }
-  if (!ticket.defaultQcTemplateId) {
-    return res.status(400).json({ success: false, error: "No QC template is assigned to this type of repair." });
+  if (!ticket.qcTemplateId) {
+    return res.status(400).json({ success: false, error: "No QC template is assigned to this repair ticket." });
   }
-  res.status(200).json({ success: true, data: ticket });
+  res.status(200).json({ success: true, data: ticket.qcTemplateId }); // Return just the template
 });
 
 /**

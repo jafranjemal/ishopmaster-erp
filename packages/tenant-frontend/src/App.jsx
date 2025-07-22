@@ -94,6 +94,8 @@ import WarrantyPoliciesPage from './pages/settings/WarrantyPoliciesPage';
 import RepairQuotePage from './pages/portal/RepairQuotePage';
 import RepairTicketDetailPage from './pages/service/RepairTicketDetailPage';
 import RepairTicketIntakePage from './pages/service/RepairTicketIntakePage';
+import TechnicianDashboardPage from './pages/service/TechnicianDashboardPage';
+import NotificationTemplatesPage from './pages/settings/NotificationTemplatesPage';
 import QcTemplatesPage from './pages/settings/QcTemplatesPage';
 function App() {
   const [posLayout, setPosLayout] = useState('default');
@@ -236,14 +238,18 @@ function App() {
                   <Route path='/accounting/installments/:id' element={<InstallmentPlanDetailPage />} /> {/* POS */}
                   <Route path='/pos' element={<PosPage />} />
                   <Route path='/shifts' element={<ShiftManagementPage />} /> {/* <-- 2. ADD THE NEW ROUTE */}
+                  {/* Notification */}
+                  <Route path='/settings/notification-templates' element={<NotificationTemplatesPage />} />
                   {/* SERVICE */}
                   {/* <Route path='/service/dashboard' element={<ServiceKanbanPage />} />
                   <Route path='/service/tickets/new' element={<RepairTicketIntakePage />} />
                   <Route path='/service/tickets/:id' element={<RepairTicketDetailPage />} /> */}
                   <Route path='/service/dashboard' element={<RepairTicketsPage />} />
                   <Route path='/service/tickets/new' element={<RepairTicketIntakePage />} />
+                  <Route path='/service/tickets/:id/edit' element={<RepairTicketIntakePage />} />
                   <Route path='/service/tickets/:id' element={<RepairTicketDetailPage />} />
                   <Route path='/settings/product-hierarchy' element={<HierarchyManagementPage />} />
+                  <Route path='/service/my-dashboard' element={<TechnicianDashboardPage />} />
                   {/* HR */}
                   <Route path='/hr/employees' element={<EmployeesPage />} />
                   <Route path='/hr/employees/:id' element={<EmployeeDetailPage />} />

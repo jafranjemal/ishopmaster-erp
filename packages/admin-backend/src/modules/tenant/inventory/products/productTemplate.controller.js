@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const asyncHandler = require("../../../../middleware/asyncHandler");
 const ErrorResponse = require("../../../../utils/errorResponse");
 const { ObjectId } = require("mongoose").Types;
@@ -98,16 +99,7 @@ exports.getAllTemplatesOld = asyncHandler(async (req, res, next) => {
 
 exports.getAllTemplates = asyncHandler(async (req, res, next) => {
   const { ProductTemplates, Category } = req.models;
-  const {
-    page = 1,
-    limit = 25,
-    search = "",
-    brandId,
-    categoryId,
-    type,
-    isActive,
-    deviceId,
-  } = req.query;
+  const { page = 1, limit = 25, search = "", brandId, categoryId, type, isActive, deviceId } = req.query;
   const skip = (page - 1) * limit;
 
   const matchStage = {};
@@ -120,8 +112,7 @@ exports.getAllTemplates = asyncHandler(async (req, res, next) => {
   if (brandId && brandId !== "__none__") matchStage.brandId = new ObjectId(brandId);
   if (deviceId && deviceId !== "__none__") matchStage.deviceId = new ObjectId(deviceId);
   if (type && type !== "__none__") matchStage.type = type;
-  if (isActive !== undefined && isActive !== "" && isActive !== "__none__")
-    matchStage.isActive = isActive === "true";
+  if (isActive !== undefined && isActive !== "" && isActive !== "__none__") matchStage.isActive = isActive === "true";
 
   // --- THE DEFINITIVE FIX: HIERARCHICAL CATEGORY FILTER ---
   if (categoryId) {
@@ -140,10 +131,7 @@ exports.getAllTemplates = asyncHandler(async (req, res, next) => {
     ]);
 
     if (categoryWithChildren.length > 0) {
-      const allIds = [
-        new ObjectId(categoryId),
-        ...categoryWithChildren[0].descendants.map((c) => c._id),
-      ];
+      const allIds = [new ObjectId(categoryId), ...categoryWithChildren[0].descendants.map((c) => c._id)];
       matchStage.categoryId = { $in: allIds };
     } else {
       matchStage.categoryId = new ObjectId(categoryId);
@@ -249,8 +237,7 @@ exports.getTemplateById = asyncHandler(async (req, res, next) => {
     .populate("defaultWarrantyPolicyId")
     .lean();
 
-  if (!template)
-    return res.status(404).json({ success: false, error: "Product Template not found" });
+  if (!template) return res.status(404).json({ success: false, error: "Product Template not found" });
   res.status(200).json({ success: true, data: template });
 });
 
@@ -259,10 +246,7 @@ exports.getTemplateById = asyncHandler(async (req, res, next) => {
 exports.getTemplatesSummary = asyncHandler(async (req, res, next) => {
   const { ProductTemplates, ProductVariants } = req.models;
 
-  const [templateCount, variantCount] = await Promise.all([
-    ProductTemplates.countDocuments({}),
-    ProductVariants.countDocuments({}),
-  ]);
+  const [templateCount, variantCount] = await Promise.all([ProductTemplates.countDocuments({}), ProductVariants.countDocuments({})]);
 
   res.status(200).json({
     success: true,
@@ -326,8 +310,7 @@ exports.updateTemplate = asyncHandler(async (req, res, next) => {
     new: true,
     runValidators: true,
   });
-  if (!updatedTemplate)
-    return res.status(404).json({ success: false, error: "Product Template not found" });
+  if (!updatedTemplate) return res.status(404).json({ success: false, error: "Product Template not found" });
   res.status(200).json({ success: true, data: updatedTemplate });
 });
 
@@ -348,8 +331,7 @@ exports.deleteTemplate = asyncHandler(async (req, res, next) => {
     });
   }
   const template = await ProductTemplates.findByIdAndDelete(req.params.id);
-  if (!template)
-    return res.status(404).json({ success: false, error: "Product Template not found" });
+  if (!template) return res.status(404).json({ success: false, error: "Product Template not found" });
   res.status(200).json({ success: true, data: {} });
 });
 
@@ -371,13 +353,10 @@ exports.generateVariants_old = asyncHandler(async (req, res, next) => {
   console.log("Template found:", template.costPrice);
   console.log("costPrice:", costPrice);
   console.log("sellingPrice:", sellingPrice);
-  if (!template)
-    return res.status(404).json({ success: false, error: "Product Template not found" });
+  if (!template) return res.status(404).json({ success: false, error: "Product Template not found" });
 
   const attributeNames = Object.keys(selectedOptions);
-  const attributeValues = Object.values(selectedOptions).filter(
-    (v) => Array.isArray(v) && v.length > 0
-  );
+  const attributeValues = Object.values(selectedOptions).filter((v) => Array.isArray(v) && v.length > 0);
 
   if (attributeValues.length === 0) {
     return res.status(400).json({
@@ -453,9 +432,7 @@ exports.generateVariants = asyncHandler(async (req, res, next) => {
 
   // Fetch template with all required fields
   const template = await ProductTemplates.findById(templateId)
-    .select(
-      "baseName skuPrefix costPrice sellingPrice assetAccountId revenueAccountId cogsAccountId"
-    )
+    .select("baseName skuPrefix costPrice sellingPrice assetAccountId revenueAccountId cogsAccountId")
     .exec();
 
   if (!template) {
@@ -469,9 +446,7 @@ exports.generateVariants = asyncHandler(async (req, res, next) => {
 
   // Validate attribute selections
   const attributeNames = Object.keys(selectedOptions);
-  const attributeValues = Object.values(selectedOptions).filter(
-    (v) => Array.isArray(v) && v.length > 0
-  );
+  const attributeValues = Object.values(selectedOptions).filter((v) => Array.isArray(v) && v.length > 0);
 
   if (attributeValues.length === 0) {
     return res.status(400).json({
@@ -563,8 +538,6 @@ exports.syncVariantsOlds = asyncHandler(async (req, res, next) => {
   }
 
   // Helper: Cartesian product
-  const cartesian = (...arrays) =>
-    arrays.reduce((a, b) => a.flatMap((d) => b.map((e) => [...d, e])), [[]]);
 
   // Helper: Normalize attributes into a unique key string
   const createComboKeyFromAttrs = (attributes) =>
@@ -605,9 +578,7 @@ exports.syncVariantsOlds = asyncHandler(async (req, res, next) => {
     })
   );
 
-  const existingVariantMap = new Map(
-    existingVariants.map((v) => [createComboKeyFromAttrs(v.attributes), v])
-  );
+  const existingVariantMap = new Map(existingVariants.map((v) => [createComboKeyFromAttrs(v.attributes), v]));
 
   const usedSkus = new Set(existingVariants.map((v) => v.sku?.toUpperCase()).filter(Boolean));
 
@@ -673,21 +644,11 @@ exports.syncVariantsOlds = asyncHandler(async (req, res, next) => {
   }
 
   if (variantsToReactivate.length > 0) {
-    dbOperations.push(
-      ProductVariants.updateMany(
-        { _id: { $in: variantsToReactivate } },
-        { $set: { isActive: true } }
-      )
-    );
+    dbOperations.push(ProductVariants.updateMany({ _id: { $in: variantsToReactivate } }, { $set: { isActive: true } }));
   }
 
   if (variantsToDeactivate.length > 0) {
-    dbOperations.push(
-      ProductVariants.updateMany(
-        { _id: { $in: variantsToDeactivate } },
-        { $set: { isActive: false } }
-      )
-    );
+    dbOperations.push(ProductVariants.updateMany({ _id: { $in: variantsToDeactivate } }, { $set: { isActive: false } }));
   }
 
   try {
@@ -716,15 +677,16 @@ exports.syncVariantsOlds = asyncHandler(async (req, res, next) => {
  * @route   POST /api/v1/tenant/inventory/templates/:id/sync-variants
  * @access  Private
  */
-exports.syncVariants = asyncHandler(async (req, res, next) => {
-  const { ProductTemplate, ProductVariants, AttributeSet } = req.models;
-  const { id: templateId } = req.params;
-  const { selections: desiredSelections } = req.body;
 
-  console.log(`🔄 Synchronizing variants for template ID: ${templateId}`);
-
-  // --- 1. Fetch Core Data ---
-  const template = await ProductTemplate.findById(templateId).populate("attributeSetId");
+exports.syncVariantsJJ = asyncHandler(async (req, res, next) => {
+  const { ProductTemplates, ProductVariants } = req.models;
+  const { id } = req.params;
+  const { options: desiredSelections } = req.body;
+  const templateId = new mongoose.Types.ObjectId(id);
+  const template = await ProductTemplates.findById(templateId).populate({
+    path: "attributeSetId",
+    populate: { path: "attributes" },
+  });
   if (!template) {
     return next(new ErrorResponse("Product Template not found", 404));
   }
@@ -732,12 +694,10 @@ exports.syncVariants = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse("Template does not have an Attribute Set assigned.", 400));
   }
 
-  const existingVariants = await ProductVariants.find({ productTemplate: templateId }).lean();
+  const existingVariants = await ProductVariants.find({ templateId }).lean();
 
-  // --- 2. Helper Functions (Deterministic) ---
   const createComboKey = (attributes) => {
-    // attributes is now an array: [{ attribute: 'id', value: 'Blue' }]
-    return attributes
+    return (attributes || [])
       .sort((a, b) => a.attribute.toString().localeCompare(b.attribute.toString()))
       .map((attr) => `${attr.attribute}:${attr.value}`)
       .join("|");
@@ -749,33 +709,23 @@ exports.syncVariants = asyncHandler(async (req, res, next) => {
       .substring(0, 3)
       .toUpperCase();
 
-  // --- 3. Prepare Data Structures ---
-  const attributeMap = new Map(
-    template.attributeSetId.attributes.map((attr) => [attr.name, attr._id])
-  );
-
+  const attributeMap = new Map(template.attributeSetId.attributes.map((attr) => [attr.name, attr._id]));
   const desiredOptionKeys = Object.keys(desiredSelections);
-  const desiredOptionValues = Object.values(desiredSelections);
+  const desiredOptionValues = Object.values(desiredSelections).filter((arr) => Array.isArray(arr) && arr.length > 0);
 
-  // Validate that all incoming options are valid for this attribute set
   for (const key of desiredOptionKeys) {
     if (!attributeMap.has(key)) {
-      return next(
-        new ErrorResponse(`Invalid attribute "${key}" for this product's attribute set.`, 400)
-      );
+      return next(new ErrorResponse(`Invalid attribute "${key}" for this product's attribute set.`, 400));
     }
   }
 
-  // --- 4. Generate All Desired Combinations ---
-  const cartesian = (...arrays) =>
-    arrays.reduce((a, b) => a.flatMap((d) => b.map((e) => [...d, e])), [[]]);
-  const desiredCombinations =
-    desiredOptionValues.length > 0 ? cartesian(...desiredOptionValues) : [];
+  const desiredCombinations = desiredOptionValues.length > 0 ? cartesian(...desiredOptionValues) : [];
 
   const desiredVariantsMap = new Map();
   desiredCombinations.forEach((combo) => {
+    if (combo.length === 0) return; // Skip empty combinations from cartesian product
     const attributes = [];
-    const nameParts = [template.name];
+    const nameParts = [template.baseName];
     const skuParts = [template.sku];
 
     combo.forEach((value, idx) => {
@@ -789,38 +739,44 @@ exports.syncVariants = asyncHandler(async (req, res, next) => {
     const comboKey = createComboKey(attributes);
     const deterministicSku = skuParts.join("-");
 
+    // --- Definitive Fix #1: Correctly map all fields to the ProductVariant schema ---
     desiredVariantsMap.set(comboKey, {
-      productTemplate: templateId,
-      name: nameParts.join(" - "),
+      templateId: templateId,
+      variantName: nameParts.join(" - "), // Correct field is variantName
       sku: deterministicSku,
       attributes: attributes,
-      sellingPrice: template.sellingPrice, // Inherit base prices
-      costPrice: template.costPrice,
+      sellingPrice: template.sellingPrice,
+      costPriceInBaseCurrency: template.costPriceInBaseCurrency, // Correct field is costPriceInBaseCurrency
       isActive: true,
     });
   });
 
-  // --- 5. Reconcile Existing vs. Desired ---
-  const existingVariantMap = new Map(
-    existingVariants.map((v) => [createComboKey(v.attributes), v])
-  );
+  const existingVariantMap = new Map(existingVariants.map((v) => [createComboKey(v.attributes), v]));
   const operations = [];
 
-  // Find variants to create or reactivate
   for (const [key, desiredVariant] of desiredVariantsMap.entries()) {
     const existing = existingVariantMap.get(key);
     if (!existing) {
-      // Variant does not exist, so we create it.
       operations.push({ insertOne: { document: desiredVariant } });
-    } else if (!existing.isActive) {
-      // Variant exists but is inactive, so we reactivate it.
-      operations.push({
-        updateOne: { filter: { _id: existing._id }, update: { $set: { isActive: true } } },
-      });
+    } else {
+      const updates = {};
+      if (!existing.isActive) {
+        updates.isActive = true;
+      }
+      if (existing.variantName !== desiredVariant.variantName) {
+        updates.variantName = desiredVariant.variantName;
+      }
+      if (existing.sku !== desiredVariant.sku) {
+        updates.sku = desiredVariant.sku;
+      }
+      if (Object.keys(updates).length > 0) {
+        operations.push({
+          updateOne: { filter: { _id: existing._id }, update: { $set: updates } },
+        });
+      }
     }
   }
 
-  // Find variants to deactivate
   for (const [key, existingVariant] of existingVariantMap.entries()) {
     if (existingVariant.isActive && !desiredVariantsMap.has(key)) {
       operations.push({
@@ -829,24 +785,216 @@ exports.syncVariants = asyncHandler(async (req, res, next) => {
     }
   }
 
-  // --- 6. Execute Bulk Database Operation ---
   if (operations.length > 0) {
     try {
       await ProductVariants.bulkWrite(operations, { ordered: false });
-      console.log(`✅ Sync complete. Performed ${operations.length} DB operations.`);
     } catch (err) {
-      console.error("❌ DB sync error:", err);
       return next(new ErrorResponse("Database sync failed: " + err.message, 500));
     }
-  } else {
-    console.log("✅ Sync complete. No changes were needed.");
   }
 
-  // --- 7. Send Final Response ---
-  const allUpdatedVariants = await ProductVariants.find({ productTemplate: templateId });
+  const allUpdatedVariants = await ProductVariants.find({ templateId });
+  console.log("allUpdatedVariants ", allUpdatedVariants);
   res.status(200).json({
     success: true,
     message: "Variants synchronized successfully.",
+    data: allUpdatedVariants,
+  });
+});
+
+exports.syncVariants = asyncHandler(async (req, res, next) => {
+  const { ProductTemplates, ProductVariants } = req.models;
+  const { id } = req.params;
+  const { options: desiredSelections } = req.body;
+
+  // Validate ID format
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return next(new ErrorResponse("Invalid product template ID format", 400));
+  }
+
+  const templateId = new mongoose.Types.ObjectId(id);
+
+  const template = await ProductTemplates.findById(templateId).populate({
+    path: "attributeSetId",
+    populate: {
+      path: "attributes",
+      select: "name key values", // Only retrieve necessary fields
+    },
+  });
+
+  if (!template) {
+    return next(new ErrorResponse("Product Template not found", 404));
+  }
+
+  if (!template.attributeSetId) {
+    return next(new ErrorResponse("Template does not have an Attribute Set assigned", 400));
+  }
+
+  const existingVariants = await ProductVariants.find({ templateId }).lean();
+
+  // Create consistent combo key for attribute sets
+  const createComboKey = (attributes) => {
+    if (!attributes) return "";
+
+    const entries = Object.entries(attributes)
+      .map(([key, value]) => [key.toLowerCase(), value]) // Normalize keys
+      .sort((a, b) => a[0].localeCompare(b[0])); // Sort alphabetically
+
+    return entries.map(([key, val]) => `${key}:${val}`).join("|");
+  };
+
+  // Generate SKU fragment
+  const generateSkuPart = (val) =>
+    (val || "")
+      .replace(/[^A-Z0-9]/gi, "")
+      .substring(0, 3)
+      .toUpperCase();
+
+  // Create mapping: attribute name -> attribute key
+  const attributeKeyMap = new Map(
+    template.attributeSetId.attributes.map((attr) => [
+      attr.name,
+      { key: attr.key, values: new Set(attr.values.map((v) => v.toLowerCase())) },
+    ])
+  );
+
+  const desiredOptionKeys = Object.keys(desiredSelections);
+
+  // Validate attributes and values
+  for (const attrName of desiredOptionKeys) {
+    if (!attributeKeyMap.has(attrName)) {
+      return next(new ErrorResponse(`Invalid attribute "${attrName}" for this product`, 400));
+    }
+
+    const validValues = attributeKeyMap.get(attrName).values;
+    for (const value of desiredSelections[attrName]) {
+      if (!validValues.has(value.toLowerCase())) {
+        return next(new ErrorResponse(`Invalid value "${value}" for attribute "${attrName}"`, 400));
+      }
+    }
+  }
+
+  // Cartesian product generator
+  const cartesian = (...arrays) => arrays.reduce((a, b) => a.flatMap((d) => b.map((e) => [...d, e])), [[]]);
+
+  const desiredCombinations = cartesian(...desiredOptionKeys.map((key) => desiredSelections[key]));
+
+  const desiredVariantsMap = new Map();
+  const baseSku = template.skuPrefix || template.sku || "BASE";
+
+  desiredCombinations.forEach((combo) => {
+    if (combo.length === 0) return;
+
+    const attributes = {};
+    const nameParts = [template.baseName];
+    const skuParts = [baseSku];
+
+    combo.forEach((value, idx) => {
+      const attrName = desiredOptionKeys[idx];
+      const attrKey = attributeKeyMap.get(attrName).key;
+
+      attributes[attrKey] = value;
+      nameParts.push(value);
+      skuParts.push(generateSkuPart(value));
+    });
+
+    const comboKey = createComboKey(attributes);
+    const deterministicSku = skuParts.join("-");
+
+    desiredVariantsMap.set(comboKey, {
+      templateId,
+      variantName: nameParts.join(" - "),
+      sku: deterministicSku,
+      attributes,
+      sellingPrice: template.sellingPrice,
+      costPrice: template.costPrice,
+      isActive: true,
+    });
+  });
+
+  const existingVariantMap = new Map(existingVariants.map((v) => [createComboKey(v.attributes), v]));
+
+  const operations = [];
+  const now = new Date();
+
+  // Process creates/updates
+  for (const [key, desiredVariant] of desiredVariantsMap) {
+    const existing = existingVariantMap.get(key);
+
+    if (!existing) {
+      operations.push({
+        insertOne: {
+          document: {
+            ...desiredVariant,
+            createdAt: now,
+            updatedAt: now,
+          },
+        },
+      });
+    } else {
+      const updates = {};
+      let needsUpdate = false;
+
+      if (existing.variantName !== desiredVariant.variantName) {
+        updates.variantName = desiredVariant.variantName;
+        needsUpdate = true;
+      }
+
+      if (existing.sku !== desiredVariant.sku) {
+        updates.sku = desiredVariant.sku;
+        needsUpdate = true;
+      }
+
+      if (!existing.isActive) {
+        updates.isActive = true;
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        updates.updatedAt = now;
+        operations.push({
+          updateOne: {
+            filter: { _id: existing._id },
+            update: { $set: updates },
+          },
+        });
+      }
+    }
+  }
+
+  // Deactivate missing variants
+  for (const [key, existingVariant] of existingVariantMap) {
+    if (existingVariant.isActive && !desiredVariantsMap.has(key)) {
+      operations.push({
+        updateOne: {
+          filter: { _id: existingVariant._id },
+          update: {
+            $set: {
+              isActive: false,
+              updatedAt: now,
+            },
+          },
+        },
+      });
+    }
+  }
+
+  // Execute database operations
+  if (operations.length > 0) {
+    try {
+      await ProductVariants.bulkWrite(operations, { ordered: false });
+    } catch (err) {
+      return next(new ErrorResponse(`Database sync failed: ${err.message}`, 500));
+    }
+  }
+
+  // Retrieve updated variants
+  const allUpdatedVariants = await ProductVariants.find({ templateId }).sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    message: `Synchronized ${desiredVariantsMap.size} variants`,
+    changes: operations.length,
     data: allUpdatedVariants,
   });
 });

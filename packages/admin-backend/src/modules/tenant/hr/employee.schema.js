@@ -1,78 +1,90 @@
 const mongoose = require("mongoose");
 
 /**
- * Defines the core Employee record. This is the single source of truth for a staff member,
- * separate from their optional system User account.
+ * Defines the master record for an Employee.
+ * This is separate from the User model, which handles system access.
+ * An Employee is a person who works for the company, while a User is an account that can log in.
  */
-
-const documentSchema = new mongoose.Schema(
-  {
-    name: { type: String, required: true },
-    url: { type: String, required: true },
-  },
-  { _id: false }
-);
-
 const employeeSchema = new mongoose.Schema(
   {
-    employeeId: { type: String, required: true, unique: true },
-    name: { type: String, required: true, trim: true },
-    documents: [documentSchema],
-    contactInfo: {
-      phone: { type: String, trim: true },
-      email: { type: String, trim: true, lowercase: true },
-      address: {
-        street: { type: String, trim: true },
-        city: { type: String, trim: true },
-        state: { type: String, trim: true },
-        postalCode: { type: String, trim: true },
-      },
+    employeeId: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
     },
 
-    designation: {
+    // Link to the User model if this employee has system access
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "JobPosition", // Now links to the JobPosition model
+      ref: "User",
+      unique: true,
+      sparse: true, // Allows multiple null values but unique for non-null
+    },
+
+    // Organizational Details
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
       required: true,
-    }, // e.g., "Senior Technician", "Cashier"
-    branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
+    },
+    jobPositionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "JobPosition",
+    },
+    departmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Department",
+    },
 
-    // The crucial link to the system user account. Optional because not all employees may have a login.
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    // Contact Information
+    contactInfo: {
+      email: { type: String, trim: true, lowercase: true },
+      phone: { type: String, trim: true },
+    },
 
+    // Compensation Details
+    compensation: {
+      type: {
+        type: String,
+        enum: ["fixed", "hourly", "hybrid", "commission_based"],
+        default: "fixed",
+      },
+      salary: { type: Number, default: 0 }, // monthly or fixed salary
+      hourlyRate: { type: Number, default: 0 }, // employee hourly pay
+      overtimeRate: { type: Number, default: 0 }, // optional overtime pay
+      commissionRate: { type: Number, default: 0 }, // for commission-based pay
+      billRate: { type: Number, default: 0 }, // hourly billing rate to clients
+      currency: { type: String, default: "LKR" }, // optional currency code
+    },
+    // Hardware & Access
     accessCardId: {
       type: String,
       trim: true,
       unique: true,
-      sparse: true, // Allows multiple documents to have a null value
-      default: null,
-    },
-    reportsTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Employee", // Self-referencing to create the hierarchy
-      default: null,
-    },
-    compensation: {
-      type: {
-        type: String,
-        required: true,
-        enum: ["fixed", "commission_based", "hourly", "hybrid"],
-        default: "fixed",
-      },
-      baseSalary: { type: Number, default: 0 },
-      commissionRate: { type: Number, default: 0 }, // Percentage, e.g., 5 for 5%
-      hourlyRate: { type: Number, default: 0 },
-      billingRate: {
-        type: Number,
-        default: 0, // This is the rate billed to customers per hour
-      },
+      sparse: true,
     },
 
-    dateOfJoining: { type: Date, default: Date.now },
-    isActive: { type: Boolean, default: true },
+    isActive: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
   },
   { timestamps: true }
 );
 
+// Pre-save hook to generate a sequential, user-friendly Employee ID.
 employeeSchema.pre("validate", async function (next) {
   if (this.isNew) {
     const lastEmployee = await this.constructor.findOne().sort({ createdAt: -1 });

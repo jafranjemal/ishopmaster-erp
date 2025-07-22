@@ -1,88 +1,13 @@
-// import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
-// import { toast } from 'react-hot-toast';
-// import { tenantSalesService } from '../services/api';
-// import { useDebounce } from '../hooks/useDebounce';
-// import useAuth from './useAuth';
-// import { useCartCalculator } from '../hooks/useCartCalculator';
-
-// const PosSessionContext = createContext(null);
-
-// export const PosSessionProvider = ({ children }) => {
-//   const { user } = useAuth();
-//   const [jobItems, setJobItems] = useState([]);
-//   const [selectedCustomer, setSelectedCustomer] = useState(null);
-//   const [defaultCustomer, setDefaultCustomer] = useState(null);
-//   const [activeSaleId, setActiveSaleId] = useState(null);
-//   const { calculatedCart, isLoading: isCalculating } = useCartCalculator(jobItems, selectedCustomer, user.branchId);
-
-//   // const [calculatedCart, setCalculatedCart] = useState({ items: [], subTotal: 0, totalDiscount: 0, totalTax: 0, grandTotal: 0, taxBreakdown: [] });
-//   // const [isCalculating, setIsLoading] = useState(false);
-
-//   const handleRecallSale = useCallback((sale) => {
-//     const itemsWithCartId = sale.items.map((item) => ({ ...item, cartId: Math.random() }));
-//     setJobItems(itemsWithCartId);
-//     setSelectedCustomer(sale.customerId);
-//     setActiveSaleId(sale._id);
-//     toast.success(`Recalled sale #${sale.invoiceNumber || sale.draftId}`);
-//   }, []);
-
-//   const resetPos = useCallback(() => {
-//     setJobItems([]);
-//     setSelectedCustomer(defaultCustomer);
-//     setActiveSaleId(null);
-//     // setCalculatedCart({ items: [], subTotal: 0, totalDiscount: 0, totalTax: 0, grandTotal: 0, taxBreakdown: [] });
-//   }, [defaultCustomer]);
-
-//   // useEffect(() => {
-//   //     // Only run automatic recalculation for new sales (when no activeSaleId is set).
-//   //     if (activeSaleId) return;
-
-//   //     const recalculate = async () => {
-//   //         if (debouncedItems.length === 0) {
-//   //             setCalculatedCart({ items: [], subTotal: 0, totalDiscount: 0, totalTax: 0, grandTotal: 0, taxBreakdown: [] });
-//   //             return;
-//   //         }
-//   //         setIsLoading(true);
-//   //         try {
-//   //             const payload = { cartData: { items: debouncedItems }, customerId: selectedCustomer?._id, branchId: user.assignedBranchId };
-//   //             const res = await tenantSalesService.calculateTotals(payload);
-//   //             setCalculatedCart(res.data.data);
-//   //         } catch (error) {
-//   //             toast.error("Could not calculate totals.");
-//   //         } finally {
-//   //             setIsLoading(false);
-//   //         }
-//   //     };
-//   //     recalculate();
-//   // }, [debouncedItems, selectedCustomer, activeSaleId, user.assignedBranchId]);
-
-//   const value = {
-//     jobItems,
-//     setJobItems,
-//     selectedCustomer,
-//     setSelectedCustomer,
-//     defaultCustomer,
-//     setDefaultCustomer,
-//     activeSaleId,
-//     setActiveSaleId,
-//     calculatedCart,
-//     isCalculating,
-//     handleRecallSale,
-//     resetPos,
-//   };
-
-//   return <PosSessionContext.Provider value={value}>{children}</PosSessionContext.Provider>;
-// };
-
-//
-
-import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { useCartCalculator } from '../hooks/useCartCalculator';
 import { tenantCustomerService } from '../services/api';
+import useAuth from './useAuth';
 
 const PosSessionContext = createContext(null);
 
 export const PosSessionProvider = ({ children }) => {
+  const { user } = useAuth();
   const [jobItems, setJobItems] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [defaultCustomer, setDefaultCustomer] = useState(null);
@@ -91,9 +16,18 @@ export const PosSessionProvider = ({ children }) => {
   // --- THE DEFINITIVE FIX: State for global adjustments lives here ---
   const [globalDiscount, setGlobalDiscount] = useState(null);
   const [additionalCharges, setAdditionalCharges] = useState([]);
-
+  const [recalledCart, setRecalledCart] = useState(null);
   const [creditSummary, setCreditSummary] = useState({ limit: 0, balance: 0 });
   const [isCreditLoading, setIsCreditLoading] = useState(false);
+
+  const { calculatedCart, isLoading: isCalculating } = useCartCalculator(
+    jobItems,
+    selectedCustomer,
+    user.branchId,
+    globalDiscount,
+    additionalCharges,
+    recalledCart,
+  );
 
   const removeGlobalDiscount = useCallback(() => setGlobalDiscount(null), []);
   const removeAdditionalCharge = useCallback((indexToRemove) => {
@@ -136,6 +70,27 @@ export const PosSessionProvider = ({ children }) => {
     setAdditionalCharges([]);
   }, [defaultCustomer]);
 
+  // --- Definitive Fix #1: Add the function to load a finalized invoice ---
+  const loadInvoiceForPayment = useCallback((invoice) => {
+    toast.success(`Loading Invoice #${invoice.invoiceId} for payment.`);
+    const itemsWithCartId = invoice.items.map((item) => ({ ...item, cartId: Math.random() }));
+    setJobItems(itemsWithCartId);
+    setGlobalDiscount(invoice.globalDiscount);
+    setAdditionalCharges(invoice.additionalCharges || []);
+    setRecalledCart({
+      items: itemsWithCartId,
+      subTotal: invoice.subTotal,
+      totalLineDiscount: invoice.totalLineDiscount,
+      totalGlobalDiscount: invoice.totalGlobalDiscount,
+      totalCharges: invoice.totalCharges,
+      totalTax: invoice.totalTax,
+      grandTotal: invoice.totalAmount,
+      taxBreakdown: invoice.taxBreakdown || [],
+    });
+    setSelectedCustomer(invoice.customerId);
+    setActiveSaleId(invoice._id);
+  }, []);
+
   const value = {
     jobItems,
     setJobItems,
@@ -155,6 +110,7 @@ export const PosSessionProvider = ({ children }) => {
     removeAdditionalCharge,
     creditSummary,
     isCreditLoading,
+    loadInvoiceForPayment,
   };
 
   return <PosSessionContext.Provider value={value}>{children}</PosSessionContext.Provider>;

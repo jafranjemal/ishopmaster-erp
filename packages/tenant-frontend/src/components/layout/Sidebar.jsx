@@ -10,6 +10,7 @@ import {
   BadgeCheck,
   BarChart3,
   Beaker,
+  BellRing,
   Bookmark,
   BookOpen,
   Building,
@@ -40,6 +41,7 @@ import {
   Landmark,
   LayoutDashboard,
   Library,
+  ListTodo,
   ListTree,
   Network,
   Package,
@@ -202,6 +204,12 @@ const Sidebar = () => {
           href: '/service/tickets/new',
           permission: 'service:ticket:create',
         },
+        {
+          name: 'My Job Queue',
+          icon: ListTodo,
+          href: '/service/my-dashboard',
+          permission: 'service:ticket:view_own', // A more specific permission
+        },
       ],
     },
     {
@@ -333,6 +341,20 @@ const Sidebar = () => {
       href: '/reports',
       icon: BarChart3,
       permission: 'reports:access',
+    },
+    {
+      name: 'Notifications',
+      icon: BellRing,
+      permission: 'settings:access',
+      children: [
+        // ... other settings
+        {
+          name: 'Notification Templates',
+          icon: BellRing,
+          href: '/settings/notification-templates',
+          permission: 'settings:notifications:manage',
+        },
+      ],
     },
     {
       name: t('sidebar.settings'),

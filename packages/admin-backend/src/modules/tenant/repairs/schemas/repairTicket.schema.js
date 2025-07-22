@@ -119,6 +119,11 @@ const repairTicketSchema = new mongoose.Schema(
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     afterImages: [{ url: String, public_id: String }],
 
+    qcTemplateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "QcChecklistTemplate",
+      default: null,
+    },
     qcResult: { type: qcResultSchema, default: null },
   },
   { timestamps: true }

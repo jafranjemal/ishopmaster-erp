@@ -151,12 +151,22 @@ const HierarchyWizard = ({ startMode, rootCategory, onItemsSelected, onAddItem }
             fetchProducts(selections.category._id, selections.brand?._id, item._id);
             break;
           }
-
           case WIZARD_STATE.PRODUCT_SELECT: {
             try {
               const fullVariant = await tenantProductService.getAllVariants({ variantIds: item._id, limit: 10 });
-              const selectedProduct = fullVariant.data.data;
-              console.log('selectedProduct ', selectedProduct);
+              console.log('fullVariant.data:', fullVariant.data);
+
+              let selectedProduct = fullVariant.data.data;
+              console.log('selectedProduct:', selectedProduct);
+              console.log('selectedProduct is array?', Array.isArray(selectedProduct));
+
+              if (Array.isArray(selectedProduct)) {
+                selectedProduct = selectedProduct[0];
+                if (!selectedProduct) {
+                  throw new Error('No variant found in response');
+                }
+              }
+
               setProductSelections((prev) =>
                 prev.some((p) => p._id === selectedProduct._id)
                   ? prev.filter((p) => p._id !== selectedProduct._id)
@@ -169,7 +179,6 @@ const HierarchyWizard = ({ startMode, rootCategory, onItemsSelected, onAddItem }
                 prev.some((p) => p._id === item._id) ? prev.filter((p) => p._id !== item._id) : [...prev, item],
               );
             }
-
             break;
           }
         }
@@ -231,8 +240,8 @@ const HierarchyWizard = ({ startMode, rootCategory, onItemsSelected, onAddItem }
 
   const handleAddToJob = useCallback(() => {
     const jobItems = productSelections.map((item) => {
-      console.log('item adding to jobsheet', item);
       const lineType = startMode === 'REPAIRS' ? 'repair_service' : 'sale_item';
+      const itemType = ['serialized', 'non-serialized'].includes(item.templateId.type) ? 'part' : 'service';
 
       const newItem = {
         productVariantId: item._id || item.productVariantId,
@@ -245,18 +254,20 @@ const HierarchyWizard = ({ startMode, rootCategory, onItemsSelected, onAddItem }
         isSerialized: item.templateId?.type === 'serialized',
         serialNumber: item.serialNumber, // From modal
         batchNumber: item?.batchInfo?.batchNumber || null,
-
+        templateId: item.templateId,
+        itemType: item.templateId?.type === 'bundle' ? 'bundle' : itemType,
         batchInfo: item.batchInfo, // From modal
         lineType: item.templateId?.type === 'bundle' ? 'bundle' : lineType,
         bundleItems: item.templateId?.bundleItems || [],
         warrantyInfo: item.templateId?.defaultWarrantyPolicyId || null,
       };
-
-      return item;
+      console.log('item adding to jobsheet newItem', newItem);
+      return newItem;
     });
 
     console.log('jobItems ', jobItems);
-    if (onItemsSelected) onItemsSelected(jobItems[0]);
+    if (onItemsSelected) onItemsSelected(jobItems);
+    if (onAddItem) onAddItem(jobItems);
     resetWizard();
   }, [productSelections, startMode, onItemsSelected, resetWizard]);
 

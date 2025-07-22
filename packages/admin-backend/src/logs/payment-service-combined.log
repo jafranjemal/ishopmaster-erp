@@ -1135,3 +1135,81 @@ Error: Failed to finalize sale. Please try again.
   "userId": "686eb673a64962f93136028e",
   "body": "{\"cartData\":{\"items\":[{\"productVariantId\":\"68722401ae9624259efb199a\",\"description\":\"WINDOWS/MACOS RE-INSTALLATION & SETUP\",\"quantity\":1,\"unitPrice\":2500,\"lineDiscount\":{\"type\":\"fixed\",\"value\":0},\"finalPrice\":2500,\"serialNumber\":null,\"batchNumber\":null,\"cartId\":0.003324227192191942}],\"subTotal\":2500,\"totalLineDiscount\":0,\"totalGlobalDiscount\":0,\"totalCharges\":0,\"totalTax\":0,\"taxBreakdown\":[],\"grandTotal\":2500,\"globalDiscount\":null,\"additionalCharges\":[],\"taxAuditTrail\":[],\"totalAmount\":2500},\"paymentData\":{\"paymentLines\":[{\"paymentMethodId\":\"686eb675a64962f931360637\",\"amount\":\"2500.00\",\"referenceNumber\":\"\",\"cashTendered\":\"\",\"changeDue\":0,\"status\":\"cleared\"}],\"notes\":\"POS Sale\"},\"customerId\":\"686eb673a64962f93136028c\",\"couponId\":null}"
 }
+2025-07-22 15:15:35 [info] Payment processed successfully 
+{
+  "service": "payment-service",
+  "paymentId": "687f5dbfb2feb3987312294a",
+  "amount": 105000,
+  "methods": [
+    "686eb675a64962f931360637"
+  ]
+}
+2025-07-22 23:02:41 [info] Event 'repair.qc_passed' received for ticket TKT-00000001. Synthesizing invoice. 
+{
+  "service": "payment-service"
+}
+2025-07-22 23:02:41 [error] Failed to synthesize invoice for ticket TKT-00000001 after QC pass. 
+MongoServerError: Transaction 1 has been committed.
+    at Connection.sendCommand (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cmap\connection.js:305:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Connection.command (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cmap\connection.js:333:26)
+    at async Server.command (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sdam\server.js:171:29)
+    at async FindOperation.execute (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\find.js:36:16)
+    at async tryOperation (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\execute_operation.js:207:20)
+    at async executeOperation (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\execute_operation.js:75:16)
+    at async FindCursor._initialize (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\find_cursor.js:61:26)
+    at async FindCursor.cursorInit (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\abstract_cursor.js:633:27)
+    at async FindCursor.fetchBatch (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\abstract_cursor.js:667:13)
+{
+  "service": "payment-service",
+  "error": "Transaction 1 has been committed."
+}
+2025-07-22 23:02:41 [error] Unhandled Rejection: Transaction 1 has been committed. 
+MongoServerError: Transaction 1 has been committed.
+    at Connection.sendCommand (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cmap\connection.js:305:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Connection.command (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cmap\connection.js:333:26)
+    at async Server.command (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sdam\server.js:171:29)
+    at async FindOperation.execute (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\find.js:36:16)
+    at async tryOperation (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\execute_operation.js:207:20)
+    at async executeOperation (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\execute_operation.js:75:16)
+    at async FindCursor._initialize (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\find_cursor.js:61:26)
+    at async FindCursor.cursorInit (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\abstract_cursor.js:633:27)
+    at async FindCursor.fetchBatch (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\abstract_cursor.js:667:13)
+{
+  "service": "payment-service",
+  "errorLabelSet": {},
+  "errorResponse": {
+    "ok": 0,
+    "errmsg": "Transaction 1 has been committed.",
+    "code": 256,
+    "codeName": "TransactionCommitted",
+    "$clusterTime": {
+      "clusterTime": {
+        "$timestamp": "7529960547660333059"
+      },
+      "signature": {
+        "hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        "keyId": 0
+      }
+    },
+    "operationTime": {
+      "$timestamp": "7529960547660333058"
+    }
+  },
+  "ok": 0,
+  "code": 256,
+  "codeName": "TransactionCommitted",
+  "$clusterTime": {
+    "clusterTime": {
+      "$timestamp": "7529960547660333059"
+    },
+    "signature": {
+      "hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "keyId": 0
+    }
+  },
+  "operationTime": {
+    "$timestamp": "7529960547660333058"
+  }
+}

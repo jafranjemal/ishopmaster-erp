@@ -77,7 +77,7 @@ exports.getPayrollRunDetails = asyncHandler(async (req, res, next) => {
       populate: {
         path: "employeeId",
         model: "Employee", // Explicitly specify the model name
-        select: "name employeeId designation branchId", // Select only the fields we need
+        select: "name employeeId jobPositionId branchId", // Select only the fields we need
       },
     })
     .lean();
@@ -101,7 +101,7 @@ exports.getPayslipDetails = asyncHandler(async (req, res, next) => {
       path: "employeeId",
       // ✅ FIX: The `select` statement now matches your new employeeSchema.
       // It selects the top-level 'name' field instead of the old 'personalInfo'.
-      select: "name designation branchId employeeId",
+      select: "name jobPositionId branchId employeeId",
       populate: {
         path: "branchId",
         model: "Branch",
@@ -129,7 +129,7 @@ exports.printPayrollRun = asyncHandler(async (req, res, next) => {
       path: "payslips",
       populate: {
         path: "employeeId",
-        select: "name designation branchId",
+        select: "name jobPositionId branchId",
         populate: { path: "branchId", select: "name" },
       },
     })
@@ -150,8 +150,7 @@ exports.printPayrollRun = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message:
-      "PDF generation endpoint is connected. PDF rendering will be implemented in the Document Engine chapter.",
+    message: "PDF generation endpoint is connected. PDF rendering will be implemented in the Document Engine chapter.",
     data: payrollRun, // Sending data back for now to show it works
   });
 });

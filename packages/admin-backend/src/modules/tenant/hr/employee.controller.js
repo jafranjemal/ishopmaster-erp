@@ -9,9 +9,7 @@ exports.getAllEmployees = asyncHandler(async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   // --- Your excellent logic for finding unassigned users remains the same ---
-  const linkedUserIds = (await Employee.find({ userId: { $ne: null } }).select("userId")).map(
-    (e) => e.userId
-  );
+  const linkedUserIds = (await Employee.find({ userId: { $ne: null } }).select("userId")).map((e) => e.userId);
   const unassignedUsers = await User.find({ _id: { $nin: linkedUserIds } }).select("name email");
 
   // --- THE DEFINITIVE FIX: Using an Aggregation Pipeline for Robust Search ---
@@ -31,7 +29,7 @@ exports.getAllEmployees = asyncHandler(async (req, res, next) => {
     {
       $lookup: {
         from: "jobpositions",
-        localField: "designation",
+        localField: "jobPositionId",
         foreignField: "_id",
         as: "jobPosition",
       },
@@ -50,20 +48,21 @@ exports.getAllEmployees = asyncHandler(async (req, res, next) => {
   const [employees, totalResult] = await Promise.all([
     Employee.aggregate([
       ...aggregationPipeline,
-      { $sort: { name: 1 } },
+      { $sort: { firstName: 1 } },
       { $skip: skip },
       { $limit: Number(limit) },
       // 4. Project the final shape
       {
         $project: {
           employeeId: 1,
-          name: 1,
+          firstName: 1,
+          lastName: 1,
           contactInfo: 1,
           isActive: 1,
           createdAt: 1,
           branchId: { _id: "$branch._id", name: "$branch.name" },
           userId: { _id: "$user._id", email: "$user.email" },
-          designation: { _id: "$jobPosition._id", title: "$jobPosition.title" },
+          jobPositionId: { _id: "$jobPosition._id", title: "$jobPosition.title" },
         },
       },
     ]),
@@ -71,7 +70,7 @@ exports.getAllEmployees = asyncHandler(async (req, res, next) => {
   ]);
 
   const total = totalResult[0]?.total || 0;
-
+  console.log(employees);
   res.status(200).json({
     success: true,
     count: employees.length,
@@ -92,10 +91,7 @@ exports.getEmployeeById = asyncHandler(async (req, res, next) => {
   const { Employee, Attendance, Leave, Payslip, Commission } = req.models;
   const employeeId = req.params.id;
 
-  const employee = await Employee.findById(employeeId)
-    .populate("branchId", "name")
-    .populate("userId", "email")
-    .lean();
+  const employee = await Employee.findById(employeeId).populate("branchId", "name").populate("userId", "email").lean();
 
   if (!employee) {
     return next(new ErrorResponse("Employee not found.", 404, "NOT_FOUND"));

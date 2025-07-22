@@ -31,6 +31,7 @@ const portalAuthRoutes = require("./modules/tenant/portal/customerAuth.routes.js
 const customerAuthTokenSchema = require("./modules/tenant/portal/customerAuthToken.schema.js");
 const { metricsMiddleware } = require("./config/metrics.js");
 const chalk = require("chalk");
+const { registerRepairListeners } = require("./modules/tenant/repairs/repair.listeners.js");
 // CORS configuration
 const allowedOrigins = [
   "http://localhost:5173", // Vite's default dev port
@@ -178,8 +179,7 @@ try {
         try {
           if (module.isPublic) {
             publicApiRouter.use(`/${moduleName}`, tenantResolver, module.router);
-            cons;
-            ole.log(chalk.magenta(`  🌐 Mounted PUBLIC routes at /api/v1/public/${moduleName}`));
+            console.log(chalk.magenta(`  🌐 Mounted PUBLIC routes at /api/v1/public/${moduleName}`));
           } else {
             tenantRouter.use(`/${moduleName}`, module.router);
             console.log(chalk.magenta(`  🔐 Mounted PRIVATE routes at /${moduleName}`));
@@ -300,6 +300,9 @@ cron.schedule(
     timezone: "Asia/Colombo", // Use the appropriate timezone
   }
 );
+
+registerRepairListeners();
+console.log("✅ Application event listeners registered.");
 
 process.on("uncaughtException", (err) => {
   console.error("Uncaught Exception:", err);

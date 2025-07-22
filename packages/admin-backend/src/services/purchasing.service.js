@@ -64,8 +64,7 @@ class PurchasingService {
     }
 
     const supplier = await Supplier.findById(po.supplierId).session(session);
-    if (!supplier || !supplier.ledgerAccountId)
-      throw new Error("Supplier or their financial account not found.");
+    if (!supplier || !supplier.ledgerAccountId) throw new Error("Supplier or their financial account not found.");
 
     const inventoryAssetAccount = await Account.findOne({
       isSystemAccount: true,
@@ -129,9 +128,7 @@ class PurchasingService {
     }
 
     // 3. Update the overall PO status
-    const allItemsReceived = po.items.every(
-      (item) => item.quantityReceived >= item.quantityOrdered
-    );
+    const allItemsReceived = po.items.every((item) => item.quantityReceived >= item.quantityOrdered);
     po.status = allItemsReceived ? "fully_received" : "partially_received";
 
     await po.save({ session });
@@ -170,8 +167,7 @@ class PurchasingService {
         name: "Inventory Asset",
       }).session(session),
     ]);
-    if (!grniAccount || !inventoryAssetAccount)
-      throw new Error("Essential accounting ledgers (GRNI or Inventory Asset) are missing.");
+    if (!grniAccount || !inventoryAssetAccount) throw new Error("Essential accounting ledgers (GRNI or Inventory Asset) are missing.");
 
     // 1. Create the Goods Receipt Note (GRN) document
     const grn = (
@@ -186,7 +182,7 @@ class PurchasingService {
             items: receivedItems.map((item) => ({
               productVariantId: item.productVariantId,
               quantityReceived: item.quantityReceived,
-              receivedSerials: item.serials || [],
+              receivedSerials: item.serials.map((x) => x.number).join(",") || [],
             })),
           },
         ],
@@ -251,9 +247,7 @@ class PurchasingService {
     }
 
     // 4. Update the overall PO status
-    const allItemsReceived = po.items.every(
-      (item) => item.quantityReceived >= item.quantityOrdered
-    );
+    const allItemsReceived = po.items.every((item) => item.quantityReceived >= item.quantityOrdered);
     po.status = allItemsReceived ? "fully_received" : "partially_received";
 
     await po.save({ session });

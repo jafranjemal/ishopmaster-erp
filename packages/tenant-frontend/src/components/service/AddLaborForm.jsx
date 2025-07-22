@@ -51,7 +51,8 @@ const AddLaborForm = ({ onSave, onCancel, isSaving, technicians = [], defaultEmp
           <SelectContent>
             {technicians.map((t) => (
               <SelectItem key={t._id} value={t._id}>
-                {t.name} - ({t.designation.title})
+                {t.firstName}
+                {t.lastName} - ({t.jobPositionId.title})
               </SelectItem>
             ))}
           </SelectContent>

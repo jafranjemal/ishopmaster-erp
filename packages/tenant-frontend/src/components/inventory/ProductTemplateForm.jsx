@@ -1,29 +1,29 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { Loader2, Percent, PlusCircle, ShieldCheck, Trash2 } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   Button,
-  Input,
-  Label,
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
+  Checkbox,
+  Input,
+  Label,
+  Modal,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Modal,
-  CardDescription,
-  Checkbox,
 } from 'ui-library';
-import CompatibilitySelector from './CompatibilitySelector';
 import FileUploader from 'ui-library/components/FileUploader';
-import { Loader2, Trash2, X, PlusCircle, ShieldCheck, Percent } from 'lucide-react';
-import ProductVariantSearch from '../procurement/ProductVariantSearch';
-import { toast } from 'react-hot-toast';
 import { tenantBrandService, tenantCategoryService, tenantDeviceService } from '../../services/api';
-import CategoryQuickForm from './products/CategoryQuickForm';
+import ProductVariantSearch from '../procurement/ProductVariantSearch';
+import CompatibilitySelector from './CompatibilitySelector';
 import BrandQuickForm from './products/BrandQuickForm';
+import CategoryQuickForm from './products/CategoryQuickForm';
 
 const generateCategoryOptions = (categories, level = 0) => {
   let options = [];
@@ -76,6 +76,7 @@ const ProductTemplateForm = ({
   onDataRefresh,
   warrantyPolicies,
   taxCategories,
+  qcTemplates,
 }) => {
   const initialFormData = React.useMemo(
     () => ({
@@ -99,6 +100,7 @@ const ProductTemplateForm = ({
       deviceId: '',
       requiredParts: [],
       defaultWarrantyPolicyId: null,
+      defaultQcTemplateId: null,
     }),
     [],
   );
@@ -138,6 +140,7 @@ const ProductTemplateForm = ({
         deviceId: templateToEdit.deviceId?._id || '',
         requiredParts: templateToEdit.requiredParts || [],
         defaultWarrantyPolicyId: templateToEdit.defaultWarrantyPolicyId?._id || null, // <-- 3. POPULATE FOR EDIT MODE
+        defaultQcTemplateId: templateToEdit.defaultQcTemplateId?._id || null,
       });
     } else {
       setFormData(initialFormData);
@@ -321,6 +324,27 @@ const ProductTemplateForm = ({
             </SelectContent>
           </Select>
         </div>
+        {formData.type === 'service' && (
+          <div>
+            <Label>Default QC Checklist (Optional)</Label>
+            <Select
+              onValueChange={(val) => handleSelectChange('defaultQcTemplateId', val)}
+              value={formData.defaultQcTemplateId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder='Select a default QC checklist for this service...' />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>None</SelectItem>
+                {qcTemplates.map((qc) => (
+                  <SelectItem key={qc._id} value={qc._id}>
+                    {qc.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
       {/* --- CASCADING HIERARCHY DROPDOWNS --- */}
       <div className='space-y-4 rounded-lg border border-slate-700 p-4'>

@@ -14,15 +14,16 @@ const leaveRoutes = require("./leave.routes"); // <-- 1. IMPORT NEW ROUTES
  */
 const express = require("express");
 const payrollRunSchema = require("./payrollRun.schema");
-const departmentSchema = require("./jobPosition/jobPosition.schema");
-const jobPositionSchema = require("./department/department.schema");
-const departmentRoutes = require("./department/department.routes"); // <-- 1. IMPORT
-const jobPositionRoutes = require("./jobPosition/jobPosition.routes");
+const departmentSchema = require("./department/department.schema");
+const jobPositionSchema = require("./jobPosition/jobPosition.schema");
 const deductionRuleSchema = require("./DeductionRule/deductionRule.schema");
-const deductionRuleRoutes = require("./DeductionRule/deductionRule.routes");
-const benefitRoutes = require("./employeeBenefit/benefit.routes");
 const benefitTypeSchema = require("./employeeBenefit/benefitType.schema");
 const employeeBenefitSchema = require("./employeeBenefit/employeeBenefit.schema");
+
+const departmentRoutes = require("./department/department.routes"); // <-- 1. IMPORT
+const jobPositionRoutes = require("./jobPosition/jobPosition.routes");
+const deductionRuleRoutes = require("./DeductionRule/deductionRule.routes");
+const benefitRoutes = require("./employeeBenefit/benefit.routes");
 const mainRouter = express.Router();
 
 mainRouter.use("/employees", employeeRoutes);

@@ -1,36 +1,36 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { toast } from 'react-hot-toast';
+import { t } from 'i18next';
 import { PlusCircle, ShieldAlert } from 'lucide-react';
-import {
-  tenantProductService,
-  tenantBrandService,
-  tenantCategoryService,
-  tenantAttributeService,
-  tenantAccountingService,
-  tenantUploadService,
-  tenantWarrantyPolicyService,
-  tenantTaxCategoryService,
-} from '../../services/api';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import {
   Button,
-  Modal,
   Card,
   CardContent,
-  Pagination,
   FilterBar,
+  HierarchicalSelect,
   Label,
-  Input,
-  SelectTrigger,
+  Modal,
+  Pagination,
   Select,
   SelectContent,
-  SelectValue,
   SelectItem,
-  HierarchicalSelect,
+  SelectTrigger,
+  SelectValue,
 } from 'ui-library';
-import ProductTemplateList from '../../components/inventory/ProductTemplateList';
 import ProductTemplateForm from '../../components/inventory/ProductTemplateForm';
 import ProductTemplateHeader from '../../components/inventory/ProductTemplateHeader';
-import { t } from 'i18next';
+import ProductTemplateList from '../../components/inventory/ProductTemplateList';
+import {
+  tenantAccountingService,
+  tenantAttributeService,
+  tenantBrandService,
+  tenantCategoryService,
+  tenantProductService,
+  tenantQcTemplateService,
+  tenantTaxCategoryService,
+  tenantUploadService,
+  tenantWarrantyPolicyService,
+} from '../../services/api';
 
 const ProductTemplatesPage = () => {
   const [templates, setTemplates] = useState([]);
@@ -42,6 +42,7 @@ const ProductTemplatesPage = () => {
     accounts: [],
     warrantyPolicies: [],
     taxCategories: [],
+    qcTemplates: [],
   });
   const [paginationData, setPaginationData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -81,6 +82,7 @@ const ProductTemplatesPage = () => {
           accountsRes,
           warrantiesRes,
           taxCatRes,
+          qcRes,
         ] = await Promise.all([
           tenantProductService.getAllTemplates(params),
           tenantProductService.getSummary(),
@@ -90,6 +92,7 @@ const ProductTemplatesPage = () => {
           tenantAccountingService.getAllAccounts(),
           tenantWarrantyPolicyService.getAll(),
           tenantTaxCategoryService.getAll(),
+          tenantQcTemplateService.getAll(),
         ]);
 
         setTemplates(templatesRes.data.data);
@@ -102,6 +105,7 @@ const ProductTemplatesPage = () => {
           accounts: accountsRes.data.data,
           warrantyPolicies: warrantiesRes.data.data,
           taxCategories: taxCatRes.data.data,
+          qcTemplates: qcRes.data.data,
         });
       } catch (error) {
         console.log(error);
@@ -320,6 +324,7 @@ const ProductTemplatesPage = () => {
           onSave={handleSave}
           onCancel={handleCloseModals}
           isSaving={isSaving}
+          qcTemplates={prereqData.qcTemplates}
           taxCategories={prereqData.taxCategories}
           getSignatureFunc={tenantUploadService.getCloudinarySignature}
         />

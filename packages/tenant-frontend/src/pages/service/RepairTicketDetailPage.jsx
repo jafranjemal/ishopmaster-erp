@@ -1,7 +1,18 @@
-import { ArrowLeft, FileText, Flag } from 'lucide-react';
+import {
+  ArrowLeft,
+  CheckSquare,
+  Cpu,
+  FileSignature,
+  FileText,
+  Flag,
+  LoaderCircle,
+  MessageSquare,
+  Timer,
+  User,
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Alert,
   AlertDescription,
@@ -27,6 +38,7 @@ import { tenantRepairService } from '../../services/api';
 
 const RepairTicketDetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { formatCurrency, user } = useAuth();
@@ -67,12 +79,52 @@ const RepairTicketDetailPage = () => {
       tenantRepairService
         .getQcDetails(ticket._id)
         .then((res) => {
-          setQcTemplate(res.data.data.defaultQcTemplateId);
+          console.log('getQcDetails ', res.data.data);
+          setQcTemplate(res.data.data);
         })
         .catch((err) => toast.error(err.response?.data?.error || 'Failed to load QC Checklist.'))
         .finally(() => setIsQcLoading(false));
     }
   }, [ticket, qcTemplate]);
+
+  const handleGenerateInvoice = async () => {
+    try {
+      await toast.promise(tenantRepairService.generateInvoiceManually(id), {
+        loading: 'Generating final invoice...',
+        success: 'Invoice generated successfully!',
+        error: (err) => err.response?.data?.error || 'Failed to generate invoice.',
+      });
+      // After success, refresh the ticket data to get the new invoiceId
+      fetchData(false);
+    } catch (err) {
+      // Error is handled by the toast promise
+    }
+  };
+
+  const handleTakePayment = () => {
+    if (ticket && ticket.finalInvoiceId) {
+      // Redirect to the POS terminal, passing the invoice ID in the URL
+      navigate(`/pos/terminal?loadInvoice=${ticket.finalInvoiceId._id}`);
+    }
+  };
+  const renderFinalizeButton = () => {
+    if (ticket.status === 'pickup_pending') {
+      if (ticket.finalInvoiceId) {
+        return (
+          <Button onClick={handleTakePayment}>
+            <CreditCard className='h-4 w-4 mr-2' /> Take Payment
+          </Button>
+        );
+      } else {
+        return (
+          <Button type='button' onClick={handleGenerateInvoice} variant='outline'>
+            <FileSignature className='h-4 w-4 mr-2' /> Generate Invoice Manually
+          </Button>
+        );
+      }
+    }
+    return null; // Don't show the button for other statuses
+  };
 
   const handleFlagForRequote = async (data) => {
     setIsSaving(true);
@@ -89,6 +141,7 @@ const RepairTicketDetailPage = () => {
       setIsSaving(false);
     }
   };
+
   const handleGenerateQuote = async () => {
     try {
       // --- THE DEFINITIVE FIX: FULLY IMPLEMENTED TOAST ---
@@ -119,7 +172,7 @@ const RepairTicketDetailPage = () => {
   };
 
   const handleTicketUpdate = (updatedTicket) => {
-    setTicket(updatedTicket);
+    fetchData();
   };
 
   const handleAssignTechnician = async (employeeId) => {
@@ -142,6 +195,16 @@ const RepairTicketDetailPage = () => {
       });
       fetchData();
     } catch (err) {}
+  };
+
+  const handleSubmitForQc = () => {
+    if (
+      window.confirm(
+        'Are you sure you have completed all repair work? This will submit the ticket for Quality Control inspection.',
+      )
+    ) {
+      handleStatusChange('qc_pending');
+    }
   };
 
   const handleSubmitQc = async (qcData) => {
@@ -210,6 +273,17 @@ const RepairTicketDetailPage = () => {
   const canGenerateQuote =
     user.permissions.includes('service:quote:create') &&
     ['diagnosing', 'on_hold_pending_re_quote'].includes(ticket.status);
+
+  const DetailBlock = ({ label, value, icon }) => (
+    <div className='flex items-start gap-3'>
+      <div className='bg-slate-800 p-2 rounded-lg border border-slate-700'>{icon}</div>
+      <div>
+        <p className='text-sm font-medium text-slate-400'>{label}</p>
+        <p className='font-medium text-slate-200'>{value}</p>
+      </div>
+    </div>
+  );
+
   return (
     <div className='space-y-6'>
       <Link to='/service/dashboard' className='flex items-center text-sm text-indigo-400 hover:underline'>
@@ -227,24 +301,77 @@ const RepairTicketDetailPage = () => {
       )}
       <div className='flex justify-between items-center'>
         <h1 className='text-3xl font-bold'>Repair Ticket: {ticket.ticketNumber}</h1>
-        <Button disabled={ticket.status !== 'pickup_pending'}>Create Invoice</Button>
+        {/* <Button disabled={ticket.status !== 'pickup_pending'}>Create Invoice</Button> */}
+        {renderFinalizeButton()}
       </div>
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 items-start'>
         <div className='lg:col-span-2 space-y-6'>
-          <Card>
-            <CardHeader>
-              <CardTitle>Customer & Asset Details</CardTitle>
+          <Card className=' border-slate-800 rounded-xl'>
+            <CardHeader className='border-b border-slate-800 pb-3'>
+              <CardTitle className='text-lg font-medium flex items-center gap-2'>
+                <User className='h-5 w-5 text-indigo-400' />
+                Customer & Asset Details
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p>
-                <strong>Customer:</strong> {ticket.customerId.name}
-              </p>
-              <p>
-                <strong>Asset:</strong> {ticket.assets[0]?.deviceId?.name} (SN: {ticket.assets[0]?.serialNumber})
-              </p>
-              <p className='mt-2'>
-                <strong>Complaint:</strong> {ticket.customerComplaint}
-              </p>
+            <CardContent className='p-0'>
+              <div className='grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 p-5'>
+                {/* Customer Details - Enhanced */}
+                <div className='bg-slate-900 p-4 space-y-4'>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                    <DetailBlock label='Customer' value={ticket.customerId.name} icon={<User size={16} />} />
+
+                    <DetailBlock
+                      label='Asset'
+                      value={`${ticket.assets[0]?.deviceId?.name || 'N/A'} (SN: ${ticket.assets[0]?.serialNumber || 'N/A'})`}
+                      icon={<Cpu size={16} />}
+                    />
+                  </div>
+
+                  <div className='bg-slate-800/50 rounded-lg p-4 border border-slate-700'>
+                    <div className='flex items-start gap-2'>
+                      <MessageSquare className='h-4 w-4 text-slate-500 mt-0.5 flex-shrink-0' />
+                      <div>
+                        <p className='text-sm font-medium text-slate-400 mb-1'>Complaint</p>
+                        <p className='text-slate-200 whitespace-pre-wrap'>{ticket.customerComplaint}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Timer Widget - Enhanced Integration */}
+                <div className='lg:w-72 flex flex-col'>
+                  <div className='bg-slate-800/50 rounded-xl border border-slate-700 p-4 h-full'>
+                    <div className='flex justify-between items-center mb-3'>
+                      <h3 className='text-sm font-medium text-slate-400 flex items-center gap-1'>
+                        <Timer className='h-4 w-4' />
+                        Time Tracker
+                      </h3>
+                      {isTimerActive && (
+                        <span className='flex items-center text-xs font-medium text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded-full'>
+                          <span className='w-2 h-2 bg-emerald-400 rounded-full animate-pulse mr-1'></span>
+                          LIVE
+                        </span>
+                      )}
+                    </div>
+
+                    <LaborTimerWidget
+                      onStart={handleStartTimer}
+                      onStop={handleStopTimer}
+                      isTimerActive={isTimerActive}
+                      totalHoursLogged={totalHoursLogged}
+                      isSaving={isSaving}
+                      activeTimer={activeTimer}
+                    />
+                    {ticket.status === 'repair_active' && !isTimerActive && (
+                      <div className='border-t border-slate-700 pt-4'>
+                        <Button className='w-full' onClick={handleSubmitForQc}>
+                          <CheckSquare className='h-4 w-4 mr-2' /> Complete Repair & Submit for QC
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -280,7 +407,7 @@ const RepairTicketDetailPage = () => {
             </CardContent>
           </Card>
 
-          {ticket.status !== 'qc_pending' && (
+          {ticket.status === 'qc_pending' && (
             <Card>
               <CardHeader>
                 <CardTitle>Quality Control Check</CardTitle>
@@ -298,6 +425,7 @@ const RepairTicketDetailPage = () => {
             </Card>
           )}
         </div>
+
         <div className='lg:col-span-1 space-y-6'>
           <Card>
             <CardHeader className='flex flex-row items-center justify-between'>
@@ -312,14 +440,6 @@ const RepairTicketDetailPage = () => {
             </CardContent>
           </Card>
 
-          <LaborTimerWidget
-            onStart={handleStartTimer}
-            onStop={handleStopTimer}
-            isTimerActive={isTimerActive}
-            totalHoursLogged={totalHoursLogged}
-            isSaving={isSaving}
-            activeTimer={activeTimer}
-          />
           <Card>
             <CardHeader>
               <CardTitle>Management</CardTitle>
@@ -352,7 +472,7 @@ const RepairTicketDetailPage = () => {
               <CardTitle>History</CardTitle>
             </CardHeader>
             <CardContent>
-              <StatusTimeline ticket={ticket} />
+              <StatusTimeline ticketId={ticket?._id} />
             </CardContent>
           </Card>
         </div>
