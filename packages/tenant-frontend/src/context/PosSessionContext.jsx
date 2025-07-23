@@ -19,6 +19,7 @@ export const PosSessionProvider = ({ children }) => {
   const [recalledCart, setRecalledCart] = useState(null);
   const [creditSummary, setCreditSummary] = useState({ limit: 0, balance: 0 });
   const [isCreditLoading, setIsCreditLoading] = useState(false);
+  const [completedSale, setCompletedSale] = useState(null);
 
   const { calculatedCart, isLoading: isCalculating } = useCartCalculator(
     jobItems,
@@ -68,6 +69,7 @@ export const PosSessionProvider = ({ children }) => {
     setActiveSaleId(null);
     setGlobalDiscount(null);
     setAdditionalCharges([]);
+    setCompletedSale(null);
   }, [defaultCustomer]);
 
   // --- Definitive Fix #1: Add the function to load a finalized invoice ---
@@ -111,6 +113,8 @@ export const PosSessionProvider = ({ children }) => {
     creditSummary,
     isCreditLoading,
     loadInvoiceForPayment,
+    completedSale,
+    setCompletedSale,
   };
 
   return <PosSessionContext.Provider value={value}>{children}</PosSessionContext.Provider>;

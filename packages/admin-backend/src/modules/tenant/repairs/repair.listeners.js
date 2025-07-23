@@ -1,6 +1,7 @@
 const eventEmitter = require("../../../config/events");
 const invoiceSynthesisService = require("../../../services/invoiceSynthesis.service");
 const logger = require("../../../config/logger"); // Assuming a logger exists
+const repairService = require("../../../services/repair.service");
 
 /**
  * This file registers all event listeners related to the Repair module.
@@ -22,6 +23,27 @@ function registerRepairListeners() {
       });
       // Re-throwing the error is crucial to ensure the transaction aborts.
       throw error;
+    }
+  });
+
+  eventEmitter.on("payment.completed", async ({ models, sourceDocument, sourceType, session }) => {
+    try {
+      // We only care about payments for SalesInvoices that are linked to a repair.
+      if (sourceType === "SalesInvoice" && sourceDocument.repairTicketId) {
+        logger.info(
+          `Payment received for service invoice ${sourceDocument.invoiceId}. Triggering post-payment workflow for ticket ${sourceDocument.repairTicketId}.`
+        );
+
+        // Call the service to handle the next step in the workflow.
+        await repairService.handleInvoicePayment(models, { repairTicketId: sourceDocument.repairTicketId }, session);
+      }
+    } catch (error) {
+      logger.error(`Error in payment.completed listener for repair ticket ${sourceDocument.repairTicketId}:`, {
+        error: error.message,
+        stack: error.stack,
+      });
+      // Do not re-throw, as the primary payment transaction has already succeeded.
+      // This should be monitored for operational errors.
     }
   });
 

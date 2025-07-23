@@ -7,6 +7,8 @@ const {
   updateSaleStatus,
   calculateTotals,
   deleteDraftOrHold,
+  getAllInvoices,
+  getSaleById,
 } = require("./sales.controller");
 const { protect, authorize } = require("../../../middleware/auth.middleware");
 
@@ -15,13 +17,14 @@ router.use(protect, authorize("sales:pos:access"));
 
 // The main endpoint for finalizing a sale
 router.route("/").post(createSale);
+router.get("/invoices", authorize("sales:invoice:view_all"), getAllInvoices);
 
 // Endpoints for advanced workflows
 router.route("/drafts").post(createDraft);
 router.route("/quotations").post(createQuotation);
 router.route("/held").get(getHeldSales);
 router.route("/:id/status").patch(updateSaleStatus);
-router.route("/:id").delete(deleteDraftOrHold);
+router.route("/:id").get(authorize("sales:invoice:view_all"), getSaleById).delete(deleteDraftOrHold);
 router.post("/calculate-totals", calculateTotals);
 // We will add routes for getting and converting quotations later
 

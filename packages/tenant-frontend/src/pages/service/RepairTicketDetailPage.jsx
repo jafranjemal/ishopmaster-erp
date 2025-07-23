@@ -3,12 +3,13 @@ import {
   CheckSquare,
   ChevronDown,
   Cpu,
-  CreditCard,
+  DollarSign,
   FileSignature,
   FileText,
   Flag,
   LoaderCircle,
   MessageSquare,
+  MonitorSmartphone,
   Timer,
   User,
 } from 'lucide-react';
@@ -32,6 +33,8 @@ import {
   Label,
   Modal,
 } from 'ui-library';
+import PaymentApplicationModal from '../../components/payments/PaymentApplicationModal';
+import InvoiceSummaryCard from '../../components/sales/details/InvoiceSummaryCard';
 import FlagRequoteForm from '../../components/service/FlagRequoteForm';
 import JobSheetEditor from '../../components/service/JobSheetEditor';
 import LaborTimerWidget from '../../components/service/LaborTimerWidget';
@@ -41,7 +44,7 @@ import StatusUpdater from '../../components/service/StatusUpdater';
 import TechnicianSelector from '../../components/service/TechnicianSelector';
 import StatusTimeline from '../../components/service/TicketStatusTimeline';
 import useAuth from '../../context/useAuth';
-import { tenantRepairService } from '../../services/api';
+import { tenantPaymentMethodService, tenantPaymentsService, tenantRepairService } from '../../services/api';
 
 const RepairTicketDetailPage = () => {
   const { id } = useParams();
@@ -56,15 +59,19 @@ const RepairTicketDetailPage = () => {
   const [isSubmittingQc, setIsSubmittingQc] = useState(false);
   const [activeTimer, setActiveTimer] = useState(null);
   const [isRequoteModalOpen, setIsRequoteModalOpen] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const [ticketRes, quotesRes, timerRes] = await Promise.all([
+      const [ticketRes, quotesRes, timerRes, pmRes] = await Promise.all([
         tenantRepairService.getTicketById(id),
         tenantRepairService.getQuotesForTicket(id),
         tenantRepairService.getActiveTimer(id),
+        tenantPaymentMethodService.getAll(),
       ]);
+      setPaymentMethods(pmRes.data.data);
       setTicket(ticketRes.data.data);
       setQuotes(quotesRes.data.data);
       setActiveTimer(timerRes.data.data);
@@ -129,9 +136,18 @@ const RepairTicketDetailPage = () => {
     if (ticket.status === 'pickup_pending') {
       if (ticket.finalInvoiceId) {
         return (
-          <Button onClick={handleTakePayment}>
-            <CreditCard className='h-4 w-4 mr-2' /> Take Payment
-          </Button>
+          <div className='flex float-end gap-2'>
+            <Button
+              onClick={() => setIsPaymentModalOpen(true)}
+              disabled={ticket.finalInvoiceId.paymentStatus === 'paid'}
+            >
+              <DollarSign className='h-4 w-4 mr-2' />
+              {ticket.finalInvoiceId.paymentStatus === 'paid' ? 'Fully Paid' : 'Record Payment'}
+            </Button>
+            <Button onClick={handleTakePayment}>
+              <MonitorSmartphone className='h-4 w-4 mr-2' /> Take Pos Payment
+            </Button>
+          </div>
         );
       } else {
         return (
@@ -268,6 +284,20 @@ const RepairTicketDetailPage = () => {
     } catch (err) {
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleRecordPayment = async (paymentData) => {
+    try {
+      await toast.promise(tenantPaymentsService.recordPayment(paymentData), {
+        loading: 'Recording payment...',
+        success: 'Payment recorded successfully!',
+        error: (err) => err.response?.data?.error || 'Failed to record payment.',
+      });
+      setIsPaymentModalOpen(false);
+      fetchData(); // Refresh the invoice data to show the new balance
+    } catch (err) {
+      // Error is handled by the toast promise
     }
   };
 
@@ -447,6 +477,7 @@ const RepairTicketDetailPage = () => {
         </div>
 
         <div className='lg:col-span-1 space-y-6'>
+          {ticket.finalInvoiceId && <InvoiceSummaryCard invoice={ticket.finalInvoiceId} />}
           <Card>
             <CardHeader className='flex flex-row items-center justify-between'>
               <CardTitle>Quotations</CardTitle>
@@ -518,6 +549,14 @@ const RepairTicketDetailPage = () => {
           </Card>
         </div>
       </div>
+
+      <PaymentApplicationModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onConfirm={handleRecordPayment}
+        invoice={ticket.finalInvoiceId}
+        paymentMethods={paymentMethods}
+      />
 
       <Modal isOpen={isRequoteModalOpen} onClose={() => setIsRequoteModalOpen(false)} title='Flag Ticket for Re-Quote'>
         <FlagRequoteForm

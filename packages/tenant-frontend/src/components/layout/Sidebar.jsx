@@ -43,6 +43,7 @@ import {
   Library,
   ListTodo,
   ListTree,
+  MonitorSmartphone,
   Network,
   Package,
   Percent,
@@ -52,6 +53,7 @@ import {
   Printer,
   User as ProfileIcon,
   Receipt,
+  RotateCcw,
   Settings,
   ShieldCheck,
   ShoppingCart,
@@ -62,7 +64,6 @@ import {
   Ticket,
   TrendingUp,
   Truck,
-  Undo2,
   UserCog,
   UserPlus,
   Users,
@@ -98,12 +99,22 @@ const Sidebar = () => {
         {
           name: t('sidebar.sub_menu.pos_terminal'),
           href: '/pos/shifts',
-          icon: ShoppingCart,
+          icon: MonitorSmartphone, // 🟢 Suggestion: CreditCard or MonitorSmartphone (for POS)
           permission: 'sales:pos:access',
         },
-        { name: 'Process Return', href: '/sales/returns', icon: Undo2, permission: 'sales:return:manage' },
-
-        // Future links like Sales History will go here
+        {
+          name: 'All Invoices',
+          href: '/sales/invoices',
+          icon: FileText, // 🟢 Suggestion: FileText for invoice documents
+          permission: 'sales:invoice:view_all',
+        },
+        {
+          name: 'Process Return',
+          href: '/sales/returns',
+          icon: RotateCcw, // 🟢 Suggestion: RotateCcw for returns/undo
+          permission: 'sales:return:manage',
+        },
+        // Add more in future
       ],
     },
     {

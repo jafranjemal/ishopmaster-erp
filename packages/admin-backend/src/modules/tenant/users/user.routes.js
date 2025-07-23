@@ -6,6 +6,7 @@ const {
   updateUser,
   deactivateUser,
   adminResetUserPassword,
+  getMyDefaultDashboard,
 } = require("./user.controller");
 const { protect, authorize } = require("../../../middleware/auth.middleware");
 
@@ -21,11 +22,9 @@ router
   // A user can only create a new user if they have the manage permission.
   .post(authorize("setting:user:manage"), createUser);
 
-router.patch(
-  "/:id/reset-password",
-  authorize("hr:employee:manage_credentials"),
-  adminResetUserPassword
-);
+router.get("/me/default-dashboard", protect, getMyDefaultDashboard);
+
+router.patch("/:id/reset-password", authorize("hr:employee:manage_credentials"), adminResetUserPassword);
 
 router
   .route("/:id")

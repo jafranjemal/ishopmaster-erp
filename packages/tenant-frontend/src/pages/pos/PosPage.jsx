@@ -22,6 +22,7 @@ import JobRecall from '../../components/pos/JobRecall';
 import JobSheet from '../../components/pos/JobSheet';
 import JobSheetEditorModal from '../../components/pos/JobSheetEditorModal';
 import PaymentModal from '../../components/pos/payments/PaymentModal';
+import PostTransactionScreen from '../../components/pos/PostTransactionScreen';
 import QuickCustomerCreateForm from '../../components/pos/QuickCustomerCreateForm';
 import StockBreakdownModal from '../../components/pos/StockBreakdownModal';
 import UniversalSearch from '../../components/pos/UniversalSearch';
@@ -49,6 +50,8 @@ const PosPage = ({ layout }) => {
     removeAdditionalCharge,
     creditSummary,
     loadInvoiceForPayment,
+    completedSale, // <-- 2. GET NEW STATE
+    setCompletedSale,
     ...posSession
   } = usePosSession();
 
@@ -194,13 +197,15 @@ const PosPage = ({ layout }) => {
     const invoiceIdToLoad = searchParams.get('loadInvoice');
     if (invoiceIdToLoad) {
       const loadInvoice = async () => {
+        const toastId = toast.loading('Loading invoice for payment...');
         try {
           const res = await tenantSalesService.getInvoiceById(invoiceIdToLoad);
           loadInvoiceForPayment(res.data.data);
-          // Clean the URL after loading
+          // Clean the URL after loading to prevent re-triggering
           setSearchParams({}, { replace: true });
+          toast.success('Invoice loaded.', { id: toastId });
         } catch (error) {
-          toast.error('Failed to load the specified invoice for payment.');
+          toast.error('Failed to load the specified invoice for payment.', { id: toastId });
         }
       };
       loadInvoice();
@@ -356,7 +361,7 @@ const PosPage = ({ layout }) => {
       userId: user._id,
     };
     try {
-      await toast.promise(tenantSalesService.finalizeSale(saleData), {
+      const res = await toast.promise(tenantSalesService.finalizeSale(saleData), {
         loading: 'Finalizing sale...',
         success: 'Sale completed successfully!',
         error: 'Sale failed.',
@@ -366,6 +371,7 @@ const PosPage = ({ layout }) => {
       setSelectedCustomer(posSession.defaultCustomer);
       setIsPaymentModalOpen(false);
       setIsConfirmModalOpen(false);
+      setCompletedSale(res.data.data);
     } catch (err) {
       console.error('Payment error:', err);
       toast.error('Failed to complete sale. Please try again.');
@@ -393,6 +399,10 @@ const PosPage = ({ layout }) => {
 
   if (isLoading) {
     return <div className='p-8 text-center'>Loading Point of Sale...</div>;
+  }
+
+  if (completedSale) {
+    return <PostTransactionScreen invoice={completedSale} onNewSale={posSession.resetPos} />;
   }
 
   // --- THE DEFINITIVE FIX: IMPLEMENTING YOUR SUPERIOR LAYOUT LOGIC ---

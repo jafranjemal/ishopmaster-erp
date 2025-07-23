@@ -14,10 +14,7 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
     query.assignedBranchId = loggedInUser.assignedBranchId;
   }
 
-  const users = await User.find(query)
-    .populate("role", "name")
-    .populate("assignedBranchId", "name")
-    .sort({ name: 1 });
+  const users = await User.find(query).populate("role", "name").populate("assignedBranchId", "name").sort({ name: 1 });
 
   res.status(200).json({ success: true, count: users.length, data: users });
 });
@@ -26,9 +23,7 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/tenant/users/:id
 exports.getUserById = asyncHandler(async (req, res, next) => {
   const { User } = req.models;
-  const user = await User.findById(req.params.id)
-    .populate("role", "name")
-    .populate("assignedBranchId", "name");
+  const user = await User.findById(req.params.id).populate("role", "name").populate("assignedBranchId", "name");
   if (!user) return res.status(404).json({ success: false, error: "User not found" });
   res.status(200).json({ success: true, data: user });
 });
@@ -83,9 +78,7 @@ exports.adminResetUserPassword = asyncHandler(async (req, res, next) => {
   const { newPassword } = req.body;
 
   if (!newPassword || newPassword.length < 6) {
-    return res
-      .status(400)
-      .json({ success: false, error: "New password must be at least 6 characters." });
+    return res.status(400).json({ success: false, error: "New password must be at least 6 characters." });
   }
 
   const user = await User.findById(req.params.id);
@@ -96,7 +89,30 @@ exports.adminResetUserPassword = asyncHandler(async (req, res, next) => {
   user.password = newPassword;
   await user.save();
 
-  res
-    .status(200)
-    .json({ success: true, data: { message: `Password for ${user.name} has been reset.` } });
+  res.status(200).json({ success: true, data: { message: `Password for ${user.name} has been reset.` } });
+});
+
+/**
+ * @desc    Get the default dashboard URL for the currently logged-in user based on their role.
+ * @route   GET /api/v1/admin/users/me/default-dashboard
+ * @access  Private
+ */
+exports.getMyDefaultDashboard = asyncHandler(async (req, res, next) => {
+  const user = req.user; // Assuming user object with roles/permissions is attached by auth middleware
+
+  // --- Definitive Fix #1: Role-based redirect logic ---
+  // This hierarchy determines the user's primary workspace.
+  // The first match in this list will be their destination.
+  let defaultUrl = "/dashboard"; // Fallback for general admins
+
+  if (user.role.name.includes("technician")) {
+    defaultUrl = "/service/my-dashboard";
+  } else if (user.role.name.includes("cashier")) {
+    defaultUrl = "/pos/shifts"; // Send cashiers to the gatekeeper first
+  } else if (user.role.name.includes("service_advisor")) {
+    defaultUrl = "/service/dashboard";
+  }
+  // Add other role-based redirects here.
+
+  res.status(200).json({ success: true, data: { defaultUrl } });
 });

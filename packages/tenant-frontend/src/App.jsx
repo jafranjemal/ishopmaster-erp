@@ -92,6 +92,8 @@ import TaxRulePage from './pages/settings/TaxRulePage';
 import WarrantyPoliciesPage from './pages/settings/WarrantyPoliciesPage';
 
 import RepairQuotePage from './pages/portal/RepairQuotePage';
+import SalesInvoiceDetailPage from './pages/sales/SalesInvoiceDetailPage';
+import SalesInvoiceListPage from './pages/sales/SalesInvoiceListPage';
 import RepairTicketDetailPage from './pages/service/RepairTicketDetailPage';
 import RepairTicketIntakePage from './pages/service/RepairTicketIntakePage';
 import TechnicianDashboardPage from './pages/service/TechnicianDashboardPage';
@@ -262,10 +264,11 @@ function App() {
                   <Route path='/settings/benefits' element={<BenefitsPage />} />
                   {/* SALES */}
                   <Route path='/sales/returns' element={<ReturnsPage />} />
+                  <Route path='/sales/invoices' element={<SalesInvoiceListPage />} />
+                  <Route path='/sales/invoices/:id' element={<SalesInvoiceDetailPage />} />
                   {/* PORTAL */}
                   <Route path='/portal/track' element={<TrackRepairPage />} />
-                  <Route path='/portal/dashboard' element={<CustomerDashboardPage />} /> // This would be protected by a
-                  customer session
+                  <Route path='/portal/dashboard' element={<CustomerDashboardPage />} />
                 </Routes>
               </Layout>
             </ProtectedRoute>

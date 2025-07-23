@@ -73,6 +73,13 @@ export const tenantAuthService = {
     );
     return response;
   },
+
+  /**
+   * Gets the default dashboard URL for the logged-in user.
+   */
+  getDefaultDashboard: async () => {
+    return api.get('/tenant/users/me/default-dashboard');
+  },
 };
 
 export const tenantDashboardService = {
@@ -158,6 +165,9 @@ export const tenantUserService = {
   delete: async (id) => api.delete(`/tenant/users/${id}`), // This is the deactivate route
   adminResetPassword: async (userId, newPassword) => {
     return api.patch(`/tenant/users/${userId}/reset-password`, newPassword);
+  },
+  getDefaultDashboard: async () => {
+    return api.get('/tenant/users/me/default-dashboard');
   },
 };
 
@@ -953,6 +963,9 @@ export const tenantRepairServiceOld = {
   updateTicketDetails: async (ticketId, data) => {
     return api.put(`/tenant/repairs/tickets/${ticketId}`, data);
   },
+  confirmDevicePickup: async (ticketId) => {
+    return api.post(`/tenant/repairs/tickets/${ticketId}/confirm-pickup`);
+  },
 
   /**
    * Deletes a repair ticket.
@@ -1368,6 +1381,17 @@ export const tenantTaxCategoryService = {
   delete: async (id) => api.delete(`/tenant/accounting/tax-categories/${id}`),
 };
 
+export const tenantPaymentsService = {
+  /**
+   * Records a new payment against a source document (e.g., SalesInvoice).
+   * @param {object} paymentData - The full payment object.
+   */
+  recordPayment: async (paymentData) => {
+    return api.post('/tenant/payments/transactions', paymentData);
+  },
+  // Other payment-related functions (e.g., for cheques) will go here.
+};
+
 export const tenantSalesService = {
   /**
    * Calculates all totals, discounts, and taxes for a given cart.
@@ -1376,7 +1400,19 @@ export const tenantSalesService = {
   calculateTotals: async (payload) => {
     return api.post('/tenant/sales/calculate-totals', payload);
   },
+  /**
+   * Gets all sales invoices with advanced filtering, sorting, and pagination.
+   * @param {object} params - The query parameters (e.g., { page, limit, search, paymentStatus }).
+   */
+  getAllInvoices: async (params) => {
+    return api.get('/tenant/sales/invoices', { params });
+  },
 
+  getInvoiceById: async (invoiceId) => {
+    // This assumes a standard GET /sales/:id endpoint exists on the backend.
+    // We will rename the main sales route file to reflect this.
+    return api.get(`/tenant/sales/${invoiceId}`);
+  },
   /**
    * Finalizes a complete sale transaction.
    * @param {object} saleData - The full sale object including cart, payment, etc.

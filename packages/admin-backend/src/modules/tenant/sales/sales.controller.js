@@ -228,11 +228,99 @@ exports.deleteDraftOrHold = asyncHandler(async (req, res, next) => {
 
   // CRITICAL: Only allow deletion of non-completed, non-financial transactions.
   if (!["draft", "on_hold", "quotation"].includes(sale.status)) {
-    return res
-      .status(400)
-      .json({ success: false, error: `Cannot delete a sale with status '${sale.status}'.` });
+    return res.status(400).json({ success: false, error: `Cannot delete a sale with status '${sale.status}'.` });
   }
 
   await sale.deleteOne();
   res.status(200).json({ success: true, data: {} });
+});
+
+/**
+ * @desc    Get all sales invoices with advanced filtering, sorting, and pagination.
+ * @route   GET /api/v1/tenant/sales/invoices
+ * @access  Private (Requires 'sales:invoice:view' permission)
+ */
+exports.getAllInvoices = asyncHandler(async (req, res, next) => {
+  const { SalesInvoice } = req.models;
+  const {
+    page = 1,
+    limit = 25,
+    search,
+    paymentStatus,
+    workflowStatus,
+    customerId,
+    startDate,
+    endDate,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = req.query;
+  const skip = (page - 1) * limit;
+
+  // 1. Build the initial match stage for filtering
+  const matchStage = {};
+  if (paymentStatus) matchStage.paymentStatus = paymentStatus;
+  if (workflowStatus) matchStage.workflowStatus = workflowStatus;
+  if (customerId) matchStage.customerId = new mongoose.Types.ObjectId(customerId);
+  if (startDate && endDate) {
+    matchStage.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+  }
+
+  // 2. Build the aggregation pipeline
+  const pipeline = [
+    { $match: matchStage },
+    // Populate customer details
+    {
+      $lookup: {
+        from: "customers",
+        localField: "customerId",
+        foreignField: "_id",
+        as: "customer",
+      },
+    },
+    { $unwind: { path: "$customer", preserveNullAndEmptyArrays: true } },
+    // Add a search stage if a search term is provided
+    {
+      $match: search
+        ? {
+            $or: [{ invoiceId: { $regex: search, $options: "i" } }, { "customer.name": { $regex: search, $options: "i" } }],
+          }
+        : {},
+    },
+    // Add sorting
+    { $sort: { [sortBy]: sortOrder === "asc" ? 1 : -1 } },
+  ];
+
+  // 3. Execute queries in parallel for efficiency
+  const [results, total] = await Promise.all([
+    SalesInvoice.aggregate([...pipeline, { $skip: skip }, { $limit: Number(limit) }]),
+    SalesInvoice.aggregate([...pipeline, { $count: "total" }]),
+  ]);
+
+  const totalCount = total[0]?.total || 0;
+
+  res.status(200).json({
+    success: true,
+    total: totalCount,
+    pagination: {
+      currentPage: Number(page),
+      totalPages: Math.ceil(totalCount / limit),
+    },
+    data: results,
+  });
+});
+
+/**
+ * @desc    Get a single sales invoice by its ID
+ * @route   GET /api/v1/tenant/sales/:id
+ * @access  Private (Requires 'sales:invoice:view' permission)
+ */
+exports.getSaleById = asyncHandler(async (req, res, next) => {
+  const { SalesInvoice } = req.models;
+  const invoice = await SalesInvoice.findById(req.params.id).populate("customerId", "name email phone"); // Populate customer details
+
+  if (!invoice) {
+    return res.status(404).json({ success: false, error: "Sales invoice not found." });
+  }
+
+  res.status(200).json({ success: true, data: invoice });
 });

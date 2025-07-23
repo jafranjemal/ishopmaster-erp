@@ -4,6 +4,7 @@ const { recalculateInvoicePayments } = require("./utils/paymentUtils");
 const { PaymentError } = require("../errors/paymentErrors");
 const logger = require("../config/logger");
 const metrics = require("../config/metrics");
+const eventEmitter = require("../config/events");
 
 // Status rules configuration
 const STATUS_RULES = {
@@ -28,13 +29,7 @@ class PaymentsService {
 
   async recordPayment(
     models,
-    {
-      sourceDocumentObject,
-      paymentSourceId,
-      paymentSourceType,
-      paymentLines,
-      ...restOfPaymentData
-    },
+    { sourceDocumentObject, paymentSourceId, paymentSourceType, paymentLines, ...restOfPaymentData },
     userId,
     baseCurrency,
     tenant,
@@ -49,15 +44,10 @@ class PaymentsService {
       this._validateCoreParameters(paymentSourceId, paymentSourceType, paymentLines);
 
       // 2. Initialize models with session
-      const { Supplier, Customer, Payment, PaymentMethod, Cheque, SupplierInvoice, SalesInvoice } =
-        this._initModels(models, session);
+      const { Supplier, Customer, Payment, PaymentMethod, Cheque, SupplierInvoice, SalesInvoice } = this._initModels(models, session);
 
       // 3. Process payment methods
-      const { methodMap, methodIds } = await this._processPaymentMethods(
-        PaymentMethod,
-        paymentLines,
-        session
-      );
+      const { methodMap, methodIds } = await this._processPaymentMethods(PaymentMethod, paymentLines, session);
 
       // 4. Handle source document
       const { sourceDocument, sourceLedgerAccountId } = await this._handleSourceDocument(
@@ -84,7 +74,10 @@ class PaymentsService {
         status: { $ne: "voided" }, // Ignore voided payments
       }).session(session);
 
-      if (existingPayment) throw new PaymentError("DUPLICATE_PAYMENT");
+      // if (existingPayment) {
+
+      //   throw new PaymentError("DUPLICATE_PAYMENT");
+      // }
 
       // 7. Create payment record
       payment = await this._createPaymentRecord(
@@ -101,22 +94,10 @@ class PaymentsService {
       );
 
       // 8. Process cheques if any
-      await this._processCheques(
-        Cheque,
-        paymentLines,
-        methodMap,
-        payment._id,
-        restOfPaymentData.direction,
-        session
-      );
+      await this._processCheques(Cheque, paymentLines, methodMap, payment._id, restOfPaymentData.direction, session);
 
       // 9. Create journal entries
-      const journalEntries = this._buildJournalEntries(
-        sourceLedgerAccountId,
-        paymentLines,
-        methodMap,
-        restOfPaymentData.direction
-      );
+      const journalEntries = this._buildJournalEntries(sourceLedgerAccountId, paymentLines, methodMap, restOfPaymentData.direction);
 
       // 10. Post accounting entries
       await this._postAccountingEntries(
@@ -136,11 +117,18 @@ class PaymentsService {
       await this._updateSourceDocument(sourceDocument, session);
 
       // 12. Recalculate invoice payments
-      await recalculateInvoicePayments(
+      await recalculateInvoicePayments(models, { sourceId: paymentSourceId, sourceType: paymentSourceType }, session);
+      const sourceType = paymentSourceType;
+      const sourceId = paymentSourceId;
+      const finalSourceDoc = await models[sourceType].findById(sourceId).session(session);
+
+      eventEmitter.emit("payment.completed", {
         models,
-        { sourceId: paymentSourceId, sourceType: paymentSourceType },
-        session
-      );
+        sourceDocument: finalSourceDoc,
+        sourceType: sourceType,
+        session,
+        tenant,
+      });
 
       // 13. Log successful processing
       metrics.timing("payment.processing.time", Date.now() - startTime);
@@ -226,14 +214,10 @@ class PaymentsService {
 
     // Get ledger account based on document type
     if (paymentSourceType === "SupplierInvoice" && sourceDocument.supplierId) {
-      const supplier = await Supplier.findById(sourceDocument.supplierId)
-        .select("ledgerAccountId name")
-        .session(session);
+      const supplier = await Supplier.findById(sourceDocument.supplierId).select("ledgerAccountId name").session(session);
       sourceLedgerAccountId = supplier?.ledgerAccountId;
     } else if (paymentSourceType === "SalesInvoice" && sourceDocument.customerId) {
-      const customer = await Customer.findById(sourceDocument.customerId)
-        .select("ledgerAccountId name")
-        .session(session);
+      const customer = await Customer.findById(sourceDocument.customerId).select("ledgerAccountId name").session(session);
       sourceLedgerAccountId = customer?.ledgerAccountId;
     }
 
@@ -252,10 +236,7 @@ class PaymentsService {
   }
 
   _validatePaymentAmounts(paymentLines, sourceDocument) {
-    const totalPayment = paymentLines.reduce(
-      (sum, line) => sum.plus(new Decimal(line.amount)),
-      new Decimal(0)
-    );
+    const totalPayment = paymentLines.reduce((sum, line) => sum.plus(new Decimal(line.amount)), new Decimal(0));
 
     const amountDue = new Decimal(sourceDocument.totalAmount).minus(sourceDocument.amountPaid || 0);
 
@@ -276,8 +257,7 @@ class PaymentsService {
     return paymentLines.map((line) => {
       const method = methodMap.get(line.paymentMethodId.toString());
 
-      const amount =
-        typeof line.amount === "string" ? parseFloat(line.amount.replace(/,/g, "")) : line.amount;
+      const amount = typeof line.amount === "string" ? parseFloat(line.amount.replace(/,/g, "")) : line.amount;
 
       // Validate reference number format
       if (line.referenceNumber) {
@@ -305,18 +285,13 @@ class PaymentsService {
   }
 
   async _createPaymentRecord(Payment, paymentData, methodMap, session) {
-    const hasCheque = paymentData.paymentLines.some(
-      (line) => methodMap.get(line.paymentMethodId.toString())?.type === "cheque"
-    );
+    const hasCheque = paymentData.paymentLines.some((line) => methodMap.get(line.paymentMethodId.toString())?.type === "cheque");
 
     const [payment] = await Payment.create(
       [
         {
           ...paymentData,
-          totalAmount: paymentData.paymentLines.reduce(
-            (sum, line) => sum + parseFloat(line.amount),
-            0
-          ),
+          totalAmount: paymentData.paymentLines.reduce((sum, line) => sum + parseFloat(line.amount), 0),
           // status: hasCheque ? STATUS_RULES.cheque : "pending",
         },
       ],
@@ -386,10 +361,7 @@ class PaymentsService {
 
   _buildJournalEntries(sourceLedgerAccountId, paymentLines, methodMap, direction) {
     const journalEntries = [];
-    const totalAmount = paymentLines.reduce(
-      (sum, line) => sum.plus(new Decimal(line.amount)),
-      new Decimal(0)
-    );
+    const totalAmount = paymentLines.reduce((sum, line) => sum.plus(new Decimal(line.amount)), new Decimal(0));
 
     if (!direction) {
       throw new PaymentError("MISSING_DIRECTION", "Payment direction is required");
@@ -462,9 +434,7 @@ class PaymentsService {
     await accountingService.createJournalEntry(
       models,
       {
-        description: `Payment for ${paymentSourceType} #${
-          sourceDocument.invoiceId || sourceDocument.poNumber || paymentSourceId
-        }`,
+        description: `Payment for ${paymentSourceType} #${sourceDocument.invoiceId || sourceDocument.poNumber || paymentSourceId}`,
         entries: journalEntries,
         currency: baseCurrency,
         exchangeRateToBase: 1,

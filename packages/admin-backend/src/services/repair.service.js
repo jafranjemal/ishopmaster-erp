@@ -530,6 +530,103 @@ class RepairService {
     await ticket.deleteOne({ session });
     return { message: `Ticket ${ticket.ticketNumber} has been permanently deleted.` };
   }
+
+  /**
+   * Handles the post-payment workflow for a repair ticket.
+   * This is triggered by a 'payment.completed' event.
+   * This definitive version creates an audit trail and triggers customer notifications.
+   */
+  async handleInvoicePayment(models, { repairTicketId }, session) {
+    const { RepairTicket, RepairTicketHistory, SalesInvoice } = models;
+
+    const ticket = await RepairTicket.findById(repairTicketId).session(session);
+    if (!ticket) {
+      console.error(`[RepairService] handleInvoicePayment: Could not find ticket with ID ${repairTicketId}.`);
+      return; // Fail gracefully if ticket not found
+    }
+
+    const invoice = await SalesInvoice.findById(ticket.finalInvoiceId).session(session);
+    if (!invoice) {
+      console.error(`[RepairService] handleInvoicePayment: Could not find linked invoice for ticket ${ticket.ticketNumber}.`);
+      return;
+    }
+
+    console.log("ticket.status ====>>> ", ticket.status);
+
+    //await ticket.save({ session });
+
+    // --- Definitive Fix #1: Create a detailed audit trail record ---
+    // Log that the financial part of this transaction is complete.
+    await RepairTicketHistory.create(
+      [
+        {
+          ticketId: ticket._id,
+          previousStatus: ticket.status,
+          newStatus: ticket.status, // The status doesn't change yet
+          changedBy: invoice.soldBy, // The user who processed the payment
+          notes: `Payment for final invoice #${invoice.invoiceId} was completed.`,
+        },
+      ],
+      { session }
+    );
+
+    // --- Definitive Fix #2: Trigger the "Ready for Pickup" notification ---
+    // The ticket is now financially cleared and ready for the customer.
+    try {
+      const populatedTicket = await RepairTicket.findById(ticket._id).populate("customerId", "name email phone").populate("assets").lean();
+      console.log("repair.ready_for_pickup is called ===>>>>>>>>>>>>>>>>>>>");
+      // Announce a new, specific event. The NotificationService will handle the rest.
+      await notificationService.triggerNotification(models, `repair.ready_for_pickup`, { ticket: populatedTicket });
+    } catch (error) {
+      console.error(`Failed to trigger 'ready_for_pickup' notification for ticket ${ticketId}:`, error);
+      // Do not fail the main transaction if notification fails.
+    }
+
+    console.log(`Service-related payment for ticket ${ticket.ticketNumber} processed. Customer has been notified for pickup.`);
+
+    return true;
+  }
+
+  /**
+   * Confirms the physical pickup of a device by the customer.
+   * This is the final step in the repair lifecycle, moving the ticket to 'closed'.
+   */
+  async confirmDevicePickup(models, { ticketId, userId }, session) {
+    const { RepairTicket, RepairTicketHistory } = models;
+    const ticket = await RepairTicket.findById(ticketId).session(session);
+
+    if (!ticket) {
+      throw new Error("Repair ticket not found.");
+    }
+
+    // --- Definitive Fix #1: CRITICAL SAFETY CHECK ---
+    // Ensure the ticket is in the correct state for this action.
+    if (ticket.status !== "pickup_pending") {
+      throw new Error(`Cannot confirm pickup. Ticket is in status '${ticket.status}', not 'pickup_pending'.`);
+    }
+
+    const previousStatus = ticket.status;
+    ticket.status = "closed";
+    await ticket.save({ session });
+
+    // Create the final audit log entry for the job.
+    await RepairTicketHistory.create(
+      [
+        {
+          ticketId: ticket._id,
+          previousStatus: previousStatus,
+          newStatus: ticket.status,
+          changedBy: userId,
+          notes: `Device pickup confirmed by cashier. Job is now closed.`,
+        },
+      ],
+      { session }
+    );
+
+    // In a future chapter, this would emit a `repair.closed` event for post-service follow-ups.
+
+    return ticket;
+  }
 }
 
 module.exports = new RepairService();

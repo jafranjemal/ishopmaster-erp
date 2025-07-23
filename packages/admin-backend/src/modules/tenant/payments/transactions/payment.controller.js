@@ -1,5 +1,6 @@
 const asyncHandler = require("../../../../middleware/asyncHandler");
 const mongoose = require("mongoose");
+const paymentsService = require("../../../../services/payments.service");
 
 // @desc    Get all payment transactions with filtering and pagination
 // @route   GET /api/v1/tenant/payments/transactions
@@ -13,9 +14,7 @@ exports.getAllPayments = asyncHandler(async (req, res, next) => {
   const filters = {};
   if (req.query.direction) filters.direction = req.query.direction;
   if (req.query.paymentMethodId) {
-    filters["paymentLines.paymentMethodId"] = new mongoose.Types.ObjectId(
-      req.query.paymentMethodId
-    );
+    filters["paymentLines.paymentMethodId"] = new mongoose.Types.ObjectId(req.query.paymentMethodId);
   }
   if (req.query.startDate && req.query.endDate) {
     filters.paymentDate = {
@@ -70,9 +69,7 @@ exports.getPaymentById = asyncHandler(async (req, res, next) => {
     .lean(); // Use .lean() to get a plain JS object we can modify
 
   if (!payment) {
-    return res
-      .status(404)
-      .json({ success: false, error: "Payment not found." });
+    return res.status(404).json({ success: false, error: "Payment not found." });
   }
 
   // 2. Perform the polymorphic populate for the source document
@@ -88,4 +85,30 @@ exports.getPaymentById = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({ success: true, data: payment });
+});
+
+/**
+ * @desc    Record a new payment against a source document (e.g., SalesInvoice).
+ * @route   POST /api/v1/tenant/accounting/payments
+ * @access  Private (Requires 'sales:pos:access' or 'accounting:payment:create')
+ */
+exports.recordPayment = asyncHandler(async (req, res, next) => {
+  const session = await req.dbConnection.startSession();
+  let newPayment;
+  console.log("payment body ", req.body);
+  try {
+    await session.withTransaction(async () => {
+      newPayment = await paymentsService.recordPayment(
+        req.models,
+        req.body, // The body should contain { paymentSourceId, paymentSourceType, paymentLines, ... }
+        req.user._id,
+        req.tenant.settings.localization.baseCurrency,
+        req.tenant,
+        session
+      );
+    });
+    res.status(201).json({ success: true, data: newPayment });
+  } finally {
+    session.endSession();
+  }
 });
