@@ -19,6 +19,7 @@ class InvoiceSynthesisService {
    */
   async createInvoiceFromRepair(models, { ticketId, userId }, session, tenant) {
     const { RepairTicket, RepairQuote, Asset } = models;
+    const baseCurrency = tenant.settings.localization.baseCurrency;
 
     // 1. Fetch all necessary documents for synthesis.
     const ticket = await RepairTicket.findById(ticketId).session(session);
@@ -29,24 +30,53 @@ class InvoiceSynthesisService {
     const approvedQuote = await RepairQuote.findOne({
       repairTicketId: ticketId,
       status: "approved",
-    }).session(session);
+    })
+      .sort({ createdAt: -1 })
+      .session(session);
     // A business rule could enforce that an approved quote is required.
 
     // 2. Synthesize the final cart data for the SalesService.
+    // const cartData = {
+    //   items: ticket.jobSheet.map((item) => ({
+    //     productVariantId: item.productVariantId,
+    //     description: item.description,
+    //     quantity: item.quantity || item.laborHours,
+    //     unitPrice: item.unitPrice || item.laborRate,
+    //     lineDiscount: null, // Line discounts are already baked into the unitPrice from the quote
+    //     isService: item.itemType !== "part",
+    //     serialNumber: item.serialNumber,
+    //     batchNumber: item.batchNumber,
+    //     employeeId: item.employeeId,
+    //     laborHours: item.laborHours,
+    //     laborRate: item.laborRate,
+    //   })),
+    //   globalDiscount: approvedQuote?.globalDiscount || null,
+    //   additionalCharges: approvedQuote?.additionalCharges || [],
+    // };
     const cartData = {
-      items: ticket.jobSheet.map((item) => ({
-        productVariantId: item.productVariantId,
-        description: item.description,
-        quantity: item.quantity || item.laborHours,
-        unitPrice: item.unitPrice || item.laborRate,
-        lineDiscount: null, // Line discounts are already baked into the unitPrice from the quote
-        isService: item.itemType !== "part",
-        serialNumber: item.serialNumber,
-        batchNumber: item.batchNumber,
-        employeeId: item.employeeId,
-        laborHours: item.laborHours,
-        laborRate: item.laborRate,
-      })),
+      items: approvedQuote.lineItems.map((item) => {
+        const itemType = item.itemType;
+        const jobItem = ticket.jobSheet.find((x) => x.itemType === itemType && x.description === item.description);
+        return {
+          productVariantId: item.productVariantId,
+          itemType: item.itemType,
+          description: item.description,
+          quantity: item.quantity || item.laborHours,
+          unitPrice: item.unitPrice || item.laborRate,
+          lineDiscount: null, // Line discounts are already baked into the unitPrice from the quote
+          isService: item.itemType !== "part",
+          serialNumber: item.serialNumber,
+          batchNumber: item.batchNumber,
+          employeeId: jobItem.employeeId,
+          laborHours: jobItem.laborHours,
+          laborRate: jobItem.laborRate,
+        };
+      }),
+
+      troubleshootFee: approvedQuote?.troubleshootFee,
+      totalGlobalDiscount: approvedQuote?.totalGlobalDiscount,
+      totalTax: approvedQuote?.totalTax,
+      grandTotal: approvedQuote?.grandTotal,
       globalDiscount: approvedQuote?.globalDiscount || null,
       additionalCharges: approvedQuote?.additionalCharges || [],
     };
@@ -72,13 +102,14 @@ class InvoiceSynthesisService {
         userId,
         couponId: null,
       },
-      session,
-      tenant
+      baseCurrency,
+      tenant,
+      session
     );
 
-    // 4. Update the original repair ticket with the final invoice ID and close it.
+    // 4. Update the original repair ticket with the final invoice ID and pickup_pending it.
     ticket.finalInvoiceId = salesInvoice._id;
-    ticket.status = "closed";
+    ticket.status = "pickup_pending";
     await ticket.save({ session });
 
     // 5. Commit any reserved stock for this repair.

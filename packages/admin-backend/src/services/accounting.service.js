@@ -2,6 +2,8 @@ const { v4: uuidv4 } = require("uuid");
 const exchangeRateService = require("./exchangeRate.service");
 const { default: mongoose } = require("mongoose");
 const { default: Decimal } = require("decimal.js");
+const AccountingError = require("../errors/accountingError");
+
 Decimal.set({ precision: 20, rounding: 4 });
 /**
  * The AccountingService handles all core financial logic. It is the only
@@ -48,35 +50,22 @@ class AccountingService {
     // const totalDebits = entries.reduce((sum, entry) => sum + (entry.debit || 0), 0);
     // const totalCredits = entries.reduce((sum, entry) => sum + (entry.credit || 0), 0);
 
-    const totalDebits = entries.reduce(
-      (sum, entry) => sum.plus(new Decimal(entry.debit || 0)),
-      new Decimal(0)
-    );
-    const totalCredits = entries.reduce(
-      (sum, entry) => sum.plus(new Decimal(entry.credit || 0)),
-      new Decimal(0)
-    );
+    const totalDebits = entries.reduce((sum, entry) => sum.plus(new Decimal(entry.debit || 0)), new Decimal(0));
+    const totalCredits = entries.reduce((sum, entry) => sum.plus(new Decimal(entry.credit || 0)), new Decimal(0));
 
     console.log("Total Debits:", totalDebits);
     console.log("Total Credits:", totalCredits);
 
     if (!totalDebits.minus(totalCredits).equals(0)) {
-      throw new AccountingError(
-        "UNBALANCED_ENTRY",
-        `Imbalance of ${totalDebits.minus(totalCredits)} detected`
-      );
+      throw new AccountingError("UNBALANCED_ENTRY", `Imbalance of ${totalDebits.minus(totalCredits)} detected`);
     }
 
     if (!totalDebits.equals(totalCredits)) {
-      throw new AccountingError(
-        "UNBALANCED_ENTRY",
-        `Debits (${totalDebits}) do not equal credits (${totalCredits})`,
-        {
-          totalDebits: totalDebits.toString(),
-          totalCredits: totalCredits.toString(),
-          entries, // Include original entries for debugging
-        }
-      );
+      throw new AccountingError("UNBALANCED_ENTRY", `Debits (${totalDebits}) do not equal credits (${totalCredits})`, {
+        totalDebits: totalDebits.toString(),
+        totalCredits: totalCredits.toString(),
+        entries, // Include original entries for debugging
+      });
     }
 
     if (!currency || !exchangeRateToBase) {
@@ -86,47 +75,17 @@ class AccountingService {
     const transactionId = uuidv4();
     const ledgerDocs = [];
     const accountUpdates = new Map();
-    // // 2. Create the individual ledger entry documents
-    // for (const entry of entries) {
-    //   // Determine the debit and credit accounts for this specific transaction line
-    //   let debitAccountId, creditAccountId, amount;
-
-    //   if (entry.debit > 0) {
-    //     const creditEntry = entries.find(
-    //       (e) => e.credit > 0 && Math.abs(e.credit - entry.debit) < 1e-9
-    //     );
-    //     if (!creditEntry) continue; // This pair will be handled when we process the credit side
-
-    //     debitAccountId = entry.accountId;
-    //     creditAccountId = creditEntry.accountId;
-    //     amount = entry.debit;
-    //   } else {
-    //     continue; // Skip credit entries directly, as they are paired with debits
-    //   }
-
-    //   // 3. CRITICAL: Convert the transaction amount to the base currency
-    //   const amountInBaseCurrency = amount * exchangeRateToBase;
-
-    //   ledgerDocs.push({
-    //     transactionId,
-    //     description,
-    //     date: date || new Date(),
-    //     debitAccountId,
-    //     creditAccountId,
-    //     amount: amountInBaseCurrency, // <-- Always store the base currency amount
-    //     originalAmount: amount, // Store original amount for reference
-    //     originalCurrency: currency, // Store original currency for reference
-    //     exchangeRate: exchangeRateToBase,
-    //     ...refs,
-    //   });
-    // }
 
     const debitEntries = entries.filter((e) => e.debit > 0);
     const creditEntries = entries.filter((e) => e.credit > 0);
 
     for (const debit of debitEntries) {
+      console.log("debit entry ", debit);
       for (const credit of creditEntries) {
         const amount = Math.min(debit.debit, credit.credit);
+        console.log("credit entry ", credit);
+        console.log("credit entry amount ", amount);
+
         if (amount <= 0) continue;
 
         const amountInBaseCurrency = amount * exchangeRateToBase;
@@ -145,14 +104,8 @@ class AccountingService {
         });
 
         // ✅ Track account balance changes
-        accountUpdates.set(
-          debit.accountId,
-          (accountUpdates.get(debit.accountId) || 0) + amountInBaseCurrency
-        );
-        accountUpdates.set(
-          credit.accountId,
-          (accountUpdates.get(credit.accountId) || 0) - amountInBaseCurrency
-        );
+        accountUpdates.set(debit.accountId, (accountUpdates.get(debit.accountId) || 0) + amountInBaseCurrency);
+        accountUpdates.set(credit.accountId, (accountUpdates.get(credit.accountId) || 0) - amountInBaseCurrency);
 
         // Reduce matched amounts
         debit.debit -= amount;

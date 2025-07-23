@@ -450,6 +450,46 @@ class RepairService {
   }
 
   /**
+   * Updates the status of the troubleshoot fee on a repair ticket.
+   * Creates an audit trail for this financial action.
+   */
+  async updateTroubleshootFeeStatus(models, { ticketId, newStatus, userId }, session) {
+    const { RepairTicket, RepairTicketHistory } = models;
+    const ticket = await RepairTicket.findById(ticketId).session(session);
+    if (!ticket) throw new Error("Repair ticket not found.");
+
+    if (!["pending", "waived", "paid"].includes(newStatus)) {
+      throw new Error("Invalid status for troubleshoot fee.");
+    }
+
+    const previousStatus = ticket.troubleshootFee.status;
+    ticket.troubleshootFee.status = newStatus;
+
+    // If waived, the amount should be zeroed out.
+    if (newStatus === "waived") {
+      ticket.troubleshootFee.amount = 0;
+    }
+
+    await ticket.save({ session });
+
+    // Create an audit log for this specific action
+    await RepairTicketHistory.create(
+      [
+        {
+          ticketId: ticket._id,
+          previousStatus: ticket.status, // The main ticket status hasn't changed
+          newStatus: ticket.status,
+          changedBy: userId,
+          notes: `Troubleshoot fee status changed from '${previousStatus}' to '${newStatus}'.`,
+        },
+      ],
+      { session }
+    );
+
+    return ticket;
+  }
+
+  /**
    * Updates the core, non-status details of a repair ticket.
    * @param {string} ticketId - The ID of the ticket to update.
    * @param {object} updateData - The fields to update (e.g., customerComplaint).

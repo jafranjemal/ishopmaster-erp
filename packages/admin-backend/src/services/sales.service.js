@@ -48,13 +48,7 @@ class SalesService {
    * Finalizes a sale by creating an invoice, deducting stock, recording payment,
    * and posting all necessary journal entries within a single transaction.
    */
-  async finalizeSale(
-    models,
-    { cartData, paymentData, customerId, branchId, userId, couponId },
-    baseCurrency,
-    tenant,
-    session = null
-  ) {
+  async finalizeSale(models, { cartData, paymentData, customerId, branchId, userId, couponId }, baseCurrency, tenant, session = null) {
     try {
       const { ProductVariants, SalesInvoice, Account, Customer, Employee, Commission } = models;
 
@@ -76,17 +70,14 @@ class SalesService {
       const amountDue = cartData.totalAmount - amountPaid;
       if (amountDue > 0) {
         const customer = await Customer.findById(customerId).session(session);
-        if (!customer || customer.creditLimit === 0)
-          throw new Error("This customer is not eligible for credit sales.");
+        if (!customer || customer.creditLimit === 0) throw new Error("This customer is not eligible for credit sales.");
 
         const arAccount = await Account.findById(customer.ledgerAccountId).session(session);
         // --- THE DEFINITIVE FIX: Correctly read balance from the Map ---
         const currentBalance = arAccount.balance.get(baseCurrency) || 0;
         const newBalance = currentBalance + amountDue;
         if (newBalance > customer.creditLimit) {
-          throw new Error(
-            `Credit limit exceeded. Limit: ${customer.creditLimit}, New Balance: ${newBalance}`
-          );
+          throw new Error(`Credit limit exceeded. Limit: ${customer.creditLimit}, New Balance: ${newBalance}`);
         }
       }
 
@@ -94,15 +85,22 @@ class SalesService {
 
       // 2. Verify inventory availability - skip pure service items
       for (const item of cartData.items) {
-        const variant = await ProductVariants.findById(item.productVariantId)
-          .populate("templateId")
-          .lean();
-
-        // Skip inventory check for pure service items
-        if (variant.templateId.type === "service" && !variant.templateId.requiredParts?.length) {
+        if (!item.productVariantId && item.employeeId && item.isService) {
+          //this is labour charge not product
           continue;
         }
 
+        const variant = await ProductVariants.findById(item.productVariantId).populate("templateId").lean();
+
+        console.log("Verify inventory availability ", variant);
+        // Skip inventory check for pure service items
+        // if (variant.templateId.type === "service" && !variant.templateId.requiredParts?.length) {
+        //   continue;
+        // }
+        if (variant.templateId.type === "service") {
+          // No stock validation or deduction here for requiredParts
+          continue;
+        }
         const inventoryStatus = await inventoryService.checkAvailability(
           models,
           {
@@ -130,9 +128,12 @@ class SalesService {
 
       const inventoryItemIds = []; // To track for the audit link
       for (const item of pricedCart.items) {
-        const variant = await ProductVariants.findById(item.productVariantId)
-          .populate("templateId")
-          .lean();
+        if (!item.productVariantId && item.employeeId && item.isService) {
+          //this is labour charge not product
+          continue;
+        }
+
+        const variant = await ProductVariants.findById(item.productVariantId).populate("templateId").lean();
 
         // Handle service items
         if (variant.templateId.type === "service") {
@@ -140,21 +141,21 @@ class SalesService {
           let partDeductedIds = [];
 
           // Deduct required parts if any
-          if (variant.templateId.requiredParts?.length > 0) {
-            const result = await inventoryService.decreaseStock(
-              models,
-              {
-                productVariantId: item.productVariantId,
-                branchId,
-                quantity: item.quantity,
-                userId,
-                refs: { salesInvoice: true },
-              },
-              session
-            );
-            costOfGoodsSold = result.costOfGoodsSold;
-            partDeductedIds = result.deductedItemIds || [];
-          }
+          // if (variant.templateId.requiredParts?.length > 0) {
+          //   const result = await inventoryService.decreaseStock(
+          //     models,
+          //     {
+          //       productVariantId: item.productVariantId,
+          //       branchId,
+          //       quantity: item.quantity,
+          //       userId,
+          //       refs: { salesInvoice: true },
+          //     },
+          //     session
+          //   );
+          //   costOfGoodsSold = result.costOfGoodsSold;
+          //   partDeductedIds = result.deductedItemIds || [];
+          // }
 
           // Get the priced item for this service
           const pricedItem = pricedCart.items.find((pi) => pi.cartId === item.cartId);
@@ -211,8 +212,7 @@ class SalesService {
       const [salesInvoice] = await SalesInvoice.create(
         [
           {
-            paymentStatus:
-              amountDue <= 0.01 ? "paid" : amountPaid > 0 ? "partially_paid" : "unpaid",
+            paymentStatus: amountDue <= 0.01 ? "paid" : amountPaid > 0 ? "partially_paid" : "unpaid",
             customerId,
             branchId,
             soldBy: userId,
@@ -234,40 +234,50 @@ class SalesService {
 
       // Now that we have the invoice ID, we can update the stock movement refs
       // In a real high-performance system, this might be done as a background job.
-      await inventoryService.linkSaleToMovements(
-        models,
-        { saleId: salesInvoice._id, inventoryItemIds },
-        session
-      );
+      await inventoryService.linkSaleToMovements(models, { saleId: salesInvoice._id, inventoryItemIds }, session);
 
       // 3. Post the core Sales and COGS journal entries
-      const [arAccount, salesRevenueAccount, cogsAccount, inventoryAssetAccount] =
-        await Promise.all([
-          Customer.findById(customerId)
-            .select("ledgerAccountId")
-            .then((c) => Account.findById(c.ledgerAccountId)),
-          Account.findOne({ isSystemAccount: true, name: "Sales Revenue" }),
-          Account.findOne({ isSystemAccount: true, name: "Cost of Goods Sold" }),
-          Account.findOne({ isSystemAccount: true, name: "Inventory Asset" }),
-        ]);
+      const customer = await Customer.findById(customerId).session(session);
+      const [arAccount, salesRevenueAccount, serviceRevenueAccount, cogsAccount, inventoryAssetAccount] = await Promise.all([
+        Account.findById(customer.ledgerAccountId).session(session),
+        Account.findOne({ isSystemAccount: true, name: "Sales Revenue" }).session(session),
+        Account.findOne({ isSystemAccount: true, name: "Service Revenue" }).session(session),
+        Account.findOne({ isSystemAccount: true, name: "Cost of Goods Sold" }).session(session),
+        Account.findOne({ isSystemAccount: true, name: "Inventory Asset" }).session(session),
+      ]);
 
       // Revenue & Tax Journal Entry
-      const revenueEntries = [
-        { accountId: arAccount._id, debit: grandTotal },
-        // The actual revenue we earned (after discounts, before tax).
-        {
-          accountId: salesRevenueAccount._id,
-          credit:
-            pricedCart.subTotal - pricedCart.totalLineDiscount - pricedCart.totalGlobalDiscount,
-        },
-      ];
+      // const revenueEntries = [
+      //   { accountId: arAccount._id, debit: grandTotal },
+      //   // The actual revenue we earned (after discounts, before tax).
+      //   {
+      //     accountId: salesRevenueAccount._id,
+      //     credit: pricedCart.subTotal - pricedCart.totalLineDiscount - pricedCart.totalGlobalDiscount,
+      //   },
+      // ];
 
-      // Add a separate credit line for each tax liability.
-      taxBreakdown.forEach((tax) =>
-        revenueEntries.push({ accountId: tax.linkedAccountId, credit: tax.amount })
-      );
+      const revenueEntries = [{ accountId: arAccount._id, debit: grandTotal }];
+      let totalSalesRevenue = 0;
+      let totalServiceRevenue = 0;
 
-      // This entry is now guaranteed to be balanced.
+      pricedCart.items.forEach((item) => {
+        if (item.itemType === "part") {
+          totalSalesRevenue += item.finalPrice * item.quantity;
+        } else {
+          // service or labor
+          totalServiceRevenue += (item.unitPrice || item.laborRate) * (item.quantity || item.laborHours);
+        }
+      });
+
+      if (totalSalesRevenue > 0) revenueEntries.push({ accountId: salesRevenueAccount._id, credit: totalSalesRevenue });
+      if (totalServiceRevenue > 0) revenueEntries.push({ accountId: serviceRevenueAccount._id, credit: totalServiceRevenue });
+
+      console.log("grandTotal:", grandTotal);
+      console.log("arAccount:", arAccount);
+      console.log("totalSalesRevenue:", totalSalesRevenue);
+      console.log("totalServiceRevenue:", totalServiceRevenue);
+
+      taxBreakdown.forEach((tax) => revenueEntries.push({ accountId: tax.linkedAccountId, credit: tax.amount }));
       await accountingService.createJournalEntry(
         models,
         {
@@ -280,26 +290,59 @@ class SalesService {
         tenant
       );
 
+      if (totalCostOfGoodsSold > 0) {
+        await accountingService.createJournalEntry(
+          models,
+          {
+            description: `COGS for Invoice #${salesInvoice.invoiceId}`,
+            entries: [
+              { accountId: cogsAccount._id, debit: totalCostOfGoodsSold },
+              { accountId: inventoryAssetAccount._id, credit: totalCostOfGoodsSold },
+            ],
+            currency: baseCurrency,
+            refs: { salesInvoiceId: salesInvoice._id },
+          },
+          session,
+          tenant
+        );
+      }
+
+      // Add a separate credit line for each tax liability.
+      //taxBreakdown.forEach((tax) => revenueEntries.push({ accountId: tax.linkedAccountId, credit: tax.amount }));
+
+      // This entry is now guaranteed to be balanced.
+      // await accountingService.createJournalEntry(
+      //   models,
+      //   {
+      //     description: `Sale - Invoice #${salesInvoice.invoiceId}`,
+      //     entries: revenueEntries,
+      //     currency: baseCurrency,
+      //     refs: { salesInvoiceId: salesInvoice._id },
+      //   },
+      //   session,
+      //   tenant
+      // );
+
       // await accountingService.createJournalEntry(models, {
       //   description: `Sale to customer for Invoice #${salesInvoice.invoiceId}`,
       //   entries: revenueEntries,
       //   refs: { salesInvoiceId: salesInvoice._id },
       // });
 
-      await accountingService.createJournalEntry(
-        models,
-        {
-          description: `COGS for Invoice #${salesInvoice.invoiceId}`,
-          entries: [
-            { accountId: cogsAccount._id, debit: totalCostOfGoodsSold },
-            { accountId: inventoryAssetAccount._id, credit: totalCostOfGoodsSold },
-          ],
-          currency: baseCurrency,
-          refs: { salesInvoiceId: salesInvoice._id },
-        },
-        session,
-        tenant
-      );
+      // await accountingService.createJournalEntry(
+      //   models,
+      //   {
+      //     description: `COGS for Invoice #${salesInvoice.invoiceId}`,
+      //     entries: [
+      //       { accountId: cogsAccount._id, debit: totalCostOfGoodsSold },
+      //       { accountId: inventoryAssetAccount._id, credit: totalCostOfGoodsSold },
+      //     ],
+      //     currency: baseCurrency,
+      //     refs: { salesInvoiceId: salesInvoice._id },
+      //   },
+      //   session,
+      //   tenant
+      // );
 
       console.log("salesInvoice._id ", salesInvoice?._id);
       // 6. Record Payment & Finalize Coupon
@@ -318,12 +361,7 @@ class SalesService {
           tenant,
           session
         );
-      if (couponId)
-        await couponService.markCouponAsRedeemed(
-          models,
-          { couponId, invoiceId: salesInvoice._id },
-          session
-        );
+      if (couponId) await couponService.markCouponAsRedeemed(models, { couponId, invoiceId: salesInvoice._id }, session);
 
       // 4. Record the payment using the universal PaymentsService
       // if (paymentData && paymentData.paymentLines.length > 0) {
@@ -352,13 +390,8 @@ class SalesService {
 
       // 5. Log commission if applicable
       const employee = await Employee.findOne({ userId: userId });
-      if (
-        employee &&
-        employee.compensation.type === "commission_based" &&
-        employee.compensation.commissionRate > 0
-      ) {
-        const commissionAmount =
-          salesInvoice.totalAmount * (employee.compensation.commissionRate / 100);
+      if (employee && employee.compensation.type === "commission_based" && employee.compensation.commissionRate > 0) {
+        const commissionAmount = salesInvoice.totalAmount * (employee.compensation.commissionRate / 100);
 
         await Commission.create([
           {
@@ -431,8 +464,7 @@ class SalesService {
     // The populate call will now work correctly
     const opportunity = await Opportunity.findById(opportunityId).session(session);
     if (!opportunity) throw new Error("Opportunity not found.");
-    if (opportunity.stage === "Closed-Won")
-      throw new Error("This opportunity has already been converted.");
+    if (opportunity.stage === "Closed-Won") throw new Error("This opportunity has already been converted.");
 
     const targetBranchId = opportunity.branchId || user.assignedBranchId;
     if (!targetBranchId) {

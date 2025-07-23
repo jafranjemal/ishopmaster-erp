@@ -11,6 +11,7 @@ import {
 } from '../../services/api';
 
 import { FileText, Hand, Plus, Tag, XCircle } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { Button, Modal } from 'ui-library';
 import AdditionalChargeForm from '../../components/pos/AdditionalChargeForm';
 import CustomerContext from '../../components/pos/CustomerContext';
@@ -62,7 +63,7 @@ const PosPage = ({ layout }) => {
   const [cartItems, setCartItems] = useState([]);
   const [popularItems, setPopularItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  //const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   //const [defaultCustomer, setDefaultCustomer] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   // const [jobItems, setJobItems] = useState([]);

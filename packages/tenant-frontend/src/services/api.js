@@ -975,6 +975,9 @@ export const tenantRepairService = {
   generateInvoiceManually: async (ticketId) => {
     return api.post(`/tenant/repairs/tickets/${ticketId}/generate-invoice`);
   },
+  updateTroubleshootFeeStatus: async (ticketId, status) => {
+    return api.patch(`/tenant/repairs/tickets/${ticketId}/troubleshoot-fee`, { status });
+  },
   generateQuote: async (ticketId, data) => api.post(`/tenant/repairs/quotes/from-ticket/${ticketId}`, data),
   sendQuote: async (quoteId) => api.post(`/tenant/repairs/quotes/${quoteId}/send`),
   getQuotesForTicket: async (ticketId) => api.get(`/tenant/repairs/quotes`, { params: { ticketId } }),

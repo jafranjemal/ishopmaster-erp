@@ -35,7 +35,9 @@ const saleItemSchema = new mongoose.Schema(
     productVariantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProductVariants",
-      required: true,
+      required: function () {
+        return !this.isService;
+      },
     },
     description: { type: String, required: true },
     quantity: { type: Number, required: true, min: 1 },
@@ -85,15 +87,7 @@ const salesInvoiceSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: [
-        "draft",
-        "on_hold",
-        "quotation",
-        "completed",
-        "partially_refunded",
-        "fully_refunded",
-        "cancelled",
-      ],
+      enum: ["draft", "on_hold", "quotation", "completed", "partially_refunded", "fully_refunded", "cancelled"],
       default: "draft",
       index: true,
     },
@@ -175,13 +169,8 @@ salesInvoiceSchema.pre("save", function (next) {
     };
 
     const original = this._originalStatus || "draft";
-    if (
-      allowedTransitions[original] &&
-      !allowedTransitions[original].includes(this.workflowStatus)
-    ) {
-      const err = new Error(
-        `Invalid status change from "${original}" to "${this.workflowStatus}".`
-      );
+    if (allowedTransitions[original] && !allowedTransitions[original].includes(this.workflowStatus)) {
+      const err = new Error(`Invalid status change from "${original}" to "${this.workflowStatus}".`);
       return next(err);
     }
   }
@@ -194,11 +183,8 @@ salesInvoiceSchema.pre("save", async function (next) {
   if (this.isNew) {
     // A helper function to generate the next sequential ID for a given prefix.
     const generateNextId = async (prefix, fieldName) => {
-      const lastDoc = await this.constructor
-        .findOne({ [fieldName]: { $ne: null } })
-        .sort({ createdAt: -1 });
-      const lastNumber =
-        lastDoc && lastDoc[fieldName] ? parseInt(lastDoc[fieldName].split("-")[1]) : 0;
+      const lastDoc = await this.constructor.findOne({ [fieldName]: { $ne: null } }).sort({ createdAt: -1 });
+      const lastNumber = lastDoc && lastDoc[fieldName] ? parseInt(lastDoc[fieldName].split("-")[1]) : 0;
       return `${prefix}-${String(lastNumber + 1).padStart(7, "0")}`;
     };
 

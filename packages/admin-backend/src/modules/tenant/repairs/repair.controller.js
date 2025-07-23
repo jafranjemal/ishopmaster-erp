@@ -166,6 +166,35 @@ exports.updateTicketStatus = asyncHandler(async (req, res, next) => {
 });
 
 /**
+ * @desc    Update the status of a repair ticket's troubleshoot fee
+ * @route   PATCH /api/v1/tenant/repairs/tickets/:id/troubleshoot-fee
+ * @access  Private
+ */
+exports.updateTroubleshootFeeStatus = asyncHandler(async (req, res, next) => {
+  const { status } = req.body;
+
+  // Permission check inside the controller for clarity
+  if (status === "waived" && !req.user.role.permissions.includes("service:ticket:waive_fees")) {
+    return res.status(403).json({ success: false, error: "You do not have permission to waive fees." });
+  }
+
+  const session = await req.dbConnection.startSession();
+  let ticket;
+  try {
+    await session.withTransaction(async () => {
+      ticket = await repairService.updateTroubleshootFeeStatus(
+        req.models,
+        { ticketId: req.params.id, newStatus: status, userId: req.user._id },
+        session
+      );
+    });
+    res.status(200).json({ success: true, data: ticket });
+  } finally {
+    session.endSession();
+  }
+});
+
+/**
  * @desc    Manually generate a SalesInvoice from a completed repair ticket.
  * @route   POST /api/v1/tenant/repairs/tickets/:id/generate-invoice
  * @access  Private (Requires 'sales:invoice:create' permission)

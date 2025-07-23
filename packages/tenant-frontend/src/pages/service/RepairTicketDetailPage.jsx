@@ -1,7 +1,9 @@
 import {
   ArrowLeft,
   CheckSquare,
+  ChevronDown,
   Cpu,
+  CreditCard,
   FileSignature,
   FileText,
   Flag,
@@ -17,11 +19,16 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
+  Badge,
   Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Label,
   Modal,
 } from 'ui-library';
@@ -86,6 +93,17 @@ const RepairTicketDetailPage = () => {
         .finally(() => setIsQcLoading(false));
     }
   }, [ticket, qcTemplate]);
+
+  const handleUpdateFeeStatus = async (newStatus) => {
+    try {
+      const res = await toast.promise(tenantRepairService.updateTroubleshootFeeStatus(id, newStatus), {
+        loading: `Marking fee as ${newStatus}...`,
+        success: `Fee status updated to ${newStatus}!`,
+        error: (err) => err.response?.data?.error || 'Update failed.',
+      });
+      handleTicketUpdate(res.data.data);
+    } catch (err) {}
+  };
 
   const handleGenerateInvoice = async () => {
     try {
@@ -284,6 +302,8 @@ const RepairTicketDetailPage = () => {
     </div>
   );
 
+  const canWaiveFees = user.permissions.includes('service:ticket:waive_fees');
+
   return (
     <div className='space-y-6'>
       <Link to='/service/dashboard' className='flex items-center text-sm text-indigo-400 hover:underline'>
@@ -455,9 +475,30 @@ const RepairTicketDetailPage = () => {
               </div>
               <div>
                 <Label>Troubleshoot Fee</Label>
-                <p className='font-bold'>
-                  {formatCurrency(ticket.troubleshootFee.amount)} ({ticket.troubleshootFee.status})
-                </p>
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-2'>
+                    <p className='font-bold'>{formatCurrency(ticket.troubleshootFee.amount)}</p>
+                    <Badge className='capitalize'>{ticket.troubleshootFee.status}</Badge>
+                  </div>
+                  {ticket.troubleshootFee.status === 'pending' && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant='outline' size='sm'>
+                          Actions <ChevronDown className='h-4 w-4 ml-2' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={() => handleUpdateFeeStatus('paid')}>Mark as Paid</DropdownMenuItem>
+                        {canWaiveFees && (
+                          <DropdownMenuItem onClick={() => handleUpdateFeeStatus('waived')}>
+                            {' '}
+                            Waive Fee
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
               </div>
 
               {ticket.status === 'repair_active' && (

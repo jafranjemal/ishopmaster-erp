@@ -106,7 +106,8 @@ class PricingService {
   async calculatePrices(models, { cartData, customerId }) {
     const { PricingRule, Promotion, Customer, ProductVariants } = models;
     const now = new Date();
-
+    let subTotal = 0;
+    let totalLineDiscount = 0;
     try {
       // --- Definitive Fix #1: The service is now "type-aware" ---
       // It intelligently separates items that can have automatic discounts (products/services)
@@ -123,9 +124,6 @@ class PricingService {
           .populate("templateId")
           .lean(),
       ]);
-
-      let subTotal = 0;
-      let totalLineDiscount = 0;
 
       // --- PASS 1 & 2: Automatic Promotions & Rules + Manual Line Discounts ---
       const pricedProductItems = processableItems.map((item) => {
@@ -172,8 +170,17 @@ class PricingService {
       });
 
       // Add the value of labor items to the subtotal *after* product discounts are calculated.
-      laborItems.forEach((item) => {
-        subTotal += (item.unitPrice || 0) * (item.quantity || 0);
+      laborItems.forEach((item, index) => {
+        const unit = item.unitPrice || item.laborRate || 0;
+        const qty = item.quantity || item.laborHours || 1;
+        const price = unit * qty;
+
+        subTotal += price;
+
+        laborItems[index] = {
+          ...item,
+          finalPrice: unit, // per-unit price
+        };
       });
 
       const finalItems = [...pricedProductItems, ...laborItems];
@@ -194,7 +201,7 @@ class PricingService {
       const totalAmount = subtotalAfterLineDiscounts - totalGlobalDiscount + totalCharges;
       const totalDiscount = (totalLineDiscount || 0) + (totalGlobalDiscount || 0) || 0;
 
-      return {
+      const payload = {
         items: finalItems,
         subTotal: parseFloat(subTotal.toFixed(2)),
         totalLineDiscount: parseFloat(totalLineDiscount.toFixed(2)),
@@ -202,15 +209,19 @@ class PricingService {
         totalCharges: parseFloat(totalCharges.toFixed(2)),
         totalAmount: parseFloat(totalAmount.toFixed(2)),
         totalDiscount,
+        grandTotal: totalAmount,
         // Preserve the raw discount/charge objects for the final invoice record
         globalDiscount: cartData.globalDiscount || null,
         additionalCharges: cartData.additionalCharges || [],
       };
+      console.log("\n\n\ncalculate prices payload", payload);
+      return payload;
     } catch (error) {
       console.error("Error during price calculation:", error);
       throw new Error("Could not calculate prices due to a server error.");
     }
   }
+
   /**
    * Special pricing for service items
    */

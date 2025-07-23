@@ -20,6 +20,7 @@ router
   .put(authorize("service:ticket:update"), ctrl.updateTicket)
   .delete(authorize("service:ticket:delete"), ctrl.deleteTicket);
 router.post("/tickets/:id/generate-invoice", authorize("sales:invoice:create"), ctrl.generateInvoice);
+router.patch("/tickets/:id/troubleshoot-fee", authorize("service:ticket:update"), ctrl.updateTroubleshootFeeStatus);
 
 router.route("/tickets/:id/jobsheet/items").post(authorize("service:ticket:update"), ctrl.addItemToJobSheet);
 router.route("/tickets/:id/jobsheet/items/:itemId").delete(authorize("service:ticket:update"), ctrl.removeItemFromJobSheet);
