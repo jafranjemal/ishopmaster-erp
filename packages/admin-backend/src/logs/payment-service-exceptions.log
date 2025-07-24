@@ -3359,3 +3359,2765 @@ TypeError: Cannot convert undefined or null to object
   ],
   "service": "payment-service"
 }
+2025-07-24 10:52:48 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 10:52:48 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 28508,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100184064,
+      "heapTotal": 66650112,
+      "heapUsed": 36179816,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1961782.796
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 10:56:52 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 10:56:52 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 22932,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 99659776,
+      "heapTotal": 66387968,
+      "heapUsed": 36503808,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1962026.265
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:01:59 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:01:59 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 36140,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100143104,
+      "heapTotal": 66650112,
+      "heapUsed": 36173800,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1962333.375
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:05:48 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:05:48 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 27912,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100421632,
+      "heapTotal": 66387968,
+      "heapUsed": 36385888,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1962562.281
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:08:04 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:08:04 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 35516,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100024320,
+      "heapTotal": 66387968,
+      "heapUsed": 36438888,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1962698.171
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:12:20 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:12:20 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 32480,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100306944,
+      "heapTotal": 66387968,
+      "heapUsed": 36555848,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1962954.625
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:16:17 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:16:17 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 16484,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 99930112,
+      "heapTotal": 66387968,
+      "heapUsed": 36530264,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1963191.343
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:21:01 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:21:01 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 36624,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 99450880,
+      "heapTotal": 66387968,
+      "heapUsed": 36752776,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1963475.734
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:22:26 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:22:26 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 13964,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100855808,
+      "heapTotal": 67174400,
+      "heapUsed": 35723368,
+      "external": 38499420,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1963560.265
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:23:03 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:23:03 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 34264,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100687872,
+      "heapTotal": 66912256,
+      "heapUsed": 35825056,
+      "external": 38499420,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1963597.875
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:23:10 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:23:10 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 24204,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 99524608,
+      "heapTotal": 66912256,
+      "heapUsed": 36205736,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1963604.343
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:30:20 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:30:20 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 28312,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 99786752,
+      "heapTotal": 66387968,
+      "heapUsed": 36436960,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1964034.343
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:30:39 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:30:39 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 16812,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100745216,
+      "heapTotal": 66650112,
+      "heapUsed": 36409792,
+      "external": 38505213,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1964053.656
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:30:52 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:30:52 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 33568,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 101109760,
+      "heapTotal": 66912256,
+      "heapUsed": 35814544,
+      "external": 38499420,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1964066.484
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:31:49 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:31:49 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 29220,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 101494784,
+      "heapTotal": 67174400,
+      "heapUsed": 35485472,
+      "external": 38499420,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1964123.718
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:32:08 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:32:08 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 13684,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 99536896,
+      "heapTotal": 66650112,
+      "heapUsed": 36542936,
+      "external": 38499420,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1964142.265
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:35:49 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:35:49 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 22520,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100352000,
+      "heapTotal": 66912256,
+      "heapUsed": 35680816,
+      "external": 38499420,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1964363.484
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:36:02 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:36:02 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 7428,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js"
+    ],
+    "memoryUsage": {
+      "rss": 100122624,
+      "heapTotal": 67174400,
+      "heapUsed": 35824712,
+      "external": 38499420,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1964376.609
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:36:13 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:36:13 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 27716,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "src/server.js"
+    ],
+    "memoryUsage": {
+      "rss": 99987456,
+      "heapTotal": 66650112,
+      "heapUsed": 36445832,
+      "external": 38499420,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1964387.468
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-24 11:37:22 [error] uncaughtException: Cannot read properties of undefined (reading 'db')
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16) 
+TypeError: Cannot read properties of undefined (reading 'db')
+    at new JobSchedulerService (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:13:41)
+    at Object.<anonymous> (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\jobScheduler.service.js:67:29)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object..js (node:internal/modules/cjs/loader:1706:10)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
+    at Module.require (node:internal/modules/cjs/loader:1311:12)
+    at require (node:internal/modules/helpers:136:16)
+{
+  "error": {},
+  "exception": true,
+  "date": "Thu Jul 24 2025 11:37:22 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 29184,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "src/server.js"
+    ],
+    "memoryUsage": {
+      "rss": 99188736,
+      "heapTotal": 66650112,
+      "heapUsed": 36429976,
+      "external": 38499420,
+      "arrayBuffers": 36088539
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 1964456.39
+  },
+  "trace": [
+    {
+      "column": 41,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": "new JobSchedulerService",
+      "line": 13,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\jobScheduler.service.js",
+      "function": null,
+      "line": 67,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module._compile",
+      "line": 1554,
+      "method": "_compile",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Object..js",
+      "line": 1706,
+      "method": ".js",
+      "native": false
+    },
+    {
+      "column": 32,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.load",
+      "line": 1289,
+      "method": "load",
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Function._load",
+      "line": 1108,
+      "method": "_load",
+      "native": false
+    },
+    {
+      "column": 14,
+      "file": "node:diagnostics_channel",
+      "function": "TracingChannel.traceSync",
+      "line": 322,
+      "method": "traceSync",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "wrapModuleLoad",
+      "line": 220,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 12,
+      "file": "node:internal/modules/cjs/loader",
+      "function": "Module.require",
+      "line": 1311,
+      "method": "require",
+      "native": false
+    },
+    {
+      "column": 16,
+      "file": "node:internal/modules/helpers",
+      "function": "require",
+      "line": 136,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}

@@ -227,7 +227,6 @@ const JobSheetEditor = ({ ticket, onUpdate, isLocked = false }) => {
         </Button>
       </div>
 
-      {JSON.stringify(ticket.jobSheet)}
       <div className='border border-slate-700 rounded-lg'>
         <Table>
           <TableHeader>

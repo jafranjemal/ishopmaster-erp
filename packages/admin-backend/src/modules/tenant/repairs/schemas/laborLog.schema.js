@@ -39,7 +39,8 @@ const laborLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// When saving, if the status is completed or paused, calculate the duration
+// REMOVE THIS ENTIRE HOOK - The service layer handles this logic.
+/*
 laborLogSchema.pre("save", function (next) {
   if (this.isModified("status") && ["completed", "paused"].includes(this.status) && this.startTime && this.endTime) {
     const durationMs = this.endTime.getTime() - this.startTime.getTime();
@@ -47,5 +48,6 @@ laborLogSchema.pre("save", function (next) {
   }
   next();
 });
+*/
 
 module.exports = laborLogSchema;

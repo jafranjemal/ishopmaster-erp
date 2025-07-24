@@ -364,6 +364,7 @@ export const tenantDeviceService = {
   create: async (data) => api.post('/tenant/inventory/devices', data),
   update: async (id, data) => api.put(`/tenant/inventory/devices/${id}`, data),
   delete: async (id) => api.delete(`/tenant/inventory/devices/${id}`),
+  getById: async (id) => api.get(`/tenant/inventory/devices/${id}`),
 };
 
 export const tenantRepairTypeService = {
@@ -960,20 +961,11 @@ export const tenantRepairServiceOld = {
    * @param {string} ticketId - The ID of the ticket to update.
    * @param {object} data - The fields to update.
    */
-  updateTicketDetails: async (ticketId, data) => {
-    return api.put(`/tenant/repairs/tickets/${ticketId}`, data);
-  },
-  confirmDevicePickup: async (ticketId) => {
-    return api.post(`/tenant/repairs/tickets/${ticketId}/confirm-pickup`);
-  },
 
   /**
    * Deletes a repair ticket.
    * @param {string} ticketId - The ID of the ticket to delete.
    */
-  deleteTicket: async (ticketId) => {
-    return api.delete(`/tenant/repairs/tickets/${ticketId}`);
-  },
 };
 
 export const tenantRepairService = {
@@ -984,6 +976,23 @@ export const tenantRepairService = {
   assignTechnician: async (id, employeeId) => api.put(`/tenant/repairs/tickets/${id}/assign`, { employeeId }),
   getTicketHistory: async (ticketId) => {
     return api.get(`/tenant/repairs/tickets/${ticketId}/history`);
+  },
+  deleteTicket: async (ticketId) => {
+    return api.delete(`/tenant/repairs/tickets/${ticketId}`);
+  },
+  confirmDevicePickup: async (ticketId) => {
+    return api.post(`/tenant/repairs/tickets/${ticketId}/confirm-pickup`);
+  },
+  updateTicketDetails: async (ticketId, data) => {
+    return api.put(`/tenant/repairs/tickets/${ticketId}`, data);
+  },
+  /**
+   * Adds "After Repair" photos to a ticket.
+   * @param {string} ticketId - The ID of the repair ticket.
+   * @param {Array<object>} photos - The array of photo objects from Cloudinary.
+   */
+  addAfterPhotos: async (ticketId, photos) => {
+    return api.post(`/tenant/repairs/tickets/${ticketId}/after-photos`, { photos });
   },
   generateInvoiceManually: async (ticketId) => {
     return api.post(`/tenant/repairs/tickets/${ticketId}/generate-invoice`);
@@ -1011,6 +1020,7 @@ export const tenantRepairService = {
   startTimer: async (ticketId) => {
     return api.post(`/tenant/repairs/time-tracking/tickets/${ticketId}/timer/start`);
   },
+  pauseTimer: async (ticketId) => api.post(`/tenant/repairs/time-tracking/tickets/${ticketId}/timer/pause`),
   flagForRequote: async (ticketId, data) => {
     return api.post(`/tenant/repairs/tickets/${ticketId}/flag-for-requote`, data);
   },
@@ -1435,6 +1445,11 @@ export const tenantNotificationTemplateService = {
    * Gets all notification templates.
    */
   getAll: async () => api.get('/tenant/settings/notification-templates'),
+
+  getNotificationEvents: async () => {
+    // This is an admin-level constant, so it's fetched from the admin API scope
+    return api.get('/tenant/settings/notification-templates/notification-events');
+  },
 
   /**
    * Creates a new notification template.

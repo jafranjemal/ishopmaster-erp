@@ -22,6 +22,7 @@ router
 router.post("/tickets/:id/generate-invoice", authorize("sales:invoice:create"), ctrl.generateInvoice);
 router.patch("/tickets/:id/troubleshoot-fee", authorize("service:ticket:update"), ctrl.updateTroubleshootFeeStatus);
 router.post("/tickets/:id/confirm-pickup", authorize("sales:pos:access"), ctrl.confirmPickup);
+router.post("/tickets/:id/after-photos", authorize("service:ticket:update"), ctrl.addAfterPhotos);
 
 router.route("/tickets/:id/jobsheet/items").post(authorize("service:ticket:update"), ctrl.addItemToJobSheet);
 router.route("/tickets/:id/jobsheet/items/:itemId").delete(authorize("service:ticket:update"), ctrl.removeItemFromJobSheet);

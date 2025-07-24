@@ -4,12 +4,13 @@ const mongoose = require("mongoose");
 const notificationService = require("./notification.service");
 const tokenService = require("./token.service");
 const eventEmitter = require("../config/events");
+const jobSchedulerService = require("./jobScheduler.service");
 
 class RepairService {
   /**
    * Creates a new repair ticket.
    */
-  async createTicket(models, { customerId, assets, ...intakeData }, userId, branchId, session) {
+  async createTicket(models, { customerId, assets, qcTemplateId, ...intakeData }, userId, branchId, session) {
     const { Device, RepairTicket, Asset, ProductVariants } = models;
 
     const assetIds = [];
@@ -49,12 +50,13 @@ class RepairService {
     }
 
     // --- Definitive Fix #1: Intelligently assign the default QC Template ---
-    let defaultQcTemplateId = null;
-    if (primaryAssetDeviceId) {
-      // Find the device, then its template to get the default QC template
+    let finalQcTemplateId = qcTemplateId;
+
+    // If no manual selection, try to find a smart default
+    if (!finalQcTemplateId && primaryAssetDeviceId) {
       const device = await Device.findById(primaryAssetDeviceId).populate("templateId").lean();
       if (device && device.templateId && device.templateId.defaultQcTemplateId) {
-        defaultQcTemplateId = device.templateId.defaultQcTemplateId;
+        finalQcTemplateId = device.templateId.defaultQcTemplateId;
       }
     }
 
@@ -65,7 +67,7 @@ class RepairService {
       customerComplaint: assets.map((a) => a.complaint).join("; "),
       createdBy: userId,
       branchId,
-      qcTemplateId: defaultQcTemplateId,
+      qcTemplateId: finalQcTemplateId,
     };
 
     const [newTicket] = await RepairTicket.create([ticketData], { session });
@@ -123,6 +125,23 @@ class RepairService {
 
     // In a real system, this would also emit an event to notify the service advisor.
 
+    return ticket;
+  }
+
+  /**
+   * Adds "After Repair" photos to a repair ticket.
+   * @param {string} ticketId - The ID of the ticket to update.
+   * @param {Array<object>} photos - Array of photo objects ({ url, public_id }).
+   */
+  async addAfterPhotos(models, { ticketId, photos }, session) {
+    const { RepairTicket } = models;
+    const ticket = await RepairTicket.findById(ticketId).session(session);
+    if (!ticket) throw new Error("Repair ticket not found.");
+
+    // Append new photos to the existing array
+    ticket.afterImages.push(...photos);
+
+    await ticket.save({ session });
     return ticket;
   }
 
@@ -624,7 +643,16 @@ class RepairService {
     );
 
     // In a future chapter, this would emit a `repair.closed` event for post-service follow-ups.
-
+    try {
+      const scheduleDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000); // 3 days from now
+      await jobSchedulerService.scheduleJob("send-post-service-feedback", scheduleDate, {
+        ticketId: ticket._id,
+        tenantDbName: tenant.dbName, // Pass the tenant DB name for the job runner
+      });
+    } catch (error) {
+      // Log the scheduling error, but do not fail the main transaction.
+      console.error(`Failed to schedule follow-up for ticket ${ticketId}:`, error);
+    }
     return ticket;
   }
 }

@@ -2,13 +2,32 @@ import { ArrowLeft } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Button, Card, CardContent, CardHeader, CardTitle, FileUploader, Label } from 'ui-library';
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  FileUploader,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from 'ui-library';
 import CustomerSearch from '../../components/crm/CustomerSearch';
 import AssetIntakeForm from '../../components/service/AssetIntakeForm';
 import PreRepairChecklist from '../../components/service/PreRepairChecklist';
 import SignaturePad from '../../components/service/SignaturePad';
 import TroubleshootFee from '../../components/service/TroubleshootFee';
-import { tenantRepairService, tenantUploadService } from '../../services/api';
+import {
+  tenantDeviceService,
+  tenantQcTemplateService,
+  tenantRepairService,
+  tenantUploadService,
+} from '../../services/api';
 
 const RepairTicketIntakePage = () => {
   const { id: ticketId } = useParams();
@@ -22,7 +41,32 @@ const RepairTicketIntakePage = () => {
   const [signature, setSignature] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(isEditMode); // Only load on mount if in edit mode
+  const [qcTemplates, setQcTemplates] = useState([]);
+  const [selectedQcTemplateId, setSelectedQcTemplateId] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    tenantQcTemplateService
+      .getAll()
+      .then((res) => setQcTemplates(res.data.data))
+      .catch(() => toast.error('Failed to load QC templates.'))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const primaryDeviceId = assets[0]?.deviceId;
+  useEffect(() => {
+    if (primaryDeviceId) {
+      // When the device changes, find its details to get the default QC template
+      tenantDeviceService.getById(primaryDeviceId).then((res) => {
+        const device = res.data.data;
+        if (device?.templateId?.defaultQcTemplateId) {
+          setSelectedQcTemplateId(device.templateId.defaultQcTemplateId);
+        } else {
+          setSelectedQcTemplateId(''); // Reset if no default
+        }
+      });
+    }
+  }, [assets, primaryDeviceId]);
 
   useEffect(() => {
     if (isEditMode) {
@@ -44,13 +88,38 @@ const RepairTicketIntakePage = () => {
   }, [ticketId, isEditMode]);
 
   const isFormValid = useMemo(() => {
+    const issues = [];
+
+    // Check customer
+    if (!customer) issues.push('Customer not selected');
+
+    // Check each asset
+    assets.forEach((a, index) => {
+      if (!a.brandId) issues.push(`Asset ${index + 1}: Missing brand`);
+      if (!a.deviceId) issues.push(`Asset ${index + 1}: Missing device`);
+      if (!a.serialNumber) issues.push(`Asset ${index + 1}: Missing serial number`);
+      if (!a.complaint) issues.push(`Asset ${index + 1}: Missing complaint`);
+    });
+
+    // Check checklist
     const requiredChecklistItems = ['powerOn', 'screenCracked', 'waterDamage', 'buttonsFunctional'];
-    return (
-      customer &&
-      assets.every((a) => a.brandId && a.deviceId && a.serialNumber && a.complaint) &&
-      requiredChecklistItems.every((key) => checklistData[key] !== undefined) &&
-      signature
-    );
+    requiredChecklistItems.forEach((key) => {
+      if (checklistData[key] === undefined) {
+        issues.push(`Checklist: '${key}' is not filled`);
+      }
+    });
+
+    // Check signature
+    if (!signature) issues.push('Customer signature not captured');
+
+    // Log issues if any
+    if (issues.length > 0) {
+      console.log('Form is invalid due to the following:');
+      issues.forEach((issue) => console.log('- ' + issue));
+      return false;
+    }
+
+    return true;
   }, [customer, assets, checklistData, signature]);
 
   const handleSubmit = async () => {
@@ -66,6 +135,7 @@ const RepairTicketIntakePage = () => {
       beforeImages: beforeImages.map((f) => ({ url: f.url, public_id: f.public_id })),
       troubleshootFee,
       customerSignature: signature,
+      qcTemplateId: selectedQcTemplateId || null,
     };
 
     try {
@@ -113,18 +183,53 @@ const RepairTicketIntakePage = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Step 2: Condition Assessment</CardTitle>
+          <CardTitle>Step 2: Quality Control Assignment</CardTitle>
         </CardHeader>
-        <CardContent className='space-y-4'>
-          <PreRepairChecklist checklistData={checklistData} setChecklistData={setChecklistData} />
-          <div>
-            <Label>Before Photos (Device Condition)</Label>
-            <FileUploader
-              onUploadComplete={setBeforeImages}
-              getSignatureFunc={tenantUploadService.getCloudinarySignature}
-              multiple={true}
-              initialFiles={beforeImages}
-            />
+        <CardContent className='space-y-6'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
+            <Card className='p-4'>
+              <CardHeader className='p-2'>
+                <CardTitle className='text-sm font-medium'>Before Photos</CardTitle>
+              </CardHeader>
+              <CardContent className='p-2'>
+                <FileUploader
+                  onUploadComplete={setBeforeImages}
+                  getSignatureFunc={tenantUploadService.getCloudinarySignature}
+                  multiple={true}
+                  initialFiles={beforeImages}
+                />
+              </CardContent>
+            </Card>
+
+            <Card className='p-4'>
+              <PreRepairChecklist checklistData={checklistData} setChecklistData={setChecklistData} />
+
+              <hr />
+              <CardHeader className='p-2'>
+                <CardTitle className='text-sm font-medium'>QC Assignment</CardTitle>
+              </CardHeader>
+              <CardDescription className='px-2'>
+                A QC checklist will be automatically selected based on the device, or you can choose one manually.
+              </CardDescription>
+              <CardContent className='p-2 space-y-3'>
+                <div>
+                  <Label>Required Checklist</Label>
+                  <Select onValueChange={setSelectedQcTemplateId} value={selectedQcTemplateId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder='Select a QC checklist...' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value=''>None</SelectItem>
+                      {qcTemplates.map((template) => (
+                        <SelectItem key={template._id} value={template._id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </CardContent>
       </Card>

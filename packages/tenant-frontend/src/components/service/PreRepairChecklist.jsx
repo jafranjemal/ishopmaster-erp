@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Label, Switch } from 'ui-library';
 
 const CHECKLIST_ITEMS = [
@@ -7,7 +8,29 @@ const CHECKLIST_ITEMS = [
   { key: 'buttonsFunctional', label: 'All Buttons Functional?', required: true },
 ];
 
+const getDefaultChecklistState = () => {
+  const state = {};
+  CHECKLIST_ITEMS.forEach((item) => {
+    state[item.key] = false;
+  });
+  return state;
+};
+
 const PreRepairChecklist = ({ checklistData, setChecklistData }) => {
+  // Initialize checklistData if not already set
+  useEffect(() => {
+    const defaultState = getDefaultChecklistState();
+    const isChecklistEmpty = !checklistData || Object.keys(checklistData).length === 0;
+
+    if (isChecklistEmpty) {
+      setChecklistData(defaultState);
+    } else {
+      // Fill any missing keys (e.g., user skipped a field before)
+      const filledState = { ...defaultState, ...checklistData };
+      setChecklistData(filledState);
+    }
+  }, []);
+
   const handleChecklistChange = (key, value) => {
     setChecklistData((prev) => ({ ...prev, [key]: value }));
   };
@@ -22,7 +45,7 @@ const PreRepairChecklist = ({ checklistData, setChecklistData }) => {
           </Label>
           <Switch
             id={item.key}
-            checked={checklistData[item.key] || false}
+            checked={checklistData?.[item.key] || false}
             onCheckedChange={(checked) => handleChecklistChange(item.key, checked)}
           />
         </div>
@@ -30,4 +53,5 @@ const PreRepairChecklist = ({ checklistData, setChecklistData }) => {
     </div>
   );
 };
+
 export default PreRepairChecklist;

@@ -66,7 +66,7 @@ const jobSheetHistoryEntrySchema = new mongoose.Schema(
 
 const repairTicketSchema = new mongoose.Schema(
   {
-    ticketNumber: { type: String, required: true, unique: true, index: true },
+    ticketNumber: { type: String, required: true, sparse: true, unique: true, index: true },
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
     branchId: { type: mongoose.Schema.Types.ObjectId, ref: "Branch", required: true },
 
@@ -180,14 +180,31 @@ repairTicketSchema.pre("save", function (next) {
   next();
 });
 // Pre-save hook to generate a sequential, user-friendly Ticket Number.
+// repairTicketSchema.pre("validate", async function (next) {
+//   if (this.isNew) {
+//     const lastTicket = await this.constructor.findOne().sort({ createdAt: -1 });
+//     let lastNumber = 0;
+//     if (lastTicket && lastTicket.ticketNumber) {
+//       lastNumber = parseInt(lastTicket.ticketNumber.split("-")[1]);
+//     }
+//     this.ticketNumber = "TKT-" + String(lastNumber + 1).padStart(8, "0");
+//   }
+//   next();
+// });
+
 repairTicketSchema.pre("validate", async function (next) {
-  if (this.isNew) {
-    const lastTicket = await this.constructor.findOne().sort({ createdAt: -1 });
-    let lastNumber = 0;
-    if (lastTicket && lastTicket.ticketNumber) {
-      lastNumber = parseInt(lastTicket.ticketNumber.split("-")[1]);
+  if (this.isNew && !this.ticketNumber) {
+    try {
+      const lastTicket = await this.constructor.findOne().sort({ createdAt: -1 }).lean();
+      let lastNumber = 0;
+      if (lastTicket?.ticketNumber?.startsWith("TKT-")) {
+        lastNumber = parseInt(lastTicket.ticketNumber.split("-")[1]) || 0;
+      }
+      const newTicketNumber = "TKT-" + String(lastNumber + 1).padStart(8, "0");
+      this.ticketNumber = newTicketNumber;
+    } catch (err) {
+      return next(err);
     }
-    this.ticketNumber = "TKT-" + String(lastNumber + 1).padStart(8, "0");
   }
   next();
 });

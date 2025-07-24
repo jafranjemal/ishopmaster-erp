@@ -1,16 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'ui-library';
-
-// In a real ERP, this list would be dynamically generated and managed centrally
-const EVENT_NAMES = [
-  'repair.status_changed.diagnosing',
-  'repair.status_changed.quote_pending',
-  'repair.status_changed.approval_pending',
-  'repair.status_changed.repair_active',
-  'repair.status_changed.qc_pending',
-  'repair.status_changed.pickup_pending',
-  'repair.status_changed.closed',
-];
+import { tenantNotificationTemplateService } from '../../../services/api';
+import PlaceholderToolbox from './PlaceholderToolbox';
 
 const RECIPIENT_TYPES = ['customer', 'assigned_technician', 'branch_manager'];
 const CHANNELS = ['email', 'sms'];
@@ -26,33 +17,51 @@ const NotificationTemplateForm = ({ templateToEdit, onSave, onCancel, isSaving }
     isActive: true,
   };
   const [formData, setFormData] = useState(initial);
+  const [allEvents, setAllEvents] = useState([]);
+  const bodyRef = useRef(null);
+
+  useEffect(() => {
+    tenantNotificationTemplateService.getNotificationEvents().then((res) => setAllEvents(res.data.data));
+  }, []);
 
   useEffect(() => {
     if (templateToEdit) setFormData({ ...initial, ...templateToEdit });
     else setFormData(initial);
   }, [templateToEdit]);
 
-  const handleSelectChange = (name, value) => {
-    if (value === formData[name]) return;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleInsertPlaceholder = (placeholder) => {
+    const textarea = bodyRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = textarea.value;
+      const newText = text.substring(0, start) + placeholder + text.substring(end);
+      setFormData((prev) => ({ ...prev, body: newText }));
+      // Focus and move cursor after the inserted text
+      setTimeout(() => {
+        textarea.focus();
+        textarea.selectionStart = textarea.selectionEnd = start + placeholder.length;
+      }, 0);
+    }
   };
-  const handleChange = (e) => setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const selectedEvent = allEvents.find((e) => e.eventName === formData.eventName);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
+  };
+  const handleChange = (e) => setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleSelectChange = (name, value) => {
+    if (value === formData[name]) return;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
     <form onSubmit={handleSubmit} className='space-y-4'>
       <div>
         <Label>Template Name</Label>
-        <Input
-          name='name'
-          value={formData.name}
-          onChange={handleChange}
-          required
-          placeholder='e.g., Customer Quote Ready (Email)'
-        />
+        <Input name='name' value={formData.name} onChange={handleChange} required />
       </div>
       <div className='grid md:grid-cols-3 gap-4'>
         <div>
@@ -62,9 +71,9 @@ const NotificationTemplateForm = ({ templateToEdit, onSave, onCancel, isSaving }
               <SelectValue placeholder='Select event...' />
             </SelectTrigger>
             <SelectContent>
-              {EVENT_NAMES.map((e) => (
-                <SelectItem key={e} value={e}>
-                  {e}
+              {allEvents.map((e) => (
+                <SelectItem key={e.eventName} value={e.eventName}>
+                  {e.eventName}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -108,31 +117,26 @@ const NotificationTemplateForm = ({ templateToEdit, onSave, onCancel, isSaving }
       {formData.channel === 'email' && (
         <div>
           <Label>Email Subject</Label>
-          <Input
-            name='subject'
-            value={formData.subject}
-            onChange={handleChange}
-            required
-            placeholder='e.g., Update on your Repair #{{ticket.ticketNumber}}'
-          />
+          <Input name='subject' value={formData.subject} onChange={handleChange} required />
         </div>
       )}
-      <div>
-        <Label>Message Body</Label>
-        <Input
-          as='textarea'
-          name='body'
-          value={formData.body}
-          onChange={handleChange}
-          required
-          rows={8}
-          placeholder='Use {{variableName}} for dynamic content.'
-        />
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 items-start'>
+        <div className='md:col-span-2'>
+          <Label>Message Body</Label>
+          <Input
+            as='textarea'
+            ref={bodyRef}
+            name='body'
+            value={formData.body}
+            onChange={handleChange}
+            required
+            rows={10}
+          />
+        </div>
+        <div>
+          <PlaceholderToolbox variables={selectedEvent?.variables} onInsert={handleInsertPlaceholder} />
+        </div>
       </div>
-      <div className='text-xs text-slate-400'>
-        Available variables: {'{{ticket.ticketNumber}}'}, {'{{customer.name}}'}, {'{{asset.name}}'}
-      </div>
-
       <div className='pt-4 flex justify-end gap-2'>
         <Button type='button' variant='outline' onClick={onCancel}>
           Cancel

@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   MessageSquare,
   MonitorSmartphone,
+  ShoppingBag,
   Timer,
   User,
 } from 'lucide-react';
@@ -30,6 +31,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  FileUploader,
   Label,
   Modal,
 } from 'ui-library';
@@ -44,7 +46,12 @@ import StatusUpdater from '../../components/service/StatusUpdater';
 import TechnicianSelector from '../../components/service/TechnicianSelector';
 import StatusTimeline from '../../components/service/TicketStatusTimeline';
 import useAuth from '../../context/useAuth';
-import { tenantPaymentMethodService, tenantPaymentsService, tenantRepairService } from '../../services/api';
+import {
+  tenantPaymentMethodService,
+  tenantPaymentsService,
+  tenantRepairService,
+  tenantUploadService,
+} from '../../services/api';
 
 const RepairTicketDetailPage = () => {
   const { id } = useParams();
@@ -135,6 +142,7 @@ const RepairTicketDetailPage = () => {
   const renderFinalizeButton = () => {
     if (ticket.status === 'pickup_pending') {
       if (ticket.finalInvoiceId) {
+        const isPaid = ticket.finalInvoiceId.paymentStatus === 'paid';
         return (
           <div className='flex float-end gap-2'>
             <Button
@@ -146,6 +154,9 @@ const RepairTicketDetailPage = () => {
             </Button>
             <Button onClick={handleTakePayment}>
               <MonitorSmartphone className='h-4 w-4 mr-2' /> Take Pos Payment
+            </Button>
+            <Button onClick={handleConfirmPickup} disabled={!isPaid || isSaving}>
+              <ShoppingBag className='h-4 w-4 mr-2' /> {isSaving ? 'Closing...' : 'Confirm Pickup'}
             </Button>
           </div>
         );
@@ -209,6 +220,21 @@ const RepairTicketDetailPage = () => {
     fetchData();
   };
 
+  const handleAfterPhotosUpload = async (files) => {
+    if (files.length === 0) return;
+    try {
+      const photoData = files.map((f) => ({ url: f.url, public_id: f.public_id }));
+      const res = await toast.promise(tenantRepairService.addAfterPhotos(id, photoData), {
+        loading: 'Saving photos...',
+        success: 'After photos saved successfully!',
+        error: (err) => err.response?.data?.error || 'Failed to save photos.',
+      });
+      handleTicketUpdate(res.data.data);
+    } catch (err) {
+      /* Handled by toast */
+    }
+  };
+
   const handleAssignTechnician = async (employeeId) => {
     try {
       await toast.promise(tenantRepairService.assignTechnician(id, employeeId), {
@@ -260,11 +286,12 @@ const RepairTicketDetailPage = () => {
   const handleStartTimer = async () => {
     setIsSaving(true);
     try {
-      await toast.promise(tenantRepairService.startTimer(id), {
+      const res = await toast.promise(tenantRepairService.startTimer(id), {
         loading: 'Starting timer...',
         success: 'Timer started!',
         error: 'Failed to start timer.',
       });
+      setActiveTimer(res.data.data);
       fetchData(false); // Refresh data without full page loader
     } catch (err) {
     } finally {
@@ -280,12 +307,43 @@ const RepairTicketDetailPage = () => {
         success: 'Time logged successfully!',
         error: 'Failed to stop timer.',
       });
-      setTicket(res.data.data); // Directly update ticket with response
+      setActiveTimer(res.data.data); // Directly update ticket with response
+      fetchData(false);
     } catch (err) {
     } finally {
       setIsSaving(false);
     }
   };
+
+  const handlePauseTimer = async () => {
+    setIsSaving(true);
+    try {
+      const res = await toast.promise(tenantRepairService.pauseTimer(id), {
+        loading: 'Pausing timer & logging labor...',
+        success: 'Time logged successfully!',
+        error: 'Failed to Pausing timer.',
+      });
+      setActiveTimer(res.data.data); // Directly update ticket with response
+      fetchData(false);
+    } catch (err) {
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const { totalHoursLogged, isPaused } = useMemo(() => {
+    if (!ticket) return { totalHoursLogged: 0, isPaused: false };
+    const totalHours =
+      ticket &&
+      Array.isArray(ticket.jobSheet) &&
+      ticket.jobSheet
+        .filter((item) => item.itemType === 'labor')
+        .reduce((sum, item) => sum + (item.laborHours || 0), 0);
+    const paused = activeTimer?.status === 'paused';
+    return { totalHoursLogged: totalHours, isPaused: paused };
+  }, [ticket, activeTimer]);
+
+  const showTimer = ticket && ticket.assignedTo?._id === user.employeeId;
 
   const handleRecordPayment = async (paymentData) => {
     try {
@@ -301,12 +359,21 @@ const RepairTicketDetailPage = () => {
     }
   };
 
-  const totalHoursLogged = useMemo(() => {
-    if (!ticket) return 0;
-    return ticket.jobSheet
-      .filter((item) => item.itemType === 'labor')
-      .reduce((sum, item) => sum + (item.laborHours || 0), 0);
-  }, [ticket]);
+  const handleConfirmPickup = async () => {
+    setIsSaving(true);
+    try {
+      const res = await toast.promise(tenantRepairService.confirmDevicePickup(id), {
+        loading: 'Closing repair job...',
+        success: 'Job closed successfully!',
+        error: (err) => err.response?.data?.error || 'Failed to close job.',
+      });
+      handleTicketUpdate(res.data.data); // Refresh the ticket state
+    } catch (err) {
+      /* Handled by toast */
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const isJobSheetLocked = useMemo(() => {
     if (!ticket) return true;
@@ -333,7 +400,7 @@ const RepairTicketDetailPage = () => {
   );
 
   const canWaiveFees = user.permissions.includes('service:ticket:waive_fees');
-
+  const isWorkActive = ['repair_active', 'qc_pending'].includes(ticket.status);
   return (
     <div className='space-y-6'>
       <Link to='/service/dashboard' className='flex items-center text-sm text-indigo-400 hover:underline'>
@@ -396,22 +463,20 @@ const RepairTicketDetailPage = () => {
                         <Timer className='h-4 w-4' />
                         Time Tracker
                       </h3>
-                      {isTimerActive && (
-                        <span className='flex items-center text-xs font-medium text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded-full'>
-                          <span className='w-2 h-2 bg-emerald-400 rounded-full animate-pulse mr-1'></span>
-                          LIVE
-                        </span>
-                      )}
                     </div>
 
                     <LaborTimerWidget
                       onStart={handleStartTimer}
+                      onPause={handlePauseTimer}
                       onStop={handleStopTimer}
-                      isTimerActive={isTimerActive}
-                      totalHoursLogged={totalHoursLogged}
+                      isPaused={isPaused}
+                      totalEstimatedHours={totalHoursLogged}
+                      totalHoursLogged={activeTimer?.totalHoursLogged}
                       isSaving={isSaving}
                       activeTimer={activeTimer}
+                      ticket={ticket}
                     />
+
                     {ticket.status === 'repair_active' && !isTimerActive && (
                       <div className='border-t border-slate-700 pt-4'>
                         <Button className='w-full' onClick={handleSubmitForQc}>
@@ -448,7 +513,17 @@ const RepairTicketDetailPage = () => {
               </div>
               <div>
                 <Label>After Repair</Label>
-                <div className='grid grid-cols-3 gap-2'>
+                <div className='grid grid-cols-1 gap-2'>
+                  {isWorkActive && (
+                    <div className='mt-4'>
+                      <FileUploader
+                        onUploadComplete={handleAfterPhotosUpload}
+                        getSignatureFunc={tenantUploadService.getCloudinarySignature}
+                        multiple={true}
+                      />
+                    </div>
+                  )}
+
                   {ticket.afterImages.map((img) => (
                     <img key={img.public_id} src={img.url} className='rounded-md' />
                   ))}
@@ -550,13 +625,15 @@ const RepairTicketDetailPage = () => {
         </div>
       </div>
 
-      <PaymentApplicationModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
-        onConfirm={handleRecordPayment}
-        invoice={ticket.finalInvoiceId}
-        paymentMethods={paymentMethods}
-      />
+      {isPaymentModalOpen && (
+        <PaymentApplicationModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => setIsPaymentModalOpen(false)}
+          onConfirm={handleRecordPayment}
+          invoice={ticket.finalInvoiceId}
+          paymentMethods={paymentMethods}
+        />
+      )}
 
       <Modal isOpen={isRequoteModalOpen} onClose={() => setIsRequoteModalOpen(false)} title='Flag Ticket for Re-Quote'>
         <FlagRequoteForm

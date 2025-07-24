@@ -10,8 +10,9 @@ const EXCHANGE_RATE_MASTER_LIST = require("../modules/admin/constants/exchangeRa
 const PAYMENT_METHOD_MASTER_LIST = require("../modules/admin/constants/paymentMethod.masterlist");
 const PRODUCT_VARIANT_MASTER_LIST = require("../modules/admin/constants/productVarients.masterlist");
 const DEVICE_MASTER_LIST = require("../modules/admin/constants/device.masterlist");
-
+const defaultNotificationTemplates = require("../modules/admin/constants/notificationTemplates.masterlist");
 const customerService = require("./customer.service");
+const defaultLabelTemplates = require("../modules/admin/constants/labelTemplates.masterlist");
 
 class TenantProvisioningService {
   /**
@@ -63,10 +64,7 @@ class TenantProvisioningService {
 
     // Note: For full modularity, Permission should also be a tenant-level model.
     // Assuming it's available for now. If it's an admin model, it needs to be fetched outside the transaction.
-    const allPermissions = await require("../modules/admin/permissions/permission.model")
-      .find({})
-      .select("key")
-      .lean();
+    const allPermissions = await require("../modules/admin/permissions/permission.model").find({}).select("key").lean();
     const allPermissionKeys = allPermissions.map((p) => p.key);
 
     const rolesToCreate = [
@@ -145,6 +143,8 @@ class TenantProvisioningService {
       Currency,
       ExchangeRate,
       PaymentMethod,
+      NotificationTemplate,
+      LabelTemplate,
     } = models;
 
     // Seed simple lists
@@ -171,6 +171,9 @@ class TenantProvisioningService {
     //     );
     //   }
     // }
+
+    await NotificationTemplate.insertMany(defaultNotificationTemplates, { session });
+    await LabelTemplate.insertMany(defaultLabelTemplates, { session });
 
     // Seed hierarchical categories using the new recursive function
     console.log("Seeding hierarchical categories...");
@@ -203,10 +206,7 @@ class TenantProvisioningService {
     const templateDocs = PRODUCT_TEMPLATE_MASTER_LIST.map((template) => {
       const attrSetId = attributeSetMap.get(template.attributeSetName);
       if (template.attributeSetName && !attrSetId) {
-        console.warn(
-          `⚠️ AttributeSet "${template.attributeSetName}" not found for:`,
-          template.baseName
-        );
+        console.warn(`⚠️ AttributeSet "${template.attributeSetName}" not found for:`, template.baseName);
       }
 
       return {
@@ -237,9 +237,7 @@ class TenantProvisioningService {
       console.log("template ", template);
 
       const attributeSet = template.attributeSetId
-        ? await AttributeSet.findById(template.attributeSetId)
-            .populate("attributes")
-            .session(session)
+        ? await AttributeSet.findById(template.attributeSetId).populate("attributes").session(session)
         : null;
 
       if (!attributeSet?.attributes) {
@@ -261,9 +259,7 @@ class TenantProvisioningService {
     const paymentMethodsToCreate = PAYMENT_METHOD_MASTER_LIST.map((method) => ({
       ...method,
       linkedAccountId: accountMap.get(method.linkedAccountName),
-      holdingAccountId: method.holdingAccountName
-        ? accountMap.get(method.holdingAccountName)
-        : null,
+      holdingAccountId: method.holdingAccountName ? accountMap.get(method.holdingAccountName) : null,
     }));
     await PaymentMethod.insertMany(paymentMethodsToCreate, {
       session,
@@ -406,10 +402,7 @@ class TenantProvisioningService {
     const { ProductTemplates, ProductVariants } = models;
 
     // 1. Fetch all templates that were just created.
-    const allTemplates = await ProductTemplates.find({})
-      .populate("brandId")
-      .session(session)
-      .lean();
+    const allTemplates = await ProductTemplates.find({}).populate("brandId").session(session).lean();
     if (!allTemplates.length) {
       console.log(" -> No product templates found, skipping variant seeding.");
       return;

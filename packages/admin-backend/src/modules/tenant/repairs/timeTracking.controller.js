@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const asyncHandler = require("../../../middleware/asyncHandler");
 const timeTrackingService = require("../../../services/timeTracking.service");
 
@@ -59,17 +60,46 @@ exports.getActiveTimer = asyncHandler(async (req, res, next) => {
 
   const employee = await Employee.findOne({ userId: req.user._id });
   if (!employee) {
-    // Return null if the user is not an employee, as they can't have a timer.
-    return res.status(200).json({ success: true, data: null });
+    // If user isn't an employee, send back a default state
+    return res.status(200).json({
+      success: true,
+      data: { activeTimer: null, totalHoursLogged: 0 },
+    });
   }
 
+  // 1. Find the currently active timer (if any)
   const activeTimer = await LaborLog.findOne({
     repairTicketId: ticketId,
     employeeId: employee._id,
-    status: "in_progress",
+    status: { $in: ["in_progress", "paused"] },
   }).lean();
 
-  res.status(200).json({ success: true, data: activeTimer });
+  // 2. Calculate the sum of all previously logged minutes for this ticket/employee
+  const totalMinutesAggregation = await LaborLog.aggregate([
+    {
+      $match: {
+        repairTicketId: new mongoose.Types.ObjectId(ticketId),
+        employeeId: employee._id,
+      },
+    },
+    {
+      $group: {
+        _id: null, // Group all matched logs together
+        totalMinutes: { $sum: "$durationMinutes" },
+      },
+    },
+  ]);
+
+  const totalMinutes = totalMinutesAggregation.length > 0 ? totalMinutesAggregation[0].totalMinutes : 0;
+
+  // 3. Send both the active timer and the total logged hours in the response
+  res.status(200).json({
+    success: true,
+    data: {
+      ...activeTimer,
+      totalHoursLogged: totalMinutes / 60,
+    },
+  });
 });
 
 const getEmployee = async (models, userId) => {

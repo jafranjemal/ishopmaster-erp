@@ -144,6 +144,24 @@ exports.confirmPickup = asyncHandler(async (req, res, next) => {
   }
 });
 
+/**
+ * @desc    Add "After Repair" photos to a repair ticket
+ * @route   POST /api/v1/tenant/repairs/tickets/:id/after-photos
+ * @access  Private (Requires 'service:ticket:update' permission)
+ */
+exports.addAfterPhotos = asyncHandler(async (req, res, next) => {
+  const session = await req.dbConnection.startSession();
+  let ticket;
+  try {
+    await session.withTransaction(async () => {
+      ticket = await repairService.addAfterPhotos(req.models, { ticketId: req.params.id, photos: req.body.photos }, session);
+    });
+    res.status(200).json({ success: true, data: ticket });
+  } finally {
+    session.endSession();
+  }
+});
+
 // @desc    Get a single repair ticket by ID
 // @route   GET /api/v1/tenant/repairs/tickets/:id
 exports.getRepairTicketById = asyncHandler(async (req, res, next) => {

@@ -20,7 +20,7 @@ const AddLaborForm = ({ onSave, onCancel, isSaving, technicians = [], defaultEmp
       setFormData((prev) => ({
         ...prev,
         laborRate: selectedTech.compensation?.billingRate || 0,
-        description: prev.description || `${selectedTech.name}'s Labor`,
+        description: prev.description || `${selectedTech.firstName}'s Labor`,
       }));
     }
   }, [formData.employeeId, technicians]);
