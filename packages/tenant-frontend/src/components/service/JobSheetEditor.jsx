@@ -245,29 +245,30 @@ const JobSheetEditor = ({ ticket, onUpdate, isLocked = false }) => {
                 </TableCell>
               </TableRow>
             )}
-            {ticket.jobSheet.map((item, i) => (
-              <TableRow key={item._id || i}>
-                <TableCell className='font-medium'>{item.description}</TableCell>
-                <TableCell className='text-center'>{item.quantity || item.laborHours}</TableCell>
-                <TableCell className='text-right font-mono'>
-                  {(() => {
-                    const total = (item.unitPrice || item.laborRate || 0) * (item.quantity || item.laborHours || 0);
-                    return total > 0 ? formatCurrency(total) : 'free';
-                  })()}
-                </TableCell>
-                <TableCell>
-                  {item._id}
-                  <Button
-                    disabled={isSaving || isLocked}
-                    variant='ghost'
-                    size='icon'
-                    onClick={() => handleRemoveItem(item.description)}
-                  >
-                    <Trash2 className='h-4 w-4 text-red-500' />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {ticket.jobSheet &&
+              ticket.jobSheet.map((item, i) => (
+                <TableRow key={item._id || i}>
+                  <TableCell className='font-medium'>{item.description}</TableCell>
+                  <TableCell className='text-center'>{item.quantity || item.laborHours}</TableCell>
+                  <TableCell className='text-right font-mono'>
+                    {(() => {
+                      const total = (item.unitPrice || item.laborRate || 0) * (item.quantity || item.laborHours || 0);
+                      return total > 0 ? formatCurrency(total) : 'free';
+                    })()}
+                  </TableCell>
+                  <TableCell>
+                    {item._id}
+                    <Button
+                      disabled={isSaving || isLocked}
+                      variant='ghost'
+                      size='icon'
+                      onClick={() => handleRemoveItem(item.description)}
+                    >
+                      <Trash2 className='h-4 w-4 text-red-500' />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </div>

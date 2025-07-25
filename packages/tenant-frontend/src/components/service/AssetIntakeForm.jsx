@@ -1,4 +1,4 @@
-import { LoaderCircle, PlusCircle, Trash2 } from 'lucide-react';
+import { LoaderCircle, PlusCircle, ScanBarcode, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import {
@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from 'ui-library';
 import { tenantBrandService, tenantDeviceService } from '../../services/api';
+import { generateSerialNumber } from '../procurement/grnUtils';
 
 const AssetRow = ({ asset, index, onAssetChange, onRemove, allBrands }) => {
   const [devicesForBrand, setDevicesForBrand] = useState([]);
@@ -139,6 +140,8 @@ const AssetRow = ({ asset, index, onAssetChange, onRemove, allBrands }) => {
             className='bg-slate-800 border-slate-700 focus:border-indigo-400 transition-colors'
             required
             placeholder='Enter unique identifier'
+            suffixIcon={<ScanBarcode size={16} />}
+            onSuffixClick={() => onAssetChange(index, 'serialNumber', generateSerialNumber(index))}
           />
         </div>
 

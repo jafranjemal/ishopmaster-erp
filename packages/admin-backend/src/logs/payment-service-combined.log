@@ -1345,3 +1345,1572 @@ MongoServerError: Transaction 1 has been committed.
     "686eb675a64962f931360637"
   ]
 }
+2025-07-25 10:56:01 [info] Event 'repair.qc_passed' received for ticket TKT-00000003. Synthesizing invoice. 
+{
+  "service": "payment-service"
+}
+2025-07-25 10:56:01 [error] Failed to synthesize invoice for ticket TKT-00000003 after QC pass. 
+MongoServerError: Transaction 3 has been committed.
+    at Connection.sendCommand (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cmap\connection.js:305:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Connection.command (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cmap\connection.js:333:26)
+    at async Server.command (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sdam\server.js:171:29)
+    at async FindOperation.execute (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\find.js:36:16)
+    at async tryOperation (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\execute_operation.js:207:20)
+    at async executeOperation (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\execute_operation.js:75:16)
+    at async FindCursor._initialize (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\find_cursor.js:61:26)
+    at async FindCursor.cursorInit (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\abstract_cursor.js:633:27)
+    at async FindCursor.fetchBatch (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\abstract_cursor.js:667:13)
+{
+  "service": "payment-service",
+  "error": "Transaction 3 has been committed."
+}
+2025-07-25 10:56:01 [error] Unhandled Rejection: Transaction 3 has been committed. 
+MongoServerError: Transaction 3 has been committed.
+    at Connection.sendCommand (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cmap\connection.js:305:27)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Connection.command (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cmap\connection.js:333:26)
+    at async Server.command (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\sdam\server.js:171:29)
+    at async FindOperation.execute (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\find.js:36:16)
+    at async tryOperation (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\execute_operation.js:207:20)
+    at async executeOperation (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\operations\execute_operation.js:75:16)
+    at async FindCursor._initialize (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\find_cursor.js:61:26)
+    at async FindCursor.cursorInit (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\abstract_cursor.js:633:27)
+    at async FindCursor.fetchBatch (D:\JJSOFT_GLOBAL\ishop-master\node_modules\mongodb\lib\cursor\abstract_cursor.js:667:13)
+{
+  "service": "payment-service",
+  "errorLabelSet": {},
+  "errorResponse": {
+    "ok": 0,
+    "errmsg": "Transaction 3 has been committed.",
+    "code": 256,
+    "codeName": "TransactionCommitted",
+    "$clusterTime": {
+      "clusterTime": {
+        "$timestamp": "7530886542609350658"
+      },
+      "signature": {
+        "hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        "keyId": 0
+      }
+    },
+    "operationTime": {
+      "$timestamp": "7530886542609350657"
+    }
+  },
+  "ok": 0,
+  "code": 256,
+  "codeName": "TransactionCommitted",
+  "$clusterTime": {
+    "clusterTime": {
+      "$timestamp": "7530886542609350658"
+    },
+    "signature": {
+      "hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      "keyId": 0
+    }
+  },
+  "operationTime": {
+    "$timestamp": "7530886542609350657"
+  }
+}
+2025-07-25 18:02:33 [error] Unhandled Rejection: formData.getHeaders is not a function 
+TypeError: formData.getHeaders is not a function
+    at BackupService.uploadToCloudinary (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:183:25)
+    at BackupService.backupTenantDatabase (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:41:39)
+{
+  "service": "payment-service"
+}
+2025-07-25 18:19:00 [error] Unhandled Rejection: Request failed with status code 401
+AxiosError: Request failed with status code 401
+    at settle (D:\JJSOFT_GLOBAL\ishop-master\node_modules\axios\dist\node\axios.cjs:2090:12)
+    at IncomingMessage.handleStreamEnd (D:\JJSOFT_GLOBAL\ishop-master\node_modules\axios\dist\node\axios.cjs:3207:11)
+    at IncomingMessage.emit (node:events:530:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (D:\JJSOFT_GLOBAL\ishop-master\node_modules\axios\dist\node\axios.cjs:4317:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async BackupService.uploadToCloudinary (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:189:22)
+    at async BackupService.backupTenantDatabase (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:41:28)
+{
+  "service": "payment-service",
+  "name": "AxiosError",
+  "code": "ERR_BAD_REQUEST",
+  "config": {
+    "transitional": {
+      "silentJSONParsing": true,
+      "forcedJSONParsing": true,
+      "clarifyTimeoutError": false
+    },
+    "adapter": [
+      "xhr",
+      "http",
+      "fetch"
+    ],
+    "transformRequest": [
+      null
+    ],
+    "transformResponse": [
+      null
+    ],
+    "timeout": 0,
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+    "maxContentLength": null,
+    "maxBodyLength": null,
+    "env": {},
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Content-Type": "multipart/form-data; boundary=--------------------------c66d51f2174be14fd667c398",
+      "User-Agent": "axios/1.11.0",
+      "Content-Length": "26374",
+      "Accept-Encoding": "gzip, compress, deflate, br"
+    },
+    "method": "post",
+    "url": "https://api.cloudinary.com/v1_1/dpkxck2uh/auto/upload",
+    "data": {
+      "_overheadLength": 827,
+      "_valueLength": 140,
+      "_valuesToMeasure": [
+        {
+          "fd": null,
+          "path": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\temp_ops\\tenant_jjsoft-2025-07-25T12-48-57-683Z.gz",
+          "flags": "r",
+          "mode": 438,
+          "end": null,
+          "bytesRead": 25351,
+          "_events": {},
+          "_readableState": {
+            "highWaterMark": 65536,
+            "buffer": [],
+            "bufferIndex": 0,
+            "length": 0,
+            "pipes": [],
+            "awaitDrainWriters": null
+          },
+          "_eventsCount": 2
+        }
+      ],
+      "writable": false,
+      "readable": true,
+      "dataSize": 0,
+      "maxDataSize": 2097152,
+      "pauseStreams": true,
+      "_released": true,
+      "_streams": [],
+      "_currentStream": null,
+      "_insideLoop": false,
+      "_pendingNext": false,
+      "_boundary": "--------------------------c66d51f2174be14fd667c398",
+      "_events": {},
+      "_eventsCount": 3
+    },
+    "allowAbsoluteUrls": true
+  },
+  "request": {
+    "_events": {},
+    "_eventsCount": 7,
+    "outputData": [],
+    "outputSize": 0,
+    "writable": true,
+    "destroyed": true,
+    "_last": false,
+    "chunkedEncoding": false,
+    "shouldKeepAlive": true,
+    "maxRequestsOnConnectionReached": false,
+    "_defaultKeepAlive": true,
+    "useChunkedEncodingByDefault": true,
+    "sendDate": false,
+    "_removedConnection": false,
+    "_removedContLen": false,
+    "_removedTE": false,
+    "strictContentLength": false,
+    "_contentLength": "26374",
+    "_hasBody": true,
+    "_trailer": "",
+    "finished": true,
+    "_headerSent": true,
+    "_closed": true,
+    "_header": "POST /v1_1/dpkxck2uh/auto/upload HTTP/1.1\r\nAccept: application/json, text/plain, */*\r\nContent-Type: multipart/form-data; boundary=--------------------------c66d51f2174be14fd667c398\r\nUser-Agent: axios/1.11.0\r\nContent-Length: 26374\r\nAccept-Encoding: gzip, compress, deflate, br\r\nHost: api.cloudinary.com\r\nConnection: keep-alive\r\n\r\n",
+    "_keepAliveTimeout": 0,
+    "agent": {
+      "_events": {},
+      "_eventsCount": 2,
+      "defaultPort": 443,
+      "protocol": "https:",
+      "options": {
+        "keepAlive": true,
+        "scheduling": "lifo",
+        "timeout": 5000,
+        "noDelay": true,
+        "path": null
+      },
+      "requests": {},
+      "sockets": {},
+      "freeSockets": {
+        "api.cloudinary.com:443:::::::::::::::::::::": [
+          {
+            "_tlsOptions": {
+              "pipe": false,
+              "secureContext": {
+                "context": {}
+              },
+              "isServer": false,
+              "requestCert": true,
+              "rejectUnauthorized": true
+            },
+            "_secureEstablished": true,
+            "_securePending": false,
+            "_newSessionPending": false,
+            "_controlReleased": true,
+            "secureConnecting": false,
+            "_SNICallback": null,
+            "servername": "api.cloudinary.com",
+            "alpnProtocol": false,
+            "authorized": true,
+            "authorizationError": null,
+            "encrypted": true,
+            "_events": {
+              "close": [
+                null,
+                null,
+                null
+              ],
+              "newListener": [
+                null,
+                null
+              ]
+            },
+            "_eventsCount": 9,
+            "connecting": false,
+            "_hadError": false,
+            "_parent": null,
+            "_host": "api.cloudinary.com",
+            "_closeAfterHandlingError": false,
+            "_readableState": {
+              "highWaterMark": 16384,
+              "buffer": [],
+              "bufferIndex": 0,
+              "length": 0,
+              "pipes": [],
+              "awaitDrainWriters": null
+            },
+            "_writableState": {
+              "highWaterMark": 16384,
+              "length": 0,
+              "corked": 0,
+              "writelen": 0,
+              "bufferedIndex": 0,
+              "pendingcb": 0
+            },
+            "allowHalfOpen": false,
+            "_sockname": null,
+            "_pendingData": null,
+            "_pendingEncoding": "",
+            "_server": null,
+            "ssl": null,
+            "_requestCert": true,
+            "_rejectUnauthorized": true,
+            "timeout": 5000,
+            "parser": null,
+            "_httpMessage": null,
+            "autoSelectFamilyAttemptedAddresses": [
+              "18.204.184.90:443",
+              "52.204.224.110:443",
+              "52.0.152.247:443",
+              "35.168.77.146:443"
+            ],
+            "handle": {
+              "_parent": {
+                "reading": true,
+                "onconnection": null
+              },
+              "_parentWrap": null,
+              "_secureContext": "[Circular]",
+              "reading": true
+            }
+          }
+        ]
+      },
+      "keepAliveMsecs": 1000,
+      "keepAlive": true,
+      "maxSockets": null,
+      "maxFreeSockets": 256,
+      "scheduling": "lifo",
+      "maxTotalSockets": null,
+      "totalSocketCount": 1,
+      "maxCachedSessions": 100,
+      "_sessionCache": {
+        "map": {},
+        "list": []
+      }
+    },
+    "method": "POST",
+    "path": "/v1_1/dpkxck2uh/auto/upload",
+    "_ended": true,
+    "res": {
+      "_events": {
+        "end": [
+          null,
+          null
+        ]
+      },
+      "_readableState": {
+        "highWaterMark": 16384,
+        "buffer": [],
+        "bufferIndex": 0,
+        "length": 0,
+        "pipes": [],
+        "awaitDrainWriters": null
+      },
+      "socket": null,
+      "httpVersionMajor": 1,
+      "httpVersionMinor": 1,
+      "httpVersion": "1.1",
+      "complete": true,
+      "rawHeaders": [
+        "Date",
+        "Fri, 25 Jul 2025 12:49:00 GMT",
+        "Content-Type",
+        "application/json; charset=utf-8",
+        "Transfer-Encoding",
+        "chunked",
+        "Connection",
+        "keep-alive",
+        "Status",
+        "401 Unauthorized",
+        "Cache-Control",
+        "no-cache",
+        "X-Cld-Error",
+        "Invalid Signature 486b9b03d72a6fb53902cb525d0e9803e71108f2. String to sign - 'folder=database_backups/tenant_jjsoft&public_id=tenant_jjsoft-2025-07-25T12-48-57-683Z&timestamp=1753447738&type=private'.",
+        "X-XSS-Protection",
+        "1; mode=block",
+        "X-Request-Id",
+        "2455dbf17f4f38acc0628b981c66eaa3",
+        "X-UA-Compatible",
+        "IE=Edge,chrome=1",
+        "Server",
+        "cloudinary"
+      ],
+      "rawTrailers": [],
+      "aborted": false,
+      "upgrade": false,
+      "url": "",
+      "method": null,
+      "statusCode": 401,
+      "statusMessage": "Unauthorized",
+      "client": "[Circular]",
+      "_consuming": true,
+      "_dumped": false,
+      "req": "[Circular]",
+      "_eventsCount": 4,
+      "responseUrl": "https://api.cloudinary.com/v1_1/dpkxck2uh/auto/upload",
+      "redirects": []
+    },
+    "aborted": false,
+    "timeoutCb": null,
+    "upgradeOrConnect": false,
+    "parser": null,
+    "maxHeadersCount": null,
+    "reusedSocket": false,
+    "host": "api.cloudinary.com",
+    "protocol": "https:",
+    "_redirectable": {
+      "_events": {},
+      "_writableState": {
+        "highWaterMark": 16384,
+        "length": 0,
+        "corked": 0,
+        "writelen": 0,
+        "bufferedIndex": 0,
+        "pendingcb": 0
+      },
+      "_options": {
+        "maxRedirects": 21,
+        "maxBodyLength": null,
+        "protocol": "https:",
+        "path": "/v1_1/dpkxck2uh/auto/upload",
+        "method": "POST",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "multipart/form-data; boundary=--------------------------c66d51f2174be14fd667c398",
+          "User-Agent": "axios/1.11.0",
+          "Content-Length": "26374",
+          "Accept-Encoding": "gzip, compress, deflate, br"
+        },
+        "agents": {},
+        "beforeRedirects": {},
+        "hostname": "api.cloudinary.com",
+        "port": "",
+        "nativeProtocols": {
+          "http:": {
+            "METHODS": [
+              "ACL",
+              "BIND",
+              "CHECKOUT",
+              "CONNECT",
+              "COPY",
+              "DELETE",
+              "GET",
+              "HEAD",
+              "LINK",
+              "LOCK",
+              "M-SEARCH",
+              "MERGE",
+              "MKACTIVITY",
+              "MKCALENDAR",
+              "MKCOL",
+              "MOVE",
+              "NOTIFY",
+              "OPTIONS",
+              "PATCH",
+              "POST",
+              "PROPFIND",
+              "PROPPATCH",
+              "PURGE",
+              "PUT",
+              "QUERY",
+              "REBIND",
+              "REPORT",
+              "SEARCH",
+              "SOURCE",
+              "SUBSCRIBE",
+              "TRACE",
+              "UNBIND",
+              "UNLINK",
+              "UNLOCK",
+              "UNSUBSCRIBE"
+            ],
+            "STATUS_CODES": {
+              "100": "Continue",
+              "101": "Switching Protocols",
+              "102": "Processing",
+              "103": "Early Hints",
+              "200": "OK",
+              "201": "Created",
+              "202": "Accepted",
+              "203": "Non-Authoritative Information",
+              "204": "No Content",
+              "205": "Reset Content",
+              "206": "Partial Content",
+              "207": "Multi-Status",
+              "208": "Already Reported",
+              "226": "IM Used",
+              "300": "Multiple Choices",
+              "301": "Moved Permanently",
+              "302": "Found",
+              "303": "See Other",
+              "304": "Not Modified",
+              "305": "Use Proxy",
+              "307": "Temporary Redirect",
+              "308": "Permanent Redirect",
+              "400": "Bad Request",
+              "401": "Unauthorized",
+              "402": "Payment Required",
+              "403": "Forbidden",
+              "404": "Not Found",
+              "405": "Method Not Allowed",
+              "406": "Not Acceptable",
+              "407": "Proxy Authentication Required",
+              "408": "Request Timeout",
+              "409": "Conflict",
+              "410": "Gone",
+              "411": "Length Required",
+              "412": "Precondition Failed",
+              "413": "Payload Too Large",
+              "414": "URI Too Long",
+              "415": "Unsupported Media Type",
+              "416": "Range Not Satisfiable",
+              "417": "Expectation Failed",
+              "418": "I'm a Teapot",
+              "421": "Misdirected Request",
+              "422": "Unprocessable Entity",
+              "423": "Locked",
+              "424": "Failed Dependency",
+              "425": "Too Early",
+              "426": "Upgrade Required",
+              "428": "Precondition Required",
+              "429": "Too Many Requests",
+              "431": "Request Header Fields Too Large",
+              "451": "Unavailable For Legal Reasons",
+              "500": "Internal Server Error",
+              "501": "Not Implemented",
+              "502": "Bad Gateway",
+              "503": "Service Unavailable",
+              "504": "Gateway Timeout",
+              "505": "HTTP Version Not Supported",
+              "506": "Variant Also Negotiates",
+              "507": "Insufficient Storage",
+              "508": "Loop Detected",
+              "509": "Bandwidth Limit Exceeded",
+              "510": "Not Extended",
+              "511": "Network Authentication Required"
+            },
+            "maxHeaderSize": 16384,
+            "globalAgent": {
+              "_events": {},
+              "_eventsCount": 2,
+              "defaultPort": 80,
+              "protocol": "http:",
+              "options": {
+                "keepAlive": true,
+                "scheduling": "lifo",
+                "timeout": 5000,
+                "noDelay": true,
+                "path": null
+              },
+              "requests": {},
+              "sockets": {},
+              "freeSockets": {},
+              "keepAliveMsecs": 1000,
+              "keepAlive": true,
+              "maxSockets": null,
+              "maxFreeSockets": 256,
+              "scheduling": "lifo",
+              "maxTotalSockets": null,
+              "totalSocketCount": 0
+            }
+          },
+          "https:": {
+            "globalAgent": "[Circular]"
+          }
+        },
+        "pathname": "/v1_1/dpkxck2uh/auto/upload"
+      },
+      "_ended": true,
+      "_ending": true,
+      "_redirectCount": 0,
+      "_redirects": "[Circular]",
+      "_requestBodyLength": 26374,
+      "_requestBodyBuffers": [],
+      "_eventsCount": 3,
+      "_currentRequest": "[Circular]",
+      "_currentUrl": "https://api.cloudinary.com/v1_1/dpkxck2uh/auto/upload"
+    }
+  },
+  "response": {
+    "status": 401,
+    "statusText": "Unauthorized",
+    "headers": {
+      "date": "Fri, 25 Jul 2025 12:49:00 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "status": "401 Unauthorized",
+      "cache-control": "no-cache",
+      "x-cld-error": "Invalid Signature 486b9b03d72a6fb53902cb525d0e9803e71108f2. String to sign - 'folder=database_backups/tenant_jjsoft&public_id=tenant_jjsoft-2025-07-25T12-48-57-683Z&timestamp=1753447738&type=private'.",
+      "x-xss-protection": "1; mode=block",
+      "x-request-id": "2455dbf17f4f38acc0628b981c66eaa3",
+      "x-ua-compatible": "IE=Edge,chrome=1",
+      "server": "cloudinary"
+    },
+    "config": "[Circular]",
+    "request": "[Circular]",
+    "data": {
+      "error": {
+        "message": "Invalid Signature 486b9b03d72a6fb53902cb525d0e9803e71108f2. String to sign - 'folder=database_backups/tenant_jjsoft&public_id=tenant_jjsoft-2025-07-25T12-48-57-683Z&timestamp=1753447738&type=private'."
+      }
+    }
+  },
+  "status": 401
+}
+2025-07-25 18:34:11 [error] Unhandled Rejection: Request failed with status code 401
+AxiosError: Request failed with status code 401
+    at settle (D:\JJSOFT_GLOBAL\ishop-master\node_modules\axios\dist\node\axios.cjs:2090:12)
+    at IncomingMessage.handleStreamEnd (D:\JJSOFT_GLOBAL\ishop-master\node_modules\axios\dist\node\axios.cjs:3207:11)
+    at IncomingMessage.emit (node:events:530:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (D:\JJSOFT_GLOBAL\ishop-master\node_modules\axios\dist\node\axios.cjs:4317:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async BackupService.uploadToCloudinary (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:189:22)
+    at async BackupService.backupTenantDatabase (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:41:28)
+{
+  "service": "payment-service",
+  "name": "AxiosError",
+  "code": "ERR_BAD_REQUEST",
+  "config": {
+    "transitional": {
+      "silentJSONParsing": true,
+      "forcedJSONParsing": true,
+      "clarifyTimeoutError": false
+    },
+    "adapter": [
+      "xhr",
+      "http",
+      "fetch"
+    ],
+    "transformRequest": [
+      null
+    ],
+    "transformResponse": [
+      null
+    ],
+    "timeout": 0,
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+    "maxContentLength": null,
+    "maxBodyLength": null,
+    "env": {},
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Content-Type": "multipart/form-data; boundary=--------------------------09a8c51caf5dae8ced3c8d06",
+      "User-Agent": "axios/1.11.0",
+      "Content-Length": "26476",
+      "Accept-Encoding": "gzip, compress, deflate, br"
+    },
+    "method": "post",
+    "url": "https://api.cloudinary.com/v1_1/dpkxck2uh/auto/upload",
+    "data": {
+      "_overheadLength": 827,
+      "_valueLength": 140,
+      "_valuesToMeasure": [
+        {
+          "fd": null,
+          "path": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\temp_ops\\tenant_jjsoft-2025-07-25T13-04-08-022Z.gz",
+          "flags": "r",
+          "mode": 438,
+          "end": null,
+          "bytesRead": 25453,
+          "_events": {},
+          "_readableState": {
+            "highWaterMark": 65536,
+            "buffer": [],
+            "bufferIndex": 0,
+            "length": 0,
+            "pipes": [],
+            "awaitDrainWriters": null
+          },
+          "_eventsCount": 2
+        }
+      ],
+      "writable": false,
+      "readable": true,
+      "dataSize": 0,
+      "maxDataSize": 2097152,
+      "pauseStreams": true,
+      "_released": true,
+      "_streams": [],
+      "_currentStream": null,
+      "_insideLoop": false,
+      "_pendingNext": false,
+      "_boundary": "--------------------------09a8c51caf5dae8ced3c8d06",
+      "_events": {},
+      "_eventsCount": 3
+    },
+    "allowAbsoluteUrls": true
+  },
+  "request": {
+    "_events": {},
+    "_eventsCount": 7,
+    "outputData": [],
+    "outputSize": 0,
+    "writable": true,
+    "destroyed": true,
+    "_last": false,
+    "chunkedEncoding": false,
+    "shouldKeepAlive": true,
+    "maxRequestsOnConnectionReached": false,
+    "_defaultKeepAlive": true,
+    "useChunkedEncodingByDefault": true,
+    "sendDate": false,
+    "_removedConnection": false,
+    "_removedContLen": false,
+    "_removedTE": false,
+    "strictContentLength": false,
+    "_contentLength": "26476",
+    "_hasBody": true,
+    "_trailer": "",
+    "finished": true,
+    "_headerSent": true,
+    "_closed": true,
+    "_header": "POST /v1_1/dpkxck2uh/auto/upload HTTP/1.1\r\nAccept: application/json, text/plain, */*\r\nContent-Type: multipart/form-data; boundary=--------------------------09a8c51caf5dae8ced3c8d06\r\nUser-Agent: axios/1.11.0\r\nContent-Length: 26476\r\nAccept-Encoding: gzip, compress, deflate, br\r\nHost: api.cloudinary.com\r\nConnection: keep-alive\r\n\r\n",
+    "_keepAliveTimeout": 0,
+    "agent": {
+      "_events": {},
+      "_eventsCount": 2,
+      "defaultPort": 443,
+      "protocol": "https:",
+      "options": {
+        "keepAlive": true,
+        "scheduling": "lifo",
+        "timeout": 5000,
+        "noDelay": true,
+        "path": null
+      },
+      "requests": {},
+      "sockets": {},
+      "freeSockets": {
+        "api.cloudinary.com:443:::::::::::::::::::::": [
+          {
+            "_tlsOptions": {
+              "pipe": false,
+              "secureContext": {
+                "context": {}
+              },
+              "isServer": false,
+              "requestCert": true,
+              "rejectUnauthorized": true
+            },
+            "_secureEstablished": true,
+            "_securePending": false,
+            "_newSessionPending": false,
+            "_controlReleased": true,
+            "secureConnecting": false,
+            "_SNICallback": null,
+            "servername": "api.cloudinary.com",
+            "alpnProtocol": false,
+            "authorized": true,
+            "authorizationError": null,
+            "encrypted": true,
+            "_events": {
+              "close": [
+                null,
+                null,
+                null
+              ],
+              "newListener": [
+                null,
+                null
+              ]
+            },
+            "_eventsCount": 9,
+            "connecting": false,
+            "_hadError": false,
+            "_parent": null,
+            "_host": "api.cloudinary.com",
+            "_closeAfterHandlingError": false,
+            "_readableState": {
+              "highWaterMark": 16384,
+              "buffer": [],
+              "bufferIndex": 0,
+              "length": 0,
+              "pipes": [],
+              "awaitDrainWriters": null
+            },
+            "_writableState": {
+              "highWaterMark": 16384,
+              "length": 0,
+              "corked": 0,
+              "writelen": 0,
+              "bufferedIndex": 0,
+              "pendingcb": 0
+            },
+            "allowHalfOpen": false,
+            "_sockname": null,
+            "_pendingData": null,
+            "_pendingEncoding": "",
+            "_server": null,
+            "ssl": null,
+            "_requestCert": true,
+            "_rejectUnauthorized": true,
+            "timeout": 5000,
+            "parser": null,
+            "_httpMessage": null,
+            "autoSelectFamilyAttemptedAddresses": [
+              "52.204.224.110:443",
+              "52.0.152.247:443",
+              "18.204.184.90:443",
+              "35.168.77.146:443"
+            ],
+            "handle": {
+              "_parent": {
+                "reading": true,
+                "onconnection": null
+              },
+              "_parentWrap": null,
+              "_secureContext": "[Circular]",
+              "reading": true
+            }
+          }
+        ]
+      },
+      "keepAliveMsecs": 1000,
+      "keepAlive": true,
+      "maxSockets": null,
+      "maxFreeSockets": 256,
+      "scheduling": "lifo",
+      "maxTotalSockets": null,
+      "totalSocketCount": 1,
+      "maxCachedSessions": 100,
+      "_sessionCache": {
+        "map": {},
+        "list": []
+      }
+    },
+    "method": "POST",
+    "path": "/v1_1/dpkxck2uh/auto/upload",
+    "_ended": true,
+    "res": {
+      "_events": {
+        "end": [
+          null,
+          null
+        ]
+      },
+      "_readableState": {
+        "highWaterMark": 16384,
+        "buffer": [],
+        "bufferIndex": 0,
+        "length": 0,
+        "pipes": [],
+        "awaitDrainWriters": null
+      },
+      "socket": null,
+      "httpVersionMajor": 1,
+      "httpVersionMinor": 1,
+      "httpVersion": "1.1",
+      "complete": true,
+      "rawHeaders": [
+        "Date",
+        "Fri, 25 Jul 2025 13:04:11 GMT",
+        "Content-Type",
+        "application/json; charset=utf-8",
+        "Transfer-Encoding",
+        "chunked",
+        "Connection",
+        "keep-alive",
+        "Status",
+        "401 Unauthorized",
+        "Cache-Control",
+        "no-cache",
+        "X-Cld-Error",
+        "Invalid Signature db829d9b0b16b02270e36fcc717edfaa2f461bda. String to sign - 'folder=database_backups/tenant_jjsoft&public_id=tenant_jjsoft-2025-07-25T13-04-08-022Z&timestamp=1753448648&type=private'.",
+        "X-XSS-Protection",
+        "1; mode=block",
+        "X-Request-Id",
+        "2e6876829d39d88d31f6f69a16fda13b",
+        "X-UA-Compatible",
+        "IE=Edge,chrome=1",
+        "Server",
+        "cloudinary"
+      ],
+      "rawTrailers": [],
+      "aborted": false,
+      "upgrade": false,
+      "url": "",
+      "method": null,
+      "statusCode": 401,
+      "statusMessage": "Unauthorized",
+      "client": "[Circular]",
+      "_consuming": true,
+      "_dumped": false,
+      "req": "[Circular]",
+      "_eventsCount": 4,
+      "responseUrl": "https://api.cloudinary.com/v1_1/dpkxck2uh/auto/upload",
+      "redirects": []
+    },
+    "aborted": false,
+    "timeoutCb": null,
+    "upgradeOrConnect": false,
+    "parser": null,
+    "maxHeadersCount": null,
+    "reusedSocket": false,
+    "host": "api.cloudinary.com",
+    "protocol": "https:",
+    "_redirectable": {
+      "_events": {},
+      "_writableState": {
+        "highWaterMark": 16384,
+        "length": 0,
+        "corked": 0,
+        "writelen": 0,
+        "bufferedIndex": 0,
+        "pendingcb": 0
+      },
+      "_options": {
+        "maxRedirects": 21,
+        "maxBodyLength": null,
+        "protocol": "https:",
+        "path": "/v1_1/dpkxck2uh/auto/upload",
+        "method": "POST",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "multipart/form-data; boundary=--------------------------09a8c51caf5dae8ced3c8d06",
+          "User-Agent": "axios/1.11.0",
+          "Content-Length": "26476",
+          "Accept-Encoding": "gzip, compress, deflate, br"
+        },
+        "agents": {},
+        "beforeRedirects": {},
+        "hostname": "api.cloudinary.com",
+        "port": "",
+        "nativeProtocols": {
+          "http:": {
+            "METHODS": [
+              "ACL",
+              "BIND",
+              "CHECKOUT",
+              "CONNECT",
+              "COPY",
+              "DELETE",
+              "GET",
+              "HEAD",
+              "LINK",
+              "LOCK",
+              "M-SEARCH",
+              "MERGE",
+              "MKACTIVITY",
+              "MKCALENDAR",
+              "MKCOL",
+              "MOVE",
+              "NOTIFY",
+              "OPTIONS",
+              "PATCH",
+              "POST",
+              "PROPFIND",
+              "PROPPATCH",
+              "PURGE",
+              "PUT",
+              "QUERY",
+              "REBIND",
+              "REPORT",
+              "SEARCH",
+              "SOURCE",
+              "SUBSCRIBE",
+              "TRACE",
+              "UNBIND",
+              "UNLINK",
+              "UNLOCK",
+              "UNSUBSCRIBE"
+            ],
+            "STATUS_CODES": {
+              "100": "Continue",
+              "101": "Switching Protocols",
+              "102": "Processing",
+              "103": "Early Hints",
+              "200": "OK",
+              "201": "Created",
+              "202": "Accepted",
+              "203": "Non-Authoritative Information",
+              "204": "No Content",
+              "205": "Reset Content",
+              "206": "Partial Content",
+              "207": "Multi-Status",
+              "208": "Already Reported",
+              "226": "IM Used",
+              "300": "Multiple Choices",
+              "301": "Moved Permanently",
+              "302": "Found",
+              "303": "See Other",
+              "304": "Not Modified",
+              "305": "Use Proxy",
+              "307": "Temporary Redirect",
+              "308": "Permanent Redirect",
+              "400": "Bad Request",
+              "401": "Unauthorized",
+              "402": "Payment Required",
+              "403": "Forbidden",
+              "404": "Not Found",
+              "405": "Method Not Allowed",
+              "406": "Not Acceptable",
+              "407": "Proxy Authentication Required",
+              "408": "Request Timeout",
+              "409": "Conflict",
+              "410": "Gone",
+              "411": "Length Required",
+              "412": "Precondition Failed",
+              "413": "Payload Too Large",
+              "414": "URI Too Long",
+              "415": "Unsupported Media Type",
+              "416": "Range Not Satisfiable",
+              "417": "Expectation Failed",
+              "418": "I'm a Teapot",
+              "421": "Misdirected Request",
+              "422": "Unprocessable Entity",
+              "423": "Locked",
+              "424": "Failed Dependency",
+              "425": "Too Early",
+              "426": "Upgrade Required",
+              "428": "Precondition Required",
+              "429": "Too Many Requests",
+              "431": "Request Header Fields Too Large",
+              "451": "Unavailable For Legal Reasons",
+              "500": "Internal Server Error",
+              "501": "Not Implemented",
+              "502": "Bad Gateway",
+              "503": "Service Unavailable",
+              "504": "Gateway Timeout",
+              "505": "HTTP Version Not Supported",
+              "506": "Variant Also Negotiates",
+              "507": "Insufficient Storage",
+              "508": "Loop Detected",
+              "509": "Bandwidth Limit Exceeded",
+              "510": "Not Extended",
+              "511": "Network Authentication Required"
+            },
+            "maxHeaderSize": 16384,
+            "globalAgent": {
+              "_events": {},
+              "_eventsCount": 2,
+              "defaultPort": 80,
+              "protocol": "http:",
+              "options": {
+                "keepAlive": true,
+                "scheduling": "lifo",
+                "timeout": 5000,
+                "noDelay": true,
+                "path": null
+              },
+              "requests": {},
+              "sockets": {},
+              "freeSockets": {},
+              "keepAliveMsecs": 1000,
+              "keepAlive": true,
+              "maxSockets": null,
+              "maxFreeSockets": 256,
+              "scheduling": "lifo",
+              "maxTotalSockets": null,
+              "totalSocketCount": 0
+            }
+          },
+          "https:": {
+            "globalAgent": "[Circular]"
+          }
+        },
+        "pathname": "/v1_1/dpkxck2uh/auto/upload"
+      },
+      "_ended": true,
+      "_ending": true,
+      "_redirectCount": 0,
+      "_redirects": "[Circular]",
+      "_requestBodyLength": 26476,
+      "_requestBodyBuffers": [],
+      "_eventsCount": 3,
+      "_currentRequest": "[Circular]",
+      "_currentUrl": "https://api.cloudinary.com/v1_1/dpkxck2uh/auto/upload"
+    }
+  },
+  "response": {
+    "status": 401,
+    "statusText": "Unauthorized",
+    "headers": {
+      "date": "Fri, 25 Jul 2025 13:04:11 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "status": "401 Unauthorized",
+      "cache-control": "no-cache",
+      "x-cld-error": "Invalid Signature db829d9b0b16b02270e36fcc717edfaa2f461bda. String to sign - 'folder=database_backups/tenant_jjsoft&public_id=tenant_jjsoft-2025-07-25T13-04-08-022Z&timestamp=1753448648&type=private'.",
+      "x-xss-protection": "1; mode=block",
+      "x-request-id": "2e6876829d39d88d31f6f69a16fda13b",
+      "x-ua-compatible": "IE=Edge,chrome=1",
+      "server": "cloudinary"
+    },
+    "config": "[Circular]",
+    "request": "[Circular]",
+    "data": {
+      "error": {
+        "message": "Invalid Signature db829d9b0b16b02270e36fcc717edfaa2f461bda. String to sign - 'folder=database_backups/tenant_jjsoft&public_id=tenant_jjsoft-2025-07-25T13-04-08-022Z&timestamp=1753448648&type=private'."
+      }
+    }
+  },
+  "status": 401
+}
+2025-07-25 18:35:23 [error] Unhandled Rejection: Request failed with status code 401
+AxiosError: Request failed with status code 401
+    at settle (D:\JJSOFT_GLOBAL\ishop-master\node_modules\axios\dist\node\axios.cjs:2090:12)
+    at IncomingMessage.handleStreamEnd (D:\JJSOFT_GLOBAL\ishop-master\node_modules\axios\dist\node\axios.cjs:3207:11)
+    at IncomingMessage.emit (node:events:530:35)
+    at endReadableNT (node:internal/streams/readable:1698:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+    at Axios.request (D:\JJSOFT_GLOBAL\ishop-master\node_modules\axios\dist\node\axios.cjs:4317:41)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async BackupService.uploadToCloudinary (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:221:22)
+    at async BackupService.backupTenantDatabase (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:47:28)
+{
+  "service": "payment-service",
+  "name": "AxiosError",
+  "code": "ERR_BAD_REQUEST",
+  "config": {
+    "transitional": {
+      "silentJSONParsing": true,
+      "forcedJSONParsing": true,
+      "clarifyTimeoutError": false
+    },
+    "adapter": [
+      "xhr",
+      "http",
+      "fetch"
+    ],
+    "transformRequest": [
+      null
+    ],
+    "transformResponse": [
+      null
+    ],
+    "timeout": 0,
+    "xsrfCookieName": "XSRF-TOKEN",
+    "xsrfHeaderName": "X-XSRF-TOKEN",
+    "maxContentLength": null,
+    "maxBodyLength": null,
+    "env": {},
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Content-Type": "multipart/form-data; boundary=--------------------------02101e49888e0793347144bd",
+      "User-Agent": "axios/1.11.0",
+      "Content-Length": "26440",
+      "Accept-Encoding": "gzip, compress, deflate, br"
+    },
+    "method": "post",
+    "url": "https://api.cloudinary.com/v1_1/dpkxck2uh/auto/upload",
+    "data": {
+      "_overheadLength": 827,
+      "_valueLength": 140,
+      "_valuesToMeasure": [
+        {
+          "fd": null,
+          "path": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\services\\temp_ops\\tenant_jjsoft-2025-07-25T13-05-20-315Z.gz",
+          "flags": "r",
+          "mode": 438,
+          "end": null,
+          "bytesRead": 25417,
+          "_events": {},
+          "_readableState": {
+            "highWaterMark": 65536,
+            "buffer": [],
+            "bufferIndex": 0,
+            "length": 0,
+            "pipes": [],
+            "awaitDrainWriters": null
+          },
+          "_eventsCount": 2
+        }
+      ],
+      "writable": false,
+      "readable": true,
+      "dataSize": 0,
+      "maxDataSize": 2097152,
+      "pauseStreams": true,
+      "_released": true,
+      "_streams": [],
+      "_currentStream": null,
+      "_insideLoop": false,
+      "_pendingNext": false,
+      "_boundary": "--------------------------02101e49888e0793347144bd",
+      "_events": {},
+      "_eventsCount": 3
+    },
+    "allowAbsoluteUrls": true
+  },
+  "request": {
+    "_events": {},
+    "_eventsCount": 7,
+    "outputData": [],
+    "outputSize": 0,
+    "writable": true,
+    "destroyed": true,
+    "_last": false,
+    "chunkedEncoding": false,
+    "shouldKeepAlive": true,
+    "maxRequestsOnConnectionReached": false,
+    "_defaultKeepAlive": true,
+    "useChunkedEncodingByDefault": true,
+    "sendDate": false,
+    "_removedConnection": false,
+    "_removedContLen": false,
+    "_removedTE": false,
+    "strictContentLength": false,
+    "_contentLength": "26440",
+    "_hasBody": true,
+    "_trailer": "",
+    "finished": true,
+    "_headerSent": true,
+    "_closed": true,
+    "_header": "POST /v1_1/dpkxck2uh/auto/upload HTTP/1.1\r\nAccept: application/json, text/plain, */*\r\nContent-Type: multipart/form-data; boundary=--------------------------02101e49888e0793347144bd\r\nUser-Agent: axios/1.11.0\r\nContent-Length: 26440\r\nAccept-Encoding: gzip, compress, deflate, br\r\nHost: api.cloudinary.com\r\nConnection: keep-alive\r\n\r\n",
+    "_keepAliveTimeout": 0,
+    "agent": {
+      "_events": {},
+      "_eventsCount": 2,
+      "defaultPort": 443,
+      "protocol": "https:",
+      "options": {
+        "keepAlive": true,
+        "scheduling": "lifo",
+        "timeout": 5000,
+        "noDelay": true,
+        "path": null
+      },
+      "requests": {},
+      "sockets": {},
+      "freeSockets": {
+        "api.cloudinary.com:443:::::::::::::::::::::": [
+          {
+            "_tlsOptions": {
+              "pipe": false,
+              "secureContext": {
+                "context": {}
+              },
+              "isServer": false,
+              "requestCert": true,
+              "rejectUnauthorized": true
+            },
+            "_secureEstablished": true,
+            "_securePending": false,
+            "_newSessionPending": false,
+            "_controlReleased": true,
+            "secureConnecting": false,
+            "_SNICallback": null,
+            "servername": "api.cloudinary.com",
+            "alpnProtocol": false,
+            "authorized": true,
+            "authorizationError": null,
+            "encrypted": true,
+            "_events": {
+              "close": [
+                null,
+                null,
+                null
+              ],
+              "newListener": [
+                null,
+                null
+              ]
+            },
+            "_eventsCount": 9,
+            "connecting": false,
+            "_hadError": false,
+            "_parent": null,
+            "_host": "api.cloudinary.com",
+            "_closeAfterHandlingError": false,
+            "_readableState": {
+              "highWaterMark": 16384,
+              "buffer": [],
+              "bufferIndex": 0,
+              "length": 0,
+              "pipes": [],
+              "awaitDrainWriters": null
+            },
+            "_writableState": {
+              "highWaterMark": 16384,
+              "length": 0,
+              "corked": 0,
+              "writelen": 0,
+              "bufferedIndex": 0,
+              "pendingcb": 0
+            },
+            "allowHalfOpen": false,
+            "_sockname": null,
+            "_pendingData": null,
+            "_pendingEncoding": "",
+            "_server": null,
+            "ssl": null,
+            "_requestCert": true,
+            "_rejectUnauthorized": true,
+            "timeout": 5000,
+            "parser": null,
+            "_httpMessage": null,
+            "autoSelectFamilyAttemptedAddresses": [
+              "52.204.224.110:443",
+              "35.168.77.146:443",
+              "18.204.184.90:443",
+              "52.0.152.247:443"
+            ],
+            "handle": {
+              "_parent": {
+                "reading": true,
+                "onconnection": null
+              },
+              "_parentWrap": null,
+              "_secureContext": "[Circular]",
+              "reading": true
+            }
+          }
+        ]
+      },
+      "keepAliveMsecs": 1000,
+      "keepAlive": true,
+      "maxSockets": null,
+      "maxFreeSockets": 256,
+      "scheduling": "lifo",
+      "maxTotalSockets": null,
+      "totalSocketCount": 1,
+      "maxCachedSessions": 100,
+      "_sessionCache": {
+        "map": {},
+        "list": []
+      }
+    },
+    "method": "POST",
+    "path": "/v1_1/dpkxck2uh/auto/upload",
+    "_ended": true,
+    "res": {
+      "_events": {
+        "end": [
+          null,
+          null
+        ]
+      },
+      "_readableState": {
+        "highWaterMark": 16384,
+        "buffer": [],
+        "bufferIndex": 0,
+        "length": 0,
+        "pipes": [],
+        "awaitDrainWriters": null
+      },
+      "socket": null,
+      "httpVersionMajor": 1,
+      "httpVersionMinor": 1,
+      "httpVersion": "1.1",
+      "complete": true,
+      "rawHeaders": [
+        "Date",
+        "Fri, 25 Jul 2025 13:05:23 GMT",
+        "Content-Type",
+        "application/json; charset=utf-8",
+        "Transfer-Encoding",
+        "chunked",
+        "Connection",
+        "keep-alive",
+        "Status",
+        "401 Unauthorized",
+        "Cache-Control",
+        "no-cache",
+        "X-Cld-Error",
+        "Invalid Signature a204f18e543b6bc904c07cc660c00203da770503. String to sign - 'folder=database_backups/tenant_jjsoft&public_id=tenant_jjsoft-2025-07-25T13-05-20-315Z&timestamp=1753448720&type=private'.",
+        "X-XSS-Protection",
+        "1; mode=block",
+        "X-Request-Id",
+        "29b2d041884a22ae0b56782fe08a67fe",
+        "X-UA-Compatible",
+        "IE=Edge,chrome=1",
+        "Server",
+        "cloudinary"
+      ],
+      "rawTrailers": [],
+      "aborted": false,
+      "upgrade": false,
+      "url": "",
+      "method": null,
+      "statusCode": 401,
+      "statusMessage": "Unauthorized",
+      "client": "[Circular]",
+      "_consuming": true,
+      "_dumped": false,
+      "req": "[Circular]",
+      "_eventsCount": 4,
+      "responseUrl": "https://api.cloudinary.com/v1_1/dpkxck2uh/auto/upload",
+      "redirects": []
+    },
+    "aborted": false,
+    "timeoutCb": null,
+    "upgradeOrConnect": false,
+    "parser": null,
+    "maxHeadersCount": null,
+    "reusedSocket": false,
+    "host": "api.cloudinary.com",
+    "protocol": "https:",
+    "_redirectable": {
+      "_events": {},
+      "_writableState": {
+        "highWaterMark": 16384,
+        "length": 0,
+        "corked": 0,
+        "writelen": 0,
+        "bufferedIndex": 0,
+        "pendingcb": 0
+      },
+      "_options": {
+        "maxRedirects": 21,
+        "maxBodyLength": null,
+        "protocol": "https:",
+        "path": "/v1_1/dpkxck2uh/auto/upload",
+        "method": "POST",
+        "headers": {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "multipart/form-data; boundary=--------------------------02101e49888e0793347144bd",
+          "User-Agent": "axios/1.11.0",
+          "Content-Length": "26440",
+          "Accept-Encoding": "gzip, compress, deflate, br"
+        },
+        "agents": {},
+        "beforeRedirects": {},
+        "hostname": "api.cloudinary.com",
+        "port": "",
+        "nativeProtocols": {
+          "http:": {
+            "METHODS": [
+              "ACL",
+              "BIND",
+              "CHECKOUT",
+              "CONNECT",
+              "COPY",
+              "DELETE",
+              "GET",
+              "HEAD",
+              "LINK",
+              "LOCK",
+              "M-SEARCH",
+              "MERGE",
+              "MKACTIVITY",
+              "MKCALENDAR",
+              "MKCOL",
+              "MOVE",
+              "NOTIFY",
+              "OPTIONS",
+              "PATCH",
+              "POST",
+              "PROPFIND",
+              "PROPPATCH",
+              "PURGE",
+              "PUT",
+              "QUERY",
+              "REBIND",
+              "REPORT",
+              "SEARCH",
+              "SOURCE",
+              "SUBSCRIBE",
+              "TRACE",
+              "UNBIND",
+              "UNLINK",
+              "UNLOCK",
+              "UNSUBSCRIBE"
+            ],
+            "STATUS_CODES": {
+              "100": "Continue",
+              "101": "Switching Protocols",
+              "102": "Processing",
+              "103": "Early Hints",
+              "200": "OK",
+              "201": "Created",
+              "202": "Accepted",
+              "203": "Non-Authoritative Information",
+              "204": "No Content",
+              "205": "Reset Content",
+              "206": "Partial Content",
+              "207": "Multi-Status",
+              "208": "Already Reported",
+              "226": "IM Used",
+              "300": "Multiple Choices",
+              "301": "Moved Permanently",
+              "302": "Found",
+              "303": "See Other",
+              "304": "Not Modified",
+              "305": "Use Proxy",
+              "307": "Temporary Redirect",
+              "308": "Permanent Redirect",
+              "400": "Bad Request",
+              "401": "Unauthorized",
+              "402": "Payment Required",
+              "403": "Forbidden",
+              "404": "Not Found",
+              "405": "Method Not Allowed",
+              "406": "Not Acceptable",
+              "407": "Proxy Authentication Required",
+              "408": "Request Timeout",
+              "409": "Conflict",
+              "410": "Gone",
+              "411": "Length Required",
+              "412": "Precondition Failed",
+              "413": "Payload Too Large",
+              "414": "URI Too Long",
+              "415": "Unsupported Media Type",
+              "416": "Range Not Satisfiable",
+              "417": "Expectation Failed",
+              "418": "I'm a Teapot",
+              "421": "Misdirected Request",
+              "422": "Unprocessable Entity",
+              "423": "Locked",
+              "424": "Failed Dependency",
+              "425": "Too Early",
+              "426": "Upgrade Required",
+              "428": "Precondition Required",
+              "429": "Too Many Requests",
+              "431": "Request Header Fields Too Large",
+              "451": "Unavailable For Legal Reasons",
+              "500": "Internal Server Error",
+              "501": "Not Implemented",
+              "502": "Bad Gateway",
+              "503": "Service Unavailable",
+              "504": "Gateway Timeout",
+              "505": "HTTP Version Not Supported",
+              "506": "Variant Also Negotiates",
+              "507": "Insufficient Storage",
+              "508": "Loop Detected",
+              "509": "Bandwidth Limit Exceeded",
+              "510": "Not Extended",
+              "511": "Network Authentication Required"
+            },
+            "maxHeaderSize": 16384,
+            "globalAgent": {
+              "_events": {},
+              "_eventsCount": 2,
+              "defaultPort": 80,
+              "protocol": "http:",
+              "options": {
+                "keepAlive": true,
+                "scheduling": "lifo",
+                "timeout": 5000,
+                "noDelay": true,
+                "path": null
+              },
+              "requests": {},
+              "sockets": {},
+              "freeSockets": {},
+              "keepAliveMsecs": 1000,
+              "keepAlive": true,
+              "maxSockets": null,
+              "maxFreeSockets": 256,
+              "scheduling": "lifo",
+              "maxTotalSockets": null,
+              "totalSocketCount": 0
+            }
+          },
+          "https:": {
+            "globalAgent": "[Circular]"
+          }
+        },
+        "pathname": "/v1_1/dpkxck2uh/auto/upload"
+      },
+      "_ended": true,
+      "_ending": true,
+      "_redirectCount": 0,
+      "_redirects": "[Circular]",
+      "_requestBodyLength": 26440,
+      "_requestBodyBuffers": [],
+      "_eventsCount": 3,
+      "_currentRequest": "[Circular]",
+      "_currentUrl": "https://api.cloudinary.com/v1_1/dpkxck2uh/auto/upload"
+    }
+  },
+  "response": {
+    "status": 401,
+    "statusText": "Unauthorized",
+    "headers": {
+      "date": "Fri, 25 Jul 2025 13:05:23 GMT",
+      "content-type": "application/json; charset=utf-8",
+      "transfer-encoding": "chunked",
+      "connection": "keep-alive",
+      "status": "401 Unauthorized",
+      "cache-control": "no-cache",
+      "x-cld-error": "Invalid Signature a204f18e543b6bc904c07cc660c00203da770503. String to sign - 'folder=database_backups/tenant_jjsoft&public_id=tenant_jjsoft-2025-07-25T13-05-20-315Z&timestamp=1753448720&type=private'.",
+      "x-xss-protection": "1; mode=block",
+      "x-request-id": "29b2d041884a22ae0b56782fe08a67fe",
+      "x-ua-compatible": "IE=Edge,chrome=1",
+      "server": "cloudinary"
+    },
+    "config": "[Circular]",
+    "request": "[Circular]",
+    "data": {
+      "error": {
+        "message": "Invalid Signature a204f18e543b6bc904c07cc660c00203da770503. String to sign - 'folder=database_backups/tenant_jjsoft&public_id=tenant_jjsoft-2025-07-25T13-05-20-315Z&timestamp=1753448720&type=private'."
+      }
+    }
+  },
+  "status": 401
+}
+2025-07-25 18:50:22 [error] Unhandled Rejection: Backup failed: BackupRecord validation failed: fileUrl: Path `fileUrl` is required., cloudinaryPublicId: Public ID must not contain file extension
+Error: Backup failed: BackupRecord validation failed: fileUrl: Path `fileUrl` is required., cloudinaryPublicId: Public ID must not contain file extension
+    at BackupService.backupTenantDatabase (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:76:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+{
+  "service": "payment-service"
+}
+2025-07-25 19:01:39 [error] Unhandled Rejection: Backup failed: BackupRecord validation failed: cloudinaryPublicId: Public ID must not contain file extension
+Error: Backup failed: BackupRecord validation failed: cloudinaryPublicId: Public ID must not contain file extension
+    at BackupService.backupTenantDatabase (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\services\backup.service.js:77:13)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+{
+  "service": "payment-service"
+}

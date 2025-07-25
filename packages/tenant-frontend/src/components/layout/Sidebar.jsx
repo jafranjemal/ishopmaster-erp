@@ -465,6 +465,12 @@ const Sidebar = () => {
           permission: 'inventory:product:manage',
           children: [
             {
+              name: 'Backups & Restore',
+              href: '/settings/backups',
+              icon: ShieldCheck,
+              permission: 'tenant:admin', // Only tenant admins should see this
+            },
+            {
               name: t('sidebar.sub_menu.brands'),
               href: '/settings/inventory/brands',
               icon: Tag,

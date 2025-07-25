@@ -1,13 +1,6 @@
-import React from "react";
-import {
-  Shield,
-  Users,
-  Settings,
-  LayoutDashboard,
-  KeyRound,
-} from "lucide-react";
-import { cn } from "ui-library";
+import { KeyRound, LayoutDashboard, Settings, Shield, ShieldCheck, Users } from "lucide-react";
 import { Link } from "react-router-dom";
+import { cn } from "ui-library";
 
 const Sidebar = () => {
   // Placeholder for navigation items. In a real app, this would be generated dynamically.
@@ -16,6 +9,12 @@ const Sidebar = () => {
     { name: "Tenants", icon: Users, href: "/tenants" },
     { name: "Permissions", icon: KeyRound, href: "/permissions" },
     { name: "System Settings", icon: Settings, href: "/settings" },
+    {
+      name: "Backups & Restore",
+      href: "/backups",
+      icon: ShieldCheck,
+      permission: "tenant:admin", // Only tenant admins should see this
+    },
   ];
   return (
     <div className="w-64 bg-slate-800 text-slate-100 flex-shrink-0">

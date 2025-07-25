@@ -10,9 +10,10 @@ import {
   tenantSettingsService,
 } from '../../services/api';
 
-import { FileText, Hand, Plus, Tag, XCircle } from 'lucide-react';
+import { FileText, Hand, Plus, Tag, Wrench, XCircle } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { Button, Modal } from 'ui-library';
+import CustomerHistoryModal from '../../components/crm/CustomerHistoryModal';
 import AdditionalChargeForm from '../../components/pos/AdditionalChargeForm';
 import CustomerContext from '../../components/pos/CustomerContext';
 import CustomerSearchModal from '../../components/pos/CustomerSearchModal';
@@ -26,9 +27,11 @@ import PostTransactionScreen from '../../components/pos/PostTransactionScreen';
 import QuickCustomerCreateForm from '../../components/pos/QuickCustomerCreateForm';
 import StockBreakdownModal from '../../components/pos/StockBreakdownModal';
 import UniversalSearch from '../../components/pos/UniversalSearch';
+import TicketDetailModal from '../../components/service/TicketDetailModal';
 import ConfirmationModal from '../../components/shared/ConfirmationModal';
 import { usePosSession } from '../../context/PosSessionContext';
 import { useCartCalculator } from '../../hooks/useCartCalculator';
+import RepairTicketIntakePage from '../service/RepairTicketIntakePage';
 
 /**
  * The definitive "smart" page orchestrator for the Point of Sale terminal.
@@ -62,7 +65,9 @@ const PosPage = ({ layout }) => {
     posSession.globalDiscount,
     posSession.additionalCharges,
   );
-
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [viewingDocument, setViewingDocument] = useState(null); // For the quick view modal
+  const [isIntakeModalOpen, setIsIntakeModalOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [popularItems, setPopularItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -216,6 +221,37 @@ const PosPage = ({ layout }) => {
     fetchData();
   }, [fetchData]);
 
+  const handleJobFound = (foundJob) => {
+    // This is for the quick "view-only" modal from JobRecall
+    setViewingDocument(foundJob.document);
+  };
+
+  const handleIntakeSuccess = (newTicket) => {
+    toast.success(`New Service Ticket #${newTicket.ticketNumber} created successfully!`);
+    setIsIntakeModalOpen(false);
+  };
+
+  const handleLoadToPos = (jobToLoad) => {
+    // This is called from the CustomerHistoryModal
+    setIsHistoryModalOpen(false);
+    if (jobToLoad.action === 'view') {
+      //load to viewer
+      if (jobToLoad.type === 'SalesInvoice') {
+        setViewingDocument(jobToLoad.document);
+      } else if (jobToLoad.type === 'RepairTicket') {
+        // Future logic to load a repair ticket directly
+        setViewingDocument(jobToLoad.document);
+      }
+    } else {
+      if (jobToLoad.type === 'SalesInvoice') {
+        loadInvoiceForPayment(jobToLoad.document);
+      } else if (jobToLoad.type === 'RepairTicket') {
+        // Future logic to load a repair ticket directly
+        toast.info('Loading repair tickets directly to POS is a future feature.');
+      }
+    }
+  };
+
   const handleAddItemToJob = useCallback((itemData, lineType = 'sale_item') => {
     // This function now receives an array from the modal or a single item from search/grid
     const itemsToAdd = Array.isArray(itemData) ? itemData : [itemData];
@@ -328,11 +364,6 @@ const PosPage = ({ layout }) => {
     return { subTotal, totalTax, totalAmount };
   }, [jobItems]);
 
-  const handleJobFound = (foundJob) => {
-    // Logic to load the found ticket/invoice into the cart/job sheet
-    console.log('Found job:', foundJob);
-  };
-
   const handleCreateCustomer = async (formData) => {
     setIsSaving(true);
     try {
@@ -419,11 +450,22 @@ const PosPage = ({ layout }) => {
                 Cancel Recalled Sale & Start New
               </Button>
             )}
-            <JobRecall onJobFound={handleJobFound} />
+
+            <div className='flex gap-2'>
+              <div className='flex-grow'>
+                <JobRecall onJobFound={handleJobFound} />
+              </div>
+              <Button variant='outline' className='h-10' onClick={() => setIsIntakeModalOpen(true)}>
+                <Wrench className='h-4 w-4 mr-2' /> New Service
+              </Button>
+            </div>
             <CustomerContext
-              customer={selectedCustomer}
               onNew={() => setIsQuickCreateOpen(true)}
               onEdit={() => setIsCustomerSearchOpen(true)}
+              customer={selectedCustomer}
+              onSelectCustomer={setSelectedCustomer}
+              onClearCustomer={() => setSelectedCustomer(posSession.defaultCustomer)}
+              onViewHistory={() => setIsHistoryModalOpen(true)}
             />
             <UniversalSearch onAddItem={handleProductSelect} />
           </div>
@@ -481,6 +523,17 @@ const PosPage = ({ layout }) => {
           </div> */}
           <DiscoveryPanel onAddItem={handleProductSelect} onItemsSelected={handleAddItemsToJob} />
         </div>
+
+        <Modal
+          isOpen={isIntakeModalOpen}
+          onClose={() => setIsIntakeModalOpen(false)}
+          title='New Service & Repair Intake'
+          size='4xl'
+        >
+          <div className='max-h-[85vh] overflow-y-auto p-2'>
+            <RepairTicketIntakePage onSuccess={handleIntakeSuccess} />
+          </div>
+        </Modal>
 
         <Modal isOpen={isDiscountModalOpen} onClose={() => setIsDiscountModalOpen(false)} title='Apply Global Discount'>
           <GlobalDiscountForm
@@ -553,6 +606,19 @@ const PosPage = ({ layout }) => {
           confirmText='Proceed'
           isConfirming={isSaving}
         />
+
+        <CustomerHistoryModal
+          isOpen={isHistoryModalOpen}
+          onClose={() => setIsHistoryModalOpen(false)}
+          customer={selectedCustomer}
+          onLoadToPos={handleLoadToPos}
+        />
+
+        <TicketDetailModal
+          isOpen={!!viewingDocument}
+          onClose={() => setViewingDocument(null)}
+          ticket={viewingDocument}
+        />
       </div>
     );
   }
@@ -568,11 +634,21 @@ const PosPage = ({ layout }) => {
             </Button>
           )}
 
-          <JobRecall onJobFound={handleJobFound} />
+          <div className='flex gap-2'>
+            <div className='flex-grow'>
+              <JobRecall onJobFound={handleJobFound} />
+            </div>
+            <Button variant='outline' className='h-10' onClick={() => setIsIntakeModalOpen(true)}>
+              <Wrench className='h-4 w-4 mr-2' /> New Service
+            </Button>
+          </div>
           <CustomerContext
-            customer={selectedCustomer}
             onNew={() => setIsQuickCreateOpen(true)}
             onEdit={() => setIsCustomerSearchOpen(true)}
+            customer={selectedCustomer}
+            onSelectCustomer={setSelectedCustomer}
+            onClearCustomer={() => setSelectedCustomer(posSession.defaultCustomer)}
+            onViewHistory={() => setIsHistoryModalOpen(true)}
           />
           <UniversalSearch onAddItem={handleProductSelect} />
         </div>
@@ -648,6 +724,27 @@ const PosPage = ({ layout }) => {
           </div>
         )}
       </div>
+
+      <Modal
+        isOpen={isIntakeModalOpen}
+        onClose={() => setIsIntakeModalOpen(false)}
+        title='New Service & Repair Intake'
+        size='4xl'
+      >
+        <div className='max-h-[85vh] overflow-y-auto p-2'>
+          <RepairTicketIntakePage onSuccess={handleIntakeSuccess} />
+        </div>
+      </Modal>
+
+      <CustomerHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
+        customer={selectedCustomer}
+        onLoadToPos={handleLoadToPos}
+      />
+
+      <TicketDetailModal isOpen={!!viewingDocument} onClose={() => setViewingDocument(null)} ticket={viewingDocument} />
+
       <Modal isOpen={isDiscountModalOpen} onClose={() => setIsDiscountModalOpen(false)} title='Apply Global Discount'>
         <GlobalDiscountForm
           onSave={(discount) => {

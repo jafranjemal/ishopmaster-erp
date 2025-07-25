@@ -113,3 +113,24 @@ export const adminTenantService = {
     return api.put(`/admin/tenants/${id}`, data);
   },
 };
+
+export const adminBackupService = {
+  /**
+   * Fetches all backup records for all tenants, with filtering and pagination.
+   * @param {object} params - { page, limit, tenantId }
+   */
+  getAllBackups: async (params) => {
+    return api.get("/admin/backups", { params });
+  },
+  triggerManualBackup: async (tenantId) => {
+    return api.post("/admin/backups/trigger", { tenantId });
+  },
+
+  /**
+   * Triggers the restore process for a specific backup record.
+   * @param {string} backupRecordId - The ID of the backup record to restore.
+   */
+  restoreBackup: async (backupRecordId) => {
+    return api.post(`/admin/backups/${backupRecordId}/restore`);
+  },
+};

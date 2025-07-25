@@ -265,6 +265,9 @@ export const tenantCustomerService = {
   getCreditSummary: async (customerId) => {
     return api.get(`/tenant/crm/customers/${customerId}/credit-summary`);
   },
+  getCustomerHistory: async (customerId) => {
+    return api.get(`/tenant/crm/customers/${customerId}/history`);
+  },
 };
 
 export const tenantCustomerGroupService = {
@@ -1253,6 +1256,16 @@ export const tenantBenefitTypeService = {
   delete: async (id) => api.delete(`/tenant/hr/benefits/types/${id}`),
 };
 
+export const tenantBackupService = {
+  /**
+   * Fetches the backup history for the currently authenticated tenant.
+   * @param {object} params - { page, limit }
+   */
+  getBackupHistory: async (params) => {
+    return api.get('/tenant/backups', { params });
+  },
+};
+
 export const tenantEmployeeBenefitService = {
   getForEmployee: async (employeeId) => api.get(`/tenant/hr/benefits/assignments/employee/${employeeId}`),
   assignToEmployee: async (employeeId, data) =>
@@ -1261,7 +1274,8 @@ export const tenantEmployeeBenefitService = {
 };
 
 export const tenantSearchService = {
-  findDocument: async (query) => api.get(`/tenant/search/documents`, { params: { query } }),
+  findDocumentByNumber: async (query) => api.get(`/tenant/search/documents`, { params: { query } }),
+  findDocument: async (query) => api.get('/tenant/search', { params: { query } }),
 };
 
 export const tenantWarrantyPolicyService = {

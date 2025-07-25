@@ -29,7 +29,7 @@ import {
   tenantUploadService,
 } from '../../services/api';
 
-const RepairTicketIntakePage = () => {
+const RepairTicketIntakePage = ({ onSuccess }) => {
   const { id: ticketId } = useParams();
   const isEditMode = Boolean(ticketId);
   const [customer, setCustomer] = useState(null);
@@ -150,7 +150,12 @@ const RepairTicketIntakePage = () => {
         error: `Failed to ${isEditMode ? 'update' : 'create'} ticket.`,
       });
       const newOrUpdatedTicket = isEditMode ? res.data.data : res.data.data.ticket;
-      navigate(`/service/tickets/${newOrUpdatedTicket._id}`);
+
+      if (onSuccess) {
+        onSuccess(res.data.data.ticket);
+      } else {
+        navigate(`/service/tickets/${newOrUpdatedTicket._id}`);
+      }
     } catch (err) {
       /* handled by toast */
     } finally {

@@ -1,12 +1,12 @@
-const inventoryService = require("./inventory.service");
-const accountingService = require("./accounting.service");
-const paymentsService = require("./payments.service");
-const mongoose = require("mongoose");
-const couponService = require("./coupon.service");
-const taxService = require("./tax.service");
-const pricingService = require("./pricing.service");
-const salesCalculationService = require("./salesCalculation.service");
-const { ERPComplianceError } = require("../errors/erpComplianceError");
+const inventoryService = require("./inventory.service")
+const accountingService = require("./accounting.service")
+const paymentsService = require("./payments.service")
+const mongoose = require("mongoose")
+const couponService = require("./coupon.service")
+const taxService = require("./tax.service")
+const pricingService = require("./pricing.service")
+const salesCalculationService = require("./salesCalculation.service")
+const { ERPComplianceError } = require("../errors/erpComplianceError")
 
 /**
  * The SalesService handles all complex business logic related to sales,
@@ -17,14 +17,14 @@ class SalesService {
    * Creates a draft sale or a quotation without affecting stock or processing payments.
    */
   async createQuoteOrDraft(models, params) {
-    const { SalesInvoice } = models;
+    const { SalesInvoice } = models
 
     // Destructure parameters safely
-    const { cartData, customerId, branchId, userId, status, expiryDate } = params || {};
+    const { cartData, customerId, branchId, userId, status, expiryDate } = params || {}
 
     // Add null checks and default values
-    if (!cartData) throw new Error("cartData is required");
-    if (!cartData.items) throw new Error("cartData.items is required");
+    if (!cartData) throw new Error("cartData is required")
+    if (!cartData.items) throw new Error("cartData.items is required")
 
     const [newDoc] = await SalesInvoice.create([
       {
@@ -39,9 +39,9 @@ class SalesService {
         status, // 'draft' or 'quotation'
         expiryDate, // For quotations
       },
-    ]);
+    ])
 
-    return newDoc;
+    return newDoc
   }
 
   /**
@@ -50,34 +50,34 @@ class SalesService {
    */
   async finalizeSale(models, { cartData, paymentData, customerId, branchId, userId, couponId }, baseCurrency, tenant, session = null) {
     try {
-      const { ProductVariants, SalesInvoice, Account, Customer, Employee, Commission } = models;
+      const { ProductVariants, SalesInvoice, Account, Customer, Employee, Commission } = models
 
       // const pricedCart = await pricingService.calculatePrices(models, { cartData, customerId });
       const pricedCart = await salesCalculationService.calculateCartTotals(models, {
         cartData,
         customerId,
         branchId,
-      });
-      const { grandTotal, totalTax, taxBreakdown } = pricedCart;
+      })
+      const { grandTotal, totalTax, taxBreakdown } = pricedCart
       // const { totalTax, taxBreakdown } = await taxService.calculateTax(models, {
       //   cartData,
       //   branchId,
       // });
-      const finalTotalAmount = grandTotal;
+      const finalTotalAmount = grandTotal
       // const grandTotal = pricedCart.totalAmount + totalTax;
       // --- 1. CREDIT LIMIT VALIDATION ---
-      const amountPaid = paymentData.paymentLines.reduce((sum, line) => sum + line.amount, 0);
-      const amountDue = cartData.totalAmount - amountPaid;
+      const amountPaid = paymentData.paymentLines.reduce((sum, line) => sum + line.amount, 0)
+      const amountDue = cartData.totalAmount - amountPaid
       if (amountDue > 0) {
-        const customer = await Customer.findById(customerId).session(session);
-        if (!customer || customer.creditLimit === 0) throw new Error("This customer is not eligible for credit sales.");
+        const customer = await Customer.findById(customerId).session(session)
+        if (!customer || customer.creditLimit === 0) throw new Error("This customer is not eligible for credit sales.")
 
-        const arAccount = await Account.findById(customer.ledgerAccountId).session(session);
+        const arAccount = await Account.findById(customer.ledgerAccountId).session(session)
         // --- THE DEFINITIVE FIX: Correctly read balance from the Map ---
-        const currentBalance = arAccount.balance.get(baseCurrency) || 0;
-        const newBalance = currentBalance + amountDue;
+        const currentBalance = arAccount.balance.get(baseCurrency) || 0
+        const newBalance = currentBalance + amountDue
         if (newBalance > customer.creditLimit) {
-          throw new Error(`Credit limit exceeded. Limit: ${customer.creditLimit}, New Balance: ${newBalance}`);
+          throw new Error(`Credit limit exceeded. Limit: ${customer.creditLimit}, New Balance: ${newBalance}`)
         }
       }
 
@@ -87,19 +87,19 @@ class SalesService {
       for (const item of cartData.items) {
         if (!item.productVariantId && item.employeeId && item.isService) {
           //this is labour charge not product
-          continue;
+          continue
         }
 
-        const variant = await ProductVariants.findById(item.productVariantId).populate("templateId").lean();
+        const variant = await ProductVariants.findById(item.productVariantId).populate("templateId").lean()
 
-        console.log("Verify inventory availability ", variant);
+        console.log("Verify inventory availability ", variant)
         // Skip inventory check for pure service items
         // if (variant.templateId.type === "service" && !variant.templateId.requiredParts?.length) {
         //   continue;
         // }
         if (variant.templateId.type === "service") {
           // No stock validation or deduction here for requiredParts
-          continue;
+          continue
         }
         const inventoryStatus = await inventoryService.checkAvailability(
           models,
@@ -109,7 +109,7 @@ class SalesService {
             quantity: item.quantity,
           },
           session
-        );
+        )
 
         if (!inventoryStatus.available) {
           throw new ERPComplianceError("INV-102", {
@@ -118,27 +118,27 @@ class SalesService {
             available: inventoryStatus.availableQuantity,
             isBundle: inventoryStatus.isBundle,
             components: inventoryStatus.components,
-          });
+          })
         }
       }
 
       // 3. Deduct stock and create invoice items and modified to handle services
-      let totalCostOfGoodsSold = 0;
-      const saleItems = [];
+      let totalCostOfGoodsSold = 0
+      const saleItems = []
 
-      const inventoryItemIds = []; // To track for the audit link
+      const inventoryItemIds = [] // To track for the audit link
       for (const item of pricedCart.items) {
         if (!item.productVariantId && item.employeeId && item.isService) {
           //this is labour charge not product
-          continue;
+          continue
         }
 
-        const variant = await ProductVariants.findById(item.productVariantId).populate("templateId").lean();
+        const variant = await ProductVariants.findById(item.productVariantId).populate("templateId").lean()
 
         // Handle service items
         if (variant.templateId.type === "service") {
-          let costOfGoodsSold = 0;
-          let partDeductedIds = [];
+          let costOfGoodsSold = 0
+          let partDeductedIds = []
 
           // Deduct required parts if any
           // if (variant.templateId.requiredParts?.length > 0) {
@@ -158,8 +158,8 @@ class SalesService {
           // }
 
           // Get the priced item for this service
-          const pricedItem = pricedCart.items.find((pi) => pi.cartId === item.cartId);
-          if (!pricedItem) throw new Error("Priced item not found");
+          const pricedItem = pricedCart.items.find((pi) => pi.cartId === item.cartId)
+          if (!pricedItem) throw new Error("Priced item not found")
 
           saleItems.push({
             ...pricedItem,
@@ -172,14 +172,14 @@ class SalesService {
               quantity: part.quantity * item.quantity,
               costPrice: part.costPrice,
             })),
-          });
+          })
 
-          if (partDeductedIds.length) inventoryItemIds.push(...partDeductedIds);
+          if (partDeductedIds.length) inventoryItemIds.push(...partDeductedIds)
         }
         // Handle product items
         else {
-          const pricedItem = pricedCart.items.find((pi) => pi.cartId === item.cartId);
-          if (!pricedItem) throw new Error("Priced item not found");
+          const pricedItem = pricedCart.items.find((pi) => pi.cartId === item.cartId)
+          if (!pricedItem) throw new Error("Priced item not found")
 
           const { costOfGoodsSold, deductedItemIds } = await inventoryService.decreaseStock(
             models,
@@ -193,8 +193,8 @@ class SalesService {
               refs: { salesInvoice: true }, // A flag for the ledger
             },
             session
-          );
-          totalCostOfGoodsSold += costOfGoodsSold;
+          )
+          totalCostOfGoodsSold += costOfGoodsSold
           // If the item is serialized or has batch info, we need to track it
           // Create the invoice item, now including the traceability fields
           saleItems.push({
@@ -203,9 +203,9 @@ class SalesService {
             serialNumber: item.serialNumber,
             batchNumber: item.batchInfo?.batchNumber,
             inventoryLotId: item.batchInfo?.lotId,
-          });
+          })
 
-          if (deductedItemIds) inventoryItemIds.push(...deductedItemIds);
+          if (deductedItemIds) inventoryItemIds.push(...deductedItemIds)
         }
       } //end of loop
 
@@ -230,21 +230,21 @@ class SalesService {
           },
         ],
         { session }
-      );
+      )
 
       // Now that we have the invoice ID, we can update the stock movement refs
       // In a real high-performance system, this might be done as a background job.
-      await inventoryService.linkSaleToMovements(models, { saleId: salesInvoice._id, inventoryItemIds }, session);
+      await inventoryService.linkSaleToMovements(models, { saleId: salesInvoice._id, inventoryItemIds }, session)
 
       // 3. Post the core Sales and COGS journal entries
-      const customer = await Customer.findById(customerId).session(session);
+      const customer = await Customer.findById(customerId).session(session)
       const [arAccount, salesRevenueAccount, serviceRevenueAccount, cogsAccount, inventoryAssetAccount] = await Promise.all([
         Account.findById(customer.ledgerAccountId).session(session),
         Account.findOne({ isSystemAccount: true, name: "Sales Revenue" }).session(session),
         Account.findOne({ isSystemAccount: true, name: "Service Revenue" }).session(session),
         Account.findOne({ isSystemAccount: true, name: "Cost of Goods Sold" }).session(session),
         Account.findOne({ isSystemAccount: true, name: "Inventory Asset" }).session(session),
-      ]);
+      ])
 
       // Revenue & Tax Journal Entry
       // const revenueEntries = [
@@ -256,28 +256,35 @@ class SalesService {
       //   },
       // ];
 
-      const revenueEntries = [{ accountId: arAccount._id, debit: grandTotal }];
-      let totalSalesRevenue = 0;
-      let totalServiceRevenue = 0;
+      const revenueEntries = [{ accountId: arAccount._id, debit: grandTotal }]
+      let totalSalesRevenue = 0
+      let totalServiceRevenue = 0
+      let totalAdditionalRevenue = 0
 
       pricedCart.items.forEach((item) => {
         if (item.itemType === "part") {
-          totalSalesRevenue += item.finalPrice * item.quantity;
+          totalSalesRevenue += item.finalPrice * item.quantity
         } else {
           // service or labor
-          totalServiceRevenue += (item.unitPrice || item.laborRate) * (item.quantity || item.laborHours);
+          totalServiceRevenue += (item.unitPrice || item.laborRate) * (item.quantity || item.laborHours)
         }
-      });
+      })
 
-      if (totalSalesRevenue > 0) revenueEntries.push({ accountId: salesRevenueAccount._id, credit: totalSalesRevenue });
-      if (totalServiceRevenue > 0) revenueEntries.push({ accountId: serviceRevenueAccount._id, credit: totalServiceRevenue });
+      if (cartData.additionalCharges && cartData.additionalCharges.length > 0) {
+        cartData.additionalCharges.forEach((charges) => {
+          totalAdditionalRevenue += charges.amount
+        })
+      }
+      totalServiceRevenue = totalServiceRevenue + totalAdditionalRevenue
+      if (totalSalesRevenue > 0) revenueEntries.push({ accountId: salesRevenueAccount._id, credit: totalSalesRevenue })
+      if (totalServiceRevenue > 0) revenueEntries.push({ accountId: serviceRevenueAccount._id, credit: totalServiceRevenue })
 
-      console.log("grandTotal:", grandTotal);
-      console.log("arAccount:", arAccount);
-      console.log("totalSalesRevenue:", totalSalesRevenue);
-      console.log("totalServiceRevenue:", totalServiceRevenue);
+      console.log("grandTotal:", grandTotal)
+      console.log("arAccount:", arAccount)
+      console.log("totalSalesRevenue:", totalSalesRevenue)
+      console.log("totalServiceRevenue:", totalServiceRevenue)
 
-      taxBreakdown.forEach((tax) => revenueEntries.push({ accountId: tax.linkedAccountId, credit: tax.amount }));
+      taxBreakdown.forEach((tax) => revenueEntries.push({ accountId: tax.linkedAccountId, credit: tax.amount }))
       await accountingService.createJournalEntry(
         models,
         {
@@ -288,7 +295,7 @@ class SalesService {
         },
         session,
         tenant
-      );
+      )
 
       if (totalCostOfGoodsSold > 0) {
         await accountingService.createJournalEntry(
@@ -304,7 +311,7 @@ class SalesService {
           },
           session,
           tenant
-        );
+        )
       }
 
       // Add a separate credit line for each tax liability.
@@ -344,7 +351,7 @@ class SalesService {
       //   tenant
       // );
 
-      console.log("salesInvoice._id ", salesInvoice?._id);
+      console.log("salesInvoice._id ", salesInvoice?._id)
       // 6. Record Payment & Finalize Coupon
       if (amountPaid > 0)
         await paymentsService.recordPayment(
@@ -360,8 +367,8 @@ class SalesService {
           baseCurrency,
           tenant,
           session
-        );
-      if (couponId) await couponService.markCouponAsRedeemed(models, { couponId, invoiceId: salesInvoice._id }, session);
+        )
+      if (couponId) await couponService.markCouponAsRedeemed(models, { couponId, invoiceId: salesInvoice._id }, session)
 
       // 4. Record the payment using the universal PaymentsService
       // if (paymentData && paymentData.paymentLines.length > 0) {
@@ -389,9 +396,9 @@ class SalesService {
       // }
 
       // 5. Log commission if applicable
-      const employee = await Employee.findOne({ userId: userId });
+      const employee = await Employee.findOne({ userId: userId })
       if (employee && employee.compensation.type === "commission_based" && employee.compensation.commissionRate > 0) {
-        const commissionAmount = salesInvoice.totalAmount * (employee.compensation.commissionRate / 100);
+        const commissionAmount = salesInvoice.totalAmount * (employee.compensation.commissionRate / 100)
 
         await Commission.create([
           {
@@ -401,18 +408,18 @@ class SalesService {
             saleDate: salesInvoice.createdAt,
             status: "pending",
           },
-        ]);
+        ])
       }
 
-      return salesInvoice;
+      return salesInvoice
     } catch (error) {
       if (couponId) {
         // This runs if any of the above `await` calls fail.
-        await couponService.releaseCouponLock(models, { couponId }, session);
+        await couponService.releaseCouponLock(models, { couponId }, session)
       }
 
-      console.error("Error in finalizeSale:", error);
-      throw new Error("Failed to finalize sale. Please try again.");
+      console.error("Error in finalizeSale:", error)
+      throw new Error("Failed to finalize sale. Please try again.")
     }
   }
 
@@ -420,18 +427,18 @@ class SalesService {
    * Converts a Quotation into a confirmed Sales Order.
    */
   async convertQuoteToOrder(models, { quoteId, userId }) {
-    const { SalesInvoice, SalesOrder } = models;
+    const { SalesInvoice, SalesOrder } = models
 
-    const quote = await SalesInvoice.findById(quoteId);
+    const quote = await SalesInvoice.findById(quoteId)
     if (!quote || quote.status !== "quotation") {
-      throw new Error("Quotation not found or cannot be converted.");
+      throw new Error("Quotation not found or cannot be converted.")
     }
 
     // Check if quote has expired
     if (quote.expiryDate && new Date(quote.expiryDate) < new Date()) {
-      quote.status = "cancelled"; // Or some other expired status
-      await quote.save({ session });
-      throw new Error("This quotation has expired and cannot be converted.");
+      quote.status = "cancelled" // Or some other expired status
+      await quote.save({ session })
+      throw new Error("This quotation has expired and cannot be converted.")
     }
 
     // Create the Sales Order from the quote's data
@@ -445,13 +452,13 @@ class SalesService {
         notes: quote.notes,
         createdBy: userId,
       },
-    ]);
+    ])
 
     // Update the original quote's status
-    quote.status = "completed"; // Or a new 'converted' status if needed
-    await quote.save();
+    quote.status = "completed" // Or a new 'converted' status if needed
+    await quote.save()
 
-    return newSalesOrder;
+    return newSalesOrder
   }
 
   /**
@@ -459,16 +466,16 @@ class SalesService {
    * This version correctly reads the items from the Opportunity.
    */
   async createOrderFromOpportunity(models, { opportunityId, userId, user }, session) {
-    const { Opportunity, SalesOrder } = models;
+    const { Opportunity, SalesOrder } = models
 
     // The populate call will now work correctly
-    const opportunity = await Opportunity.findById(opportunityId).session(session);
-    if (!opportunity) throw new Error("Opportunity not found.");
-    if (opportunity.stage === "Closed-Won") throw new Error("This opportunity has already been converted.");
+    const opportunity = await Opportunity.findById(opportunityId).session(session)
+    if (!opportunity) throw new Error("Opportunity not found.")
+    if (opportunity.stage === "Closed-Won") throw new Error("This opportunity has already been converted.")
 
-    const targetBranchId = opportunity.branchId || user.assignedBranchId;
+    const targetBranchId = opportunity.branchId || user.assignedBranchId
     if (!targetBranchId) {
-      throw new Error("Could not determine a destination branch for this sales order.");
+      throw new Error("Could not determine a destination branch for this sales order.")
     }
 
     // --- THE DEFINITIVE FIX ---
@@ -492,16 +499,16 @@ class SalesService {
         },
       ],
       { session }
-    );
+    )
     // --- END OF FIX ---
 
     // Update the original opportunity's status
-    opportunity.stage = "Closed-Won";
-    opportunity.branchId = targetBranchId;
-    await opportunity.save({ session });
+    opportunity.stage = "Closed-Won"
+    opportunity.branchId = targetBranchId
+    await opportunity.save({ session })
 
-    return newSalesOrder;
+    return newSalesOrder
   }
 }
 
-module.exports = new SalesService();
+module.exports = new SalesService()

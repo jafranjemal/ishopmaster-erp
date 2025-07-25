@@ -27,6 +27,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  ConfirmationModal,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -40,7 +41,7 @@ import InvoiceSummaryCard from '../../components/sales/details/InvoiceSummaryCar
 import FlagRequoteForm from '../../components/service/FlagRequoteForm';
 import JobSheetEditor from '../../components/service/JobSheetEditor';
 import LaborTimerWidget from '../../components/service/LaborTimerWidget';
-import QcChecklistForm from '../../components/service/QcChecklistForm';
+import MatrixQcGrid from '../../components/service/MatrixQcGrid';
 import QuoteList from '../../components/service/QuoteList';
 import StatusUpdater from '../../components/service/StatusUpdater';
 import TechnicianSelector from '../../components/service/TechnicianSelector';
@@ -68,6 +69,7 @@ const RepairTicketDetailPage = () => {
   const [isRequoteModalOpen, setIsRequoteModalOpen] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isConfirmQcOpen, setIsConfirmQcOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -258,13 +260,12 @@ const RepairTicketDetailPage = () => {
   };
 
   const handleSubmitForQc = () => {
-    if (
-      window.confirm(
-        'Are you sure you have completed all repair work? This will submit the ticket for Quality Control inspection.',
-      )
-    ) {
-      handleStatusChange('qc_pending');
-    }
+    handleStatusChange('qc_pending');
+  };
+
+  const handleConfirmSubmitForQc = () => {
+    setIsConfirmQcOpen(false); // Close the modal
+    handleStatusChange('qc_pending');
   };
 
   const handleSubmitQc = async (qcData) => {
@@ -340,7 +341,8 @@ const RepairTicketDetailPage = () => {
         .filter((item) => item.itemType === 'labor')
         .reduce((sum, item) => sum + (item.laborHours || 0), 0);
     const paused = activeTimer?.status === 'paused';
-    return { totalHoursLogged: totalHours, isPaused: paused };
+    console.log('totalHours ', totalHours);
+    return { totalHoursLogged: totalHours || 0, isPaused: paused };
   }, [ticket, activeTimer]);
 
   const showTimer = ticket && ticket.assignedTo?._id === user.employeeId;
@@ -381,7 +383,8 @@ const RepairTicketDetailPage = () => {
     return !['diagnosing', 'on_hold_pending_re_quote'].includes(ticket.status);
   }, [ticket]);
 
-  const isTimerActive = !!activeTimer;
+  const isTimerActive = activeTimer?.status === 'in_progress';
+
   if (isLoading) return <p className='p-8 text-center'>Loading ticket details...</p>;
   if (!ticket) return <p className='p-8 text-center'>Ticket not found.</p>;
   const isTechnicianView = ticket.assignedTo?._id === user.employeeId;
@@ -477,7 +480,7 @@ const RepairTicketDetailPage = () => {
                       ticket={ticket}
                     />
 
-                    {ticket.status === 'repair_active' && !isTimerActive && (
+                    {ticket.status === 'repair_active' && activeTimer && !isTimerActive && (
                       <div className='border-t border-slate-700 pt-4'>
                         <Button className='w-full' onClick={handleSubmitForQc}>
                           <CheckSquare className='h-4 w-4 mr-2' /> Complete Repair & Submit for QC
@@ -544,7 +547,11 @@ const RepairTicketDetailPage = () => {
                   </div>
                 )}
                 {qcTemplate && (
-                  <QcChecklistForm template={qcTemplate} onSubmit={handleSubmitQc} isSubmitting={isSubmittingQc} />
+                  <>
+                    {/* <QcChecklistForm template={qcTemplate} onSubmit={handleSubmitQc} isSubmitting={isSubmittingQc} />
+                    <HotkeyQcList template={qcTemplate} onSubmit={handleSubmitQc} isSubmitting={isSubmittingQc} /> */}
+                    <MatrixQcGrid template={qcTemplate} onSubmit={handleSubmitQc} isSubmitting={isSubmittingQc} />
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -642,6 +649,16 @@ const RepairTicketDetailPage = () => {
           isSaving={isSaving}
         />
       </Modal>
+
+      <ConfirmationModal
+        isOpen={isConfirmQcOpen}
+        onClose={() => setIsConfirmQcOpen(false)}
+        onConfirm={handleConfirmSubmitForQc}
+        title='Submit for Quality Control?'
+        message='Are you sure you have completed all repair work? This will submit the ticket for final inspection.'
+        confirmText='Yes, Submit for QC'
+        isConfirming={isSaving}
+      />
     </div>
   );
 };

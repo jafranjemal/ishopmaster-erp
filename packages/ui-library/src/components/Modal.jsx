@@ -6,12 +6,27 @@ import { createPortal } from "react-dom";
 import { cn } from "../lib/utils";
 import Button from "./Button";
 
-const sizeClasses = {
+export const sizeClasses = {
+  // Fullscreen (no rounding, full width & height)
   full: "w-full h-full rounded-none",
-  xl: "max-w-4xl",
-  l: "min-w-3xl max-w-4xl",
-  sm: "min-w-xs max-w-sm",
-  xs: "min-w-xs max-w-sm",
+
+  // Extra‑large modals / containers
+  "4xl": "max-w-7xl mx-auto", // ~80rem
+  "3xl": "max-w-6xl mx-auto", // ~72rem
+  "2xl": "max-w-5xl mx-auto", // ~64rem
+  xl: "max-w-4xl mx-auto", // ~56rem
+
+  // Medium‑to‑large
+  lg: "max-w-3xl mx-auto", // ~48rem
+  md: "max-w-2xl mx-auto", // ~42rem
+
+  // Small‑to‑medium
+  sm: "max-w-xl mx-auto", // ~36rem
+  xs: "max-w-lg mx-auto", // ~32rem
+
+  // Very small / notifications
+  tiny: "max-w-md mx-auto", // ~28rem
+  mini: "max-w-sm mx-auto", // ~24rem
 };
 
 const Modal = ({

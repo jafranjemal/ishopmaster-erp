@@ -97,8 +97,10 @@ import SalesInvoiceListPage from './pages/sales/SalesInvoiceListPage';
 import RepairTicketDetailPage from './pages/service/RepairTicketDetailPage';
 import RepairTicketIntakePage from './pages/service/RepairTicketIntakePage';
 import TechnicianDashboardPage from './pages/service/TechnicianDashboardPage';
+import TenantBackupsPage from './pages/settings/BackupsPage';
 import NotificationTemplatesPage from './pages/settings/NotificationTemplatesPage';
 import QcTemplatesPage from './pages/settings/QcTemplatesPage';
+
 function App() {
   const [posLayout, setPosLayout] = useState('default');
   const togglePosLayout = () => setPosLayout((prev) => (prev === 'default' ? 'cartFocus' : 'default'));
@@ -197,6 +199,7 @@ function App() {
                   <Route path='/settings/taxes' element={<TaxRulePage />} />
                   <Route path='/settings/tax-categories' element={<TaxCategoryPage />} />
                   <Route path='/settings/qc-templates' element={<QcTemplatesPage />} />
+                  <Route path='/settings/backups' element={<TenantBackupsPage />} />
                   {/* --- accounting routes --- */}
                   <Route path='/accounting/budgets' element={<BudgetingPage />} />
                   <Route path='/accounting/period-closing' element={<PeriodClosingPage />} />

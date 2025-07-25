@@ -6121,3 +6121,471 @@ TypeError: Cannot read properties of undefined (reading 'db')
   ],
   "service": "payment-service"
 }
+2025-07-25 18:06:50 [error] uncaughtException: Converting circular structure to JSON
+    --> starting at object with constructor 'ClientRequest'
+    |     property 'res' -> object with constructor 'IncomingMessage'
+    --- property 'req' closes the circle
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'ClientRequest'
+    |     property 'res' -> object with constructor 'IncomingMessage'
+    --- property 'req' closes the circle
+    at JSON.stringify (<anonymous>)
+    at Printf.template (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\config\logger.js:21:54)
+    at Printf.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\printf.js:11:26)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at DerivedLogger._transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\winston\lib\winston\logger.js:314:29)
+    at Transform._read (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:166:10)
+    at Transform._write (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:155:83)
+    at doWrite (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:390:139)
+    at writeOrBuffer (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:381:5) 
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'ClientRequest'
+    |     property 'res' -> object with constructor 'IncomingMessage'
+    --- property 'req' closes the circle
+    at JSON.stringify (<anonymous>)
+    at Printf.template (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\config\logger.js:21:54)
+    at Printf.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\printf.js:11:26)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at DerivedLogger._transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\winston\lib\winston\logger.js:314:29)
+    at Transform._read (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:166:10)
+    at Transform._write (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:155:83)
+    at doWrite (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:390:139)
+    at writeOrBuffer (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:381:5)
+{
+  "error": {},
+  "exception": true,
+  "date": "Fri Jul 25 2025 18:06:50 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 7172,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "src/server.js"
+    ],
+    "memoryUsage": {
+      "rss": 189407232,
+      "heapTotal": 83361792,
+      "heapUsed": 53887400,
+      "external": 40103671,
+      "arrayBuffers": 36389895
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 2074222.953
+  },
+  "trace": [
+    {
+      "column": null,
+      "file": null,
+      "function": null,
+      "line": null,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": null,
+      "file": null,
+      "function": "JSON.stringify",
+      "line": null,
+      "method": "stringify",
+      "native": false
+    },
+    {
+      "column": 54,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\config\\logger.js",
+      "function": "Printf.template",
+      "line": 21,
+      "method": "template",
+      "native": false
+    },
+    {
+      "column": 26,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\logform\\printf.js",
+      "function": "Printf.transform",
+      "line": 11,
+      "method": "transform",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\logform\\combine.js",
+      "function": "Format.transform",
+      "line": 20,
+      "method": "transform",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\logform\\combine.js",
+      "function": "Format.transform",
+      "line": 20,
+      "method": "transform",
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\winston\\lib\\winston\\logger.js",
+      "function": "DerivedLogger._transform",
+      "line": 314,
+      "method": "_transform",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_transform.js",
+      "function": "Transform._read",
+      "line": 166,
+      "method": "_read",
+      "native": false
+    },
+    {
+      "column": 83,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_transform.js",
+      "function": "Transform._write",
+      "line": 155,
+      "method": "_write",
+      "native": false
+    },
+    {
+      "column": 139,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_writable.js",
+      "function": "doWrite",
+      "line": 390,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 5,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_writable.js",
+      "function": "writeOrBuffer",
+      "line": 381,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-25 18:07:30 [error] uncaughtException: Converting circular structure to JSON
+    --> starting at object with constructor 'ClientRequest'
+    |     property 'res' -> object with constructor 'IncomingMessage'
+    --- property 'req' closes the circle
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'ClientRequest'
+    |     property 'res' -> object with constructor 'IncomingMessage'
+    --- property 'req' closes the circle
+    at JSON.stringify (<anonymous>)
+    at Printf.template (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\config\logger.js:21:54)
+    at Printf.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\printf.js:11:26)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at DerivedLogger._transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\winston\lib\winston\logger.js:314:29)
+    at Transform._read (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:166:10)
+    at Transform._write (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:155:83)
+    at doWrite (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:390:139)
+    at writeOrBuffer (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:381:5) 
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'ClientRequest'
+    |     property 'res' -> object with constructor 'IncomingMessage'
+    --- property 'req' closes the circle
+    at JSON.stringify (<anonymous>)
+    at Printf.template (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\config\logger.js:21:54)
+    at Printf.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\printf.js:11:26)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at DerivedLogger._transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\winston\lib\winston\logger.js:314:29)
+    at Transform._read (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:166:10)
+    at Transform._write (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:155:83)
+    at doWrite (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:390:139)
+    at writeOrBuffer (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:381:5)
+{
+  "error": {},
+  "exception": true,
+  "date": "Fri Jul 25 2025 18:07:30 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 36620,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "src/server.js"
+    ],
+    "memoryUsage": {
+      "rss": 188977152,
+      "heapTotal": 83623936,
+      "heapUsed": 53612392,
+      "external": 40103887,
+      "arrayBuffers": 36390111
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 2074262.687
+  },
+  "trace": [
+    {
+      "column": null,
+      "file": null,
+      "function": null,
+      "line": null,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": null,
+      "file": null,
+      "function": "JSON.stringify",
+      "line": null,
+      "method": "stringify",
+      "native": false
+    },
+    {
+      "column": 54,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\config\\logger.js",
+      "function": "Printf.template",
+      "line": 21,
+      "method": "template",
+      "native": false
+    },
+    {
+      "column": 26,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\logform\\printf.js",
+      "function": "Printf.transform",
+      "line": 11,
+      "method": "transform",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\logform\\combine.js",
+      "function": "Format.transform",
+      "line": 20,
+      "method": "transform",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\logform\\combine.js",
+      "function": "Format.transform",
+      "line": 20,
+      "method": "transform",
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\winston\\lib\\winston\\logger.js",
+      "function": "DerivedLogger._transform",
+      "line": 314,
+      "method": "_transform",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_transform.js",
+      "function": "Transform._read",
+      "line": 166,
+      "method": "_read",
+      "native": false
+    },
+    {
+      "column": 83,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_transform.js",
+      "function": "Transform._write",
+      "line": 155,
+      "method": "_write",
+      "native": false
+    },
+    {
+      "column": 139,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_writable.js",
+      "function": "doWrite",
+      "line": 390,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 5,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_writable.js",
+      "function": "writeOrBuffer",
+      "line": 381,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}
+2025-07-25 18:16:10 [error] uncaughtException: Converting circular structure to JSON
+    --> starting at object with constructor 'ClientRequest'
+    |     property 'res' -> object with constructor 'IncomingMessage'
+    --- property 'req' closes the circle
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'ClientRequest'
+    |     property 'res' -> object with constructor 'IncomingMessage'
+    --- property 'req' closes the circle
+    at JSON.stringify (<anonymous>)
+    at Printf.template (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\config\logger.js:21:54)
+    at Printf.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\printf.js:11:26)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at DerivedLogger._transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\winston\lib\winston\logger.js:314:29)
+    at Transform._read (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:166:10)
+    at Transform._write (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:155:83)
+    at doWrite (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:390:139)
+    at writeOrBuffer (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:381:5) 
+TypeError: Converting circular structure to JSON
+    --> starting at object with constructor 'ClientRequest'
+    |     property 'res' -> object with constructor 'IncomingMessage'
+    --- property 'req' closes the circle
+    at JSON.stringify (<anonymous>)
+    at Printf.template (D:\JJSOFT_GLOBAL\ishop-master\packages\admin-backend\src\config\logger.js:21:54)
+    at Printf.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\printf.js:11:26)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at Format.transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\logform\combine.js:20:24)
+    at DerivedLogger._transform (D:\JJSOFT_GLOBAL\ishop-master\node_modules\winston\lib\winston\logger.js:314:29)
+    at Transform._read (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:166:10)
+    at Transform._write (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_transform.js:155:83)
+    at doWrite (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:390:139)
+    at writeOrBuffer (D:\JJSOFT_GLOBAL\ishop-master\node_modules\readable-stream\lib\_stream_writable.js:381:5)
+{
+  "error": {},
+  "exception": true,
+  "date": "Fri Jul 25 2025 18:16:10 GMT+0530 (India Standard Time)",
+  "process": {
+    "pid": 23008,
+    "uid": null,
+    "gid": null,
+    "cwd": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend",
+    "execPath": "D:\\Program Files\\nodejs\\node.exe",
+    "version": "v22.14.0",
+    "argv": [
+      "D:\\Program Files\\nodejs\\node.exe",
+      "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\server.js",
+      "src/server.js"
+    ],
+    "memoryUsage": {
+      "rss": 186896384,
+      "heapTotal": 83361792,
+      "heapUsed": 53320184,
+      "external": 40104020,
+      "arrayBuffers": 36390244
+    }
+  },
+  "os": {
+    "loadavg": [
+      0,
+      0,
+      0
+    ],
+    "uptime": 2074782.031
+  },
+  "trace": [
+    {
+      "column": null,
+      "file": null,
+      "function": null,
+      "line": null,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": null,
+      "file": null,
+      "function": "JSON.stringify",
+      "line": null,
+      "method": "stringify",
+      "native": false
+    },
+    {
+      "column": 54,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\packages\\admin-backend\\src\\config\\logger.js",
+      "function": "Printf.template",
+      "line": 21,
+      "method": "template",
+      "native": false
+    },
+    {
+      "column": 26,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\logform\\printf.js",
+      "function": "Printf.transform",
+      "line": 11,
+      "method": "transform",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\logform\\combine.js",
+      "function": "Format.transform",
+      "line": 20,
+      "method": "transform",
+      "native": false
+    },
+    {
+      "column": 24,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\logform\\combine.js",
+      "function": "Format.transform",
+      "line": 20,
+      "method": "transform",
+      "native": false
+    },
+    {
+      "column": 29,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\winston\\lib\\winston\\logger.js",
+      "function": "DerivedLogger._transform",
+      "line": 314,
+      "method": "_transform",
+      "native": false
+    },
+    {
+      "column": 10,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_transform.js",
+      "function": "Transform._read",
+      "line": 166,
+      "method": "_read",
+      "native": false
+    },
+    {
+      "column": 83,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_transform.js",
+      "function": "Transform._write",
+      "line": 155,
+      "method": "_write",
+      "native": false
+    },
+    {
+      "column": 139,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_writable.js",
+      "function": "doWrite",
+      "line": 390,
+      "method": null,
+      "native": false
+    },
+    {
+      "column": 5,
+      "file": "D:\\JJSOFT_GLOBAL\\ishop-master\\node_modules\\readable-stream\\lib\\_stream_writable.js",
+      "function": "writeOrBuffer",
+      "line": 381,
+      "method": null,
+      "native": false
+    }
+  ],
+  "service": "payment-service"
+}

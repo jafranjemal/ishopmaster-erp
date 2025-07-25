@@ -1,6 +1,7 @@
-import { Hourglass, Loader2, Lock, PauseCircle, PlayCircle, StopCircle } from 'lucide-react';
+import { Hourglass, Loader2, PauseCircle, PlayCircle, StopCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from 'ui-library';
+import { StatusLockBadge } from './StatusLockBadge';
 
 /**
  * Definitive Labor Timer Widget
@@ -75,12 +76,7 @@ const LaborTimerWidget = ({
         </div>
       )}
       {/* Locked state badge */}
-      {isControlLocked && (
-        <div className='mb-4 flex items-center justify-center gap-2 text-sm font-medium text-yellow-300 bg-yellow-900/30 px-4 py-2 rounded-md'>
-          <Lock className='w-4 h-4' />
-          Timer controls locked (status: <span className='uppercase'>{ticket?.status?.replace(/_/g, ' ')}</span>)
-        </div>
-      )}
+      {isControlLocked && <StatusLockBadge status={ticket?.status} />}
 
       {/* Main Time Display */}
       <div className='text-center mb-6'>
@@ -132,6 +128,7 @@ const LaborTimerWidget = ({
                 </>
               )}
             </Button>
+
             {activeTimer && activeTimer.status && (
               <Button
                 variant='destructive'

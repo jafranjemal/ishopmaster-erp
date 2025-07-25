@@ -1,30 +1,40 @@
-import React from "react";
-import { Button } from "ui-library";
-import { User, Edit, PlusCircle } from "lucide-react";
+import { History, User, X } from 'lucide-react';
+import { Button, Card, CardContent } from 'ui-library';
+import CustomerSearch from '../crm/CustomerSearch';
 
-const CustomerContext = ({ customer, onEdit, onNew, onClear }) => {
-  return (
-    <div className="p-3 bg-slate-900/50 rounded-lg">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <User className="h-6 w-6 text-slate-400 flex-shrink-0" />
-          <div className="truncate">
-            <p className="font-semibold truncate" title={customer?.name}>
-              {customer?.name || "No Customer Selected"}
-            </p>
-            <p className="text-xs text-slate-400 truncate">{customer?.phone || "Select or create a customer"}</p>
+const CustomerContext = ({ customer, onSelectCustomer, onClearCustomer, onViewHistory, onEdit, onNew }) => {
+  if (customer && customer.name !== 'Walking Customer') {
+    return (
+      <Card>
+        <CardContent className='p-3 flex justify-between items-center'>
+          <div className='flex items-center gap-3'>
+            <User className='h-6 w-6 text-indigo-400' />
+            <div>
+              <p className='font-semibold'>{customer.name}</p>
+              <p className='text-sm text-slate-400'>{customer.phone}</p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center flex-shrink-0">
-          <Button variant="ghost" size="sm" onClick={onEdit}>
-            Edit
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onNew}>
-            New
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+          <div className='flex items-center gap-2'>
+            <div className='flex items-center flex-shrink-0'>
+              <Button variant='ghost' size='sm' onClick={onEdit}>
+                Edit
+              </Button>
+              <Button variant='ghost' size='sm' onClick={onNew}>
+                New
+              </Button>
+            </div>
+            <Button variant='outline' size='sm' onClick={onViewHistory}>
+              <History className='h-4 w-4 mr-2' />
+              View History
+            </Button>
+            <Button variant='ghost' size='icon' onClick={onClearCustomer}>
+              <X className='h-4 w-4' />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  return <CustomerSearch onSelectCustomer={onSelectCustomer} />;
 };
 export default CustomerContext;
