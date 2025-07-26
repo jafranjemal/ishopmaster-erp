@@ -1,7 +1,7 @@
 import { ArrowLeft, DollarSign, Printer } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from 'ui-library';
 
 import PaymentApplicationModal from '../../components/payments/PaymentApplicationModal';
@@ -12,10 +12,12 @@ import { tenantPaymentMethodService, tenantPaymentsService, tenantSalesService }
 
 const SalesInvoiceDetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [invoice, setInvoice] = useState(null);
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!id) return;
@@ -53,11 +55,35 @@ const SalesInvoiceDetailPage = () => {
     }
   };
 
+  const handleProcessExchange = async () => {
+    if (
+      !window.confirm(
+        'This will void the current invoice and start a new transaction with the returned items as credit. Are you sure?',
+      )
+    )
+      return;
+
+    setIsProcessing(true);
+    try {
+      const res = await toast.promise(tenantSalesService.reopenInvoiceForExchange(id), {
+        loading: 'Reopening original invoice...',
+        success: 'Invoice reversed! Loading exchange...',
+        error: (err) => err.response?.data?.error || 'Failed to process exchange.',
+      });
+      // Pass the original invoice data directly to the POS page
+      navigate('/pos/terminal', { state: { exchangeData: res.data.data } });
+    } catch (err) {
+      /* Handled by toast */
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (isLoading) return <p className='p-8 text-center'>Loading Invoice Details...</p>;
   if (!invoice) return <p className='p-8 text-center'>Invoice not found.</p>;
 
   const isPaid = invoice.paymentStatus === 'paid';
-
+  const canBeExchanged = invoice.status === 'completed';
   return (
     <>
       <div className='space-y-6'>
@@ -73,6 +99,10 @@ const SalesInvoiceDetailPage = () => {
             <Button variant='outline'>
               <Printer className='h-4 w-4 mr-2' />
               Print Invoice
+            </Button>
+            <Button variant='outline' onClick={handleProcessExchange} disabled={!canBeExchanged || isProcessing}>
+              <Repeat className='h-4 w-4 mr-2' />
+              {isProcessing ? 'Processing...' : 'Process Exchange'}
             </Button>
             {/* --- Definitive Fix #2: Add the intelligent "Record Payment" button --- */}
             <Button onClick={() => setIsPaymentModalOpen(true)} disabled={isPaid}>

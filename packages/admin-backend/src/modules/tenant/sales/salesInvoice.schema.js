@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const servicePartSchema = new mongoose.Schema(
   {
@@ -8,7 +8,7 @@ const servicePartSchema = new mongoose.Schema(
     costPrice: Number,
   },
   { _id: false }
-);
+)
 
 const discountSchema = new mongoose.Schema(
   {
@@ -17,7 +17,7 @@ const discountSchema = new mongoose.Schema(
     reason: { type: String, trim: true },
   },
   { _id: false }
-);
+)
 
 const chargeSchema = new mongoose.Schema(
   {
@@ -25,7 +25,7 @@ const chargeSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
   },
   { _id: false }
-);
+)
 
 /**
  * Defines a single line item within a Sales Invoice.
@@ -36,7 +36,7 @@ const saleItemSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProductVariants",
       required: function () {
-        return !this.isService;
+        return !this.isService
       },
     },
     description: { type: String, required: true },
@@ -68,7 +68,7 @@ const saleItemSchema = new mongoose.Schema(
     requiredParts: [servicePartSchema],
   },
   { _id: false }
-);
+)
 
 /**
  * Defines the main Sales Invoice document, now upgraded for advanced workflows.
@@ -87,14 +87,14 @@ const salesInvoiceSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
-      enum: ["draft", "on_hold", "quotation", "completed", "partially_refunded", "fully_refunded", "cancelled"],
+      enum: ["draft", "on_hold", "quotation", "completed", "partially_refunded", "fully_refunded", "reopened_for_exchange", "cancelled"],
       default: "draft",
       index: true,
     },
 
     workflowStatus: {
       type: String,
-      enum: ["draft", "sent", "approved", "processing", "completed", "disputed", "cancelled"],
+      enum: ["draft", "sent", "approved", "processing", "completed", "disputed", "reopened_for_exchange", "cancelled"],
       default: "draft",
       index: true,
     },
@@ -147,15 +147,15 @@ const salesInvoiceSchema = new mongoose.Schema(
     soldBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }
-);
+)
 
 salesInvoiceSchema.pre("save", function (next) {
   // Store the original status to compare against on update
   if (!this.isNew) {
-    this._originalStatus = this.get("workflowStatus", null, { getters: false });
+    this._originalStatus = this.get("workflowStatus", null, { getters: false })
   }
-  next();
-});
+  next()
+})
 
 salesInvoiceSchema.pre("save", function (next) {
   if (this.isModified("workflowStatus")) {
@@ -166,16 +166,17 @@ salesInvoiceSchema.pre("save", function (next) {
       processing: ["completed", "disputed"],
       completed: [], // Cannot change workflow status after completion, only payment/refund status
       disputed: ["cancelled", "processing"],
-    };
+      reopened_for_exchange: [],
+    }
 
-    const original = this._originalStatus || "draft";
+    const original = this._originalStatus || "draft"
     if (allowedTransitions[original] && !allowedTransitions[original].includes(this.workflowStatus)) {
-      const err = new Error(`Invalid status change from "${original}" to "${this.workflowStatus}".`);
-      return next(err);
+      const err = new Error(`Invalid status change from "${original}" to "${this.workflowStatus}".`)
+      return next(err)
     }
   }
-  next();
-});
+  next()
+})
 
 // Intelligent pre-save hook to generate sequential IDs based on status
 salesInvoiceSchema.pre("save", async function (next) {
@@ -183,20 +184,20 @@ salesInvoiceSchema.pre("save", async function (next) {
   if (this.isNew) {
     // A helper function to generate the next sequential ID for a given prefix.
     const generateNextId = async (prefix, fieldName) => {
-      const lastDoc = await this.constructor.findOne({ [fieldName]: { $ne: null } }).sort({ createdAt: -1 });
-      const lastNumber = lastDoc && lastDoc[fieldName] ? parseInt(lastDoc[fieldName].split("-")[1]) : 0;
-      return `${prefix}-${String(lastNumber + 1).padStart(7, "0")}`;
-    };
+      const lastDoc = await this.constructor.findOne({ [fieldName]: { $ne: null } }).sort({ createdAt: -1 })
+      const lastNumber = lastDoc && lastDoc[fieldName] ? parseInt(lastDoc[fieldName].split("-")[1]) : 0
+      return `${prefix}-${String(lastNumber + 1).padStart(7, "0")}`
+    }
 
     // Generate the correct ID based on the document's status.
     if (this.status === "completed" && !this.invoiceId) {
-      this.invoiceId = await generateNextId("INV", "invoiceId");
+      this.invoiceId = await generateNextId("INV", "invoiceId")
     } else if (this.status === "quotation" && !this.quotationId) {
-      this.quotationId = await generateNextId("QT", "quotationId");
+      this.quotationId = await generateNextId("QT", "quotationId")
     } else if (["draft", "on_hold"].includes(this.status) && !this.draftId) {
-      this.draftId = `DRAFT-${Date.now()}`;
+      this.draftId = `DRAFT-${Date.now()}`
     }
   }
-  next();
-});
-module.exports = salesInvoiceSchema;
+  next()
+})
+module.exports = salesInvoiceSchema

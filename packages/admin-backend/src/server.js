@@ -19,6 +19,7 @@ try {
   const adminTenantRoutes = require("./modules/admin/tenants/tenant.routes.js")
   const adminModulesRoutes = require("./modules/admin/modules/module.routes.js")
   const adminPermissionsRoutes = require("./modules/admin/permissions/permission.routes.js")
+  const adminConstantsRoutes = require("./modules/admin/constants/constants.routes.js")
 
   const tenantAuthRoutes = require("./modules/tenant/auth/auth.routes.js")
   const tenantRolesRoutes = require("./modules/tenant/roles/role.routes.js")
@@ -99,37 +100,6 @@ try {
   // --- DYNAMIC TENANT MODULE LOADER ---
   const tenantModulesPath = path.join(__dirname, "modules", "tenant")
   const tenantRouter = express.Router() // Create a dedicated router for all tenant modules
-
-  // fs.readdirSync(tenantModulesPath).forEach((moduleName) => {
-  //   const modulePath = path.join(tenantModulesPath, moduleName);
-  //   if (fs.statSync(modulePath).isDirectory()) {
-  //     console.log(`Loading tenant module: ${moduleName}`);
-  //     const module = require(path.join(modulePath, "index.js"));
-
-  //     // 1. Register all schemas from the module
-  //     if (module.schemas) {
-  //       for (const [name, schema] of Object.entries(module.schemas)) {
-  //         databaseService.registerSchema(name, schema);
-  //         console.log(`  - Registered schema: ${name}`);
-  //       }
-  //     }
-
-  //     // 2. Mount the module's router on a sub-path
-  //     if (module.router) {
-  //       if (module.isPublic) {
-  //         // Public routes are mounted on the public router, which only uses the tenantResolver
-  //         publicApiRouter.use(`/${moduleName}`, tenantResolver, module.router);
-  //         console.log(`  - Mounted PUBLIC routes at /api/v1/public/${moduleName}`);
-  //       } else {
-  //         tenantRouter.use(`/${moduleName}`, module.router);
-  //         console.log(`  - Mounted routes at /${moduleName}`);
-  //       }
-  //     }
-  //   }
-  // });
-  // // --- END OF LOADER ---
-
-  // Body Parser Middleware
 
   // Improved module loader with debug information
   console.log(chalk.yellow.bold(`\n⏳ Starting module discovery in: ${tenantModulesPath}`))
@@ -240,6 +210,7 @@ try {
   app.use("/api/v1/admin/tenants", adminTenantRoutes)
   app.use("/api/v1/admin/modules", adminModulesRoutes)
   app.use("/api/v1/admin/permissions", adminPermissionsRoutes)
+  app.use("/api/v1/admin/constants", adminConstantsRoutes)
   app.use("/api/v1/backups", backupRoutes)
 
   portalApiRouter.use("/auth", tenantResolver, portalAuthRoutes)

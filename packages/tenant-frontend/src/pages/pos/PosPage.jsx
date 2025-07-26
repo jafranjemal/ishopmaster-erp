@@ -55,6 +55,7 @@ const PosPage = ({ layout }) => {
     loadInvoiceForPayment,
     completedSale, // <-- 2. GET NEW STATE
     setCompletedSale,
+    loadExchangeData,
     ...posSession
   } = usePosSession();
 
@@ -98,6 +99,14 @@ const PosPage = ({ layout }) => {
   useEffect(() => {
     tenantSettingsService.getDenominations().then((res) => setDenominations(res.data.data));
   }, []);
+
+  useEffect(() => {
+    if (location.state?.exchangeData) {
+      loadExchangeData(location.state.exchangeData);
+      // Clear the state to prevent re-loading on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, loadExchangeData]);
 
   const handleFinalizeOnCredit = async () => {
     if (!canSellOnCredit) return toast.error('This customer is not eligible for credit sales.');

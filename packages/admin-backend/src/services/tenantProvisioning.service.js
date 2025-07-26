@@ -1,18 +1,19 @@
 // Master Data Lists
-const BRAND_MASTER_LIST = require("../modules/admin/constants/brand.masterlist");
-const CATEGORY_MASTER_LIST = require("../modules/admin/constants/category.masterlist");
-const ATTRIBUTE_MASTER_LIST = require("../modules/admin/constants/attribute.masterlist");
-const ATTRIBUTE_SET_MASTER_LIST = require("../modules/admin/constants/attributeSet.masterlist");
-const PRODUCT_TEMPLATE_MASTER_LIST = require("../modules/admin/constants/productTemplate.masterlist");
-const DEFAULT_ACCOUNTS_LIST = require("../modules/admin/constants/account.masterlist");
-const CURRENCY_MASTER_LIST = require("../modules/admin/constants/currency.masterlist");
-const EXCHANGE_RATE_MASTER_LIST = require("../modules/admin/constants/exchangeRate.masterlist");
-const PAYMENT_METHOD_MASTER_LIST = require("../modules/admin/constants/paymentMethod.masterlist");
-const PRODUCT_VARIANT_MASTER_LIST = require("../modules/admin/constants/productVarients.masterlist");
-const DEVICE_MASTER_LIST = require("../modules/admin/constants/device.masterlist");
-const defaultNotificationTemplates = require("../modules/admin/constants/notificationTemplates.masterlist");
-const customerService = require("./customer.service");
-const defaultLabelTemplates = require("../modules/admin/constants/labelTemplates.masterlist");
+const BRAND_MASTER_LIST = require("../modules/admin/constants/brand.masterlist")
+const CATEGORY_MASTER_LIST = require("../modules/admin/constants/category.masterlist")
+const ATTRIBUTE_MASTER_LIST = require("../modules/admin/constants/attribute.masterlist")
+const ATTRIBUTE_SET_MASTER_LIST = require("../modules/admin/constants/attributeSet.masterlist")
+const PRODUCT_TEMPLATE_MASTER_LIST = require("../modules/admin/constants/productTemplate.masterlist")
+const DEFAULT_ACCOUNTS_LIST = require("../modules/admin/constants/account.masterlist")
+const CURRENCY_MASTER_LIST = require("../modules/admin/constants/currency.masterlist")
+const EXCHANGE_RATE_MASTER_LIST = require("../modules/admin/constants/exchangeRate.masterlist")
+const PAYMENT_METHOD_MASTER_LIST = require("../modules/admin/constants/paymentMethod.masterlist")
+const PRODUCT_VARIANT_MASTER_LIST = require("../modules/admin/constants/productVarients.masterlist")
+const DEVICE_MASTER_LIST = require("../modules/admin/constants/device.masterlist")
+const defaultNotificationTemplates = require("../modules/admin/constants/notificationTemplates.masterlist")
+const customerService = require("./customer.service")
+const defaultLabelTemplates = require("../modules/admin/constants/labelTemplates.masterlist")
+const defaultTemplates = require("../modules/admin/constants/defaultTemplates")
 
 class TenantProvisioningService {
   /**
@@ -22,26 +23,26 @@ class TenantProvisioningService {
    * @param {object} initialData - Contains owner and primaryBranch data.
    */
   async provisionNewTenantDb(models, session, initialData) {
-    console.log(`[Provisioning Service] Starting database setup...`);
+    console.log(`[Provisioning Service] Starting database setup...`)
 
     // 1. Seed financial accounts first, as they are dependencies for other records.
-    await this._seedAccounts(models, session);
+    await this._seedAccounts(models, session)
 
     // 2. Seed system data like roles and the default 'Walking Customer'.
-    const { adminRole } = await this._seedSystemData(models, session);
+    const { adminRole } = await this._seedSystemData(models, session)
 
     // 3. Seed the owner's user account, linking it to the newly created role and branch.
-    await this._seedOwnerAccount(models, session, initialData, adminRole);
+    await this._seedOwnerAccount(models, session, initialData, adminRole)
 
     // 4. Seed master data for inventory management.
-    await this._seedMasterData(models, session);
+    await this._seedMasterData(models, session)
 
-    await this._seedDevicesAndRepairs(models, session);
+    await this._seedDevicesAndRepairs(models, session)
 
     // 5. Seed Product Variants, linking them to the newly created templates.
     // await this._seedProductVariants(models, session);
 
-    console.log(`[Provisioning Service] Database setup complete.`);
+    console.log(`[Provisioning Service] Database setup complete.`)
   }
 
   /**
@@ -49,9 +50,9 @@ class TenantProvisioningService {
    * @private
    */
   async _seedAccounts(models, session) {
-    const { Account } = models;
-    await Account.insertMany(DEFAULT_ACCOUNTS_LIST, { session });
-    console.log(`  -> Default Chart of Accounts seeded.`);
+    const { Account } = models
+    await Account.insertMany(DEFAULT_ACCOUNTS_LIST, { session })
+    console.log(`  -> Default Chart of Accounts seeded.`)
   }
 
   /**
@@ -60,12 +61,12 @@ class TenantProvisioningService {
    * @returns {object} The created Super Admin role document.
    */
   async _seedSystemData(models, session) {
-    const { Role, Permission } = models;
+    const { Role, Permission } = models
 
     // Note: For full modularity, Permission should also be a tenant-level model.
     // Assuming it's available for now. If it's an admin model, it needs to be fetched outside the transaction.
-    const allPermissions = await require("../modules/admin/permissions/permission.model").find({}).select("key").lean();
-    const allPermissionKeys = allPermissions.map((p) => p.key);
+    const allPermissions = await require("../modules/admin/permissions/permission.model").find({}).select("key").lean()
+    const allPermissionKeys = allPermissions.map((p) => p.key)
 
     const rolesToCreate = [
       {
@@ -83,10 +84,10 @@ class TenantProvisioningService {
         permissions: ["sales:pos:access", "crm:customer:manage"],
         isSystemRole: true,
       },
-    ];
+    ]
 
-    const createdRoles = await Role.insertMany(rolesToCreate, { session });
-    console.log(`  -> Default Roles seeded.`);
+    const createdRoles = await Role.insertMany(rolesToCreate, { session })
+    console.log(`  -> Default Roles seeded.`)
 
     await customerService.createCustomerWithLedger(
       models,
@@ -96,12 +97,12 @@ class TenantProvisioningService {
         phone: "000-000-0000",
       },
       session
-    );
-    console.log(`  -> Default 'Walking Customer' created.`);
+    )
+    console.log(`  -> Default 'Walking Customer' created.`)
 
-    const adminRole = createdRoles.find((r) => r.name === "Super Admin");
-    if (!adminRole) throw new Error("Super Admin role was not created during seeding.");
-    return { adminRole };
+    const adminRole = createdRoles.find((r) => r.name === "Super Admin")
+    if (!adminRole) throw new Error("Super Admin role was not created during seeding.")
+    return { adminRole }
   }
 
   /**
@@ -109,7 +110,7 @@ class TenantProvisioningService {
    * @private
    */
   async _seedOwnerAccount(models, session, { owner }, adminRole) {
-    const { User, Branch } = models;
+    const { User, Branch } = models
     // In a real transactional implementation, the branch should be created here too.
     // For now, we assume it's passed in.
     await User.create(
@@ -123,8 +124,8 @@ class TenantProvisioningService {
         },
       ],
       { session }
-    );
-    console.log(`  -> Owner account created.`);
+    )
+    console.log(`  -> Owner account created.`)
   }
 
   /**
@@ -145,13 +146,13 @@ class TenantProvisioningService {
       PaymentMethod,
       NotificationTemplate,
       LabelTemplate,
-    } = models;
+    } = models
 
     // Seed simple lists
     await Brand.insertMany(
       BRAND_MASTER_LIST.map((b) => (b.name ? { name: b.name } : b)),
       { session }
-    );
+    )
 
     // // Seed hierarchical categories
     // for (const cat of CATEGORY_MASTER_LIST) {
@@ -172,23 +173,23 @@ class TenantProvisioningService {
     //   }
     // }
 
-    await NotificationTemplate.insertMany(defaultNotificationTemplates, { session });
-    await LabelTemplate.insertMany(defaultLabelTemplates, { session });
-
+    await NotificationTemplate.insertMany(defaultNotificationTemplates, { session })
+    await LabelTemplate.insertMany(defaultLabelTemplates, { session })
+    await models.DocumentTemplate.insertMany(defaultTemplates, { session })
     // Seed hierarchical categories using the new recursive function
-    console.log("Seeding hierarchical categories...");
-    await this.seedCategoriesRecursively(CATEGORY_MASTER_LIST, null, models, session);
-    console.log(" -> Categories seeded successfully.");
+    console.log("Seeding hierarchical categories...")
+    await this.seedCategoriesRecursively(CATEGORY_MASTER_LIST, null, models, session)
+    console.log(" -> Categories seeded successfully.")
 
     // Seed Attributes and Sets
-    const createdAttributes = await Attribute.insertMany(ATTRIBUTE_MASTER_LIST, { session });
-    const attributeMap = new Map(createdAttributes.map((attr) => [attr.key, attr._id]));
+    const createdAttributes = await Attribute.insertMany(ATTRIBUTE_MASTER_LIST, { session })
+    const attributeMap = new Map(createdAttributes.map((attr) => [attr.key, attr._id]))
     const attributeSetDocs = ATTRIBUTE_SET_MASTER_LIST.map((set) => ({
       name: set.name,
       key: set.key || set.name.toLowerCase().replace(/\s+/g, "_"),
       attributes: set.attributeKeys.map((key) => attributeMap.get(key)).filter(Boolean),
-    }));
-    await AttributeSet.insertMany(attributeSetDocs, { session });
+    }))
+    await AttributeSet.insertMany(attributeSetDocs, { session })
 
     // Seed Product Templates
     const [brands, categories, attributeSets, accounts] = await Promise.all([
@@ -196,17 +197,17 @@ class TenantProvisioningService {
       Category.find({}).session(session),
       AttributeSet.find({}).session(session),
       Account.find({}).session(session),
-    ]);
-    const brandMap = new Map(brands.map((b) => [b.name, b._id]));
-    const categoryMap = new Map(categories.map((c) => [c.name, c._id]));
-    const attributeSetMap = new Map(attributeSets.map((a) => [a.name, a._id]));
-    const accountMap = new Map(accounts.map((a) => [a.name, a._id]));
+    ])
+    const brandMap = new Map(brands.map((b) => [b.name, b._id]))
+    const categoryMap = new Map(categories.map((c) => [c.name, c._id]))
+    const attributeSetMap = new Map(attributeSets.map((a) => [a.name, a._id]))
+    const accountMap = new Map(accounts.map((a) => [a.name, a._id]))
 
-    console.log("PRODUCT_TEMPLATE_MASTER_LIST size ", PRODUCT_TEMPLATE_MASTER_LIST.length);
+    console.log("PRODUCT_TEMPLATE_MASTER_LIST size ", PRODUCT_TEMPLATE_MASTER_LIST.length)
     const templateDocs = PRODUCT_TEMPLATE_MASTER_LIST.map((template) => {
-      const attrSetId = attributeSetMap.get(template.attributeSetName);
+      const attrSetId = attributeSetMap.get(template.attributeSetName)
       if (template.attributeSetName && !attrSetId) {
-        console.warn(`⚠️ AttributeSet "${template.attributeSetName}" not found for:`, template.baseName);
+        console.warn(`⚠️ AttributeSet "${template.attributeSetName}" not found for:`, template.baseName)
       }
 
       return {
@@ -219,34 +220,34 @@ class TenantProvisioningService {
         assetAccountId: accountMap.get(template.assetAccountName),
         revenueAccountId: accountMap.get(template.revenueAccountName),
         cogsAccountId: accountMap.get(template.cogsAccountName),
-      };
-    }).filter((t) => t.brandId && t.assetAccountId);
+      }
+    }).filter((t) => t.brandId && t.assetAccountId)
 
-    console.log("templateDocs size ", templateDocs.length);
+    console.log("templateDocs size ", templateDocs.length)
 
-    let createdTemplates = [];
+    let createdTemplates = []
     if (templateDocs.length > 0) {
       // 1. Create the templates and store the result
-      createdTemplates = await ProductTemplates.insertMany(templateDocs, { session });
+      createdTemplates = await ProductTemplates.insertMany(templateDocs, { session })
     }
 
-    console.log("createdTemplates size ", createdTemplates.length);
+    console.log("createdTemplates size ", createdTemplates.length)
 
     // 2. Loop through each newly created template.
     for (const template of createdTemplates) {
-      console.log("template ", template);
+      console.log("template ", template)
 
       const attributeSet = template.attributeSetId
         ? await AttributeSet.findById(template.attributeSetId).populate("attributes").session(session)
-        : null;
+        : null
 
       if (!attributeSet?.attributes) {
-        console.warn(`⚠️ Template "${template.baseName}" has no attributeSetId`);
+        console.warn(`⚠️ Template "${template.baseName}" has no attributeSetId`)
       }
       if (!attributeSet || attributeSet.attributes.length === 0) {
-        await ProductVariants.createDefaultVariant(template, session);
+        await ProductVariants.createDefaultVariant(template, session)
       } else {
-        await ProductVariants.createDefaultVariant(template, session);
+        await ProductVariants.createDefaultVariant(template, session)
         // await ProductVariants.createVariantsFromAttributes(template, attributeSet, session);
       }
 
@@ -260,20 +261,20 @@ class TenantProvisioningService {
       ...method,
       linkedAccountId: accountMap.get(method.linkedAccountName),
       holdingAccountId: method.holdingAccountName ? accountMap.get(method.holdingAccountName) : null,
-    }));
+    }))
     await PaymentMethod.insertMany(paymentMethodsToCreate, {
       session,
       ordered: true,
-    });
+    })
 
-    console.log("Seeding master data: Currencies and Exchange Rates...");
-    await Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true });
+    console.log("Seeding master data: Currencies and Exchange Rates...")
+    await Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true })
     await ExchangeRate.insertMany(EXCHANGE_RATE_MASTER_LIST, {
       session,
       ordered: true,
-    });
-    console.log("Currency data seeded successfully.");
-    console.log(`  -> Master Inventory data seeded.`);
+    })
+    console.log("Currency data seeded successfully.")
+    console.log(`  -> Master Inventory data seeded.`)
   }
 
   /**
@@ -285,26 +286,26 @@ class TenantProvisioningService {
    * @param {mongoose.ClientSession} session - The active transaction session.
    */
   async seedCategoriesRecursively(categoryNodes, parentId, models, session) {
-    const { Category } = models;
+    const { Category } = models
 
     // Prepare all documents for the current level
     const categoriesToCreate = categoryNodes.map((node) => ({
       name: node.name,
       description: node.description,
       parent: parentId, // Use 'parent' to match our final schema
-    }));
+    }))
 
     // Create all categories at the current level in a single batch
-    const createdCategories = await Category.insertMany(categoriesToCreate, { session });
+    const createdCategories = await Category.insertMany(categoriesToCreate, { session })
 
     // Now, for each newly created category, check if it has children and recurse
     for (let i = 0; i < createdCategories.length; i++) {
-      const parentDoc = createdCategories[i];
-      const sourceNode = categoryNodes[i]; // The original node from the master list
+      const parentDoc = createdCategories[i]
+      const sourceNode = categoryNodes[i] // The original node from the master list
 
       if (sourceNode.children && sourceNode.children.length > 0) {
         // If children exist, call the function again for the next level down
-        await this.seedCategoriesRecursively(sourceNode.children, parentDoc._id, models, session);
+        await this.seedCategoriesRecursively(sourceNode.children, parentDoc._id, models, session)
       }
     }
   }
@@ -315,10 +316,10 @@ class TenantProvisioningService {
    * @param {*} session
    */
   async _seedDevicesAndRepairs(models, session) {
-    const { Device, RepairType, Brand, Category } = models;
+    const { Device, RepairType, Brand, Category } = models
 
     // Example Device list (extend as needed)
-    const devices = DEVICE_MASTER_LIST;
+    const devices = DEVICE_MASTER_LIST
     // Example Repairs list (common repairs for smartphones)
     const commonRepairs = [
       "Screen Replacement",
@@ -328,68 +329,68 @@ class TenantProvisioningService {
       "Speaker/Mic Repair",
       "Button Repair",
       "Water Damage Treatment",
-    ];
+    ]
 
     // Lookup brand and category documents
-    const brandMap = new Map();
-    const categoryMap = new Map();
+    const brandMap = new Map()
+    const categoryMap = new Map()
 
     // Cache all brands & categories to avoid repeated queries
-    const allBrands = await Brand.find({}).session(session);
-    allBrands.forEach((b) => brandMap.set(b.name, b._id));
+    const allBrands = await Brand.find({}).session(session)
+    allBrands.forEach((b) => brandMap.set(b.name, b._id))
 
-    const allCategories = await Category.find({}).session(session);
-    allCategories.forEach((c) => categoryMap.set(c.name, c._id));
+    const allCategories = await Category.find({}).session(session)
+    allCategories.forEach((c) => categoryMap.set(c.name, c._id))
 
     for (const deviceData of devices) {
-      const brandId = brandMap.get(deviceData.brandName);
-      const categoryId = categoryMap.get(deviceData.categoryName);
+      const brandId = brandMap.get(deviceData.brandName)
+      const categoryId = categoryMap.get(deviceData.categoryName)
 
       if (!brandId || !categoryId) {
-        console.warn(`Skipping device ${deviceData.name} - brand or category missing.`);
-        continue;
+        console.warn(`Skipping device ${deviceData.name} - brand or category missing.`)
+        continue
       }
 
       // Check if device already exists
-      let device = await Device.findOne({ name: deviceData.name, brandId }).session(session);
+      let device = await Device.findOne({ name: deviceData.name, brandId }).session(session)
       if (!device) {
         device = new Device({
           name: deviceData.name,
           brandId,
           categoryId,
           isActive: true,
-        });
-        await device.save({ session });
-        console.log(`Created device: ${device.name}`);
+        })
+        await device.save({ session })
+        console.log(`Created device: ${device.name}`)
       } else {
-        console.log(`Device already exists: ${device.name}`);
+        console.log(`Device already exists: ${device.name}`)
       }
 
       // Seed repair types for this device
       for (const repairName of commonRepairs) {
         // Build a unique repair type name: "DeviceName - RepairName"
-        const repairTypeName = `${device.name} - ${repairName}`;
+        const repairTypeName = `${device.name} - ${repairName}`
 
         // Check if this repair type already exists for this device
         const exists = await RepairType.findOne({
           name: repairTypeName,
           deviceId: device._id,
-        }).session(session);
-        if (exists) continue;
+        }).session(session)
+        if (exists) continue
 
         const repairType = new RepairType({
           name: repairTypeName,
           deviceId: device._id,
           description: repairName,
           isActive: true,
-        });
+        })
 
-        await repairType.save({ session });
-        console.log(`Created repair type: ${repairType.name}`);
+        await repairType.save({ session })
+        console.log(`Created repair type: ${repairType.name}`)
       }
     }
 
-    console.log("Device and Repair Type seeding complete.");
+    console.log("Device and Repair Type seeding complete.")
   }
 
   /**
@@ -399,35 +400,35 @@ class TenantProvisioningService {
    * @private
    */
   async _seedProductVariants(models, session) {
-    const { ProductTemplates, ProductVariants } = models;
+    const { ProductTemplates, ProductVariants } = models
 
     // 1. Fetch all templates that were just created.
-    const allTemplates = await ProductTemplates.find({}).populate("brandId").session(session).lean();
+    const allTemplates = await ProductTemplates.find({}).populate("brandId").session(session).lean()
     if (!allTemplates.length) {
-      console.log(" -> No product templates found, skipping variant seeding.");
-      return;
+      console.log(" -> No product templates found, skipping variant seeding.")
+      return
     }
 
     // 2. Create a fast, case-insensitive lookup map.
     // The key is now always uppercase: 'BASENAME|BRANDNAME'
-    const templateMap = new Map();
+    const templateMap = new Map()
     for (const template of allTemplates) {
       if (template.baseName && template.brandId?.name) {
-        const key = `${template.baseName.toUpperCase()}|${template.brandId.name.toUpperCase()}`;
-        templateMap.set(key, template._id);
+        const key = `${template.baseName.toUpperCase()}|${template.brandId.name.toUpperCase()}`
+        templateMap.set(key, template._id)
       }
     }
 
     // 3. Prepare the variant documents for insertion.
-    const variantsToCreate = [];
+    const variantsToCreate = []
     for (const variant of PRODUCT_VARIANT_MASTER_LIST) {
       // --- DEFINITIVE FIX IS HERE ---
       // We now split the variant's templateKey and convert its parts to uppercase
       // to ensure a case-insensitive match with our map.
-      const keyParts = variant.templateKey.split("|");
-      const lookupKey = `${keyParts[0].toUpperCase()}|${keyParts[1].toUpperCase()}`;
+      const keyParts = variant.templateKey.split("|")
+      const lookupKey = `${keyParts[0].toUpperCase()}|${keyParts[1].toUpperCase()}`
 
-      const templateId = templateMap.get(lookupKey);
+      const templateId = templateMap.get(lookupKey)
 
       if (templateId) {
         variantsToCreate.push({
@@ -438,21 +439,21 @@ class TenantProvisioningService {
           images: variant.images,
           costPrice: 0,
           sellingPrice: 0,
-        });
+        })
       } else {
         console.warn(
           ` -> [Warning] Could not find parent template for key: "${variant.templateKey}". Skipping variant: "${variant.variantName}"`
-        );
+        )
       }
     }
 
     // 4. Insert all variants in a single batch.
     if (variantsToCreate.length > 0) {
-      await ProductVariants.insertMany(variantsToCreate, { session });
+      await ProductVariants.insertMany(variantsToCreate, { session })
     }
 
-    console.log(` -> ${variantsToCreate.length} Product Variants seeded successfully.`);
+    console.log(` -> ${variantsToCreate.length} Product Variants seeded successfully.`)
   }
 }
 
-module.exports = new TenantProvisioningService();
+module.exports = new TenantProvisioningService()

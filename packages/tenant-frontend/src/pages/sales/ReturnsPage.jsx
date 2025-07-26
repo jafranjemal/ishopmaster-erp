@@ -1,116 +1,117 @@
-import React, { useState, useCallback } from 'react';
+import { Undo2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { Button, Card, CardContent, CardHeader, CardTitle } from 'ui-library';
+import JobRecall from '../../components/pos/JobRecall';
+import RefundConfirmationModal from '../../components/sales/returns/RefundConfirmationModal';
+import ReturnableItemsList from '../../components/sales/returns/ReturnableItemsList';
 import { tenantReturnsService } from '../../services/api';
-import { Button, Input, Card, CardContent, CardHeader, CardTitle } from 'ui-library';
-import { Search } from 'lucide-react';
-import SelectReturnItems from '../../components/sales/returns/SelectReturnItems';
-import ConfirmRefundStep from '../../components/sales/returns/ConfirmRefundStep';
-import { useNavigate } from 'react-router-dom';
 
 const ReturnsPage = () => {
-  const [step, setStep] = useState(1);
-  const [invoiceId, setInvoiceNumber] = useState('');
-  const [originalInvoice, setOriginalInvoice] = useState(null);
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const navigate = useNavigate();
+  const [foundInvoice, setFoundInvoice] = useState(null);
+  const [selectedItems, setSelectedItems] = useState({});
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleFindInvoice = async () => {
-    try {
-      const res = await tenantReturnsService.findInvoice(invoiceId);
-      if (res.data.data.length === 0) throw new Error('Invoice not found.');
-      setOriginalInvoice(res.data.data[0]);
-      setStep(2);
-    } catch (err) {
-      toast.error(err.message || 'Failed to find invoice.');
+  const handleJobFound = (foundJob) => {
+    if (foundJob.type === 'SalesInvoice') {
+      setFoundInvoice(foundJob.document);
+      setSelectedItems({}); // Reset selection when a new invoice is found
+    } else {
+      toast.error('Only Sales Invoices can be processed for returns here.');
     }
   };
 
-  const handleSelectionChange = (item) => {
-    setSelectedItems((prev) => {
-      const exists = prev.find((i) => i.productVariantId === item.productVariantId);
-      if (exists) return prev.filter((i) => i.productVariantId !== item.productVariantId);
-      return [...prev, { productVariantId: item.productVariantId, quantityReturned: 1, returnPrice: item.finalPrice }];
-    });
+  const resetPage = () => {
+    setFoundInvoice(null);
+    setSelectedItems({});
+    setIsConfirmModalOpen(false);
   };
 
-  const handleQuantityChange = (variantId, qty) => {
-    setSelectedItems((prev) =>
-      prev.map((i) => (i.productVariantId === variantId ? { ...i, quantityReturned: Number(qty) } : i)),
-    );
-  };
-
-  const handleProcessReturn = async (resolution) => {
-    setIsProcessing(true);
+  const handleProcessReturn = async (refundMethod) => {
+    setIsSaving(true);
     const returnData = {
-      originalInvoiceId: originalInvoice._id,
-      customerId: originalInvoice.customerId,
-      items: selectedItems,
-      totalRefundAmount: selectedItems.reduce((sum, i) => sum + i.returnPrice * i.quantityReturned, 0),
-      resolution,
+      invoiceId: foundInvoice._id,
+      itemsToReturn: Object.values(selectedItems).map((item) => ({
+        productVariantId: item.productVariantId,
+        quantity: item.quantity,
+        reason: 'Customer return', // In a real app, you'd have a reason input
+        description: item.description,
+      })),
+      refundMethod,
     };
+
     try {
       await toast.promise(tenantReturnsService.processReturn(returnData), {
         loading: 'Processing return...',
         success: 'Return processed successfully!',
-        error: 'Return failed.',
+        error: (err) => err.response?.data?.error || 'Failed to process return.',
       });
-      navigate('/sales/history');
+      resetPage();
     } catch (err) {
-      /* handled by toast */
+      /* Handled by toast */
     } finally {
-      setIsProcessing(false);
+      setIsSaving(false);
+      setIsConfirmModalOpen(false);
     }
   };
 
-  const totalRefund = selectedItems.reduce((sum, i) => sum + i.returnPrice * i.quantityReturned, 0);
+  const canProcessReturn = useMemo(() => Object.keys(selectedItems).length > 0, [selectedItems]);
 
   return (
-    <div className='space-y-6 max-w-4xl mx-auto'>
-      <h1 className='text-3xl font-bold'>Process Customer Return (RMA)</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            Step {step}: {step === 1 ? 'Find Original Invoice' : 'Select Items & Confirm'}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {step === 1 && (
-            <div className='flex gap-2'>
-              <Input
-                value={invoiceId}
-                onChange={(e) => setInvoiceNumber(e.target.value)}
-                placeholder='Enter Invoice Number...'
-              />
-              <Button onClick={handleFindInvoice}>
-                <Search className='h-4 w-4 mr-2' />
-                Find
-              </Button>
-            </div>
-          )}
-          {step === 2 && originalInvoice && (
-            <div>
-              <h3 className='font-bold mb-2'>Select Items to Return</h3>
-              <SelectReturnItems
-                invoice={originalInvoice}
+    <>
+      <div className='space-y-6'>
+        <div className='flex justify-between items-center'>
+          <h1 className='text-3xl font-bold flex items-center gap-2'>
+            <Undo2 className='h-8 w-8 text-indigo-400' /> Process Customer Return
+          </h1>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>1. Find Original Invoice</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <JobRecall onJobFound={handleJobFound} />
+          </CardContent>
+        </Card>
+
+        {foundInvoice && (
+          <Card>
+            <CardHeader>
+              <CardTitle>2. Select Items to Return</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ReturnableItemsList
+                items={foundInvoice.items}
                 selectedItems={selectedItems}
-                onSelectionChange={handleSelectionChange}
-                onQuantityChange={handleQuantityChange}
+                onSelectionChange={setSelectedItems}
               />
-              <div className='mt-6 border-t border-slate-700 pt-6'>
-                <h3 className='font-bold mb-4'>Confirm Refund</h3>
-                <ConfirmRefundStep
-                  totalRefund={totalRefund}
-                  paymentMethods={[]}
-                  onConfirm={handleProcessReturn}
-                  isSaving={isProcessing}
-                />
-              </div>
-            </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className='flex justify-end gap-2'>
+          {foundInvoice && (
+            <Button variant='outline' onClick={resetPage}>
+              Clear
+            </Button>
           )}
-        </CardContent>
-      </Card>
-    </div>
+          <Button onClick={() => setIsConfirmModalOpen(true)} disabled={!canProcessReturn}>
+            Process Return
+          </Button>
+        </div>
+      </div>
+
+      <RefundConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleProcessReturn}
+        selectedItems={selectedItems}
+        isSaving={isSaving}
+      />
+    </>
   );
 };
+
 export default ReturnsPage;

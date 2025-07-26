@@ -98,6 +98,9 @@ import RepairTicketDetailPage from './pages/service/RepairTicketDetailPage';
 import RepairTicketIntakePage from './pages/service/RepairTicketIntakePage';
 import TechnicianDashboardPage from './pages/service/TechnicianDashboardPage';
 import TenantBackupsPage from './pages/settings/BackupsPage';
+import DocumentBuilderPage from './pages/settings/DocumentBuilderPage';
+import DocumentTemplatesPage from './pages/settings/DocumentTemplatesPage';
+import HardwareManagementPage from './pages/settings/HardwareManagementPage';
 import NotificationTemplatesPage from './pages/settings/NotificationTemplatesPage';
 import QcTemplatesPage from './pages/settings/QcTemplatesPage';
 
@@ -177,6 +180,9 @@ function App() {
                   <Route path='/inventory/assembly' element={<AssemblyPage />} />
                   <Route path='/inventory/products/templates/:id' element={<ProductTemplateDetailPage />} />
                   {/* Settings Module Routes */}
+                  <Route path='/settings/hardware' element={<HardwareManagementPage />} />
+                  <Route path='/settings/document-templates/:id/design' element={<DocumentBuilderPage />} />
+                  <Route path='/settings/document-templates' element={<DocumentTemplatesPage />} />
                   <Route path='/settings/cash-drawer' element={<DrawerConfigurationPage />} />
                   <Route path='/settings/financial-periods' element={<FinancialPeriodsPage />} />
                   <Route path='/settings/coupons' element={<CouponManagementPage />} />

@@ -36,6 +36,7 @@ import {
   Gift,
   Globe,
   Hammer,
+  HardDrive,
   History,
   KeyRound,
   Landmark,
@@ -459,6 +460,13 @@ const Sidebar = () => {
           ],
         },
         {
+          name: 'Hardware & Devices',
+          href: '/settings/hardware',
+          icon: HardDrive,
+          permission: 'settings:access',
+        },
+
+        {
           name: t('sidebar.sub_menu.inventory_settings'),
           href: '/settings/inventory',
           icon: Warehouse,
@@ -469,6 +477,20 @@ const Sidebar = () => {
               href: '/settings/backups',
               icon: ShieldCheck,
               permission: 'tenant:admin', // Only tenant admins should see this
+            },
+            {
+              name: 'Printing & Documents',
+              icon: Printer,
+              permission: 'settings:access',
+              children: [
+                // ... other settings
+                {
+                  name: 'Document Templates',
+                  icon: Printer,
+                  href: '/settings/document-templates',
+                  permission: 'settings:access',
+                },
+              ],
             },
             {
               name: t('sidebar.sub_menu.brands'),

@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      body {
+          font-family: Arial, sans-serif;
+          font-size: 10pt;
+          margin: 0;
+          padding: 0;
+          width: {{template.paperWidth}}mm;
+          height: {{template.paperHeight}}mm;
+          background-image: url('{{template.backgroundImageUrl}}');
+          background-size: cover;
+          background-repeat: no-repeat;
+      }
+      .canvas-item {
+          position: absolute;
+          overflow: hidden;
+          border: 1px dotted #ccc; /* Helper for debugging layouts */
+      }
+      table {
+          width: 100%;
+          border-collapse: collapse;
+      }
+      th, td {
+          padding: 2px;
+          text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    {{#each layout}}
+    <div
+      class="canvas-item"
+      style="left: {{this.x}}px; top: {{this.y}}px; width: {{this.w}}px; height: {{this.h}}px; font-size: {{this.fontSize}}pt; text-align: {{this.textAlign}};"
+    >
+      {{!-- This is a simplified renderer. A full version would have more complex logic per component type --}} {{#if (eq this.componentType
+      'invoiceId')}}
+      <strong>{{../data.invoiceId}}</strong>
+      {{/if}} {{#if (eq this.componentType 'customerName')}} {{../data.customerId.name}} {{/if}} {{#if (eq this.componentType
+      'grandTotal')}} {{formatCurrency ../data.totalAmount}} {{/if}}
+    </div>
+    {{/each}}
+  </body>
+</html>

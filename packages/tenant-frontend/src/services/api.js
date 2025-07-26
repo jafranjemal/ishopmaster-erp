@@ -1444,8 +1444,8 @@ export const tenantSalesService = {
   finalizeSale: async (saleData) => {
     return api.post('/tenant/sales', saleData);
   },
-  getInvoiceById: async (invoiceId) => {
-    return api.get(`/tenant/sales/${invoiceId}`); // Assuming a standard GET by ID endpoint exists
+  reopenInvoiceForExchange: async (invoiceId) => {
+    return api.post(`/tenant/sales/invoices/${invoiceId}/reopen-for-exchange`);
   },
   createDraft: async (data) => api.post('/tenant/sales/drafts', data),
   createQuotation: async (data) => api.post('/tenant/sales/quotations', data),
@@ -1497,6 +1497,54 @@ export const tenantQcTemplateService = {
   create: async (data) => api.post('/tenant/repairs/qc-templates', data),
   update: async (id, data) => api.put(`/tenant/repairs/qc-templates/${id}`, data),
   delete: async (id) => api.delete(`/tenant/repairs/qc-templates/${id}`),
+};
+
+export const tenantDocumentTemplateService = {
+  getAll: async (params) => api.get('/tenant/settings/document/templates', { params }),
+  getById: async (id) => api.get(`/tenant/settings/document/templates/${id}`),
+  create: async (data) => api.post('/tenant/settings/document/templates', data),
+  update: async (id, data) => api.put(`/tenant/settings/document/templates/${id}`, data),
+  delete: async (id) => api.delete(`/tenant/settings/document/templates/${id}`),
+  getDataFields: async (documentType) => {
+    return api.get('/admin/constants/document-data-fields', { params: { documentType } });
+  },
+};
+
+export const tenantHardwareService = {
+  /**
+   * Gets all configured hardware devices.
+   * @param {object} params - Query parameters (e.g., { branchId }).
+   */
+  getAll: async (params) => api.get('/tenant/settings/hardware-devices', { params }),
+
+  /**
+   * Creates a new hardware device configuration.
+   * @param {object} data - The device data.
+   */
+  create: async (data) => api.post('/tenant/settings/hardware-devices', data),
+
+  /**
+   * Updates an existing hardware device configuration.
+   * @param {string} id - The ID of the device to update.
+   * @param {object} data - The updated device data.
+   */
+  update: async (id, data) => api.put(`/tenant/settings/hardware-devices/${id}`, data),
+
+  /**
+   * Deletes a hardware device configuration.
+   * @param {string} id - The ID of the device to delete.
+   */
+  delete: async (id) => api.delete(`/tenant/settings/hardware-devices/${id}`),
+};
+
+export const tenantPrintingService = {
+  /**
+   * Creates a new print job in the queue for the Hardware Bridge to pick up.
+   * @param {object} jobData - The details of the print job.
+   */
+  createPrintJob: async (jobData) => {
+    return api.post('/tenant/printing/jobs', jobData);
+  },
 };
 
 export default api;

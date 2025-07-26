@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   MessageSquare,
   MonitorSmartphone,
+  Printer,
   ShoppingBag,
   Timer,
   User,
@@ -46,6 +47,7 @@ import QuoteList from '../../components/service/QuoteList';
 import StatusUpdater from '../../components/service/StatusUpdater';
 import TechnicianSelector from '../../components/service/TechnicianSelector';
 import StatusTimeline from '../../components/service/TicketStatusTimeline';
+import PrintModal from '../../components/shared/PrintModal';
 import useAuth from '../../context/useAuth';
 import {
   tenantPaymentMethodService,
@@ -70,6 +72,7 @@ const RepairTicketDetailPage = () => {
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isConfirmQcOpen, setIsConfirmQcOpen] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -423,6 +426,10 @@ const RepairTicketDetailPage = () => {
         <h1 className='text-3xl font-bold'>Repair Ticket: {ticket.ticketNumber}</h1>
         {/* <Button disabled={ticket.status !== 'pickup_pending'}>Create Invoice</Button> */}
         {renderFinalizeButton()}
+
+        <Button variant='outline' onClick={() => setIsPrintModalOpen(true)}>
+          <Printer className='h-4 w-4 mr-2' /> Print
+        </Button>
       </div>
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6 items-start'>
         <div className='lg:col-span-2 space-y-6'>
@@ -658,6 +665,13 @@ const RepairTicketDetailPage = () => {
         message='Are you sure you have completed all repair work? This will submit the ticket for final inspection.'
         confirmText='Yes, Submit for QC'
         isConfirming={isSaving}
+      />
+
+      <PrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        documentType='RepairTicket'
+        documentId={ticket._id}
       />
     </div>
   );

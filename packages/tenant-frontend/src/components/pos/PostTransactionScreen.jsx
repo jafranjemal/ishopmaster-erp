@@ -4,11 +4,12 @@ import { toast } from 'react-hot-toast';
 import { Button, Card, CardContent, CardHeader, CardTitle } from 'ui-library';
 import useAuth from '../../context/useAuth';
 import { tenantRepairService } from '../../services/api';
+import PrintModal from '../shared/PrintModal';
 
 const PostTransactionScreen = ({ invoice, onNewSale }) => {
   const { formatCurrency } = useAuth();
   const [isClosingJob, setIsClosingJob] = useState(false);
-
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
   const isServiceInvoice = !!invoice.repairTicketId;
   const changeDue =
     (invoice.amountPaid || 0) > (invoice.totalAmount || 0) ? invoice.amountPaid - invoice.totalAmount : 0;
@@ -59,11 +60,18 @@ const PostTransactionScreen = ({ invoice, onNewSale }) => {
           )}
           {/* --- End of Fix --- */}
 
-          <Button variant='outline' className='w-full'>
+          <Button variant='outline' className='w-full' onClick={() => setIsPrintModalOpen(true)}>
             <Printer className='h-4 w-4 mr-2' /> Print Receipt
           </Button>
         </CardContent>
       </Card>
+
+      <PrintModal
+        isOpen={isPrintModalOpen}
+        onClose={() => setIsPrintModalOpen(false)}
+        documentType='SalesInvoice'
+        documentId={invoice._id}
+      />
     </div>
   );
 };

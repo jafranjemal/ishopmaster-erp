@@ -1,9 +1,37 @@
-const asyncHandler = require("../../../../middleware/asyncHandler");
-const returnsService = require("../../../../services/returns.service");
+const asyncHandler = require("../../../../middleware/asyncHandler")
+const returnsService = require("../../../../services/returns.service")
+
+/**
+ * @desc    Process a customer return (create an RMA).
+ * @route   POST /api/v1/tenant/sales/returns
+ * @access  Private (Requires 'sales:return:process' permission)
+ */
+exports.processReturn = asyncHandler(async (req, res, next) => {
+  const session = await req.dbConnection.startSession()
+  let newRma
+  try {
+    await session.withTransaction(async () => {
+      newRma = await returnsService.processReturn(
+        req.models,
+        {
+          invoiceId: req.body.invoiceId,
+          itemsToReturn: req.body.itemsToReturn,
+          refundMethod: req.body.refundMethod,
+          userId: req.user._id,
+        },
+        session,
+        req.tenant
+      )
+    })
+    res.status(201).json({ success: true, data: newRma })
+  } finally {
+    session.endSession()
+  }
+})
 
 exports.createReturn = asyncHandler(async (req, res, next) => {
-  const session = await req.dbConnection.startSession();
-  let result;
+  const session = await req.dbConnection.startSession()
+  let result
   try {
     await session.withTransaction(async () => {
       result = await returnsService.processReturn(
@@ -11,26 +39,26 @@ exports.createReturn = asyncHandler(async (req, res, next) => {
         { returnData: req.body, userId: req.user._id, branchId: req.user.assignedBranchId },
         session,
         req.tenant
-      );
-    });
-    res.status(201).json({ success: true, data: result });
+      )
+    })
+    res.status(201).json({ success: true, data: result })
   } finally {
-    session.endSession();
+    session.endSession()
   }
-});
+})
 exports.getReturnById = asyncHandler(async (req, res, next) => {
   const rma = await req.models.RMA.findById(req.params.id)
     .populate("customerId", "name")
     .populate("items.productVariantId", "name sku")
-    .lean();
+    .lean()
   if (!rma) {
-    return res.status(404).json({ success: false, message: "RMA not found" });
+    return res.status(404).json({ success: false, message: "RMA not found" })
   }
-  res.status(200).json({ success: true, data: rma });
-});
+  res.status(200).json({ success: true, data: rma })
+})
 exports.getAllReturns = asyncHandler(async (req, res, next) => {
-  const { page = 1, limit = 10 } = req.query;
-  const skip = (page - 1) * limit;
+  const { page = 1, limit = 10 } = req.query
+  const skip = (page - 1) * limit
 
   const returns = await req.models.RMA.find()
     .populate("customerId", "name")
@@ -38,9 +66,9 @@ exports.getAllReturns = asyncHandler(async (req, res, next) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .lean();
+    .lean()
 
-  const totalCount = await req.models.RMA.countDocuments();
+  const totalCount = await req.models.RMA.countDocuments()
   res.status(200).json({
     success: true,
     data: returns,
@@ -50,11 +78,11 @@ exports.getAllReturns = asyncHandler(async (req, res, next) => {
       currentPage: parseInt(page),
       pageSize: parseInt(limit),
     },
-  });
-});
+  })
+})
 exports.updateReturn = asyncHandler(async (req, res, next) => {
-  const session = await req.dbConnection.startSession();
-  let updatedRma;
+  const session = await req.dbConnection.startSession()
+  let updatedRma
   try {
     await session.withTransaction(async () => {
       updatedRma = await req.models.RMA.findByIdAndUpdate(req.params.id, req.body, {
@@ -64,38 +92,38 @@ exports.updateReturn = asyncHandler(async (req, res, next) => {
       })
         .populate("customerId", "name")
         .populate("items.productVariantId", "name sku")
-        .lean();
-    });
+        .lean()
+    })
     if (!updatedRma) {
-      return res.status(404).json({ success: false, message: "RMA not found" });
+      return res.status(404).json({ success: false, message: "RMA not found" })
     }
-    res.status(200).json({ success: true, data: updatedRma });
+    res.status(200).json({ success: true, data: updatedRma })
   } finally {
-    session.endSession();
+    session.endSession()
   }
-});
+})
 exports.deleteReturn = asyncHandler(async (req, res, next) => {
-  const session = await req.dbConnection.startSession();
+  const session = await req.dbConnection.startSession()
   try {
     await session.withTransaction(async () => {
-      const deletedRma = await req.models.RMA.findByIdAndDelete(req.params.id, { session });
+      const deletedRma = await req.models.RMA.findByIdAndDelete(req.params.id, { session })
       if (!deletedRma) {
-        return res.status(404).json({ success: false, message: "RMA not found" });
+        return res.status(404).json({ success: false, message: "RMA not found" })
       }
-      res.status(200).json({ success: true, message: "RMA deleted successfully" });
-    });
+      res.status(200).json({ success: true, message: "RMA deleted successfully" })
+    })
   } finally {
-    session.endSession();
+    session.endSession()
   }
-});
+})
 exports.getReturnSummary = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -106,79 +134,77 @@ exports.getReturnSummary = asyncHandler(async (req, res, next) => {
         totalRefundAmount: { $sum: "$totalRefundAmount" },
       },
     },
-  ]);
+  ])
 
   res.status(200).json({
     success: true,
     data: summary.length > 0 ? summary[0] : { totalReturns: 0, totalRefundAmount: 0 },
-  });
-});
+  })
+})
 exports.getReturnItems = asyncHandler(async (req, res, next) => {
-  const rma = await req.models.RMA.findById(req.params.id)
-    .populate("items.productVariantId", "name sku")
-    .lean();
+  const rma = await req.models.RMA.findById(req.params.id).populate("items.productVariantId", "name sku").lean()
   if (!rma) {
-    return res.status(404).json({ success: false, message: "RMA not found" });
+    return res.status(404).json({ success: false, message: "RMA not found" })
   }
-  res.status(200).json({ success: true, data: rma.items });
-});
+  res.status(200).json({ success: true, data: rma.items })
+})
 exports.getReturnByInvoiceId = asyncHandler(async (req, res, next) => {
   const rma = await req.models.RMA.findOne({ originalInvoiceId: req.params.invoiceId })
     .populate("customerId", "name")
     .populate("items.productVariantId", "name sku")
-    .lean();
+    .lean()
   if (!rma) {
-    return res.status(404).json({ success: false, message: "RMA not found for this invoice" });
+    return res.status(404).json({ success: false, message: "RMA not found for this invoice" })
   }
-  res.status(200).json({ success: true, data: rma });
-});
+  res.status(200).json({ success: true, data: rma })
+})
 exports.getReturnByCustomerId = asyncHandler(async (req, res, next) => {
   const rmas = await req.models.RMA.find({ customerId: req.params.customerId })
     .populate("customerId", "name")
     .populate("items.productVariantId", "name sku")
     .sort({ createdAt: -1 })
-    .lean();
+    .lean()
   if (rmas.length === 0) {
-    return res.status(404).json({ success: false, message: "No RMAs found for this customer" });
+    return res.status(404).json({ success: false, message: "No RMAs found for this customer" })
   }
-  res.status(200).json({ success: true, data: rmas });
-});
+  res.status(200).json({ success: true, data: rmas })
+})
 exports.getReturnByBranchId = asyncHandler(async (req, res, next) => {
   const rmas = await req.models.RMA.find({ branchId: req.params.branchId })
     .populate("customerId", "name")
     .populate("items.productVariantId", "name sku")
     .sort({ createdAt: -1 })
-    .lean();
+    .lean()
   if (rmas.length === 0) {
-    return res.status(404).json({ success: false, message: "No RMAs found for this branch" });
+    return res.status(404).json({ success: false, message: "No RMAs found for this branch" })
   }
-  res.status(200).json({ success: true, data: rmas });
-});
+  res.status(200).json({ success: true, data: rmas })
+})
 exports.getReturnByRmaNumber = asyncHandler(async (req, res, next) => {
   const rma = await req.models.RMA.findOne({ rmaNumber: req.params.rmaNumber })
     .populate("customerId", "name")
     .populate("items.productVariantId", "name sku")
-    .lean();
+    .lean()
   if (!rma) {
-    return res.status(404).json({ success: false, message: "RMA not found" });
+    return res.status(404).json({ success: false, message: "RMA not found" })
   }
-  res.status(200).json({ success: true, data: rma });
-});
+  res.status(200).json({ success: true, data: rma })
+})
 exports.getReturnCountByStatus = asyncHandler(async (req, res, next) => {
-  const { status } = req.query;
-  const query = status ? { status } : {};
+  const { status } = req.query
+  const query = status ? { status } : {}
 
-  const count = await req.models.RMA.countDocuments(query);
-  res.status(200).json({ success: true, data: { count } });
-});
+  const count = await req.models.RMA.countDocuments(query)
+  res.status(200).json({ success: true, data: { count } })
+})
 exports.getReturnSummaryByCustomer = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -207,18 +233,18 @@ exports.getReturnSummaryByCustomer = asyncHandler(async (req, res, next) => {
         totalRefundAmount: 1,
       },
     },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})
 exports.getReturnSummaryByBranch = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -247,18 +273,18 @@ exports.getReturnSummaryByBranch = asyncHandler(async (req, res, next) => {
         totalRefundAmount: 1,
       },
     },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})
 exports.getReturnSummaryByDateRange = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -278,18 +304,18 @@ exports.getReturnSummaryByDateRange = asyncHandler(async (req, res, next) => {
       },
     },
     { $sort: { date: 1 } },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})
 exports.getReturnSummaryByProduct = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -319,18 +345,18 @@ exports.getReturnSummaryByProduct = asyncHandler(async (req, res, next) => {
         totalRefundAmount: 1,
       },
     },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})
 exports.getReturnSummaryByReason = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -351,18 +377,18 @@ exports.getReturnSummaryByReason = asyncHandler(async (req, res, next) => {
       },
     },
     { $sort: { totalReturns: -1 } },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})
 exports.getReturnSummaryByPaymentMethod = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -381,18 +407,18 @@ exports.getReturnSummaryByPaymentMethod = asyncHandler(async (req, res, next) =>
         totalRefundAmount: 1,
       },
     },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})
 exports.getReturnSummaryByStatus = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -411,18 +437,18 @@ exports.getReturnSummaryByStatus = asyncHandler(async (req, res, next) => {
         totalRefundAmount: 1,
       },
     },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})
 exports.getReturnSummaryByBranchAndDate = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -451,18 +477,18 @@ exports.getReturnSummaryByBranchAndDate = asyncHandler(async (req, res, next) =>
         totalRefundAmount: 1,
       },
     },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})
 exports.getReturnSummaryByCustomerAndDate = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -491,18 +517,18 @@ exports.getReturnSummaryByCustomerAndDate = asyncHandler(async (req, res, next) 
         totalRefundAmount: 1,
       },
     },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})
 exports.getReturnSummaryByProductAndDate = asyncHandler(async (req, res, next) => {
-  const { startDate, endDate } = req.query;
+  const { startDate, endDate } = req.query
   const query = {
     createdAt: {
       $gte: new Date(startDate),
       $lte: new Date(endDate),
     },
-  };
+  }
 
   const summary = await req.models.RMA.aggregate([
     { $match: query },
@@ -532,7 +558,7 @@ exports.getReturnSummaryByProductAndDate = asyncHandler(async (req, res, next) =
         totalRefundAmount: 1,
       },
     },
-  ]);
+  ])
 
-  res.status(200).json({ success: true, data: summary });
-});
+  res.status(200).json({ success: true, data: summary })
+})

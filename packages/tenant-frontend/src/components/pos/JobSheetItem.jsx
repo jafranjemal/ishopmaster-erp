@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Package,
   PackageCheck,
+  Repeat,
   ShieldCheck,
   Tag,
   Trash2,
@@ -19,7 +20,10 @@ import useAuth from '../../context/useAuth';
 const JobSheetItem = ({ item, onRemove, onQuantityChange, onEdit, taxMode }) => {
   const { formatCurrency } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
-
+  const isExchangeItem = item.isExchangeItem;
+  const displayQuantity = Math.abs(item.quantity);
+  const displayPrice = Math.abs(item.finalPrice);
+  const displayTotal = displayQuantity * displayPrice;
   const quantity = item.quantity || 0;
   const unitPrice = item.unitPrice || 0;
   const lineDiscount = item.lineDiscount || null;
@@ -172,6 +176,7 @@ const JobSheetItem = ({ item, onRemove, onQuantityChange, onEdit, taxMode }) => 
       <TableCell className='font-medium'>
         <div className='flex items-center gap-2'>
           {lineDiscount && <Tag className='h-3 w-3 text-green-400 flex-shrink-0' title='Discount applied' />}
+          {isExchangeItem && <Repeat className='h-4 w-4 text-red-400' title='Exchange Item Credit' />}
           <span>{item.description}</span>
         </div>
 
@@ -215,6 +220,15 @@ const JobSheetItem = ({ item, onRemove, onQuantityChange, onEdit, taxMode }) => 
           className='h-8 w-20 text-center bg-slate-700'
           min='1'
         />
+        {isExchangeItem ? (
+          displayQuantity
+        ) : (
+          <Input
+            type='number'
+            value={displayQuantity}
+            onChange={(e) => onQuantityChange(item.cartId, e.target.value)}
+          />
+        )}
       </TableCell>
 
       <TableCell className='text-right font-mono'>

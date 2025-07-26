@@ -93,6 +93,26 @@ export const PosSessionProvider = ({ children }) => {
     setActiveSaleId(invoice._id);
   }, []);
 
+  const loadExchangeData = useCallback((originalInvoice) => {
+    toast.success(`Processing exchange for Invoice #${originalInvoice.invoiceId}.`);
+
+    // Transform original items into credit items for the new cart
+    const exchangeItems = originalInvoice.items.map((item) => ({
+      ...item,
+      quantity: -Math.abs(item.quantity), // Ensure quantity is negative
+      finalPrice: -Math.abs(item.finalPrice), // Ensure price is negative
+      cartId: Math.random(), // Assign a new unique ID for the cart
+      isExchangeItem: true, // Flag for UI purposes
+    }));
+
+    setJobItems(exchangeItems);
+    setSelectedCustomer(originalInvoice.customerId);
+    // Do not set activeSaleId, as this is a new transaction
+    setActiveSaleId(null);
+    // Do not set recalledCart, as we want the calculator to run on the new items
+    setRecalledCart(null);
+  }, []);
+
   const value = {
     jobItems,
     setJobItems,
@@ -115,6 +135,7 @@ export const PosSessionProvider = ({ children }) => {
     loadInvoiceForPayment,
     completedSale,
     setCompletedSale,
+    loadExchangeData,
   };
 
   return <PosSessionContext.Provider value={value}>{children}</PosSessionContext.Provider>;

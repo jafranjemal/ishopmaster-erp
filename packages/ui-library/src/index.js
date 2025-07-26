@@ -11,6 +11,7 @@
 
 // export * from "./lib/utils";
 
+export * from "./components/Accordion";
 export { Alert, AlertDescription, AlertTitle } from "./components/Alert";
 export * from "./components/AlertModal";
 export { default as AlertModal } from "./components/AlertModal";
@@ -50,5 +51,6 @@ export * from "./components/Select";
 export * from "./components/Skeleton";
 export { Switch } from "./components/Switch";
 export * from "./components/Table";
+export * from "./components/Tabs";
 export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./components/Tooltip";
 export * from "./lib/utils"; // Also export our `cn` utility

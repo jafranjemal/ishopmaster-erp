@@ -509,6 +509,79 @@ class SalesService {
 
     return newSalesOrder
   }
+
+  /**
+   * Reopens a completed sales invoice for an exchange.
+   * This is a critical financial operation that:
+   * 1. Validates the invoice can be reopened.
+   * 2. Creates a reversing journal entry to cancel the original sale's financial impact.
+   * 3. Updates the original invoice's status to 'reopened_for_exchange'.
+   */
+  async reopenInvoiceForExchange(models, { invoiceId, userId }, session, tenant) {
+    const { SalesInvoice, LedgerEntry, Account } = models
+    const baseCurrency = tenant.settings.localization.baseCurrency
+
+    // 1. Find and validate the original invoice
+    const originalInvoice = await SalesInvoice.findById(invoiceId).session(session)
+    if (!originalInvoice) throw new Error("Original invoice not found.")
+    if (originalInvoice.workflowStatus !== "completed") {
+      throw new Error(`Cannot reopen an invoice with status '${originalInvoice.workflowStatus}'.`)
+    }
+
+    // 2. Find all original financial entries for this invoice
+    const originalEntries = await LedgerEntry.find({ salesInvoiceId: originalInvoice._id }).session(session)
+    if (originalEntries.length === 0) {
+      throw new Error("Could not find original financial transactions for this invoice. Cannot reverse.")
+    }
+
+    // 3. Create the perfect reversing journal entry
+    const reversingEntries = []
+    for (const entry of originalEntries) {
+      // Simply flip the debit and credit accounts
+      reversingEntries.push({
+        accountId: entry.creditAccountId,
+        debit: entry.amount, // Amount is already in base currency
+      })
+      reversingEntries.push({
+        accountId: entry.debitAccountId,
+        credit: entry.amount,
+      })
+    }
+
+    // Group by accountId to create a clean, compound entry
+    const groupedEntries = reversingEntries.reduce((acc, { accountId, debit = 0, credit = 0 }) => {
+      if (!acc[accountId]) acc[accountId] = { debit: 0, credit: 0 }
+      acc[accountId].debit += debit
+      acc[accountId].credit += credit
+      return acc
+    }, {})
+
+    const finalReversingEntries = Object.entries(groupedEntries).map(([accountId, { debit, credit }]) => ({
+      accountId,
+      debit,
+      credit,
+    }))
+
+    await accountingService.createJournalEntry(
+      models,
+      {
+        description: `Reversal for Invoice #${originalInvoice.invoiceId} due to exchange.`,
+        entries: finalReversingEntries,
+        currency: baseCurrency,
+        refs: { originalSalesInvoiceId: originalInvoice._id },
+      },
+      session,
+      tenant
+    )
+
+    // 4. Update the original invoice's status
+    originalInvoice.workflowStatus = "reopened_for_exchange"
+    await originalInvoice.save({ session })
+
+    // The service returns the original invoice data, which the frontend will use
+    // to pre-populate the POS cart for the new transaction.
+    return originalInvoice
+  }
 }
 
 module.exports = new SalesService()
