@@ -9,6 +9,7 @@ const {
   deleteDraftOrHold,
   getAllInvoices,
   getSaleById,
+  reopenInvoiceForExchange,
 } = require("./sales.controller")
 const { protect, authorize } = require("../../../middleware/auth.middleware")
 
@@ -18,7 +19,7 @@ router.use(protect, authorize("sales:pos:access"))
 // The main endpoint for finalizing a sale
 router.route("/").post(createSale)
 router.get("/invoices", authorize("sales:invoice:view_all"), getAllInvoices)
-router.post("/invoices/:id/reopen-for-exchange", authorize("sales:exchange:process"), ctrl.reopenInvoiceForExchange)
+router.post("/invoices/:id/reopen-for-exchange", authorize("sales:exchange:process"), reopenInvoiceForExchange)
 
 // Endpoints for advanced workflows
 router.route("/drafts").post(createDraft)

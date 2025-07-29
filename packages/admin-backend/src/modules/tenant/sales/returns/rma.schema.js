@@ -2,7 +2,7 @@ const mongoose = require("mongoose")
 
 const returnedItemSchema = new mongoose.Schema(
   {
-    productVariantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariant", required: true },
+    productVariantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariants", required: true },
     quantity: { type: Number, required: true },
     reason: { type: String, required: true },
     // Price at the time of original sale, for accurate financial reversal

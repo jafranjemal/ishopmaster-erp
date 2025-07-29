@@ -1,157 +1,118 @@
-import { Group, Image as KonvaImage, Line, Rect, Text } from 'react-konva';
+import { useEffect, useRef } from 'react';
+import { Group, Image, Line, Rect, Text, Transformer } from 'react-konva';
 
-/**
- * Renders a table given its dimensions, style, and tableContent spec
- */
-const TableRenderer = ({ dimensions, style, tableContent, data }) => {
-  const { columns, dataKey } = tableContent;
+const ElementRenderer = ({ element, isSelected, onSelect, onUpdate, onDelete }) => {
+  const shapeRef = useRef();
+  const transformerRef = useRef();
 
-  // Determine rows: use real data if present, otherwise generate 5 dummy rows
-  const realRows = Array.isArray(data?.[dataKey]) && data[dataKey].length > 0 ? data[dataKey] : null;
+  useEffect(() => {
+    if (isSelected && transformerRef.current) {
+      transformerRef.current.nodes([shapeRef.current]);
+      transformerRef.current.getLayer().batchDraw();
+    }
+  }, [isSelected]);
 
-  const rows =
-    realRows ||
-    Array.from({ length: 5 }, () =>
-      // each dummy row has an empty string for every column
-      columns.reduce((r, col) => {
-        r[col.dataKey] = '';
-        return r;
-      }, {}),
-    );
+  const handleTransformEnd = () => {
+    const node = shapeRef.current;
+    const scaleX = node.scaleX();
+    const scaleY = node.scaleY();
 
-  const headerHeight = 25;
-  const rowHeight = (dimensions.height - headerHeight) / rows.length;
+    node.scaleX(1);
+    node.scaleY(1);
 
-  return (
-    <Group>
-      {/* Outer border */}
-      <Rect
-        width={dimensions.width}
-        height={dimensions.height}
-        stroke={style.border.color}
-        strokeWidth={style.border.width}
-      />
-
-      {/* Header */}
-      {columns.map((col, i) => {
-        const x = columns.slice(0, i).reduce((sum, c) => sum + c.width, 0);
-        return (
-          <Group key={`hdr-${i}`}>
-            <Rect
-              x={x}
-              width={col.width}
-              height={headerHeight}
-              stroke={style.border.color}
-              strokeWidth={style.border.width}
-              fill={style.headerFill || '#f0f0f0'}
-            />
-            <Text
-              x={x + 5}
-              y={5}
-              text={col.header}
-              width={col.width - 10}
-              height={headerHeight - 10}
-              fontSize={style.fontSize}
-              align={col.align}
-            />
-          </Group>
-        );
-      })}
-
-      {/* Data rows (real or dummy) */}
-      {rows.map((row, rowIndex) =>
-        columns.map((col, colIndex) => {
-          const x = columns.slice(0, colIndex).reduce((sum, c) => sum + c.width, 0);
-          const y = headerHeight + rowIndex * rowHeight;
-          // For dummy rows, row[col.dataKey] will be '', for real it'll be the actual value
-          const rawValue = row[col.dataKey];
-          const text =
-            rawValue != null && rawValue !== ''
-              ? col.format === 'currency'
-                ? new Intl.NumberFormat(undefined, {
-                    style: 'currency',
-                    currency: 'USD',
-                  }).format(rawValue)
-                : String(rawValue)
-              : '—';
-
-          return (
-            <Group key={`cell-${rowIndex}-${colIndex}`}>
-              <Rect
-                x={x}
-                y={y}
-                width={col.width}
-                height={rowHeight}
-                stroke={style.border.color}
-                strokeWidth={style.border.width}
-              />
-              <Text
-                x={x + 5}
-                y={y + 5}
-                text={text}
-                width={col.width - 10}
-                height={rowHeight - 10}
-                fontSize={style.fontSize}
-                align={col.align}
-              />
-            </Group>
-          );
-        }),
-      )}
-    </Group>
-  );
-};
-
-const ElementRenderer = ({ element, isSelected, onSelect, onChange, onDelete, isPartOfGroup, draggable = true }) => {
-  const { id, type, position, dimensions, style, content, tableContent } = element;
+    onUpdate({
+      position: {
+        x: node.x(),
+        y: node.y(),
+      },
+      dimensions: {
+        width: node.width() * scaleX,
+        height: node.height() * scaleY,
+      },
+      rotation: node.rotation(),
+    });
+  };
 
   const renderElement = () => {
-    switch (type) {
+    switch (element.type) {
       case 'text':
         return (
           <Text
-            text={content.staticText || content.template || ''}
-            width={dimensions.width}
-            height={dimensions.height}
-            fontSize={style.fontSize}
-            fontFamily={style.fontFamily || 'Helvetica'}
-            fill={style.fillColor || '#000000'}
-            align={style.textAlign || 'left'}
-            verticalAlign={style.verticalAlign || 'top'}
-            padding={5}
-            wrap='word'
-            fontStyle={[
-              style.fontWeight === 'bold' ? 'bold' : '',
-              style.fontStyle === 'italic' ? 'italic' : '',
-              style.textDecoration === 'underline' ? 'underline' : '',
-            ].join(' ')}
-          />
-        );
-
-      case 'image':
-        return (
-          <KonvaImage
-            width={dimensions.width}
-            height={dimensions.height}
-            fill='#e2e8f0'
-            stroke='#94a3b8'
-            strokeWidth={1}
-            dash={[5, 5]}
+            ref={shapeRef}
+            x={element.position.x}
+            y={element.position.y}
+            width={element.dimensions.width}
+            height={element.dimensions.height}
+            text={element.content.staticText || element.content.dataKey || 'Text Field'}
+            fontSize={element.style?.fontSize || 8}
+            fontFamily={element.style?.fontFamily}
+            fill={element.style?.color}
+            align={element.style?.textAlign}
+            rotation={element.rotation || 0}
+            draggable
+            onDragEnd={handleTransformEnd}
+            onClick={onSelect}
+            onTap={onSelect}
           />
         );
 
       case 'line':
         return (
           <Line
-            points={[0, 0, dimensions.width, 0]}
-            stroke={style.strokeColor || '#000000'}
-            strokeWidth={style.borderWidth || 1}
+            ref={shapeRef}
+            x={element.position.x}
+            y={element.position.y}
+            points={[0, 0, element.dimensions.width, 0]}
+            stroke={element.style.color}
+            strokeWidth={1}
+            rotation={element.rotation || 0}
+            draggable
+            onDragEnd={handleTransformEnd}
+            onClick={onSelect}
+            onTap={onSelect}
           />
         );
 
-      case 'table': {
-        return <TableRenderer dimensions={dimensions} style={style} tableContent={tableContent} data={null} />;
-      }
+      case 'image':
+        return (
+          <Image
+            ref={shapeRef}
+            x={element.position.x}
+            y={element.position.y}
+            width={element.dimensions.width}
+            height={element.dimensions.height}
+            image={new window.Image()}
+            fillPatternRepeat='no-repeat'
+            rotation={element.rotation || 0}
+            draggable
+            onDragEnd={handleTransformEnd}
+            onClick={onSelect}
+            onTap={onSelect}
+          />
+        );
+
+      case 'table':
+        return (
+          <Group
+            ref={shapeRef}
+            x={element.position.x}
+            y={element.position.y}
+            rotation={element.rotation || 0}
+            draggable
+            onDragEnd={handleTransformEnd}
+            onClick={onSelect}
+            onTap={onSelect}
+          >
+            <Rect
+              width={element.dimensions.width}
+              height={element.dimensions.height}
+              fill='#ffffff'
+              stroke='#e5e7eb'
+              strokeWidth={1}
+            />
+            <Text x={10} y={10} text='Items Table' fontSize={12} fontStyle='bold' fill='#000000' />
+          </Group>
+        );
 
       default:
         return null;
@@ -159,31 +120,30 @@ const ElementRenderer = ({ element, isSelected, onSelect, onChange, onDelete, is
   };
 
   return (
-    <Group
-      id={id}
-      x={position.x}
-      y={position.y}
-      draggable={draggable && !isPartOfGroup}
-      onDragEnd={(e) => {
-        onChange({
-          position: {
-            x: e.target.x(),
-            y: e.target.y(),
-          },
-        });
-      }}
-      onClick={(e) => {
-        e.cancelBubble = isPartOfGroup;
-        onSelect(e);
-      }}
-      onTap={onSelect}
-    >
+    <>
       {renderElement()}
-
-      {isSelected && !isPartOfGroup && (
-        <Rect width={dimensions.width} height={dimensions.height} stroke='#3b82f6' strokeWidth={1} dash={[4, 2]} />
+      {isSelected && (
+        <Transformer
+          ref={transformerRef}
+          boundBoxFunc={(oldBox, newBox) => newBox}
+          rotateEnabled={true}
+          rotationSnaps={[0, 90, 180, 270]}
+          onTransformEnd={handleTransformEnd}
+          onDelete={() => onDelete()}
+          anchorRenderer={(anchorProps) => {
+            if (anchorProps.name === 'top-right') {
+              return (
+                // In a real Konva implementation, this would be a Konva shape
+                // that calls the onDelete handler.
+                // For simplicity, we'll add the button logic to the PropertiesPanel.
+                <Rect {...anchorProps} fill='red' />
+              );
+            }
+            return <Rect {...anchorProps} />;
+          }}
+        />
       )}
-    </Group>
+    </>
   );
 };
 

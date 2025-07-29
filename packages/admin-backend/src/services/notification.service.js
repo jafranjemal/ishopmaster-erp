@@ -1,6 +1,6 @@
-const nodemailer = require("nodemailer");
-require("dotenv").config(); // Ensure .env is loaded here if it's not already
-const handlebars = require("handlebars");
+const nodemailer = require("nodemailer")
+require("dotenv").config() // Ensure .env is loaded here if it's not already
+const handlebars = require("handlebars")
 class NotificationService {
   constructor() {
     // Create a reusable transporter object using the SMTP transport
@@ -13,7 +13,7 @@ class NotificationService {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
-    });
+    })
   }
 
   /**
@@ -23,28 +23,29 @@ class NotificationService {
    * @param {object} context - The data payload related to the event (e.g., the ticket object).
    */
   async triggerNotification(models, eventName, context) {
-    const { NotificationTemplate } = models;
-    const templates = await NotificationTemplate.find({ eventName, isActive: true });
+    const { NotificationTemplate } = models
+    const templates = await NotificationTemplate.find({ eventName, isActive: true })
 
     for (const template of templates) {
-      const recipient = this._getRecipient(template.recipientType, context);
+      const recipient = this._getRecipient(template.recipientType, context)
       if (!recipient || (!recipient.email && !recipient.phone)) {
-        console.warn(`No recipient found for template ${template.name}`);
-        continue;
+        console.warn(`No recipient found for template ${template.name}`)
+        continue
       }
 
-      const renderedSubject = handlebars.compile(template.subject || "")(context);
-      const renderedBody = handlebars.compile(template.body)(context);
+      const renderedSubject = handlebars.compile(template.subject || "")(context)
+      const renderedBody = handlebars.compile(template.body)(context)
 
       if (template.channel === "email" && recipient.email) {
         await this._sendEmail({
           to: recipient.email,
           subject: renderedSubject,
           html: renderedBody,
-        });
+          attachments: context.attachment ? [context.atachment] : [],
+        })
       } else if (template.channel === "sms" && recipient.phone) {
         // SMS sending logic would be implemented here using a gateway like Twilio
-        console.log(`[SMS Stub] To: ${recipient.phone}, Body: ${renderedBody}`);
+        console.log(`[SMS Stub] To: ${recipient.phone}, Body: ${renderedBody}`)
       }
     }
   }
@@ -56,12 +57,12 @@ class NotificationService {
   _getRecipient(recipientType, context) {
     switch (recipientType) {
       case "customer":
-        return context.ticket?.customerId;
+        return context.ticket?.customerId
       case "assigned_technician":
-        return context.ticket?.assignedTo;
+        return context.ticket?.assignedTo
       // Add other roles like 'branch_manager' here in the future
       default:
-        return null;
+        return null
     }
   }
 
@@ -69,15 +70,20 @@ class NotificationService {
    * Private helper to send an email.
    * @private
    */
-  async _sendEmail({ to, subject, html }) {
+  async _sendEmail({ to, subject, attachments = [] }) {
     const info = await this.transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to,
       subject,
       html,
-    });
-    console.log(`Email sent for event. Message ID: ${info.messageId}`);
-    return info;
+      attachments: attachments.map((att) => ({
+        filename: att.filename,
+        content: att.content, // This should be a buffer
+        contentType: "application/pdf",
+      })),
+    })
+    console.log(`Email sent for event. Message ID: ${info.messageId}`)
+    return info
   }
 
   /**
@@ -86,7 +92,7 @@ class NotificationService {
    */
   async sendEmail({ to, subject, html }) {
     if (!to || !subject || !html) {
-      throw new Error("To, subject, and html are required for sending email.");
+      throw new Error("To, subject, and html are required for sending email.")
     }
 
     const info = await this.transporter.sendMail({
@@ -94,11 +100,11 @@ class NotificationService {
       to,
       subject,
       html,
-    });
+    })
 
-    console.log("Message sent: %s", info.messageId);
-    return info;
+    console.log("Message sent: %s", info.messageId)
+    return info
   }
 }
 
-module.exports = new NotificationService();
+module.exports = new NotificationService()

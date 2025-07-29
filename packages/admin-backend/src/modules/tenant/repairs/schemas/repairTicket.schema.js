@@ -1,9 +1,9 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const jobSheetItemSchema = new mongoose.Schema(
   {
     itemType: { type: String, required: true, enum: ["part", "service", "labor"] },
-    productVariantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariant" },
+    productVariantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariants" },
     description: { type: String, required: true },
     quantity: { type: Number, required: true },
     unitPrice: { type: Number, required: true }, // Price at the time of adding
@@ -32,7 +32,7 @@ const jobSheetItemSchema = new mongoose.Schema(
     },
   },
   { _id: false }
-);
+)
 
 const qcChecklistItemResultSchema = new mongoose.Schema(
   {
@@ -40,7 +40,7 @@ const qcChecklistItemResultSchema = new mongoose.Schema(
     passed: { type: Boolean, required: true },
   },
   { _id: false }
-);
+)
 
 const qcResultSchema = new mongoose.Schema(
   {
@@ -53,7 +53,7 @@ const qcResultSchema = new mongoose.Schema(
     photos: [{ url: String, public_id: String }],
   },
   { _id: false }
-);
+)
 
 const jobSheetHistoryEntrySchema = new mongoose.Schema(
   {
@@ -62,7 +62,7 @@ const jobSheetHistoryEntrySchema = new mongoose.Schema(
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   },
   { _id: false }
-);
+)
 
 const repairTicketSchema = new mongoose.Schema(
   {
@@ -127,27 +127,27 @@ const repairTicketSchema = new mongoose.Schema(
     qcResult: { type: qcResultSchema, default: null },
   },
   { timestamps: true }
-);
+)
 
 repairTicketSchema.pre("save", function (next) {
   if (!this.isNew) {
-    this._originalStatus = this.get("status", null, { getters: false });
+    this._originalStatus = this.get("status", null, { getters: false })
   }
-  next();
-});
+  next()
+})
 
 repairTicketSchema.pre("save", function (next) {
   if (this.isModified("status")) {
-    const originalDoc = this.$__.activePaths.states.require || this.$__.activePaths.states.default;
-    const originalStatus = originalDoc?.status || this._doc.status;
+    const originalDoc = this.$__.activePaths.states.require || this.$__.activePaths.states.default
+    const originalStatus = originalDoc?.status || this._doc.status
 
-    const previousStatus = this.isNew ? "new" : originalStatus;
+    const previousStatus = this.isNew ? "new" : originalStatus
 
-    const isSameStatus = this.status === previousStatus;
+    const isSameStatus = this.status === previousStatus
 
     if (isSameStatus) {
-      console.log("Status unchanged. Skipping transition check.");
-      return next();
+      console.log("Status unchanged. Skipping transition check.")
+      return next()
     }
 
     const allowedTransitions = {
@@ -161,24 +161,24 @@ repairTicketSchema.pre("save", function (next) {
       qc_pending: ["pickup_pending", "repair_active"],
       pickup_pending: ["closed"],
       on_hold_pending_re_quote: ["approval_pending", "cancelled"],
-    };
+    }
 
-    const validTransitions = allowedTransitions[previousStatus];
+    const validTransitions = allowedTransitions[previousStatus]
 
     if (this.isNew && this.status !== "intake") {
-      const err = new Error(`A new ticket must start with 'intake' status.`);
-      return next(err);
+      const err = new Error(`A new ticket must start with 'intake' status.`)
+      return next(err)
     }
 
     if (validTransitions && !validTransitions.includes(this.status)) {
       const err = new Error(
         `Invalid status transition from '${previousStatus}' to '${this.status}'. ` + `Allowed: ${validTransitions.join(", ")}`
-      );
-      return next(err);
+      )
+      return next(err)
     }
   }
-  next();
-});
+  next()
+})
 // Pre-save hook to generate a sequential, user-friendly Ticket Number.
 // repairTicketSchema.pre("validate", async function (next) {
 //   if (this.isNew) {
@@ -195,18 +195,18 @@ repairTicketSchema.pre("save", function (next) {
 repairTicketSchema.pre("validate", async function (next) {
   if (this.isNew && !this.ticketNumber) {
     try {
-      const lastTicket = await this.constructor.findOne().sort({ createdAt: -1 }).lean();
-      let lastNumber = 0;
+      const lastTicket = await this.constructor.findOne().sort({ createdAt: -1 }).lean()
+      let lastNumber = 0
       if (lastTicket?.ticketNumber?.startsWith("TKT-")) {
-        lastNumber = parseInt(lastTicket.ticketNumber.split("-")[1]) || 0;
+        lastNumber = parseInt(lastTicket.ticketNumber.split("-")[1]) || 0
       }
-      const newTicketNumber = "TKT-" + String(lastNumber + 1).padStart(8, "0");
-      this.ticketNumber = newTicketNumber;
+      const newTicketNumber = "TKT-" + String(lastNumber + 1).padStart(8, "0")
+      this.ticketNumber = newTicketNumber
     } catch (err) {
-      return next(err);
+      return next(err)
     }
   }
-  next();
-});
+  next()
+})
 
-module.exports = repairTicketSchema;
+module.exports = repairTicketSchema

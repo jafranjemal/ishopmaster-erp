@@ -1508,6 +1508,9 @@ export const tenantDocumentTemplateService = {
   getDataFields: async (documentType) => {
     return api.get('/admin/constants/document-data-fields', { params: { documentType } });
   },
+  getDataSources: async (documentType) => {
+    return api.get(`/admin/constants/document-data-sources/${documentType}`);
+  },
 };
 
 export const tenantHardwareService = {
@@ -1540,6 +1543,37 @@ export const tenantHardwareService = {
 export const tenantPrintingService = {
   /**
    * Creates a new print job in the queue for the Hardware Bridge to pick up.
+   * @param {object} jobData - The details of the print job.
+   */
+  createPrintJob: async (jobData) => {
+    return api.post('/tenant/printing/jobs', jobData);
+  },
+};
+
+export const tenantDocumentService = {
+  /**
+   * Renders a document and gets the PDF blob for downloading.
+   * @param {string} templateId - The ID of the DocumentTemplate.
+   * @param {string} dataId - The ID of the data document (e.g., SalesInvoice).
+   * @param {string} style - The print style (e.g., 'customer_copy').
+   */
+  renderForDownload: async (templateId, dataId, style) => {
+    return api.get('/tenant/settings/document/print', {
+      params: { templateId, dataId, style },
+      responseType: 'blob', // Critical for handling PDF downloads
+    });
+  },
+
+  /**
+   * Triggers the backend to send a document via email.
+   * @param {object} emailData - { templateId, dataId, emailTemplateId, recipientEmail }
+   */
+  sendByEmail: async (emailData) => {
+    return api.post('/tenant/settings/document/send-email', emailData);
+  },
+
+  /**
+   * Creates a new print job for the local Hardware Bridge.
    * @param {object} jobData - The details of the print job.
    */
   createPrintJob: async (jobData) => {

@@ -8,38 +8,43 @@
           font-size: 10pt;
           margin: 0;
           padding: 0;
-          width: {{template.paperWidth}}mm;
-          height: {{template.paperHeight}}mm;
+          width: {{template.paperDimensions.width}}mm;
+          height: {{template.paperDimensions.height}}mm;
           background-image: url('{{template.backgroundImageUrl}}');
           background-size: cover;
           background-repeat: no-repeat;
+          position: relative;
       }
-      .canvas-item {
+      .element {
           position: absolute;
           overflow: hidden;
-          border: 1px dotted #ccc; /* Helper for debugging layouts */
-      }
-      table {
-          width: 100%;
-          border-collapse: collapse;
-      }
-      th, td {
-          padding: 2px;
-          text-align: left;
+          box-sizing: border-box;
+          display: flex; /* Use flexbox for vertical alignment */
+          white-space: pre-wrap; /* Respect newlines in text */
       }
     </style>
   </head>
   <body>
     {{#each layout}}
     <div
-      class="canvas-item"
-      style="left: {{this.x}}px; top: {{this.y}}px; width: {{this.w}}px; height: {{this.h}}px; font-size: {{this.fontSize}}pt; text-align: {{this.textAlign}};"
+      class="element"
+      style="
+                left: {{this.position.x}}mm;
+                top: {{this.position.y}}mm;
+                width: {{this.dimensions.width}}mm;
+                height: {{this.dimensions.height}}mm;
+                font-size: {{this.style.fontSize}}pt;
+                font-family: '{{this.style.fontFamily}}';
+                font-weight: {{this.style.fontWeight}};
+                color: {{this.style.color}};
+                background-color: {{this.style.backgroundColor}};
+                text-align: {{this.style.textAlign}};
+                align-items: {{#if (eq this.style.verticalAlign 'middle')}}center{{else if (eq this.style.verticalAlign 'bottom')}}flex-end{{else}}flex-start{{/if}};
+                border: {{this.style.border.width}}pt {{this.style.border.style}} {{this.style.border.color}};
+            "
     >
-      {{!-- This is a simplified renderer. A full version would have more complex logic per component type --}} {{#if (eq this.componentType
-      'invoiceId')}}
-      <strong>{{../data.invoiceId}}</strong>
-      {{/if}} {{#if (eq this.componentType 'customerName')}} {{../data.customerId.name}} {{/if}} {{#if (eq this.componentType
-      'grandTotal')}} {{formatCurrency ../data.totalAmount}} {{/if}}
+      {{#if (eq this.type 'text')}} {{#if this.content.dataKey}} {{!-- Render dynamic data from the data object --}} {{get ../data
+      this.content.dataKey}} {{else}} {{!-- Render static text from the template itself --}} {{this.content.staticText}} {{/if}} {{/if}}
     </div>
     {{/each}}
   </body>
