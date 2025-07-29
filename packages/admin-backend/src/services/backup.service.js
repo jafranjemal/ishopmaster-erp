@@ -2,7 +2,10 @@ const { exec } = require("child_process")
 const fs = require("fs")
 const path = require("path")
 const cloudinary = require("cloudinary").v2
-const BackupRecord = require("../modules/admin/backups/backupRecord.schema")
+//const BackupRecord = require("../modules/admin/backups/backupRecord.schema")
+
+const BackupRecord = require(path.join(__dirname, "..", "modules", "admin", "backups", "backupRecord.schema.js"))
+
 const { MongoClient } = require("mongodb")
 const axios = require("axios")
 require("dotenv").config()
