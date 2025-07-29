@@ -10,11 +10,12 @@ const path = require("path")
 const fs = require("fs")
 const helmet = require("helmet")
 const morgan = require("morgan")
+const chalk = require("chalk")
+
 const { connectAdminDB } = require("./config/db")
 const errorHandler = require("./middleware/errorHandler")
 const tenantResolver = require("./middleware/tenantResolver")
 const cron = require("node-cron")
-const { backupTenantDatabase } = require("./services/backup.service.js")
 const databaseService = require("./services/database.service") // Our registry service
 const licenseCheck = require("./middleware/licenseCheck.middleware") // <-- 1. IMPORT NEW MIDDLEWARE
 
@@ -36,13 +37,13 @@ const dunningService = require("./services/dunning.service.js")
 const portalAuthRoutes = require("./modules/tenant/portal/customerAuth.routes.js")
 const customerAuthTokenSchema = require("./modules/tenant/portal/customerAuthToken.schema.js")
 const { metricsMiddleware } = require("./config/metrics.js")
-const chalk = require("chalk")
 const { registerRepairListeners } = require("./modules/tenant/repairs/repair.listeners.js")
 console.log("[DEBUG] OK: Loaded ./modules/tenant/repairs/repair.listeners.js")
 const adminBackupRoutes = require("./modules/admin/backups/backup.routes")
 const tenantBackupRoutes = require("./modules/tenant/backups/backup.routes")
 const jobSchedulerService = require("./services/jobScheduler.service.js")
 console.log("[DEBUG] OK: Loaded ./services/jobScheduler.service.js")
+const { backupTenantDatabase } = require("./services/backup.service.js")
 
 // CORS configuration
 const allowedOrigins = [
