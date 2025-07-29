@@ -49,7 +49,8 @@ try {
   const allowedOrigins = [
     "http://localhost:5173", // Vite's default dev port
     "http://localhost:5174", // Vite's default dev port
-    "https://ishop-master-frontend.onrender.com", // Example production frontend URL
+    "https://ishopmaster-erp-admin-frontend.vercel.app", // Example production frontend URL
+    "https://ishopmaster.vercel.app",
   ]
 
   // Regex patterns for dynamic subdomains
