@@ -10,7 +10,8 @@
     "dev:admin:backend": "npm run dev --workspace=admin-backend",
     "dev:admin:frontend": "npm run dev --workspace=admin-frontend",
     "dev": "concurrently \"npm:dev:admin:backend\" \"npm:dev:admin:frontend\"",
-    "install:all": "npm install -ws"
+    "install:all": "npm install -ws",
+    "start:prod": "npm run start --workspace=admin-backend"
   },
   "keywords": [],
   "author": "",
