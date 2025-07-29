@@ -1,12 +1,12 @@
 const { exec } = require("child_process")
+require("dotenv").config()
 const fs = require("fs")
 const path = require("path")
 const cloudinary = require("cloudinary").v2
-const BackupRecord = require("../modules/admin/backups/backupRecord")
 
 const { MongoClient } = require("mongodb")
 const axios = require("axios")
-require("dotenv").config()
+const BackupRecord = require("../modules/admin/backups/backupRecord")
 
 // Validate environment variables
 const requiredEnvVars = ["CLOUD_NAME", "CLOUD_API_KEY", "CLOUD_API_SECRET", "MONGO_URI_BASE"]
