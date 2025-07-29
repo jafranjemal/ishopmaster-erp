@@ -6,7 +6,7 @@ const cloudinary = require("cloudinary").v2
 
 const { MongoClient } = require("mongodb")
 const axios = require("axios")
-const BackupRecord = require("../modules/admin/backups/backupRecord")
+const BackupRecord = require("../modules/admin/backups/backupRecord.js")
 
 // Validate environment variables
 const requiredEnvVars = ["CLOUD_NAME", "CLOUD_API_KEY", "CLOUD_API_SECRET", "MONGO_URI_BASE"]
