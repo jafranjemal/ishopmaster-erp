@@ -14,9 +14,17 @@
     "start:prod": "cd packages/admin-backend && node src/server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "iShopMaster Team",
   "license": "ISC",
+  "dependencies": {
+    "react-router-dom": "^6.25.1"
+  },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.4"
+  },
+  "overrides": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
   }
 }
