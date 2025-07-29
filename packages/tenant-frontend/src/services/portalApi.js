@@ -2,7 +2,11 @@ import axios from 'axios'; // Portal might use a separate axios instance
 import { jwtDecode } from 'jwt-decode';
 //const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api/v1/portal';
 const API_URL = 'http://localhost:5001/api/v1/public/portal';
-const portalApi = axios.create({ baseURL: API_URL });
+const portalApi = axios.create({
+  baseURL: import.meta.env.VITE_API_URL + '/api/v1/public/portal',
+});
+
+//const portalApi = axios.create({ baseURL: API_URL });
 // This function runs before every single request sent by this portalApi instance.
 portalApi.interceptors.request.use(
   (config) => {

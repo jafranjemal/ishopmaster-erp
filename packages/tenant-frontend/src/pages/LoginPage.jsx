@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
-import { tenantAuthService } from '../services/api'; // Assume this service exists
+import { setApiTenantHeader, tenantAuthService } from '../services/api'; // Assume this service exists
 
 // Import reusable components from our shared UI library
 import { useTranslation } from 'react-i18next';
-import { Button } from 'ui-library';
+import { Button, Input, Label } from 'ui-library';
+import { useTenant } from '../context/TenantContext';
 import useAuth from '../context/useAuth';
 
 const LoginPage = () => {
@@ -15,6 +16,8 @@ const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { tenantId } = useParams();
+  const { tenantUrl } = useTenant();
   // Determine where to redirect after login. Defaults to the dashboard '/'.
   const from = location.state?.from?.pathname || '/';
 
@@ -52,12 +55,13 @@ const LoginPage = () => {
 
       // This code only runs if the promise was successful
       if (response.data.success && response.data.token) {
+        setApiTenantHeader(tenantId);
         login(response.data.token); //save the token in context
         console.log('Login successful! Redirecting...');
         const dashboardRes = await tenantAuthService.getDefaultDashboard();
         const { defaultUrl } = dashboardRes.data.data;
         //navigate(defaultUrl, { replace: true });
-        navigate(from, { replace: true });
+        navigate(tenantUrl(from), { replace: true });
       }
     } catch (err) {
       // Set the error state with the message from the backend
@@ -68,6 +72,16 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (tenantId)
+      handleChange({
+        target: {
+          name: 'subdomain',
+          value: tenantId,
+        },
+      });
+  }, [tenantId]);
 
   return (
     <div className='flex items-center justify-center min-h-screen'>
@@ -95,6 +109,22 @@ const LoginPage = () => {
                 placeholder={t('login.subdomain_placeholder')}
               />
             </div>
+
+            {!tenantId && (
+              <div>
+                <Label htmlFor='tenantId'>Business ID</Label>
+                <Input
+                  id='tenantId'
+                  name='subdomain'
+                  type='text'
+                  value={formData.subdomain}
+                  onChange={handleChange}
+                  required
+                  placeholder='e.g., ma-iphone'
+                />
+              </div>
+            )}
+
             <div>
               <label htmlFor='email-address' className='sr-only'>
                 {t('login.email_label', 'Email Address')}

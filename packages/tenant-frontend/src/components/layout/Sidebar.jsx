@@ -27,6 +27,7 @@ import {
   Combine,
   Contact,
   Contact2,
+  CreditCard,
   Edit,
   FileCheck,
   FileMinus,
@@ -72,285 +73,307 @@ import {
   Warehouse,
   Wrench,
 } from 'lucide-react';
+import { useTenant } from '../../context/TenantContext';
 import useAuth from '../../context/useAuth';
-
 const Sidebar = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const { user, tenant } = useAuth();
-
+  const { tenantUrl } = useTenant();
   // State is now an object to track multiple open menus
   const [openMenus, setOpenMenus] = useState({});
 
   // --- MASTER NAVIGATION CONFIGURATION (with corrected permissions and translations) ---
-  const navItems = [
+
+  const navItemsOl = [
     {
       name: t('sidebar.dashboard'),
-      href: '/',
+      href: tenantUrl('/'),
       icon: LayoutDashboard,
       permission: null,
     },
 
     {
-      name: t('sidebar.pos_parent'), // e.g., "Point of Sale"
-      href: '/pos/shifts',
+      name: t('sidebar.pos_parent'),
+      href: tenantUrl('/pos/shifts'),
       icon: ShoppingCart,
       permission: 'sales:pos:access',
       children: [
         {
           name: t('sidebar.sub_menu.pos_terminal'),
-          href: '/pos/shifts',
-          icon: MonitorSmartphone, // 🟢 Suggestion: CreditCard or MonitorSmartphone (for POS)
+          href: tenantUrl('/pos/shifts'),
+          icon: MonitorSmartphone,
           permission: 'sales:pos:access',
         },
         {
           name: 'All Invoices',
-          href: '/sales/invoices',
-          icon: FileText, // 🟢 Suggestion: FileText for invoice documents
+          href: tenantUrl('/sales/invoices'),
+          icon: FileText,
           permission: 'sales:invoice:view_all',
         },
         {
           name: 'Process Return',
-          href: '/sales/returns',
-          icon: RotateCcw, // 🟢 Suggestion: RotateCcw for returns/undo
+          href: tenantUrl('/sales/returns'),
+          icon: RotateCcw,
           permission: 'sales:return:manage',
         },
-        // Add more in future
       ],
     },
     {
       name: t('sidebar.inventory'),
-      href: '/inventory',
+      href: tenantUrl('/inventory'),
       icon: Warehouse,
       permission: 'inventory:product:view',
       children: [
         {
           name: t('sidebar.sub_menu.products'),
-          href: '/inventory/products',
+          href: tenantUrl('/inventory/products'),
           icon: Package,
           permission: 'inventory:product:view',
         },
         {
           name: 'Kitting & Assembly',
-          href: '/inventory/assembly',
+          href: tenantUrl('/inventory/assembly'),
           icon: Combine,
           permission: 'inventory:assembly:create',
         },
-
         {
           name: t('sidebar.sub_menu.stock_levels'),
-          href: '/inventory/stock-levels',
+          href: tenantUrl('/inventory/stock-levels'),
           icon: SlidersHorizontal,
           permission: 'inventory:product:view',
-        }, // <-- NEW
-
+        },
         {
           name: t('sidebar.sub_menu.adjustments'),
-          href: '/inventory/adjustments',
+          href: tenantUrl('/inventory/adjustments'),
           icon: FileSliders,
           permission: 'inventory:stock:adjust',
         },
         {
           name: t('sidebar.sub_menu.transfers'),
-          href: '/inventory/transfers',
+          href: tenantUrl('/inventory/transfers'),
           icon: ArrowRightLeft,
           permission: 'inventory:stock:transfer',
         },
         {
           name: 'Print Hub',
-          href: '/inventory/print-hub',
-          icon: Printer, // Assuming Printer icon from lucide-react
+          href: tenantUrl('/inventory/print-hub'),
+          icon: Printer,
           permission: 'inventory:product:view',
         },
-        { name: 'Inventory Ledger', href: '/inventory/ledger', icon: History, permission: 'inventory:stock:view' },
+        {
+          name: 'Inventory Ledger',
+          href: tenantUrl('/inventory/ledger'),
+          icon: History,
+          permission: 'inventory:stock:view',
+        },
       ],
     },
     {
       name: t('sidebar.procurement'),
-      href: '/procurement',
+      href: tenantUrl('/procurement'),
       icon: Truck,
       permission: 'procurement:po:create',
       children: [
         {
           name: t('sidebar.sub_menu.purchase_orders'),
-          href: '/procurement/po',
+          href: tenantUrl('/procurement/po'),
           icon: ClipboardList,
           permission: 'procurement:po:create',
         },
         {
           name: 'Goods Receipts',
-          href: '/procurement/receipts',
+          href: tenantUrl('/procurement/receipts'),
           icon: ClipboardCheck,
           permission: 'procurement:po:view',
         },
-
         {
           name: t('sidebar.sub_menu.suppliers'),
-          href: '/procurement/suppliers',
+          href: tenantUrl('/procurement/suppliers'),
           icon: Contact,
           permission: 'procurement:supplier:manage',
         },
         {
           name: t('sidebar.sub_menu.invoices'),
-          href: '/procurement/invoices',
+          href: tenantUrl('/procurement/invoices'),
           icon: FileText,
           permission: 'accounting:payables:view',
-        }, // <-- NEW LINK
+        },
       ],
     },
     {
-      name: t('sidebar.service_parent'), // e.g., "Service & Repairs"
-      //  href: '/service/dashboard',
+      name: t('sidebar.service_parent'),
       icon: Hammer,
-      permission: 'service:ticket:view', // A general permission for the module
+      permission: 'service:ticket:view',
       children: [
         {
           name: t('sidebar.sub_menu.service_dashboard'),
+          href: tenantUrl('/service/dashboard'),
           icon: LayoutDashboard,
-          href: '/service/dashboard',
           permission: 'service:ticket:view',
         },
         {
           name: t('sidebar.sub_menu.new_repair_ticket'),
+          href: tenantUrl('/service/tickets/new'),
           icon: FilePlus2,
-          href: '/service/tickets/new',
           permission: 'service:ticket:create',
         },
         {
           name: 'My Job Queue',
+          href: tenantUrl('/service/my-dashboard'),
           icon: ListTodo,
-          href: '/service/my-dashboard',
-          permission: 'service:ticket:view_own', // A more specific permission
+          permission: 'service:ticket:view_own',
         },
       ],
     },
     {
       name: t('sidebar.crm'),
-      href: '/crm',
+      href: tenantUrl('/crm'),
       icon: Users,
       permission: 'crm:customer:manage',
       children: [
         {
           name: 'Leads',
-          href: '/crm/leads',
-          icon: UserPlus, // 👤➕ Represents adding/finding potential customers
+          href: tenantUrl('/crm/leads'),
+          icon: UserPlus,
           permission: 'crm:lead:view',
         },
         {
           name: 'Opportunities',
-          href: '/crm/opportunities',
-          icon: TrendingUp, // 📈 Represents potential deals/sales growth
+          href: tenantUrl('/crm/opportunities'),
+          icon: TrendingUp,
           permission: 'crm:opportunity:view',
         },
-
         {
           name: t('sidebar.sub_menu.customers'),
-          href: '/crm/customers',
+          href: tenantUrl('/crm/customers'),
           icon: Contact,
           permission: 'crm:customer:manage',
         },
-        { name: 'Customer Groups', href: '/crm/groups', icon: Contact2, permission: 'crm:customer_group:manage' },
+        {
+          name: 'Customer Groups',
+          href: tenantUrl('/crm/groups'),
+          icon: Contact2,
+          permission: 'crm:customer_group:manage',
+        },
       ],
     },
-
     {
-      name: t('sidebar.hr_parent'), // e.g., "Human Resources"
-      href: '/hr/employees',
-      icon: Users, // 👤 Suitable for HR/People
+      name: t('sidebar.hr_parent'),
+      href: tenantUrl('/hr/employees'),
+      icon: Users,
       permission: 'hr:employee:view',
       children: [
         {
           name: t('sidebar.sub_menu.employees'),
-          href: '/hr/employees',
-          icon: BadgeCheck, // ✅ Best for employee list/identity verification
+          href: tenantUrl('/hr/employees'),
+          icon: BadgeCheck,
           permission: 'hr:employee:view',
         },
-        // Future features
         {
           name: 'Attendance',
           icon: CalendarCheck,
           permission: 'hr:attendance:view',
-          children: [{ name: 'Timesheets', href: '/hr/attendance', icon: Clock11, permission: 'hr:attendance:view' }],
+          children: [
+            {
+              name: 'Timesheets',
+              href: tenantUrl('/hr/attendance'),
+              icon: Clock11,
+              permission: 'hr:attendance:view',
+            },
+          ],
         },
-        { name: 'Leave Management', href: '/hr/leave-management', icon: CalendarCheck, permission: 'hr:leave:manage' },
-
         {
           name: 'Leave Management',
-          href: '/hr/leave-management',
-          icon: Plane, // ✈️ For vacation/leave modules
+          href: tenantUrl('/hr/leave-management'),
+          icon: CalendarCheck,
+          permission: 'hr:leave:manage',
+        },
+        {
+          name: 'Leave Management',
+          href: tenantUrl('/hr/leave-management'),
+          icon: Plane,
           permission: 'hr:leave:view',
         },
-        { name: 'Organization Setup', href: '/hr/organization', icon: Building2, permission: 'hr:employee:view' },
-
+        {
+          name: 'Organization Setup',
+          href: tenantUrl('/hr/organization'),
+          icon: Building2,
+          permission: 'hr:employee:view',
+        },
         {
           name: 'Payroll',
-          href: '/hr/payroll',
-          icon: Wallet, // 💼 For salaries and compensation
+          href: tenantUrl('/hr/payroll'),
+          icon: Wallet,
           permission: 'hr:payroll:view',
         },
       ],
     },
     {
       name: t('sidebar.accounting'),
-      href: '/accounting',
+      href: tenantUrl('/accounting'),
       icon: Landmark,
       permission: 'accounting:ledger:view',
       children: [
         {
           name: t('sidebar.sub_menu.general_ledger'),
-          href: '/accounting/ledger',
+          href: tenantUrl('/accounting/ledger'),
           icon: BookOpen,
           permission: 'accounting:ledger:view',
         },
         {
           name: t('sidebar.sub_menu.chart_of_accounts'),
-          href: '/accounting/chart',
+          href: tenantUrl('/accounting/chart'),
           icon: Library,
           permission: 'accounting:chart:manage',
         },
-
         {
           name: t('sidebar.sub_menu.payables', 'Accounts Payable'),
-          href: '/accounting/payables',
+          href: tenantUrl('/accounting/payables'),
           icon: Receipt,
           permission: 'accounting:payables:view',
         },
         {
           name: t('sidebar.sub_menu.cheques'),
-          href: '/accounting/cheques',
+          href: tenantUrl('/accounting/cheques'),
           icon: Edit,
           permission: 'accounting:cheque:view',
         },
         {
           name: t('sidebar.sub_menu.all_payments'),
-          href: '/accounting/payments',
+          href: tenantUrl('/accounting/payments'),
           icon: SwatchBook,
           permission: 'accounting:payment:view',
         },
         {
           name: t('sidebar.sub_menu.payroll'),
-          href: '/accounting/payroll',
+          href: tenantUrl('/accounting/payroll'),
           icon: FileCheck,
           permission: 'hr:payroll:run',
         },
         {
           name: 'Bank Reconciliation',
-          href: '/accounting/bank-reconciliation',
+          href: tenantUrl('/accounting/bank-reconciliation'),
           icon: Landmark,
           permission: 'accounting:reconciliation:manage',
         },
         {
           name: 'Period Closing',
-          href: '/accounting/period-closing',
+          href: tenantUrl('/accounting/period-closing'),
           icon: CalendarOff,
           permission: 'accounting:closing:manage',
         },
-        { name: 'Budgets', href: '/accounting/budgets', icon: PiggyBank, permission: 'accounting:budget:manage' },
+        {
+          name: 'Budgets',
+          href: tenantUrl('/accounting/budgets'),
+          icon: PiggyBank,
+          permission: 'accounting:budget:manage',
+        },
       ],
     },
     {
       name: t('sidebar.reports'),
-      href: '/reports',
+      href: tenantUrl('/reports'),
       icon: BarChart3,
       permission: 'reports:access',
     },
@@ -359,161 +382,170 @@ const Sidebar = () => {
       icon: BellRing,
       permission: 'settings:access',
       children: [
-        // ... other settings
         {
           name: 'Notification Templates',
           icon: BellRing,
-          href: '/settings/notification-templates',
+          href: tenantUrl('/settings/notification-templates'),
           permission: 'settings:notifications:manage',
         },
       ],
     },
     {
       name: t('sidebar.settings'),
-      href: '/settings',
+      href: tenantUrl('/settings'),
       icon: Settings,
       permission: 'settings:access',
       children: [
         {
           name: 'Company Profile',
-          href: '/settings/company-profile',
+          href: tenantUrl('/settings/company-profile'),
           icon: Building,
           permission: 'settings:company:manage',
         },
         {
           name: 'Product Hierarchy',
-          href: '/settings/product-hierarchy',
+          href: tenantUrl('/settings/product-hierarchy'),
           icon: Network,
           permission: 'inventory:product:manage',
         },
         {
           name: 'Warranty Policies',
-          href: '/settings/warranties',
+          href: tenantUrl('/settings/warranties'),
           icon: ShieldCheck,
           permission: 'inventory:product:manage',
         },
-        { name: 'Discount Coupons', href: '/settings/coupons', icon: Ticket, permission: 'sales:pricing:manage' },
-
+        {
+          name: 'Discount Coupons',
+          href: tenantUrl('/settings/coupons'),
+          icon: Ticket,
+          permission: 'sales:pricing:manage',
+        },
         {
           name: t('sidebar.sub_menu.profile'),
-          href: '/settings/profile',
+          href: tenantUrl('/settings/profile'),
           icon: ProfileIcon,
           permission: 'settings:access',
         },
-
         {
           name: t('sidebar.sub_menu.currencies'),
-          href: '/settings/currencies',
+          href: tenantUrl('/settings/currencies'),
           icon: ChartCandlestick,
           permission: 'settings:access',
-        }, // <-- ADD THIS NEW LINK
-
+        },
         {
           name: t('sidebar.sub_menu.locations'),
-          href: '/settings/locations',
+          href: tenantUrl('/settings/locations'),
           icon: Building2,
           permission: 'settings:locations:manage',
         },
         {
           name: t('sidebar.sub_menu.localization'),
-          href: '/settings/localization',
+          href: tenantUrl('/settings/localization'),
           icon: Globe,
           permission: 'settings:access',
         },
-        { name: 'Cash Drawer', href: '/settings/cash-drawer', icon: Coins, permission: 'settings:pos:manage' },
-
+        {
+          name: 'Cash Drawer',
+          href: tenantUrl('/settings/cash-drawer'),
+          icon: Coins,
+          permission: 'settings:pos:manage',
+        },
         {
           name: t('sidebar.sub_menu.users'),
-          href: '/settings/users',
+          href: tenantUrl('/settings/users'),
           icon: UserCog,
           permission: 'setting:user:manage',
         },
         {
           name: 'Tax Categories',
-          href: '/settings/tax-categories',
+          href: tenantUrl('/settings/tax-categories'),
           icon: Bookmark,
           permission: 'accounting:tax:manage',
         },
-
-        { name: 'Tax Rules', href: '/settings/taxes', icon: Percent, permission: 'accounting:tax:manage' },
-
+        {
+          name: 'Tax Rules',
+          href: tenantUrl('/settings/taxes'),
+          icon: Percent,
+          permission: 'accounting:tax:manage',
+        },
         {
           name: t('sidebar.sub_menu.payment_methods'),
-          href: '/settings/payment-methods',
+          href: tenantUrl('/settings/payment-methods'),
           icon: Wallet,
           permission: 'settings:access',
-        }, // <-- ADD THIS LINK
-
+        },
         {
           name: t('sidebar.sub_menu.roles_permissions'),
-          href: '/settings/roles',
+          href: tenantUrl('/settings/roles'),
           icon: KeyRound,
           permission: 'hr:role:manage',
-        }, // Corrected permission
+        },
         {
           name: 'Service Settings',
           icon: Wrench,
-          permission: 'settings:service:manage', // Example permission
+          permission: 'settings:service:manage',
           children: [
-            // ... other service settings
-            { name: 'QC Templates', href: '/settings/qc-templates', icon: Wrench, permission: 'service:qc:manage' },
+            {
+              name: 'QC Templates',
+              href: tenantUrl('/settings/qc-templates'),
+              icon: Wrench,
+              permission: 'service:qc:manage',
+            },
           ],
         },
         {
           name: 'Hardware & Devices',
-          href: '/settings/hardware',
+          href: tenantUrl('/settings/hardware'),
           icon: HardDrive,
           permission: 'settings:access',
         },
-
         {
           name: t('sidebar.sub_menu.inventory_settings'),
-          href: '/settings/inventory',
+          href: tenantUrl('/settings/inventory'),
           icon: Warehouse,
           permission: 'inventory:product:manage',
           children: [
             {
               name: 'Backups & Restore',
-              href: '/settings/backups',
+              href: tenantUrl('/settings/backups'),
               icon: ShieldCheck,
-              permission: 'tenant:admin', // Only tenant admins should see this
+              permission: 'tenant:admin',
             },
             {
               name: 'Printing & Documents',
+              href: tenantUrl('/settings/printing'),
               icon: Printer,
               permission: 'settings:access',
               children: [
-                // ... other settings
                 {
                   name: 'Document Templates',
+                  href: tenantUrl('/settings/document-templates'),
                   icon: Printer,
-                  href: '/settings/document-templates',
                   permission: 'settings:access',
                 },
               ],
             },
             {
               name: t('sidebar.sub_menu.brands'),
-              href: '/settings/inventory/brands',
+              href: tenantUrl('/settings/inventory/brands'),
               icon: Tag,
               permission: 'inventory:product:manage',
             },
             {
               name: t('sidebar.sub_menu.categories'),
-              href: '/settings/inventory/categories',
+              href: tenantUrl('/settings/inventory/categories'),
               icon: ListTree,
               permission: 'inventory:product:manage',
             },
             {
               name: t('sidebar.sub_menu.attributes'),
-              href: '/settings/inventory/attributes',
+              href: tenantUrl('/settings/inventory/attributes'),
               icon: Beaker,
               permission: 'inventory:product:manage',
             },
             {
               name: t('sidebar.sub_menu.label_templates'),
-
-              href: '/settings/printing',
+              href: tenantUrl('/settings/printing'),
               icon: Printer,
               permission: 'settings:printing:manage',
             },
@@ -521,21 +553,527 @@ const Sidebar = () => {
         },
         {
           name: 'Financial Periods',
-          href: '/settings/financial-periods',
+          href: tenantUrl('/settings/financial-periods'),
           icon: CalendarDays,
           permission: 'accounting:closing:manage',
         },
-
-        { name: 'Benefits Setup', href: '/settings/benefits', icon: Gift, permission: 'hr:benefits:manage' },
-        { name: 'Pricing & Promotions', href: '/settings/pricing', icon: Tags, permission: 'sales:pricing:manage' },
-
+        {
+          name: 'Benefits Setup',
+          href: tenantUrl('/settings/benefits'),
+          icon: Gift,
+          permission: 'hr:benefits:manage',
+        },
+        {
+          name: 'Pricing & Promotions',
+          href: tenantUrl('/settings/pricing'),
+          icon: Tags,
+          permission: 'sales:pricing:manage',
+        },
         {
           name: t('sidebar.sub_menu.integrations'),
-          href: '/settings/integrations',
+          href: tenantUrl('/settings/integrations'),
           icon: Plug,
           permission: 'settings:access',
         },
-        { name: 'Deduction Rules', href: '/settings/payroll-rules', icon: FileMinus, permission: 'hr:payroll:manage' },
+        {
+          name: 'Deduction Rules',
+          href: tenantUrl('/settings/payroll-rules'),
+          icon: FileMinus,
+          permission: 'hr:payroll:manage',
+        },
+      ],
+    },
+  ];
+
+  const navItems = [
+    // Dashboard
+    {
+      name: t('sidebar.dashboard'),
+      href: tenantUrl('/'),
+      icon: LayoutDashboard,
+      permission: null,
+    },
+
+    // SALES
+    {
+      name: t('sidebar.sales'),
+      icon: FileText,
+      permission: 'sales:pos:access',
+      children: [
+        {
+          name: t('sidebar.sub_menu.pos_terminal'),
+          href: tenantUrl('/pos/shifts'),
+          icon: CreditCard,
+          permission: 'sales:pos:access',
+        },
+        {
+          name: 'All Invoices',
+          href: tenantUrl('/sales/invoices'),
+          icon: FileText,
+          permission: 'sales:invoice:view_all',
+        },
+        {
+          name: 'Process Return',
+          href: tenantUrl('/sales/returns'),
+          icon: RotateCcw,
+          permission: 'sales:return:manage',
+        },
+      ],
+    },
+
+    // CRM
+    {
+      name: t('sidebar.crm'),
+      icon: Users,
+      permission: 'crm:customer:manage',
+      children: [
+        {
+          name: 'Leads',
+          href: tenantUrl('/crm/leads'),
+          icon: UserPlus,
+          permission: 'crm:lead:view',
+        },
+        {
+          name: 'Opportunities',
+          href: tenantUrl('/crm/opportunities'),
+          icon: TrendingUp,
+          permission: 'crm:opportunity:view',
+        },
+        {
+          name: t('sidebar.sub_menu.customers'),
+          href: tenantUrl('/crm/customers'),
+          icon: Contact,
+          permission: 'crm:customer:manage',
+        },
+        {
+          name: 'Customer Groups',
+          href: tenantUrl('/crm/groups'),
+          icon: Contact2,
+          permission: 'crm:customer_group:manage',
+        },
+      ],
+    },
+
+    // SERVICE & REPAIRS
+    {
+      name: t('sidebar.service_parent'),
+      icon: Hammer,
+      permission: 'service:ticket:view',
+      children: [
+        {
+          name: t('sidebar.sub_menu.service_dashboard'),
+          href: tenantUrl('/service/dashboard'),
+          icon: LayoutDashboard,
+          permission: 'service:ticket:view',
+        },
+        {
+          name: t('sidebar.sub_menu.new_repair_ticket'),
+          href: tenantUrl('/service/tickets/new'),
+          icon: FilePlus2,
+          permission: 'service:ticket:create',
+        },
+        {
+          name: 'My Job Queue',
+          href: tenantUrl('/service/my-dashboard'),
+          icon: ListTodo,
+          permission: 'service:ticket:view_own',
+        },
+      ],
+    },
+
+    // INVENTORY
+    {
+      name: t('sidebar.inventory'),
+      icon: Warehouse,
+      permission: 'inventory:product:view',
+      children: [
+        {
+          name: t('sidebar.sub_menu.products'),
+          href: tenantUrl('/inventory/products'),
+          icon: Package,
+          permission: 'inventory:product:view',
+        },
+        {
+          name: t('sidebar.sub_menu.stock_levels'),
+          href: tenantUrl('/inventory/stock-levels'),
+          icon: SlidersHorizontal,
+          permission: 'inventory:product:view',
+        },
+        {
+          name: t('sidebar.sub_menu.adjustments'),
+          href: tenantUrl('/inventory/adjustments'),
+          icon: FileSliders,
+          permission: 'inventory:stock:adjust',
+        },
+        {
+          name: t('sidebar.sub_menu.transfers'),
+          href: tenantUrl('/inventory/transfers'),
+          icon: ArrowRightLeft,
+          permission: 'inventory:stock:transfer',
+        },
+        {
+          name: 'Kitting & Assembly',
+          href: tenantUrl('/inventory/assembly'),
+          icon: Combine,
+          permission: 'inventory:assembly:create',
+        },
+        {
+          name: 'Print Hub',
+          href: tenantUrl('/inventory/print-hub'),
+          icon: Printer,
+          permission: 'inventory:product:view',
+        },
+        {
+          name: 'Inventory Ledger',
+          href: tenantUrl('/inventory/ledger'),
+          icon: History,
+          permission: 'inventory:stock:view',
+        },
+      ],
+    },
+
+    // PROCUREMENT
+    {
+      name: t('sidebar.procurement'),
+      icon: Truck,
+      permission: 'procurement:po:create',
+      children: [
+        {
+          name: t('sidebar.sub_menu.purchase_orders'),
+          href: tenantUrl('/procurement/po'),
+          icon: ClipboardList,
+          permission: 'procurement:po:create',
+        },
+        {
+          name: 'Goods Receipts',
+          href: tenantUrl('/procurement/receipts'),
+          icon: ClipboardCheck,
+          permission: 'procurement:po:view',
+        },
+        {
+          name: t('sidebar.sub_menu.suppliers'),
+          href: tenantUrl('/procurement/suppliers'),
+          icon: Contact,
+          permission: 'procurement:supplier:manage',
+        },
+        {
+          name: t('sidebar.sub_menu.invoices'),
+          href: tenantUrl('/procurement/invoices'),
+          icon: FileText,
+          permission: 'accounting:payables:view',
+        },
+      ],
+    },
+
+    // ACCOUNTING
+    {
+      name: t('sidebar.accounting'),
+      icon: Landmark,
+      permission: 'accounting:ledger:view',
+      children: [
+        {
+          name: t('sidebar.sub_menu.general_ledger'),
+          href: tenantUrl('/accounting/ledger'),
+          icon: BookOpen,
+          permission: 'accounting:ledger:view',
+        },
+        {
+          name: t('sidebar.sub_menu.chart_of_accounts'),
+          href: tenantUrl('/accounting/chart'),
+          icon: Library,
+          permission: 'accounting:chart:manage',
+        },
+        {
+          name: t('sidebar.sub_menu.payables', 'Accounts Payable'),
+          href: tenantUrl('/accounting/payables'),
+          icon: Receipt,
+          permission: 'accounting:payables:view',
+        },
+        {
+          name: t('sidebar.sub_menu.all_payments'),
+          href: tenantUrl('/accounting/payments'),
+          icon: SwatchBook,
+          permission: 'accounting:payment:view',
+        },
+        {
+          name: t('sidebar.sub_menu.cheques'),
+          href: tenantUrl('/accounting/cheques'),
+          icon: Edit,
+          permission: 'accounting:cheque:view',
+        },
+        {
+          name: t('sidebar.sub_menu.payroll'),
+          href: tenantUrl('/accounting/payroll'),
+          icon: FileCheck,
+          permission: 'hr:payroll:run',
+        },
+        {
+          name: 'Bank Reconciliation',
+          href: tenantUrl('/accounting/bank-reconciliation'),
+          icon: Landmark,
+          permission: 'accounting:reconciliation:manage',
+        },
+        {
+          name: 'Period Closing',
+          href: tenantUrl('/accounting/period-closing'),
+          icon: CalendarOff,
+          permission: 'accounting:closing:manage',
+        },
+        {
+          name: 'Budgets',
+          href: tenantUrl('/accounting/budgets'),
+          icon: PiggyBank,
+          permission: 'accounting:budget:manage',
+        },
+      ],
+    },
+
+    // HR
+    {
+      name: t('sidebar.hr_parent'),
+      icon: Users,
+      permission: 'hr:employee:view',
+      children: [
+        {
+          name: t('sidebar.sub_menu.employees'),
+          href: tenantUrl('/hr/employees'),
+          icon: BadgeCheck,
+          permission: 'hr:employee:view',
+        },
+        {
+          name: 'Attendance',
+          href: tenantUrl('/hr/attendance'),
+          icon: CalendarCheck,
+          permission: 'hr:attendance:view',
+        },
+        {
+          name: 'Leave Management',
+          href: tenantUrl('/hr/leave-management'),
+          icon: Plane,
+          permission: 'hr:leave:manage',
+        },
+        {
+          name: 'Organization Setup',
+          href: tenantUrl('/hr/organization'),
+          icon: Building2,
+          permission: 'hr:employee:view',
+        },
+        {
+          name: 'Payroll',
+          href: tenantUrl('/hr/payroll'),
+          icon: Wallet,
+          permission: 'hr:payroll:view',
+        },
+      ],
+    },
+
+    // REPORTS
+    {
+      name: t('sidebar.reports'),
+      href: tenantUrl('/reports'),
+      icon: BarChart3,
+      permission: 'reports:access',
+    },
+
+    // NOTIFICATIONS
+    {
+      name: 'Notifications',
+      icon: BellRing,
+      permission: 'settings:access',
+      children: [
+        {
+          name: 'Notification Templates',
+          href: tenantUrl('/settings/notification-templates'),
+          icon: BellRing,
+          permission: 'settings:notifications:manage',
+        },
+      ],
+    },
+
+    // SETTINGS
+    {
+      name: t('sidebar.settings'),
+      href: tenantUrl('/settings'),
+      icon: Settings,
+      permission: 'settings:access',
+      children: [
+        {
+          name: 'Company Profile',
+          href: tenantUrl('/settings/company-profile'),
+          icon: Building,
+          permission: 'settings:company:manage',
+        },
+        {
+          name: 'Product Hierarchy',
+          href: tenantUrl('/settings/product-hierarchy'),
+          icon: Network,
+          permission: 'inventory:product:manage',
+        },
+        {
+          name: 'Warranty Policies',
+          href: tenantUrl('/settings/warranties'),
+          icon: ShieldCheck,
+          permission: 'inventory:product:manage',
+        },
+        {
+          name: 'Discount Coupons',
+          href: tenantUrl('/settings/coupons'),
+          icon: Ticket,
+          permission: 'sales:pricing:manage',
+        },
+        {
+          name: t('sidebar.sub_menu.profile'),
+          href: tenantUrl('/settings/profile'),
+          icon: ProfileIcon,
+          permission: 'settings:access',
+        },
+        {
+          name: 'Currencies',
+          href: tenantUrl('/settings/currencies'),
+          icon: ChartCandlestick,
+          permission: 'settings:access',
+        },
+        {
+          name: 'Locations',
+          href: tenantUrl('/settings/locations'),
+          icon: Building2,
+          permission: 'settings:locations:manage',
+        },
+        {
+          name: 'Localization',
+          href: tenantUrl('/settings/localization'),
+          icon: Globe,
+          permission: 'settings:access',
+        },
+        {
+          name: 'Cash Drawer',
+          href: tenantUrl('/settings/cash-drawer'),
+          icon: Coins,
+          permission: 'settings:pos:manage',
+        },
+        {
+          name: 'Users',
+          href: tenantUrl('/settings/users'),
+          icon: UserCog,
+          permission: 'setting:user:manage',
+        },
+        {
+          name: 'Tax Categories',
+          href: tenantUrl('/settings/tax-categories'),
+          icon: Bookmark,
+          permission: 'accounting:tax:manage',
+        },
+        {
+          name: 'Tax Rules',
+          href: tenantUrl('/settings/taxes'),
+          icon: Percent,
+          permission: 'accounting:tax:manage',
+        },
+        {
+          name: t('sidebar.sub_menu.payment_methods'),
+          href: tenantUrl('/settings/payment-methods'),
+          icon: Wallet,
+          permission: 'settings:access',
+        },
+        {
+          name: t('sidebar.sub_menu.roles_permissions'),
+          href: tenantUrl('/settings/roles'),
+          icon: KeyRound,
+          permission: 'hr:role:manage',
+        },
+        {
+          name: 'Service Settings',
+          icon: Wrench,
+          permission: 'settings:service:manage',
+          children: [
+            {
+              name: 'QC Templates',
+              href: tenantUrl('/settings/qc-templates'),
+              icon: Wrench,
+              permission: 'service:qc:manage',
+            },
+          ],
+        },
+        {
+          name: 'Hardware & Devices',
+          href: tenantUrl('/settings/hardware'),
+          icon: HardDrive,
+          permission: 'settings:access',
+        },
+        {
+          name: 'Inventory Settings',
+          href: tenantUrl('/settings/inventory'),
+          icon: Warehouse,
+          permission: 'inventory:product:manage',
+          children: [
+            {
+              name: 'Backups & Restore',
+              href: tenantUrl('/settings/backups'),
+              icon: ShieldCheck,
+              permission: 'tenant:admin',
+            },
+            {
+              name: 'Document Templates',
+              href: tenantUrl('/settings/document-templates'),
+              icon: Printer,
+              permission: 'settings:access',
+            },
+            {
+              name: 'Brands',
+              href: tenantUrl('/settings/inventory/brands'),
+              icon: Tag,
+              permission: 'inventory:product:manage',
+            },
+            {
+              name: 'Categories',
+              href: tenantUrl('/settings/inventory/categories'),
+              icon: ListTree,
+              permission: 'inventory:product:manage',
+            },
+            {
+              name: 'Attributes',
+              href: tenantUrl('/settings/inventory/attributes'),
+              icon: Beaker,
+              permission: 'inventory:product:manage',
+            },
+            {
+              name: 'Label Templates',
+              href: tenantUrl('/settings/printing'),
+              icon: Printer,
+              permission: 'settings:printing:manage',
+            },
+          ],
+        },
+        {
+          name: 'Financial Periods',
+          href: tenantUrl('/settings/financial-periods'),
+          icon: CalendarDays,
+          permission: 'accounting:closing:manage',
+        },
+        {
+          name: 'Benefits Setup',
+          href: tenantUrl('/settings/benefits'),
+          icon: Gift,
+          permission: 'hr:benefits:manage',
+        },
+        {
+          name: 'Pricing & Promotions',
+          href: tenantUrl('/settings/pricing'),
+          icon: Tags,
+          permission: 'sales:pricing:manage',
+        },
+        {
+          name: t('sidebar.sub_menu.integrations'),
+          href: tenantUrl('/settings/integrations'),
+          icon: Plug,
+          permission: 'settings:access',
+        },
+        {
+          name: 'Deduction Rules',
+          href: tenantUrl('/settings/payroll-rules'),
+          icon: FileMinus,
+          permission: 'hr:payroll:manage',
+        },
       ],
     },
   ];

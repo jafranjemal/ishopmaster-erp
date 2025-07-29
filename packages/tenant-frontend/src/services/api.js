@@ -37,6 +37,14 @@ api.interceptors.response.use(
   },
 );
 
+export const setApiTenantHeader = (tenantId) => {
+  if (tenantId) {
+    api.defaults.headers.common['X-Tenant-ID'] = tenantId;
+  } else {
+    delete api.defaults.headers.common['X-Tenant-ID'];
+  }
+};
+
 // For tenant-specific role management
 export const tenantRoleService = {
   getAll: async () => api.get('/tenant/roles'),

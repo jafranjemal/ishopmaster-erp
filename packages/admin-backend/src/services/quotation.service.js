@@ -92,9 +92,10 @@ class QuotationService {
     const customer = ticket.customerId
     if (!customer || !customer.email) throw new Error("Customer email not found.")
 
-    //const portalBaseUrl = process.env.FRONTEND_PORTAL_BASE_URL.replace("://", `://${tenant.subdomain}.`);
-    const portalBaseUrl = process.env.FRONTEND_PORTAL_BASE_URL
-    const quoteUrl = `${portalBaseUrl}/portal/quotes/${quote._id}`
+    const portalBaseUrl = process.env.FRONTEND_PORTAL_BASE_URL || `http://localhost:5174`
+    // For production on Vercel, we use a path. For custom domains, we could use a subdomain.
+    const quoteUrl = `${portalBaseUrl}/portal/${tenant.subdomain}/quotes/${quote._id}`
+
     console.log("sendQuoteToCustomer => quoteUrl ", quoteUrl)
 
     const emailTemplate = getQuoteApprovalTemplate(customer.name, quote, tenant)

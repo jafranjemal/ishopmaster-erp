@@ -2,7 +2,6 @@ import './App.css';
 
 import { Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import Layout from './components/layout/Layout';
 import ChequeManagementPage from './pages/accounting/ChequeManagementPage';
 import InstallmentPlanDetailPage from './pages/accounting/InstallmentPlanDetailPage';
 import PayablesPage from './pages/accounting/PayablesPage';
@@ -92,6 +91,8 @@ import TaxRulePage from './pages/settings/TaxRulePage';
 import WarrantyPoliciesPage from './pages/settings/WarrantyPoliciesPage';
 
 import DesignStudioLayout from './components/layout/DesignStudioLayout';
+import LayoutWrapper from './components/layout/LayoutWrapper';
+import TenantWrapper from './components/layout/TenantWrapper';
 import RepairQuotePage from './pages/portal/RepairQuotePage';
 import SalesInvoiceDetailPage from './pages/sales/SalesInvoiceDetailPage';
 import SalesInvoiceListPage from './pages/sales/SalesInvoiceListPage';
@@ -113,13 +114,15 @@ function App() {
     <>
       <Routes>
         {/* Public Route */}
-
+        <Route element={<TenantWrapper />}>
+          <Route path='/login' element={<LoginPage />} />
+          <Route path='/:tenantId/login' element={<LoginPage />} />
+        </Route>
         {/* --- PUBLIC-FACING ROUTES (NO LOGIN REQUIRED INITIALLY) --- */}
-        <Route path='/login' element={<LoginPage />} />
 
         {/* --- THE DEFINITIVE FIX: DEDICATED PORTAL ROUTE GROUP --- */}
         <Route
-          path='/portal/*'
+          path='/portal/:tenantId/*'
           element={
             <CustomerAuthProvider>
               <PortalLayout>
@@ -141,7 +144,7 @@ function App() {
 
         {/* All POS-related routes are now grouped and use the dedicated PosLayout */}
         <Route
-          path='/pos/*'
+          path='/:tenantId/pos/*'
           element={
             <ProtectedRoute>
               <PosSessionProvider>
@@ -163,129 +166,126 @@ function App() {
           }
         />
 
+        {/* MAIN APPLICATION ROUTES (FIXED) */}
+        <Route path='/:tenantId' element={<ProtectedRoute />}>
+          <Route element={<TenantWrapper />}>
+            <Route element={<DesignStudioLayout />}>
+              {/* Added LayoutWrapper here as parent of all tenant routes */}
+              <Route element={<LayoutWrapper />}>
+                <Route index element={<Navigate to='dashboard' replace />} />
+                <Route path='dashboard' element={<DashboardPage />} />
+                <Route path='inventory/products' element={<ProductTemplatesPage />} />
+                <Route path='inventory/products/templates/:id' element={<ProductTemplateDetailPage />} />
+                <Route path='inventory/assembly' element={<AssemblyPage />} />
+                <Route path='inventory/products/templates/:id' element={<ProductTemplateDetailPage />} />
+                {/* Settings Module Routes */}
+                <Route path='settings/hardware' element={<HardwareManagementPage />} />
+                <Route path='settings/document-templates/:id/design' element={<DocumentBuilderPage />} />
+                <Route path='settings/document-templates' element={<DocumentTemplatesPage />} />
+                <Route path='settings/cash-drawer' element={<DrawerConfigurationPage />} />
+                <Route path='settings/financial-periods' element={<FinancialPeriodsPage />} />
+                <Route path='settings/coupons' element={<CouponManagementPage />} />
+                <Route path='settings/coupons/:batchId' element={<CouponBatchDetailPage />} />
+                <Route path='settings/warranties' element={<WarrantyPoliciesPage />} />
+                <Route path='settings/pricing' element={<PricingManagementPage />} />
+                <Route path='settings/locations' element={<LocationsPage />} />
+                <Route path='settings/users' element={<UsersPage />} />
+                <Route path='settings/inventory/brands' element={<BrandsPage />} />
+                <Route path='settings/company-profile' element={<CompanyProfilePage />} />
+                <Route path='settings/inventory/categories' element={<CategoriesPage />} />
+                <Route path='settings/inventory/attributes' element={<AttributesPage />} />
+                <Route path='settings/roles' element={<RolesPage />} />
+                <Route path='settings/profile' element={<MyProfilePage />} />
+                <Route path='settings/localization' element={<LocalizationPage />} />
+                <Route path='settings/printing' element={<PrintingPage />} />{' '}
+                <Route path='settings/printing/new' element={<LabelDesignerPage />} />{' '}
+                <Route path='settings/printing/:id' element={<LabelDesignerPage />} />
+                <Route path='settings/payroll-rules' element={<DeductionRulesPage />} />
+                <Route path='settings/taxes' element={<TaxRulePage />} />
+                <Route path='settings/tax-categories' element={<TaxCategoryPage />} />
+                <Route path='settings/qc-templates' element={<QcTemplatesPage />} />
+                <Route path='settings/backups' element={<TenantBackupsPage />} />
+                {/* --- accounting routes --- */}
+                <Route path='accounting/budgets' element={<BudgetingPage />} />
+                <Route path='accounting/period-closing' element={<PeriodClosingPage />} />
+                <Route path='accounting/chart' element={<ChartOfAccountsPage />} />
+                <Route path='accounting/ledger' element={<GeneralLedgerPage />} />
+                <Route path='accounting/bank-reconciliation' element={<BankReconciliationPage />} />
+                <Route path='accounting/payables/reconcile' element={<SupplierInvoiceReconciliationPage />} />
+                {/* CRM Routes */}
+                <Route path='crm/leads' element={<LeadManagementPage />} />
+                <Route path='crm/opportunities' element={<OpportunityKanbanPage />} />
+                <Route path='crm/opportunities/:id' element={<OpportunityDetailPage />} />
+                <Route path='crm/groups' element={<CustomerGroupsPage />} />
+                <Route path='crm/customers' element={<CustomersPage />} />
+                <Route path='crm/customers/:id' element={<CustomerProfilePage />} /> {/* Procurement Routes */}
+                {/* procurement */}
+                <Route path='procurement/suppliers/:id' element={<SupplierProfilePage />} />
+                <Route path='procurement/suppliers' element={<SuppliersPage />} />
+                <Route path='procurement/po' element={<PurchaseOrdersPage />} />
+                <Route path='procurement/po/:id' element={<PurchaseOrderDetailPage />} />
+                <Route path='settings/currencies' element={<CurrenciesPage />} />
+                <Route path='accounting/payables' element={<PayablesPage />} />
+                <Route path='accounting/ledger/:accountId' element={<IndividualLedgerPage />} />
+                <Route path='settings/payment-methods' element={<PaymentMethodsPage />} />
+                <Route path='accounting/cheques' element={<ChequeManagementPage />} />{' '}
+                <Route path='procurement/invoices' element={<InvoicesListPage />} />
+                <Route path='accounting/payments' element={<PaymentsListPage />} />
+                <Route path='procurement/invoices/:id' element={<SupplierInvoiceDetailPage />} />
+                <Route path='accounting/payments/:id' element={<PaymentDetailPage />} />
+                {/* inventory */}
+                <Route path='inventory/ledger' element={<InventoryLedgerPage />} />
+                <Route path='inventory/stock-levels' element={<StockLevelsPage />} />
+                <Route path='inventory/stock-details/:variantId' element={<StockDetailPage />} />
+                <Route path='inventory/adjustments' element={<StockAdjustmentsPage />} />{' '}
+                <Route path='inventory/adjustments-history' element={<AdjustmentHistoryPage />} />{' '}
+                <Route path='inventory/transfers' element={<StockTransfersPage />} /> {/* <-- 2. ADD NEW ROUTE */}
+                <Route path='inventory/transfers/:id' element={<StockTransferDetailPage />} />{' '}
+                <Route path='inventory/print-hub' element={<PrintHubPage />} />
+                {/* procurement */}
+                <Route path='procurement/receipts' element={<GoodsReceiptsPage />} />
+                <Route path='procurement/receipts/:id' element={<GRNDetailPage />} />
+                <Route path='accounting/installments/:id' element={<InstallmentPlanDetailPage />} /> {/* POS */}
+                <Route path='pos' element={<PosPage />} />
+                <Route path='shifts' element={<ShiftManagementPage />} /> {/* <-- 2. ADD THE NEW ROUTE */}
+                {/* Notification */}
+                <Route path='settings/notification-templates' element={<NotificationTemplatesPage />} />
+                {/* SERVICE */}
+                {/* <Route path='service/dashboard' element={<ServiceKanbanPage />} />
+                  <Route path='service/tickets/new' element={<RepairTicketIntakePage />} />
+                  <Route path='service/tickets/:id' element={<RepairTicketDetailPage />} /> */}
+                <Route path='service/dashboard' element={<RepairTicketsPage />} />
+                <Route path='service/tickets/new' element={<RepairTicketIntakePage />} />
+                <Route path='service/tickets/:id/edit' element={<RepairTicketIntakePage />} />
+                <Route path='service/tickets/:id' element={<RepairTicketDetailPage />} />
+                <Route path='settings/product-hierarchy' element={<HierarchyManagementPage />} />
+                <Route path='service/my-dashboard' element={<TechnicianDashboardPage />} />
+                {/* HR */}
+                <Route path='hr/employees' element={<EmployeesPage />} />
+                <Route path='hr/employees/:id' element={<EmployeeDetailPage />} />
+                <Route path='accounting/payroll' element={<PayrollPage />} />
+                <Route path='accounting/payroll/:id' element={<PayrollRunDetailsPage />} />
+                <Route path='accounting/payslips/:id' element={<PayslipDetailPage />} />
+                <Route path='hr/attendance' element={<AttendancePage />} />
+                <Route path='hr/leave-management' element={<LeaveManagementPage />} />
+                <Route path='hr/organization' element={<OrganizationPage />} />
+                <Route path='settings/benefits' element={<BenefitsPage />} />
+                {/* SALES */}
+                <Route path='sales/returns' element={<ReturnsPage />} />
+                <Route path='sales/invoices' element={<SalesInvoiceListPage />} />
+                <Route path='sales/invoices/:id' element={<SalesInvoiceDetailPage />} />
+                {/* PORTAL */}
+                <Route path='portal/track' element={<TrackRepairPage />} />
+                <Route path='portal/dashboard' element={<CustomerDashboardPage />} />
+                {/* ... ALL OTHER TENANT ROUTES ... */}
+              </Route>
+            </Route>
+          </Route>
+        </Route>
+
         {/* Protected Routes */}
-        <Route
-          path='/*' // Match all other routes
-          element={
-            <ProtectedRoute>
-              <DesignStudioLayout>
-                <Layout>
-                  {' '}
-                  {/* The main layout with Sidebar and TopBar */}
-                  <Routes>
-                    {/* Nested routes that appear inside the Layout */}
-                    <Route path='/' element={<DashboardPage />} />
-                    <Route path='/login' element={<LoginPage />} />
-                    {/* --- INVENTORY ROUTES --- */}
-                    <Route path='/inventory/products' element={<ProductTemplatesPage />} />
-                    <Route path='/inventory/products/templates/:id' element={<ProductTemplateDetailPage />} />
-                    <Route path='/inventory/assembly' element={<AssemblyPage />} />
-                    <Route path='/inventory/products/templates/:id' element={<ProductTemplateDetailPage />} />
-                    {/* Settings Module Routes */}
-                    <Route path='/settings/hardware' element={<HardwareManagementPage />} />
-                    <Route path='/settings/document-templates/:id/design' element={<DocumentBuilderPage />} />
-                    <Route path='/settings/document-templates' element={<DocumentTemplatesPage />} />
-                    <Route path='/settings/cash-drawer' element={<DrawerConfigurationPage />} />
-                    <Route path='/settings/financial-periods' element={<FinancialPeriodsPage />} />
-                    <Route path='/settings/coupons' element={<CouponManagementPage />} />
-                    <Route path='/settings/coupons/:batchId' element={<CouponBatchDetailPage />} />
-                    <Route path='/settings/warranties' element={<WarrantyPoliciesPage />} />
-                    <Route path='/settings/pricing' element={<PricingManagementPage />} />
-                    <Route path='/settings/locations' element={<LocationsPage />} />
-                    <Route path='/settings/users' element={<UsersPage />} />
-                    <Route path='/settings/inventory/brands' element={<BrandsPage />} />
-                    <Route path='/settings/company-profile' element={<CompanyProfilePage />} />
-                    <Route path='/settings/inventory/categories' element={<CategoriesPage />} />
-                    <Route path='/settings/inventory/attributes' element={<AttributesPage />} />
-                    <Route path='/settings/roles' element={<RolesPage />} />
-                    <Route path='/settings/profile' element={<MyProfilePage />} />
-                    <Route path='/settings/localization' element={<LocalizationPage />} />
-                    <Route path='/settings/printing' element={<PrintingPage />} />{' '}
-                    <Route path='/settings/printing/new' element={<LabelDesignerPage />} />{' '}
-                    <Route path='/settings/printing/:id' element={<LabelDesignerPage />} />
-                    <Route path='/settings/payroll-rules' element={<DeductionRulesPage />} />
-                    <Route path='/settings/taxes' element={<TaxRulePage />} />
-                    <Route path='/settings/tax-categories' element={<TaxCategoryPage />} />
-                    <Route path='/settings/qc-templates' element={<QcTemplatesPage />} />
-                    <Route path='/settings/backups' element={<TenantBackupsPage />} />
-                    {/* --- accounting routes --- */}
-                    <Route path='/accounting/budgets' element={<BudgetingPage />} />
-                    <Route path='/accounting/period-closing' element={<PeriodClosingPage />} />
-                    <Route path='/accounting/chart' element={<ChartOfAccountsPage />} />
-                    <Route path='/accounting/ledger' element={<GeneralLedgerPage />} />
-                    <Route path='/accounting/bank-reconciliation' element={<BankReconciliationPage />} />
-                    <Route path='/accounting/payables/reconcile' element={<SupplierInvoiceReconciliationPage />} />
-                    {/* CRM Routes */}
-                    <Route path='/crm/leads' element={<LeadManagementPage />} />
-                    <Route path='/crm/opportunities' element={<OpportunityKanbanPage />} />
-                    <Route path='/crm/opportunities/:id' element={<OpportunityDetailPage />} />
-                    <Route path='/crm/groups' element={<CustomerGroupsPage />} />
-                    <Route path='/crm/customers' element={<CustomersPage />} />
-                    <Route path='/crm/customers/:id' element={<CustomerProfilePage />} /> {/* Procurement Routes */}
-                    {/* procurement */}
-                    <Route path='/procurement/suppliers/:id' element={<SupplierProfilePage />} />
-                    <Route path='/procurement/suppliers' element={<SuppliersPage />} />
-                    <Route path='/procurement/po' element={<PurchaseOrdersPage />} />
-                    <Route path='/procurement/po/:id' element={<PurchaseOrderDetailPage />} />
-                    <Route path='/settings/currencies' element={<CurrenciesPage />} />
-                    <Route path='/accounting/payables' element={<PayablesPage />} />
-                    <Route path='/accounting/ledger/:accountId' element={<IndividualLedgerPage />} />
-                    <Route path='/settings/payment-methods' element={<PaymentMethodsPage />} />
-                    <Route path='/accounting/cheques' element={<ChequeManagementPage />} />{' '}
-                    <Route path='/procurement/invoices' element={<InvoicesListPage />} />
-                    <Route path='/accounting/payments' element={<PaymentsListPage />} />
-                    <Route path='/procurement/invoices/:id' element={<SupplierInvoiceDetailPage />} />
-                    <Route path='/accounting/payments/:id' element={<PaymentDetailPage />} />
-                    {/* inventory */}
-                    <Route path='/inventory/ledger' element={<InventoryLedgerPage />} />
-                    <Route path='/inventory/stock-levels' element={<StockLevelsPage />} />
-                    <Route path='/inventory/stock-details/:variantId' element={<StockDetailPage />} />
-                    <Route path='/inventory/adjustments' element={<StockAdjustmentsPage />} />{' '}
-                    <Route path='/inventory/adjustments-history' element={<AdjustmentHistoryPage />} />{' '}
-                    <Route path='/inventory/transfers' element={<StockTransfersPage />} /> {/* <-- 2. ADD NEW ROUTE */}
-                    <Route path='/inventory/transfers/:id' element={<StockTransferDetailPage />} />{' '}
-                    <Route path='/inventory/print-hub' element={<PrintHubPage />} />
-                    {/* procurement */}
-                    <Route path='/procurement/receipts' element={<GoodsReceiptsPage />} />
-                    <Route path='/procurement/receipts/:id' element={<GRNDetailPage />} />
-                    <Route path='/accounting/installments/:id' element={<InstallmentPlanDetailPage />} /> {/* POS */}
-                    <Route path='/pos' element={<PosPage />} />
-                    <Route path='/shifts' element={<ShiftManagementPage />} /> {/* <-- 2. ADD THE NEW ROUTE */}
-                    {/* Notification */}
-                    <Route path='/settings/notification-templates' element={<NotificationTemplatesPage />} />
-                    {/* SERVICE */}
-                    {/* <Route path='/service/dashboard' element={<ServiceKanbanPage />} />
-                  <Route path='/service/tickets/new' element={<RepairTicketIntakePage />} />
-                  <Route path='/service/tickets/:id' element={<RepairTicketDetailPage />} /> */}
-                    <Route path='/service/dashboard' element={<RepairTicketsPage />} />
-                    <Route path='/service/tickets/new' element={<RepairTicketIntakePage />} />
-                    <Route path='/service/tickets/:id/edit' element={<RepairTicketIntakePage />} />
-                    <Route path='/service/tickets/:id' element={<RepairTicketDetailPage />} />
-                    <Route path='/settings/product-hierarchy' element={<HierarchyManagementPage />} />
-                    <Route path='/service/my-dashboard' element={<TechnicianDashboardPage />} />
-                    {/* HR */}
-                    <Route path='/hr/employees' element={<EmployeesPage />} />
-                    <Route path='/hr/employees/:id' element={<EmployeeDetailPage />} />
-                    <Route path='/accounting/payroll' element={<PayrollPage />} />
-                    <Route path='/accounting/payroll/:id' element={<PayrollRunDetailsPage />} />
-                    <Route path='/accounting/payslips/:id' element={<PayslipDetailPage />} />
-                    <Route path='/hr/attendance' element={<AttendancePage />} />
-                    <Route path='/hr/leave-management' element={<LeaveManagementPage />} />
-                    <Route path='/hr/organization' element={<OrganizationPage />} />
-                    <Route path='/settings/benefits' element={<BenefitsPage />} />
-                    {/* SALES */}
-                    <Route path='/sales/returns' element={<ReturnsPage />} />
-                    <Route path='/sales/invoices' element={<SalesInvoiceListPage />} />
-                    <Route path='/sales/invoices/:id' element={<SalesInvoiceDetailPage />} />
-                    {/* PORTAL */}
-                    <Route path='/portal/track' element={<TrackRepairPage />} />
-                    <Route path='/portal/dashboard' element={<CustomerDashboardPage />} />
-                  </Routes>
-                </Layout>
-              </DesignStudioLayout>
-            </ProtectedRoute>
-          }
-        />
+
+        {/* <Route path='/' element={<Navigate to='/login' replace />} /> */}
       </Routes>
     </>
   );
