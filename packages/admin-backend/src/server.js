@@ -39,12 +39,11 @@ try {
   const { metricsMiddleware } = require("./config/metrics.js")
   const { registerRepairListeners } = require("./modules/tenant/repairs/repair.listeners.js")
   console.log("[DEBUG] OK: Loaded ./modules/tenant/repairs/repair.listeners.js")
-  const adminBackupRoutes = require("./modules/admin/backups/backup.routes")
-  const tenantBackupRoutes = require("./modules/tenant/backups/backup.routes")
   const jobSchedulerService = require("./services/jobScheduler.service.js")
   console.log("[DEBUG] OK: Loaded ./services/jobScheduler.service.js")
   const { backupTenantDatabase } = require("./services/backup.service.js")
-  const backupRoutes = require("./modules/admin/backups/backup.routes.js")
+  const tenantBackupRoutes = require("./modules/tenant/backups/backup.routes")
+  const adminBackupRoutes = require("./modules/admin/backups/backup.routes.js")
 
   // CORS configuration
   const allowedOrigins = [
@@ -216,7 +215,7 @@ try {
   app.use("/api/v1/admin/modules", adminModulesRoutes)
   app.use("/api/v1/admin/permissions", adminPermissionsRoutes)
   app.use("/api/v1/admin/constants", adminConstantsRoutes)
-  app.use("/api/v1/backups", backupRoutes)
+  //app.use("/api/v1/backups", adminBackupRoutes)
 
   portalApiRouter.use("/auth", tenantResolver, portalAuthRoutes)
   tenantRouter.use("/backups", tenantBackupRoutes)
