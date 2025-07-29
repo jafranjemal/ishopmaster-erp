@@ -11,7 +11,7 @@
     "dev:admin:frontend": "npm run dev --workspace=admin-frontend",
     "dev": "concurrently \"npm:dev:admin:backend\" \"npm:dev:admin:frontend\"",
     "install:all": "npm install -ws",
-    "start:prod": "npm run start --workspace=admin-backend"
+    "start:prod": "cd packages/admin-backend && node src/server.js"
   },
   "keywords": [],
   "author": "",
