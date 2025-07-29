@@ -30,7 +30,6 @@ try {
   const tenantRolesRoutes = require("./modules/tenant/roles/role.routes.js")
   const tenantProfileRoutes = require("./modules/tenant/profile/profile.routes.js")
   const tenantProductRoutes = require("../tenants/routes/product.routes.js")
-  const backupRoutes = require("./modules/admin/backups/backup.routes.js")
   const Tenant = require("./modules/admin/tenants/tenant.model.js")
   const apiKeyAuth = require("./middleware/apiKeyAuth.middleware")
   const { receiveDevicePunch } = require("./modules/tenant/hr/attendance.controller")
@@ -45,6 +44,7 @@ try {
   const jobSchedulerService = require("./services/jobScheduler.service.js")
   console.log("[DEBUG] OK: Loaded ./services/jobScheduler.service.js")
   const { backupTenantDatabase } = require("./services/backup.service.js")
+  const backupRoutes = require("./modules/admin/backups/backup.routes.js")
 
   // CORS configuration
   const allowedOrigins = [
