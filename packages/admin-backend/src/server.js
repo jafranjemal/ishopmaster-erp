@@ -86,7 +86,8 @@ try {
   connectAdminDB()
   const app = express()
   app.use(express.json())
-  app.use(cors(corsOptions))
+  //app.use(cors(corsOptions))
+  app.options("*", cors())
   // Metrics endpoint
   app.get("/metrics", async (req, res) => {
     res.set("Content-Type", register.contentType)
