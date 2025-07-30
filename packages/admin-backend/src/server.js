@@ -57,7 +57,7 @@ try {
   const allowedPatterns = [
     /^https?:\/\/([a-z0-9-]+\.)?localhost:5173$/, // Local subdomains
     /^https?:\/\/([a-z0-9-]+\.)?localhost:5174$/, // Local subdomains
-    /^https?:\/\/([a-z0-9-]+\.)?your-production-domain\.com$/, // Production subdomains
+    /^https?:\/\/([a-z0-9-]+\.)?vercel\.app$/, // Production subdomains
   ]
 
   const corsOptions = {
@@ -87,7 +87,7 @@ try {
   const app = express()
   app.use(express.json())
   //app.use(cors(corsOptions))
-  app.options("*", cors())
+  app.use(cors(corsOptions))
   // Metrics endpoint
   app.get("/metrics", async (req, res) => {
     res.set("Content-Type", register.contentType)
