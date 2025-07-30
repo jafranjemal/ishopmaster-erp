@@ -3,7 +3,7 @@ import axios from "axios";
 // The baseURL is now dynamically set from the .env file (for local dev)
 // or from the environment variables set on the hosting platform (for production).
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api/v1";
-
+console.log({ API_URL });
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -75,6 +75,7 @@ export const adminModuleService = {
 export const adminPermissionService = {
   // READ (All) - Fetches all permissions, grouped by module
   getAll: async () => {
+    console.log("admin permission fetching getall");
     const response = await api.get("/admin/permissions");
     return response.data; // Expects { success: true, count: number, data: { module: [...] } }
   },
