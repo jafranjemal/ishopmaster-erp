@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 /**
  * The ProductVariants represents a specific, sellable, stockable item.
@@ -57,7 +57,7 @@ const productVariantSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
-);
+)
 
 /**
  * @desc When a new ProductTemplate is created, if it's a 'bundle' or 'service'
@@ -66,7 +66,7 @@ const productVariantSchema = new mongoose.Schema(
  */
 productVariantSchema.statics.createDefaultVariant = async function (template) {
   if (template.type === "bundle" || template.type === "service" || !template.attributeSetId) {
-    console.log(`Creating default variant for ${template.type}: ${template.baseName}`);
+    // console.log(`Creating default variant for ${template.type}: ${template.baseName}`);
     return this.create({
       templateId: template._id, // Correct field name
       variantName: template.baseName,
@@ -74,42 +74,32 @@ productVariantSchema.statics.createDefaultVariant = async function (template) {
       attributes: new Map(), // Bundles/services have no attributes
       costPrice: template.costPrice || 0,
       sellingPrice: template.sellingPrice || 0,
-    });
+    })
   }
-  return null; // Return null if no action was taken
-};
+  return null // Return null if no action was taken
+}
 
-productVariantSchema.statics.createVariantsFromAttributes = async function (
-  template,
-  attributeSet,
-  session = null
-) {
+productVariantSchema.statics.createVariantsFromAttributes = async function (template, attributeSet, session = null) {
   if (!attributeSet || !attributeSet.attributes || attributeSet.attributes.length === 0) {
-    throw new Error("No attributes available to generate variants");
+    throw new Error("No attributes available to generate variants")
   }
-  console.log(`Creating variant for ${template.type}: ${template.baseName}`);
+  console.log(`Creating variant for ${template.type}: ${template.baseName}`)
 
-  const ProductVariants = this;
+  const ProductVariants = this
 
   // Prepare attribute options (array of arrays)
-  const attributeValueOptions = attributeSet.attributes.map((attr) =>
-    attr.values.map((value) => ({ key: attr.key, value }))
-  );
+  const attributeValueOptions = attributeSet.attributes.map((attr) => attr.values.map((value) => ({ key: attr.key, value })))
 
   // Cartesian product helper
-  const cartesian = (arrays) =>
-    arrays.reduce(
-      (acc, curr) => acc.flatMap((accItem) => curr.map((currItem) => [...accItem, currItem])),
-      [[]]
-    );
+  const cartesian = (arrays) => arrays.reduce((acc, curr) => acc.flatMap((accItem) => curr.map((currItem) => [...accItem, currItem])), [[]])
 
-  const combinations = cartesian(attributeValueOptions);
+  const combinations = cartesian(attributeValueOptions)
 
   const variantsToCreate = combinations.map((combination) => {
-    const attributesMap = {};
+    const attributesMap = {}
     combination.forEach(({ key, value }) => {
-      attributesMap[key] = value;
-    });
+      attributesMap[key] = value
+    })
 
     return {
       templateId: template._id,
@@ -118,10 +108,10 @@ productVariantSchema.statics.createVariantsFromAttributes = async function (
       attributes: attributesMap,
       costPrice: template.costPrice || 0,
       sellingPrice: template.sellingPrice || 0,
-    };
-  });
+    }
+  })
 
-  return ProductVariants.insertMany(variantsToCreate, { session });
-};
+  return ProductVariants.insertMany(variantsToCreate, { session })
+}
 
-module.exports = productVariantSchema;
+module.exports = productVariantSchema

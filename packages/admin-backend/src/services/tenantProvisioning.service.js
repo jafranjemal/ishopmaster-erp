@@ -235,33 +235,60 @@ class TenantProvisioningService {
     console.log("Total templates to process:", templateDocs.length)
 
     // ======================================================================
-    // BATCH PROCESSING FOR TEMPLATES AND VARIANTS
+    // BATCH PROCESSING FOR BOTH TEMPLATES AND VARIANTS
     // ======================================================================
-    const BATCH_SIZE = 50
+    const TEMPLATE_BATCH_SIZE = 50 // How many templates to process per transaction
+    const VARIANT_BATCH_SIZE = 100 // How many variants to insert at a time
     const masterListMap = new Map(PRODUCT_TEMPLATE_MASTER_LIST.map((t) => [t.baseName, t]))
 
-    for (let i = 0; i < templateDocs.length; i += BATCH_SIZE) {
-      const batchDocs = templateDocs.slice(i, i + BATCH_SIZE)
-      console.log(`Processing batch ${i / BATCH_SIZE + 1}...`)
+    // --- Outer Loop: Process templates in batches ---
+    for (let i = 0; i < templateDocs.length; i += TEMPLATE_BATCH_SIZE) {
+      const templateBatch = templateDocs.slice(i, i + TEMPLATE_BATCH_SIZE)
+      console.log(`Processing template batch ${Math.floor(i / TEMPLATE_BATCH_SIZE) + 1}...`)
 
-      const createdTemplates = await ProductTemplates.insertMany(batchDocs, { session })
+      const batchSession = await models.ProductTemplates.db.startSession()
+      try {
+        await batchSession.withTransaction(async () => {
+          // 1. Create the templates for this batch
+          const createdTemplates = await ProductTemplates.insertMany(templateBatch, { session: batchSession })
 
-      for (const createdTemplate of createdTemplates) {
-        const originalTemplate = masterListMap.get(createdTemplate.baseName)
-        if (!originalTemplate) continue
+          // 2. Collect ALL variants for the templates created in this batch
+          const allVariantsInBatch = []
+          for (const createdTemplate of createdTemplates) {
+            const originalTemplate = masterListMap.get(createdTemplate.baseName)
+            if (!originalTemplate) continue
 
-        if (originalTemplate.variants && originalTemplate.variants.length > 0) {
-          const variantsToCreate = originalTemplate.variants.map((variant) => ({
-            templateId: createdTemplate._id,
-            sku: `${createdTemplate.skuPrefix || "SKU"}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-            attributes: variant.attributes,
-          }))
-          await ProductVariants.insertMany(variantsToCreate, { session })
-        } else {
-          await ProductVariants.createDefaultVariant(createdTemplate, session)
-        }
+            if (originalTemplate.variants && originalTemplate.variants.length > 0) {
+              originalTemplate.variants.forEach((variant) => {
+                allVariantsInBatch.push({
+                  templateId: createdTemplate._id,
+                  sku: `${createdTemplate.skuPrefix || "SKU"}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+                  attributes: variant.attributes,
+                  costPrice: createdTemplate.costPrice,
+                  sellingPrice: createdTemplate.sellingPrice,
+                })
+              })
+            } else {
+              // If a template has no pre-defined variants, create its default one immediately
+              await ProductVariants.createDefaultVariant(createdTemplate, batchSession)
+            }
+          }
+
+          // 3. --- Inner Loop: Insert the collected variants in smaller batches ---
+          if (allVariantsInBatch.length > 0) {
+            console.log(` -> Inserting ${allVariantsInBatch.length} variants in chunks of ${VARIANT_BATCH_SIZE}...`)
+            for (let j = 0; j < allVariantsInBatch.length; j += VARIANT_BATCH_SIZE) {
+              const variantChunk = allVariantsInBatch.slice(j, j + VARIANT_BATCH_SIZE)
+              await ProductVariants.insertMany(variantChunk, { session: batchSession })
+            }
+          }
+        })
+      } finally {
+        await batchSession.endSession()
       }
     }
+
+    console.log("All batches processed successfully.")
 
     // let createdTemplates = []
     // if (templateDocs.length > 0) {
