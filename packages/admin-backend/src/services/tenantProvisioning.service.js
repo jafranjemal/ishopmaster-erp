@@ -27,41 +27,44 @@ class TenantProvisioningService {
   async provisionNewTenantDb(models, session, initialData) {
     console.log(`[Provisioning Service] Starting database setup...`)
 
-    const coreSession = await models.User.db.startSession()
-    try {
-      await coreSession.withTransaction(async () => {
-        await this._seedAccounts(models, coreSession)
-        const { adminRole } = await this._seedSystemData(models, coreSession)
-        await this._seedOwnerAccount(models, coreSession, initialData, adminRole)
-      })
-    } finally {
-      await coreSession.endSession()
-    }
-
     // 1. Seed financial accounts first, as they are dependencies for other records.
-    //await this._seedAccounts(models, session)
+    await this._seedAccounts(models, session)
 
     // 2. Seed system data like roles and the default 'Walking Customer'.
-    // const { adminRole } = await this._seedSystemData(models, session)
+    const { adminRole } = await this._seedSystemData(models, session)
 
     // 3. Seed the owner's user account, linking it to the newly created role and branch.
-    // await this._seedOwnerAccount(models, session, initialData, adminRole)
+    await this._seedOwnerAccount(models, session, initialData, adminRole)
+
+    const [accounts] = await Promise.all([models.Account.find({}).session(session)])
+
+    const accountMap = new Map(accounts.map((a) => [a.name, a._id]))
+
+    const paymentMethodsToCreate = PAYMENT_METHOD_MASTER_LIST.map((method) => ({
+      ...method,
+      linkedAccountId: accountMap.get(method.linkedAccountName),
+      holdingAccountId: method.holdingAccountName ? accountMap.get(method.holdingAccountName) : null,
+    }))
+    await PaymentMethod.insertMany(paymentMethodsToCreate, {
+      session,
+      ordered: true,
+    })
+
+    console.log("Seeding master data: Currencies and Exchange Rates...")
+    await Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true })
+    await ExchangeRate.insertMany(EXCHANGE_RATE_MASTER_LIST, {
+      session,
+      ordered: true,
+    })
+    console.log("Currency data seeded successfully.")
 
     // 4. Seed master data for inventory management.
     await this._seedMasterData(models, session)
 
-    // --- Transaction 3: Final Financial Data ---
-    const financialSession = await models.User.db.startSession()
-    try {
-      await financialSession.withTransaction(async () => {
-        const accounts = await models.Account.find({}).session(financialSession)
-        const accountMap = new Map(accounts.map((a) => [a.name, a._id]))
-        await this._seedPaymentMethods(models, financialSession, accountMap)
-        await this._seedCurrencies(models, financialSession)
-      })
-    } finally {
-      await financialSession.endSession()
-    }
+    //await this._seedDevicesAndRepairs(models, session)
+
+    // 5. Seed Product Variants, linking them to the newly created templates.
+    // await this._seedProductVariants(models, session);
 
     console.log(`[Provisioning Service] Database setup complete.`)
   }
@@ -343,18 +346,6 @@ class TenantProvisioningService {
 
     // Seed Payment Methods, linking them to the correct accounts
 
-    // await PaymentMethod.insertMany(paymentMethodsToCreate, {
-    //   session,
-    //   ordered: true,
-    // })
-
-    // console.log("Seeding master data: Currencies and Exchange Rates...")
-    // await Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true })
-    // await ExchangeRate.insertMany(EXCHANGE_RATE_MASTER_LIST, {
-    //   session,
-    //   ordered: true,
-    // })
-    // console.log("Currency data seeded successfully.")
     console.log(`  -> Master Inventory data seeded.`)
   }
 
@@ -389,30 +380,6 @@ class TenantProvisioningService {
         await this.seedCategoriesRecursively(sourceNode.children, parentDoc._id, models, session)
       }
     }
-  }
-
-  /**
-   * Seeds Payment Methods.
-   */
-  async _seedPaymentMethods(models, session, accountMap) {
-    const { PaymentMethod } = models
-    const paymentMethodsToCreate = PAYMENT_METHOD_MASTER_LIST.map((method) => ({
-      ...method,
-      linkedAccountId: accountMap.get(method.linkedAccountName),
-      holdingAccountId: method.holdingAccountName ? accountMap.get(method.holdingAccountName) : null,
-    }))
-    await PaymentMethod.insertMany(paymentMethodsToCreate, { session, ordered: true })
-    console.log(" -> Payment Methods seeded.")
-  }
-
-  /**
-   * Seeds Currencies and Exchange Rates.
-   */
-  async _seedCurrencies(models, session) {
-    const { Currency, ExchangeRate } = models
-    await Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true })
-    await ExchangeRate.insertMany(EXCHANGE_RATE_MASTER_LIST, { session, ordered: true })
-    console.log(" -> Currencies seeded.")
   }
 
   /**
