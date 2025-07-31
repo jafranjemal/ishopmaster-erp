@@ -36,16 +36,17 @@ const BRANDS = [
   { name: "GX" },
   { name: "G+OCA PRO" },
   { name: "CELEBRATE" },
-
+  { name: "ZAT" },
+  { name: "SPIGEN" },
   { name: "UNIQUE DESIGN" },
   { name: "Redington" },
   { name: "Xmart" },
   { name: "ATB KING KONG" },
   { name: "Crystal Case" },
-  { name: "Spigen" },
+
   { name: "RECCI" },
   // Generic
   { name: "Unbranded" },
-];
+]
 
-module.exports = BRANDS;
+module.exports = BRANDS

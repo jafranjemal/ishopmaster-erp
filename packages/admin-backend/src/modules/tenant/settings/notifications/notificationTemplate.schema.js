@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 /**
  * Defines a configurable, templated notification for a specific business event.
@@ -16,7 +16,7 @@ const notificationTemplateSchema = new mongoose.Schema(
     recipientType: {
       type: String,
       required: true,
-      enum: ["customer", "assigned_technician", "branch_manager"],
+      enum: ["customer", "assigned_technician", "branch_manager", "employee"],
     },
 
     subject: { type: String, trim: true }, // For email channel
@@ -25,6 +25,6 @@ const notificationTemplateSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true, index: true },
   },
   { timestamps: true }
-);
+)
 
-module.exports = notificationTemplateSchema;
+module.exports = notificationTemplateSchema

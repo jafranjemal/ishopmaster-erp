@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 /**
  * The ProductTemplates represents the abstract concept of a product family.
@@ -22,7 +22,7 @@ const componentItemSchema = new mongoose.Schema(
     },
   },
   { _id: false }
-);
+)
 
 const productTemplateSchema = new mongoose.Schema(
   {
@@ -62,10 +62,6 @@ const productTemplateSchema = new mongoose.Schema(
     deviceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Device",
-      required: function () {
-        // A device link is required for physical products, but not for abstract services.
-        return this.type === "non-serialized" || this.type === "serialized" || this.type === "bundle";
-      },
     },
 
     // The set of attributes that defines this product's variations (e.g., "Smartphone Specs")
@@ -73,7 +69,7 @@ const productTemplateSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "AttributeSet",
       required: function () {
-        return this.type === "non-serialized" || this.type === "serialized";
+        return this.type === "non-serialized" || this.type === "serialized"
       },
     },
     alertQty: {
@@ -124,17 +120,17 @@ const productTemplateSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
-);
+)
 
 // Add a validator to ensure bundleItems only exists for bundle-type products
 productTemplateSchema.pre("validate", function (next) {
-  if (this.type !== "bundle" && this.bundleItems.length > 0) {
-    this.bundleItems = []; // Clear bundle items if not a bundle type
+  if (this.type !== "bundle") {
+    this.bundleItems = [] // Clear bundle items if not a bundle type
   }
-  if (this.type === "bundle" && this.bundleItems.length === 0) {
+  if (this.type === "bundle" && this.bundleItems?.length === 0) {
     // We will handle this validation more gracefully in the service/controller layer upon save
   }
-  next();
-});
+  next()
+})
 
-module.exports = productTemplateSchema;
+module.exports = productTemplateSchema

@@ -1,1824 +1,396 @@
-/**
- * The definitive default list of product templates to be seeded for a new tenant.
- * The `*Name` fields are used by the seeder to look up the correct ObjectId.
- * Ordered by latest Apple products first, containing over 100 templates.
- */
-const PRODUCT_TEMPLATE_MASTER_LIST = [
-  {
-    baseName: "20w Usb-c 3-pin Power Adapter",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Charger Specifications",
-    images: [
-      {
-        url: "https://i0.wp.com/www.innovink.lk/wp-content/uploads/2023/11/Apple-20W-USB-Type-C-Power-Adapter.jpg?resize=300%2C300&ssl=1",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Usb-c To Lightning Cable - 1m",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://celltronics.lk/wp-content/uploads/2022/11/Apple-USB-C-to-Lightning-Cable-1.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Lightning To Usb Cable - 1m",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://carmarthencameras.com/cdn/shop/products/3_67_12.jpg?v=1654869539",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Usb Power Adapter 5w",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Charger Specifications",
-    images: [
-      {
-        url: "https://mcprod.hnak.com/media/catalog/product/5/2/52a1cb63976bed376f7f7a333a1a203fcc567a3d1274c17fa5e1cd93adcad53f.jpeg?quality=60&fit=bounds&height=&width=",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A620 Tws Earbuds Pro 2",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://otc.lk/wp-content/uploads/2024/08/Aspor-A620-TWS-Earbuds-Pro-2-BY-OTC.LK-IN-SRILANKA-1.png",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A827 Advanced Micro / V8 Fast Charger Iq 2.4a",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Charger Specifications",
-    images: [
-      {
-        url: "https://static-01.daraz.lk/p/78a1bc6f574db83a3fcd4caa4aeb37e5.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A167 Fast Charging Usb To Lightning Cable",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://appleme.lk/wp-content/uploads/2023/07/1-207.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A168 Fast Charging Usb To Type-c Cable",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://i0.wp.com/cyberdeals.lk/wp-content/uploads/2024/09/1-208.jpg?fit=600%2C600&ssl=1",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A166 Fast Charging Usb To Micro Cable",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://i0.wp.com/appleme.lk/wp-content/uploads/2023/07/1-206.jpg?fit=600%2C600&ssl=1",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A109pd 27w Type-c To Lightning Fast Charging Cable",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://macs.lk/wp-content/uploads/2024/08/16cda90ef8b834e733c289346e20a112.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A152 Type-c To Type-c 100w Pd Fast Charging Cable 1.8m",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://jomlakwt.s3.me-south-1.amazonaws.com/uploads/all/2XbELZsWlYxToSvAO7FtORurVRffImRfxYJWgZC9.webp.webp",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "D60l 2.4 Lightning Chargering Data Cable",
-    type: "non-serialized",
-    brandName: "VDENMENV",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://gpbest.by/upload/iblock/f46/f463311dd0cd77301e00f770353a95b8.png",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Housing Iphone 12 Pro Pacific Blue",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Frame & Housing",
-    attributeSetName: "Spare Parts (Mobiles)",
-    images: [
-      {
-        url: "https://m.media-amazon.com/images/I/41-F8Y7VPRL._AC_UF894,1000_QL80_.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Dc01y 3pin Dock",
-    type: "non-serialized",
-    brandName: "VDENMENV",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Charger Specifications",
-    images: [
-      {
-        url: "https://otc.lk/wp-content/uploads/2024/04/Vdenmenv-DC01Y-3pin-Dock-BY-OTC.LK-IN-SRILANKA-1.png",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Airpods Pro 2nd Generation",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://staticcontent.eways.ir/upload/ProductPictures/991386ex6681827183.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A9 Pro Touch Screen Airpods_pro – Anc Wireless Earbuds With Bluetooth 5.0",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://static-01.daraz.pk/p/b8106345399b9a44bc61ad558c49337a.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "G28 Earphones Comfortable",
-    type: "non-serialized",
-    brandName: "CELEBRATE",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://img.tvcmall.com/dynamic/uploads/details/740x740_681500376A-7.webp",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "G25 3.5mm Earphone",
-    type: "non-serialized",
-    brandName: "CELEBRATE",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://otc.lk/wp-content/uploads/2024/04/Celebrat-G25-3.5mm-Earphone-by-otc.lk-in-srilanka-.png",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "D11 Wired Earphone 3.5mm",
-    type: "non-serialized",
-    brandName: "CELEBRATE",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://fonehouse.lk/wp-content/uploads/2024/08/D11-packaging-image-300x300-1.webp",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "G19 Wired Headphones 3.5mm Stereo Sound In-ear Earphone",
-    type: "non-serialized",
-    brandName: "CELEBRATE",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://transasia.lk/img/product/11600/11600-002_720X720.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Fly-1 Effortless Joyful Sound 3.5mm",
-    type: "non-serialized",
-    brandName: "CELEBRATE",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://b2b.miami/content/images/37/naushniki-celebrat-fly-1-black-54892654355215.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A330 Powerbank 10000 Mah",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Power Banks",
-    attributeSetName: null,
-    images: [
-      {
-        url: "https://gadgetasia.lk/wp-content/uploads/2024/09/sri-lanka-gadget-asia-lk-aspor-a330-10000mah-powerbank-best-price.png",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A316 20000mah 22.5w Portable Power Bank",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Power Banks",
-    attributeSetName: null,
-    images: [
-      {
-        url: "https://www.simplytek.lk/cdn/shop/files/Aspor-A316-20000mAh-Portable-Power-Bank-simplytek-lk-Sri-Lanka_2.jpg?v=1698992724&width=610",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Tune 110 – Original Wired Handsfree",
-    type: "non-serialized",
-    brandName: "JBL",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://shopperstar.lk/wp-content/uploads/2022/08/JBL-TUNE-110-2.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Protective Case",
-    type: "non-serialized",
-    brandName: "UNIQUE DESIGN",
-    categoryName: "Phone Cases",
-    attributeSetName: "Phone Case Specifications",
-    images: [
-      {
-        url: "https://5.imimg.com/data5/SELLER/Default/2023/5/310429371/WZ/JZ/DM/189434614/black-airpods-pro-protective-case-500x500.jpeg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Display",
-    type: "non-serialized",
-    brandName: "GX",
-    categoryName: "Display Screens",
-    attributeSetName: "Display Screen Specs",
-    images: [
-      {
-        url: "https://s.alicdn.com/@sc04/kf/Ha06ca052a7534b8c9051fc2cb07189e0G.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Battery",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Batteries",
-    attributeSetName: "Battery Specs",
-    images: [
-      {
-        url: "https://www.phonepartworld.com/image/cache/data/Products/iPhone%206/11-Apple-iPhone-6-Battery-Replacement-1-700x600.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Backglass",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Glass & Lens",
-    attributeSetName: "Back Glass Specs",
-    images: [
-      {
-        url: "https://www.mbitechparts.ie/wp-content/uploads/2018/01/iPhone-X-10-Adhesive-Inc-Gold-Replacement-Back-Rear-Glass-Battery-Cover-White.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Oca Touch Glass",
-    type: "non-serialized",
-    brandName: "G+OCA PRO",
-    categoryName: "Glass & Lens",
-    attributeSetName: "Display Screen Specs",
-    images: [
-      {
-        url: "https://s.alicdn.com/@sc04/kf/Hb94aef3c15b44729ba4c87047585aac8H.jpg_720x720q50.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A616 True Wireless Stereo Bluetooth Earbuds",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Headphones & Earbuds",
-    attributeSetName: "Earphones / Headphones",
-    images: [
-      {
-        url: "https://lafafa.pk/wp-content/uploads/2022/04/10-1.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A827 Advanced Type-c / V8 Fast Charger Iq 2.4a",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Charger Specifications",
-    images: [
-      {
-        url: "https://img.drz.lazcdn.com/static/lk/p/78a1bc6f574db83a3fcd4caa4aeb37e5.jpg_720x720q80.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Silicone Case",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Phone Cases",
-    attributeSetName: "Apple Case Specs",
-    images: [
-      {
-        url: "https://i0.wp.com/cyberdeals.lk/wp-content/uploads/2024/09/Dark-Blue-1.jpg?fit=600%2C600&ssl=1",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Magsafe Case",
-    type: "non-serialized",
-    brandName: "Spigen",
-    categoryName: "Phone Cases",
-    attributeSetName: "Apple Case Specs",
-    images: [
-      {
-        url: "https://nofake.lk/wp-content/uploads/2023/05/IMG_3758-2.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Crystal Case",
-    type: "non-serialized",
-    brandName: "Crystal Case",
-    categoryName: "Phone Cases",
-    attributeSetName: "Apple Case Specs",
-    images: [
-      {
-        url: "https://thecasefactory.in/cdn/shop/files/TransparentCase-Copy.jpg?v=1737532101&width=1024",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Airpod Pro /02 Leather Case",
-    type: "non-serialized",
-    brandName: "UNIQUE DESIGN",
-    categoryName: "Phone Cases",
-    attributeSetName: "Phone Case Specifications",
-    images: [
-      {
-        url: "https://static.tudo.lk/uploads/2023/01/airpod-pro-pouch-synthetic-leather-16731732280215727.webp",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Magsafe Battery Pack",
-    type: "non-serialized",
-    brandName: "Redington",
-    categoryName: "Power Banks",
-    attributeSetName: null,
-    images: [
-      {
-        url: "https://bizweb.dktcdn.net/thumb/grande/100/368/432/products/sac-du-phong-magsafe-battery-3.jpg?v=1720768361793",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Xmart Camera Lens",
-    type: "non-serialized",
-    brandName: "Xmart",
-    categoryName: "Screen Protectors",
-    attributeSetName: "Apple Case Specs",
-    images: [
-      {
-        url: "https://5.imimg.com/data5/SELLER/Default/2024/7/438097683/BL/KK/BB/86943673/xmart-mobile-camera-ring.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Air Pods Pro Ati-lost Cace",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Phone Cases",
-    attributeSetName: "Phone Case Specifications",
-    images: [
-      {
-        url: "https://i5.walmartimages.com/asr/8cb4dcec-49f8-4bad-a6b5-a894d3e1d5e5.5ccc7ea859c295bfeca29352310de45d.jpeg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Air Pods Pro 2 Ati-lost Cace",
-    type: "non-serialized",
-    brandName: "ATB KING KONG",
-    categoryName: "Phone Cases",
-    attributeSetName: "Phone Case Specifications",
-    images: [
-      {
-        url: "https://i5.walmartimages.com/asr/8cb4dcec-49f8-4bad-a6b5-a894d3e1d5e5.5ccc7ea859c295bfeca29352310de45d.jpeg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A325 Wireless Power Bank 5000mah",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Power Banks",
-    attributeSetName: null,
-    images: [
-      {
-        url: "https://baloon.lk/wp-content/uploads/2023/11/450x450-Web-Site-SIZE-1-1-300x300.png",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Usb-a To Micro (cb-24m)",
-    type: "non-serialized",
-    brandName: "CELEBRATE",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://www.data-media.gr/i/289122/CB-24M-2.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Usb-a To Lightning (cb-24l)",
-    type: "non-serialized",
-    brandName: "CELEBRATE",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://www.data-media.gr/i/289119/CB-24L-2.webp",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Usb-a To Tp-c (cb-24c)",
-    type: "non-serialized",
-    brandName: "CELEBRATE",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://www.data-media.gr/i/289124/CB-24C-2.webp",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Apple Iphone 8",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Smartphone Specifications",
-    images: [
-      {
-        url: "https://mobilecity-live.s3.ap-southeast-2.amazonaws.com/wp-content/uploads/2021/01/01011348/iPhone-8-black.jpeg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Apple Iphone 7",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Smartphone Specifications",
-    images: [
-      {
-        url: "",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Iphone Orgin",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Batteries",
-    attributeSetName: "Battery Specs",
-    images: [
-      {
-        url: "https://appleme.lk/wp-content/uploads/2023/03/6-battery.jpeg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Recci Rpb-n17 Burton 2.1a 20000 Mah Power Bank (black)",
-    type: "non-serialized",
-    brandName: "RECCI",
-    categoryName: "Power Banks",
-    attributeSetName: null,
-    images: [
-      {
-        url: "https://otc.lk/wp-content/uploads/2024/11/recci-2.webp",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A322 10000 Mah Power Bank",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Power Banks",
-    attributeSetName: null,
-    images: [
-      {
-        url: "https://img.drz.lazcdn.com/static/lk/p/dd14b23e602c351d59a7306a2af5c192.jpg_960x960q80.jpg_.webp",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A827 Advanced Lihgtning/ V8 Fast Charger Iq 2.4a",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Charger Specifications",
-    images: [
-      {
-        url: "https://static-01.daraz.lk/p/78a1bc6f574db83a3fcd4caa4aeb37e5.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Atb-king Kong Glass Clear",
-    type: "non-serialized",
-    brandName: "ATB KING KONG",
-    categoryName: "Screen Protectors",
-    attributeSetName: "Apple Case Specs",
-    images: [
-      {
-        url: "https://down-my.img.susercontent.com/file/my-11134207-7r98w-lzzb39uy04mh3c",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Ac-25 3.1a Fast Charge Micro Usb Data & Charging 1m",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Chargers & Cables",
-    attributeSetName: "Cable Specs",
-    images: [
-      {
-        url: "https://static-01.daraz.lk/p/84a0c68cd5859ea21678f34b7947d9b3.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "A371 10000mah Powerbank",
-    type: "non-serialized",
-    brandName: "ASPOR",
-    categoryName: "Power Banks",
-    attributeSetName: null,
-    images: [
-      {
-        url: "https://otc.lk/wp-content/uploads/2024/12/Aspor-A371-10000mAH-Power-Bank-by-otc.lk-in-srilanka-scaled.jpg",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  //======================================================================
-  // iPhones (Latest to Oldest)
-  //======================================================================
-  {
-    baseName: "iPhone 16 Pro",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [{ url: "https://i.imgur.com/p24x9aO.png" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 16 Pro Max",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [{ url: "https://i.imgur.com/p24x9aO.png" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 16",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [{ url: "https://i.imgur.com/jIUiLd2.png" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 16 Plus",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [{ url: "https://i.imgur.com/jIUiLd2.png" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 15 Pro",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-1inch-naturaltitanium?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1692846363993",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 15 Pro Max",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-7inch-whitetitanium?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1692846363459",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 15",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-finish-select-202309-6-1inch-pink?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1692923783938",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 15 Plus",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-finish-select-202309-6-7inch-green?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1692923778929",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 14 Pro",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-pro-finish-select-202209-6-1inch-deeppurple?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1663703891093",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 14",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-14-finish-select-202209-6-1inch-yellow?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1661023finish-select-202209-6-1inch-yellow",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone 13",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-13-finish-select-202207-6-1inch-green?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=16567128882finish-select-202207-6-1inch-green",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPhone SE (3rd generation)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smartphones",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-se-finish-select-202207-starlight?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1656712 finish-select-202207-starlight",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+// seed/masterlists/productTemplate.masterlist.js
 
-  //======================================================================
-  // iPads (Latest to Oldest)
-  //======================================================================
-  {
-    baseName: "iPad Pro 13-inch (M4)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Tablets & iPads",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-pro-13-m4-select-wifi-spaceblack-202405?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1713488291242",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPad Air 13-inch (M2)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Tablets & iPads",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-air-13-m2-select-wifi-purple-202405?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=171348827purple-202405",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPad (10th generation)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Tablets & iPads",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-10-9-finish-select-202212-blue?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1667610509373",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "iPad mini (6th generation)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Tablets & iPads",
-    attributeSetName: "Apple iPhone Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-mini-finish-select-gallery-202211-starlight?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1667595932822",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+const DEVICE_LIST = require("./device.masterlist")
+const BRANDS = require("./brand.masterlist")
+const COMPONENT_LIST = require("./component.masterlist")
+const MIGRATED_RAW_DATA = require("./migration.rawdata") // Assuming your data is in this file
+const CATEGORY_MASTER_LIST = require("./category.masterlist")
+const ATTRIBUTE_SET_MASTER_LIST = require("./attributeSet.masterlist")
+const ATTRIBUTES = require("./attribute.masterlist")
 
-  //======================================================================
-  // MacBooks (Latest to Oldest)
-  //======================================================================
-  {
-    baseName: "MacBook Air 15-inch (M3)",
-    type: "serialized",
+// 1. Build a map: serviceName → serviceGroupName
+const servicesNode = CATEGORY_MASTER_LIST.find((node) => node.name === "Services")
+const serviceMap = {}
+
+// for each subgroup under Services…
+servicesNode.children.forEach((group) => {
+  const groupName = group.name // e.g. "Device Repair Services"
+  ;(group.children || []).forEach((svc) => {
+    serviceMap[svc.name] = groupName
+  })
+})
+
+// 2. Our 120 detailed service list (as before)
+// 1. Hard-coded array of the 120 service names
+const SERVICE_NAMES = [
+  // Quick-Fix Micro-Repairs (20)
+  "Glass-Only Touch Repair",
+  "Frame Straightening & Dent Removal",
+  "Micro-Soldered Connector Cleaning",
+  "Speaker Dust & Debris Removal",
+  "Button Membrane Replacement",
+  "Camera Lens Glass Replacement",
+  "Flash Module Cell Repair",
+  "Vibration Motor Cleaning",
+  "SIM Tray Slot Cleaning",
+  "Micro-Port Reflow (Charging/Data Flex)",
+  "Earpiece Mesh Replacement",
+  "Proximity Sensor Cleaning",
+  "Ambient Light Sensor Cleaning",
+  "Lightning Port Dust Clear",
+  "Microphone Mesh Replacement",
+  "Mini-Flex Cable Re-seal",
+  "Nano-Coating Application",
+  "Housing Surface Polish",
+  "Speaker Grill Re-seal",
+  "Home Button Flex Re-seat",
+
+  // Mid-Level Hardware Swaps (20)
+  "Screen Assembly Replacement (LCD)",
+  "Screen Assembly Replacement (OLED)",
+  "Battery Pack Replacement",
+  "Back Glass Replacement",
+  "Rear Camera Module Swap",
+  "Front Camera Module Swap",
+  "Speaker Module Replacement",
+  "Microphone Module Replacement",
+  "Earpiece Module Replacement",
+  "Button (Power/Volume) Replacement",
+  "Charging Port Assembly Replacement",
+  "SIM Tray Replacement",
+  "Vibration Motor Replacement",
+  "Housing / Frame Assembly Swap",
+  "Proximity & Ambient Sensor Assembly",
+  "Flash / Torch Module Replacement",
+  "Wi-Fi Antenna Flex Replacement",
+  "Bluetooth Antenna Flex Replacement",
+  "GPS Antenna Flex Replacement",
+  "NFC Coil Replacement",
+
+  // Water & Corrosion Treatment (10)
+  "Water Damage Cleaning",
+  "Corrosion Neutralization Treatment",
+  "Ultrasonic Board Cleaning",
+  "Port-by-Port Reseal & Waterproofing",
+  "Nano-Coating Reapplication",
+  "Liquid-Damage Full Diagnostic",
+  "Face ID Water Damage Repair",
+  "Data Recovery from Liquid-Damaged Boards",
+  "Salt-Air Corrosion Mitigation",
+  "Post-Repair Waterproof Test",
+
+  // Software, Locks & Activation (20)
+  "iOS Update & Restore",
+  "Error-Specific Recovery (4013/4014/9)",
+  "Carrier Network SIM-Unlock",
+  "IMEI/MEID Repair & Re-Programming",
+  "Baseband Reflash & Recovery",
+  "Activation Lock / MDM Bypass",
+  "iTunes Error Repair Service",
+  "Jailbreak & Custom Firmware",
+  "Data Backup & Transfer",
+  "Complete Factory Reset & Diagnostics",
+  "App Performance Optimization",
+  "Security Patch Installation",
+  "Profile & Certificate Management",
+  "VPN / Enterprise Config Setup",
+  "iCloud Sync Troubleshooting",
+  "Mail / Contacts Restore",
+  "Screen Time & Restrictions Reset",
+  "Touch ID/Face ID Re-enroll Service",
+  "OTA Update Issue Fix",
+  "Firmware Downgrade Service",
+
+  // Board-Level / Microsoldering (30)
+  "Charging IC (U2/Tristar/Tigris) Repair",
+  "PMIC (Power Management IC) Repair",
+  "Audio IC Repair",
+  "Baseband IC Repair",
+  "CPU Reballing / Reflow",
+  "NAND Flash Repair / Upgrade",
+  "Touch Controller IC Repair",
+  "Backlight IC Filter Repair",
+  "Display Connector Trace Repair",
+  "Camera Connector Trace Repair",
+  "Battery Connector Repair",
+  "Wi-Fi / Bluetooth RF IC Repair",
+  "Cellular RF / Network IC Repair",
+  "TrueDepth / Face ID Module Board Rework",
+  "Dot Projector Flex Microsoldering",
+  "Mesh-Layer PCB Trace Repair",
+  "Capacitor & Resistor-Level Replacement",
+  "Backlight Circuit Microsoldering",
+  "Solder Mask Touch-Up",
+  "Board-to-Board Bridge Repair",
+  "Micro-BGA IC Replacement",
+  "Logic Board Short-Circuit Trace Repair",
+  "Power-Consumption IC Calibration",
+  "Ultrasonic BGA Ball Replacement",
+  "EMI/RFI Filter IC Replacement",
+  "Microcontroller IC Swap",
+  "PCB Layer-Stack Re-lamination",
+  "Flex Cable End-Reflow",
+  "NFC / RFID Coil Microsoldering",
+  "Pressure-Sensor IC Repair",
+
+  // Premium Diagnostics & Specialty (20)
+  "Standard Diagnostic Service",
+  "Thermal Imaging Diagnostics",
+  "Power-Consumption Profiling",
+  "Short-Circuit Tracing Service",
+  "Motherboard Multilayer Fault Analysis",
+  "Boot Loop & Stuck-On-Logo Recovery",
+  "Battery Health Calibration & Certification",
+  "Pre-Repair Benchmarking Report",
+  "Post-Repair Performance Report",
+  "Overheating Issue Diagnosis",
+  "Signal-Strength Calibration",
+  "GPS-Error Diagnostics",
+  "Liquid-Ingress Depth Analysis",
+  "Salt-Air Corrosion Report",
+  "Data Recovery from Dead Boards",
+  "Firmware Integrity Verification",
+  "Acoustic Diagnostics (Speaker/Mic)",
+  "Camera Sensor Alignment Check",
+  "EMI/RFI Noise Profiling",
+  "Insurance Assessment & Quotation",
+]
+
+// 3. Grab all Apple models
+const allIphoneNames = DEVICE_LIST.filter((d) => d.brandName === "Apple").map((d) => d.name)
+
+// 4. Generator helper
+const generate = (models, serviceName, categoryName) =>
+  models.map((model) => ({
+    baseName: `${model} ${serviceName}`.toUpperCase(),
+    type: "service",
     brandName: "Apple",
-    categoryName: "Laptops & MacBooks",
-    attributeSetName: "Apple MacBook Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mba15-midnight-select-202402?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1707099711652",
-      },
-    ],
+    categoryName,
+    deviceName: model,
     assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
+    revenueAccountName: "Service Revenue",
     cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "MacBook Air 13-inch (M3)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Laptops & MacBooks",
-    attributeSetName: "Apple MacBook Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mba13-starlight-select-202402?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1707099711652",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "MacBook Pro 14-inch (M3)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Laptops & MacBooks",
-    attributeSetName: "Apple MacBook Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-m3-max-pro-spaceblack-select-202310?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1697230830118",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "MacBook Pro 16-inch (M3)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Laptops & MacBooks",
-    attributeSetName: "Apple MacBook Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp16-m3-max-pro-silver-select-202310?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1697230830118",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+  }))
 
-  //======================================================================
-  // Apple Watch (Latest to Oldest)
-  //======================================================================
-  {
-    baseName: "Apple Watch Ultra 2",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smart Watches",
-    attributeSetName: "Apple Watch Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/watch-ultra2-digital-crown-202309_GEO_US?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=16941242502",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Apple Watch Series 9",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smart Watches",
-    attributeSetName: "Apple Watch Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/watch-s9-digital-crown-202309_GEO_US?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=1694124376785",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Apple Watch SE",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Smart Watches",
-    attributeSetName: "Apple Watch Specs",
-    images: [
-      {
-        url: "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/watch-se-digital-crown-202309?wid=2560&hei=1440&fmt=p-jpg&qlt=80&.v=16941242502",
-      },
-    ],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+// 5. Build all templates, using serviceMap lookup
+const generateServiceTemplates = () => {
+  return SERVICE_NAMES.flatMap((svc) => {
+    const category = serviceMap[svc] || "Device Repair Services"
+    return generate(allIphoneNames, svc, category)
+  })
+}
 
-  //======================================================================
-  // Samsung Phones
-  //======================================================================
-  {
-    baseName: "Samsung Galaxy S24 Ultra",
-    type: "serialized",
-    brandName: "Samsung",
-    categoryName: "Smartphones",
-    attributeSetName: "Smartphone Specifications",
-    images: [{ url: "https://i.imgur.com/8MrZ9pD.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Samsung Galaxy Z Fold 5",
-    type: "serialized",
-    brandName: "Samsung",
-    categoryName: "Smartphones",
-    attributeSetName: "Smartphone Specifications",
-    images: [{ url: "https://i.imgur.com/6Xz1Y2b.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Samsung Galaxy A55",
-    type: "serialized",
-    brandName: "Samsung",
-    categoryName: "Smartphones",
-    attributeSetName: "Smartphone Specifications",
-    images: [{ url: "https://i.imgur.com/gTq42K0.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+// Usage
+// const allServiceTemplates = generateServiceTemplates();
+// console.log(`Generated ${allServiceTemplates.length} service templates`);
 
-  //======================================================================
-  // Other Android Phones
-  //======================================================================
-  {
-    baseName: "Google Pixel 8 Pro",
-    type: "serialized",
-    brandName: "Google",
-    categoryName: "Smartphones",
-    attributeSetName: "Smartphone Specifications",
-    images: [{ url: "https://i.imgur.com/2Y5lG1f.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Xiaomi 14 Ultra",
-    type: "serialized",
-    brandName: "Xiaomi",
-    categoryName: "Smartphones",
-    attributeSetName: "Smartphone Specifications",
-    images: [{ url: "https://i.imgur.com/5D6fBq4.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+// ======================================================================
+// MIGRATION ENGINE
+// ======================================================================
 
-  //======================================================================
-  // Cases & Covers (Extensive List)
-  //======================================================================
-  ...["15 Pro Max", "15 Pro", "15 Plus", "15", "14 Pro", "14"].map((model) => ({
-    baseName: `Spigen Liquid Air Case for iPhone ${model}`,
-    type: "non-serialized",
-    brandName: "Spigen",
-    categoryName: "Cases & Covers",
-    attributeSetName: "Phone Case Attributes",
-    images: [{ url: "https://i.imgur.com/bK6g3pW.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-
-  ...["S24 Ultra", "S24", "S23 Ultra"].map((model) => ({
-    baseName: `Nillkin CamShield Pro Case for Samsung ${model}`,
-    type: "non-serialized",
-    brandName: "Nillkin",
-    categoryName: "Cases & Covers",
-    attributeSetName: "Phone Case Attributes",
-    images: [{ url: "https://i.imgur.com/mZ4R2j5.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-
-  ...["15 Pro", "15", "14", "13"].map((model) => ({
-    baseName: `Apple Silicone Case with MagSafe for iPhone ${model}`,
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Cases & Covers",
-    attributeSetName: "Phone Case Attributes",
-    images: [{ url: "https://i.imgur.com/J3Gf1Gv.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  {
-    baseName: "Generic Clear TPU Case",
-    type: "non-serialized",
-    brandName: "Unbranded",
-    categoryName: "Cases & Covers",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/h5r8wFf.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-
-  //======================================================================
-  // Screen Protectors
-  //======================================================================
-
-  ...["S24 Ultra", "S24", "S23 Ultra", "A55"].map((model) => ({
-    baseName: `Privacy Tempered Glass for Samsung ${model}`,
-    type: "non-serialized",
-    brandName: "Unbranded",
-    categoryName: "Screen Protectors",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/J4p7F3g.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-
-  //======================================================================
-  // Chargers & Adapters
-  //======================================================================
-  {
-    baseName: "Apple 20W USB-C Power Adapter",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Chargers & Adapters",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/s6n5Y6T.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Anker 30W Nano 3 Charger (GaN)",
-    type: "non-serialized",
-    brandName: "Anker",
-    categoryName: "Chargers & Adapters",
-    attributeSetName: "Phone Case Attributes",
-    images: [{ url: "https://i.imgur.com/lJ4d9Yd.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Baseus 65W GaN3 Pro Desktop Charger",
-    type: "non-serialized",
-    brandName: "Baseus",
-    categoryName: "Chargers & Adapters",
-    attributeSetName: "Phone Case Attributes",
-    images: [{ url: "https://i.imgur.com/GfJj2m3.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Ugreen 100W Nexode GaN Charger",
-    type: "non-serialized",
-    brandName: "Ugreen",
-    categoryName: "Chargers & Adapters",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/v8t4R3p.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-
-  //======================================================================
-  // Cables & Converters
-  //======================================================================
-  {
-    baseName: "Apple USB-C to Lightning Cable",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Cables & Converters",
-    attributeSetName: "Cable Specifications",
-    images: [{ url: "https://i.imgur.com/o7s2q2Y.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Apple USB-C Charge Cable",
-    type: "non-serialized",
-    brandName: "Apple",
-    categoryName: "Cables & Converters",
-    attributeSetName: "Cable Specifications",
-    images: [{ url: "https://i.imgur.com/O6hJ3b5.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Anker PowerLine III USB-C to USB-C",
-    type: "non-serialized",
-    brandName: "Anker",
-    categoryName: "Cables & Converters",
-    attributeSetName: "Cable Specifications",
-    images: [{ url: "https://i.imgur.com/r8t2Y3z.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Baseus 3-in-1 Charging Cable",
-    type: "non-serialized",
-    brandName: "Baseus",
-    categoryName: "Cables & Converters",
-    attributeSetName: "Cable Specifications",
-    images: [{ url: "https://i.imgur.com/yB2f0G2.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Ugreen HDMI to VGA Converter",
-    type: "non-serialized",
-    brandName: "Ugreen",
-    categoryName: "Cables & Converters",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/d9jY8hV.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-
-  //======================================================================
-  // Power Banks
-  //======================================================================
-  {
-    baseName: "Anker PowerCore 10000mAh",
-    type: "non-serialized",
-    brandName: "Anker",
-    categoryName: "Power Banks",
-    attributeSetName: "Power Bank Specifications",
-    images: [{ url: "https://i.imgur.com/L2q8sJ7.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Anker 737 Power Bank (PowerCore 24K)",
-    type: "non-serialized",
-    brandName: "Anker",
-    categoryName: "Power Banks",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/eG1f0W8.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Baseus 20000mAh 65W Power Bank",
-    type: "non-serialized",
-    brandName: "Baseus",
-    categoryName: "Power Banks",
-    attributeSetName: "Power Bank Specifications",
-    images: [{ url: "https://i.imgur.com/T5r7m2X.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Remax 50000mAh Power Bank",
-    type: "non-serialized",
-    brandName: "Remax",
-    categoryName: "Power Banks",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/3N8p8Wk.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-
-  //======================================================================
-  // Audio
-  //======================================================================
-  {
-    baseName: "Apple AirPods Pro (2nd generation)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Earphones",
-    attributeSetName: "Audio Accessory Specs", // ✅ New set
-    images: [{ url: "https://i.imgur.com/9n9L9kL.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Apple AirPods (3rd generation)",
-    type: "serialized",
-    brandName: "Apple",
-    categoryName: "Earphones",
-    attributeSetName: "Audio Accessory Specs", // ✅ Same set
-    images: [{ url: "https://i.imgur.com/bX6f6l7.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "JBL Go 3 Portable Speaker",
-    type: "serialized",
-    brandName: "JBL",
-    categoryName: "Bluetooth Speakers",
-    attributeSetName: "Speaker Specifications", // ✅ Corrected
-    images: [{ url: "https://i.imgur.com/XqY8X8z.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Sony WH-1000XM5 Headphones",
-    type: "serialized",
-    brandName: "Sony",
-    categoryName: "Headphones & Headsets",
-    attributeSetName: "Audio Accessory Specs", // ✅ Same set as AirPods
-    images: [{ url: "https://i.imgur.com/R3r3p8Z.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-
-  //======================================================================
-  // Storage
-  //======================================================================
-  {
-    baseName: "SanDisk Ultra microSD Card",
-    type: "non-serialized",
-    brandName: "SanDisk",
-    categoryName: "Memory Cards & Storage",
-    attributeSetName: "Storage",
-    images: [{ url: "https://i.imgur.com/sT5w1d3.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Kingston DataTraveler USB 3.2 Flash Drive",
-    type: "non-serialized",
-    brandName: "Kingston",
-    categoryName: "Memory Cards & Storage",
-    attributeSetName: "Storage",
-    images: [{ url: "https://i.imgur.com/j1v2X4D.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-
-  //======================================================================
-  // EXPANDED Accessories Section
-  //======================================================================
-  // --- Cases & Covers ---
-  ...["15 Pro Max", "15 Pro", "15 Plus", "15", "14 Pro", "14", "13", "SE"].map((model) => ({
-    baseName: `Spigen Liquid Air Case for iPhone ${model}`,
-    type: "non-serialized",
-    brandName: "Spigen",
-    categoryName: "Cases & Covers",
-    attributeSetName: "Phone Case Attributes",
-    images: [{ url: "https://i.imgur.com/bK6g3pW.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  ...["S24 Ultra", "S24", "S23 Ultra", "A55", "A35"].map((model) => ({
-    baseName: `Nillkin CamShield Pro Case for Samsung ${model}`,
-    type: "non-serialized",
-    brandName: "Nillkin",
-    categoryName: "Cases & Covers",
-    attributeSetName: "Phone Case Attributes",
-    images: [{ url: "https://i.imgur.com/mZ4R2j5.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  {
-    baseName: "Otterbox Defender Series Case for iPhone 15 Pro",
-    type: "non-serialized",
-    brandName: "Otterbox",
-    categoryName: "Cases & Covers",
-    attributeSetName: "Phone Case Attributes",
-    images: [{ url: "https://i.imgur.com/N8gZ6hF.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-
-  // --- Screen Protectors ---
-  ...["15 Pro Max", "15 Pro", "15 Plus", "15", "14 Pro", "14", "13", "SE", "12"].map((model) => ({
-    baseName: `9H Tempered Glass for iPhone ${model}`,
-    type: "non-serialized",
-    brandName: "Unbranded",
-    categoryName: "Screen Protectors",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/z4bY3hX.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  ...["S24 Ultra", "S24", "S23 Ultra", "A55", "A35"].map((model) => ({
-    baseName: `Matte Finish Tempered Glass for Samsung ${model}`,
-    type: "non-serialized",
-    brandName: "Unbranded",
-    categoryName: "Screen Protectors",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/S8h7J2K.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  {
-    baseName: "Camera Lens Protector for iPhone 15 Pro/Pro Max",
-    type: "non-serialized",
-    brandName: "Unbranded",
-    categoryName: "Screen Protectors",
-    attributeSetName: null,
-    images: [{ url: "https://i.imgur.com/2s4xYgM.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-
-  //======================================================================
-  // DEFINITIVE Repair Parts Section
-  //======================================================================
-  ...["15 Pro Max", "15 Pro", "14 Pro Max", "14 Pro", "13 Pro Max", "13 Pro", "12", "11"].map(
-    (model) => ({
-      baseName: `iPhone ${model} Display Assembly (OEM)`,
-      type: "serialized",
-      brandName: "Apple",
-      categoryName: "Displays",
-      attributeSetName: "Display Attributes",
-      images: [{ url: "https://i.imgur.com/o1C3g9w.jpeg" }],
-      assetAccountName: "Inventory Asset",
-      revenueAccountName: "Sales Revenue",
-      cogsAccountName: "Cost of Goods Sold",
+const runMigrations = (rawData, attributeList) => {
+  const templates = new Map()
+  const attributeKeywords = new Map()
+  attributeList.forEach((attr) => {
+    attr.values.forEach((val) => {
+      attributeKeywords.set(val.toUpperCase(), attr.key)
     })
-  ),
-  ...["S24 Ultra", "S23 Ultra", "S22 Ultra"].map((model) => ({
-    baseName: `Samsung ${model} Display Assembly (AMOLED)`,
+  })
+
+  rawData.forEach((item) => {
+    let baseName = item.itemName.toUpperCase()
+    const attributes = []
+
+    // Extract attributes
+    attributeKeywords.forEach((key, value) => {
+      if (baseName.includes(value)) {
+        attributes.push({ key, value: attributeList.find((a) => a.key === key).values.find((v) => v.toUpperCase() === value) })
+        baseName = baseName.replace(value, "").trim()
+      }
+    })
+
+    // Clean up baseName
+    baseName = baseName.replace(/-/g, " ").replace(/ +/g, " ").trim()
+
+    if (!templates.has(baseName)) {
+      templates.set(baseName, {
+        baseName: baseName,
+        type: item.serialized ? "serialized" : "non-serialized",
+        brandName: BRANDS.some((b) => b.name.toUpperCase() === item.brand.toUpperCase()) ? item.brand.toUpperCase() : "UNBRANDED",
+        categoryName: item.category === "Spare Part" ? "Spare Parts" : "Accessories",
+        attributeSetName: "TBD", // Placeholder
+        variants: [],
+      })
+    }
+
+    templates.get(baseName).variants.push({
+      originalItemName: item.itemName,
+      barcode: item.barcode,
+      itemImage: item.itemImage,
+      attributes: attributes,
+    })
+  })
+
+  return Array.from(templates.values())
+}
+
+const runMigration = () => {
+  const templates = new Map()
+  const attributeKeywords = new Map()
+  ATTRIBUTES.forEach((attr) => {
+    attr.values.forEach((val) => attributeKeywords.set(val.toUpperCase(), attr.key))
+  })
+
+  const upperCaseBrands = BRANDS.map((b) => b.name.toUpperCase())
+
+  MIGRATED_RAW_DATA.forEach((item) => {
+    let baseName = item.itemName.toUpperCase()
+    const attributes = []
+
+    attributeKeywords.forEach((key, value) => {
+      if (baseName.includes(value)) {
+        const originalValue = ATTRIBUTES.find((a) => a.key === key).values.find((v) => v.toUpperCase() === value)
+        attributes.push({ key, value: originalValue })
+        baseName = baseName.replace(value, "")
+      }
+    })
+
+    baseName = baseName.replace(/-/g, " ").replace(/ +/g, " ").trim()
+
+    if (!templates.has(baseName)) {
+      const allVariantKeys = new Set(attributes.map((a) => a.key))
+      templates.set(baseName, {
+        baseName: baseName,
+        type: item.serialized ? "serialized" : "non-serialized",
+        brandName: upperCaseBrands.includes(item.brand.toUpperCase()) ? item.brand.toUpperCase() : "UNBRANDED",
+        categoryName: item.category === "Spare Part" ? "Spare Parts" : "Accessories",
+        attributeSetName: assignAttributeSet(Array.from(allVariantKeys)),
+        variants: [],
+        _allVariantKeys: allVariantKeys,
+      })
+    }
+
+    const template = templates.get(baseName)
+    attributes.forEach((attr) => template._allVariantKeys.add(attr.key))
+    template.variants.push({
+      originalItemName: item.itemName,
+      barcode: item.barcode,
+      itemImage: item.itemImage,
+      attributes: attributes,
+    })
+  })
+
+  // Final pass to update attribute sets with all keys
+  Array.from(templates.values()).forEach((template) => {
+    template.attributeSetName = assignAttributeSet(Array.from(template._allVariantKeys))
+    delete template._allVariantKeys
+  })
+
+  return Array.from(templates.values())
+}
+
+// ======================================================================
+// DYNAMIC GENERATION ENGINES
+// ======================================================================
+
+// ======================================================================
+// ATTRIBUTE SET LINKING ENGINE
+// ======================================================================
+
+/**
+ * Finds the best-fitting AttributeSet for a given list of attribute keys.
+ * @param {string[]} extractedKeys - An array of attribute keys found for a template.
+ * @returns {string} The name of the best-matching AttributeSet.
+ */
+const assignAttributeSet = (keys, defaultSet = "General Spare Part Specs") => {
+  let bestMatch = { name: defaultSet, score: 0 }
+  if (!keys || keys.length === 0) return bestMatch.name
+
+  ATTRIBUTE_SET_MASTER_LIST.forEach((set) => {
+    const matchCount = set.attributeKeys.filter((key) => keys.includes(key)).length
+    const completeness = (matchCount / keys.length) * 100
+    if (completeness > bestMatch.score) {
+      bestMatch = { name: set.name, score: completeness }
+    }
+  })
+  return bestMatch.name
+}
+
+const generateDeviceTemplates = () =>
+  DEVICE_LIST.map((device) => ({
+    baseName: device.name.toUpperCase(),
     type: "serialized",
-    brandName: "Samsung",
-    categoryName: "Displays",
-    attributeSetName: "Display Attributes",
-    images: [{ url: "https://i.imgur.com/7gK8L4b.jpeg" }],
+    brandName: device.brandName.toUpperCase(),
+    categoryName: device.categoryName,
+    attributeSetName: assignAttributeSet(["model", "color", "storage", "ram"], "Smartphone Specifications"),
+    deviceName: device.name,
     assetAccountName: "Inventory Asset",
     revenueAccountName: "Sales Revenue",
     cogsAccountName: "Cost of Goods Sold",
-  })),
+  }))
 
-  ...["15 Pro", "14 Pro", "13", "12", "11", "XS", "X"].map((model) => ({
-    baseName: `iPhone ${model} Battery`,
-    type: "non-serialized",
-    brandName: "Unbranded",
-    categoryName: "Batteries",
-    attributeSetName: "Battery Specs",
-    images: [{ url: "https://i.imgur.com/C3b1b6B.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  ...["15 Pro", "14", "13", "12"].map((model) => ({
-    baseName: `iPhone ${model} Charging Port Flex Cable`,
-    type: "non-serialized",
-    brandName: "Unbranded",
-    categoryName: "Flex Cables",
-    attributeSetName: "Flex Cable Attributes",
-    images: [{ url: "https://i.imgur.com/N2s1f2y.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  ...["15 Pro Max", "15 Pro", "14 Pro Max", "14 Pro"].map((model) => ({
-    baseName: `iPhone ${model} Back Glass with Housing`,
-    type: "non-serialized",
-    brandName: "Unbranded",
-    categoryName: "Housing & Chassis",
-    attributeSetName: "Housing Attributes",
-    images: [{ url: "https://i.imgur.com/D9fV6j1.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  {
-    baseName: `iPhone Face ID / Proximity Sensor Flex`,
-    type: "non-serialized",
-    brandName: "Unbranded",
-    categoryName: "Flex Cables",
-    attributeSetName: "Flex Cable Attributes",
-    images: [{ url: "https://i.imgur.com/b9J8K5A.jpeg" }],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Sales Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+const generateComponentTemplates = () =>
+  COMPONENT_LIST.flatMap((component) => {
+    if (component.brandAgnostic) {
+      return component.brands.map((brandName) => ({
+        baseName: `${brandName} ${component.name}`.toUpperCase(),
+        type: component.type,
+        brandName: brandName.toUpperCase(),
+        categoryName: component.categoryName,
+        attributeSetName: component.attributeSetName,
+        deviceName: null,
+        assetAccountName: "Inventory Asset",
+        revenueAccountName: "Sales Revenue",
+        cogsAccountName: "Cost of Goods Sold",
+      }))
+    } else {
+      return DEVICE_LIST.map((device) => ({
+        baseName: `${component.name} for ${device.name}`.toUpperCase(),
+        type: component.type,
+        brandName: "UNBRANDED",
+        categoryName: component.categoryName,
+        attributeSetName: component.attributeSetName,
+        deviceName: device.name,
+        assetAccountName: "Inventory Asset",
+        revenueAccountName: "Sales Revenue",
+        cogsAccountName: "Cost of Goods Sold",
+      }))
+    }
+  })
 
-  //======================================================================
-  // DEFINITIVE Services Section
-  //======================================================================
-  // --- Diagnostics ---
-  {
-    baseName: "Standard Diagnostic Service",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Standard Diagnostic Service",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Advanced Liquid Damage Assessment",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Liquid Damage Assessment",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+const generateServiceTemplatesa = () => {
+  const allIphoneNames = DEVICE_LIST.filter((d) => d.brandName === "Apple").map((d) => d.name)
+  const batteryModels = ["iPhone 14 Pro", "iPhone 13", "iPhone 12", "iPhone 11"]
+  const generate = (models, service, category) =>
+    models.map((model) => ({
+      baseName: `${model} ${service}`.toUpperCase(),
+      type: "service",
+      brandName: "UNBRANDED",
+      categoryName: category,
+      deviceName: model,
+      assetAccountName: "Inventory Asset",
+      revenueAccountName: "Service Revenue",
+      cogsAccountName: "Cost of Goods Sold",
+    }))
 
-  // --- Common Hardware Repairs ---
-  ...["15 Pro", "15", "14 Pro", "14", "13", "12", "11"].map((model) => ({
-    baseName: `iPhone ${model} Screen Replacement (Original Quality)`,
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Screen Replacement",
-    attributeSetName: "Service Attributes",
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  ...["S23 Ultra", "S22", "A54"].map((model) => ({
-    baseName: `Samsung ${model} Screen Replacement`,
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Screen Replacement",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  ...["14 Pro", "13", "12", "11", "XS", "X"].map((model) => ({
-    baseName: `iPhone ${model} Battery Replacement`,
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Battery Replacement",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  ...["14 Pro", "13", "12"].map((model) => ({
-    baseName: `iPhone ${model} Charging Port Replacement`,
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Charging Port Replacement",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  ...["14 Pro", "13"].map((model) => ({
-    baseName: `iPhone ${model} Back Glass Replacement`,
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Back Glass Repair",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  })),
-  {
-    baseName: "Speaker / Earpiece Cleaning",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Speaker/Mic Repair",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+  const screenServices = generate(allIphoneNames, "Screen Replacement", "Screen Replacement")
+  const batteryServices = generate(batteryModels, "Battery Replacement", "Battery Replacement")
 
-  // --- Advanced / Motherboard Repairs ---
-  {
-    baseName: "No Power - Short Circuit Diagnostic & Repair",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Laptop Repair",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Charging IC Replacement",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Laptop Repair",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Audio IC Replacement",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Laptop Repair",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Liquid Damage Ultrasonic Cleaning",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Ultrasonic Cleaning",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "MacBook Logic Board Repair (Level 3)",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Laptop Repair",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
+  return [...screenServices, ...batteryServices]
+}
 
-  // --- Software Services ---
-  {
-    baseName: "iOS Update & Backup Service",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Software Installation",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Data Transfer (Phone to Phone)",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Software Installation",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-  {
-    baseName: "Password / Lock Removal (Proof of Ownership Req.)",
-    type: "service",
-    brandName: "Unbranded",
-    categoryName: "Software Installation",
-    attributeSetName: null,
-    images: [],
-    assetAccountName: "Inventory Asset",
-    revenueAccountName: "Service Revenue",
-    cogsAccountName: "Cost of Goods Sold",
-  },
-];
+// ======================================================================
+// FINAL ASSEMBLY
+// ======================================================================
+// NOTE: I am using a placeholder for MIGRATED_RAW_DATA
+// In your project, you would replace this with the actual data.
+// ======================================================================
+// 4. FINAL ASSEMBLY
+// ======================================================================
+const MIGRATED_TEMPLATES = runMigration()
+const DEFAULT_DEVICES = generateDeviceTemplates()
+const DEFAULT_COMPONENTS = generateComponentTemplates()
+const DEFAULT_SERVICES = generateServiceTemplates()
 
-module.exports = PRODUCT_TEMPLATE_MASTER_LIST;
+const PRODUCT_TEMPLATE_MASTER_LIST = [...MIGRATED_TEMPLATES, ...DEFAULT_DEVICES, ...DEFAULT_COMPONENTS, ...DEFAULT_SERVICES]
+module.exports = PRODUCT_TEMPLATE_MASTER_LIST

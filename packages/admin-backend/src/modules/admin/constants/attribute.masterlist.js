@@ -41,22 +41,7 @@ const ATTRIBUTES = [
   {
     name: "Screen Size",
     key: "screen_size",
-    values: [
-      '4.7"',
-      '5.4"',
-      '5.8"',
-      '6.1"',
-      '6.5"',
-      '6.7"',
-      '8.3"',
-      '10.2"',
-      '10.9"',
-      '11"',
-      '12.9"',
-      '13"',
-      '14"',
-      '16"',
-    ],
+    values: ['4.7"', '5.4"', '5.8"', '6.1"', '6.5"', '6.7"', '8.3"', '10.2"', '10.9"', '11"', '12.9"', '13"', '14"', '16"'],
   },
   {
     name: "Processor",
@@ -169,16 +154,7 @@ const ATTRIBUTES = [
   {
     name: "Service Duration",
     key: "service_duration",
-    values: [
-      "15 minutes",
-      "30 minutes",
-      "45 minutes",
-      "1 hour",
-      "1.5 hours",
-      "2 hours",
-      "Half Day",
-      "Full Day",
-    ],
+    values: ["15 minutes", "30 minutes", "45 minutes", "1 hour", "1.5 hours", "2 hours", "Half Day", "Full Day"],
   },
   {
     name: "Model",
@@ -223,10 +199,20 @@ const ATTRIBUTES = [
     ],
   },
   {
-    name: "Quality/Type",
+    name: "Quality Type",
     key: "quality_type",
-    values: ["Original", "Copy", "Clone", "Redington", "GX", "OCA", "AAA", "Cell"],
+    values: [
+      "Original", // ✅ Genuine OEM part from manufacturer
+      "OEM Pulled", // ✅ Original pulled from a working device
+      "Refurbished", // ✅ Original part repaired or reconditioned
+      "AAA", // ✅ High-quality aftermarket (premium copy)
+      "AA", // ✅ Mid-range quality aftermarket
+      "A", // ✅ Basic quality aftermarket (cheap copy)
+      "Copy", // ✅ Generic/low-grade replacement
+      "Clone", // ✅ Imitation; may not match original specs
+    ],
   },
+
   {
     name: "Length",
     key: "length",
@@ -265,21 +251,7 @@ const ATTRIBUTES = [
   {
     name: "Power Rating",
     key: "power_rating",
-    values: [
-      "5W",
-      "10W",
-      "15W",
-      "18W",
-      "20W",
-      "30W",
-      "45W",
-      "60W",
-      "67W",
-      "85W",
-      "96W",
-      "100W",
-      "140W",
-    ],
+    values: ["5W", "10W", "15W", "18W", "20W", "30W", "45W", "60W", "67W", "85W", "96W", "100W", "140W"],
   },
   {
     name: "Driver Size",
@@ -299,18 +271,7 @@ const ATTRIBUTES = [
   {
     name: "Speed Class",
     key: "speed_class",
-    values: [
-      "Class 2",
-      "Class 4",
-      "Class 6",
-      "Class 10",
-      "UHS-I",
-      "UHS-II",
-      "UHS-III",
-      "V30",
-      "V60",
-      "V90",
-    ],
+    values: ["Class 2", "Class 4", "Class 6", "Class 10", "UHS-I", "UHS-II", "UHS-III", "V30", "V60", "V90"],
   },
   {
     name: "Storage Type",
@@ -335,14 +296,8 @@ const ATTRIBUTES = [
   {
     name: "Warranty Plan",
     key: "warrantyPlan",
-    values: [
-      "Standard Warranty",
-      "Extended Warranty",
-      "AppleCare+",
-      "Samsung Care+",
-      "iShield Protection Plan",
-    ],
+    values: ["Standard Warranty", "Extended Warranty", "AppleCare+", "Samsung Care+", "iShield Protection Plan"],
   },
-];
+]
 
-module.exports = ATTRIBUTES;
+module.exports = ATTRIBUTES

@@ -14,6 +14,8 @@ const defaultNotificationTemplates = require("../modules/admin/constants/notific
 const customerService = require("./customer.service")
 const defaultLabelTemplates = require("../modules/admin/constants/labelTemplates.masterlist")
 const defaultTemplates = require("../modules/admin/constants/defaultTemplates")
+const warrantyPolicyList = require("../modules/admin/constants/warrantyPolicy.masterlist")
+const defaultQc = require("../modules/admin/constants/qc.masterlist")
 
 class TenantProvisioningService {
   /**
@@ -37,7 +39,7 @@ class TenantProvisioningService {
     // 4. Seed master data for inventory management.
     await this._seedMasterData(models, session)
 
-    await this._seedDevicesAndRepairs(models, session)
+    //await this._seedDevicesAndRepairs(models, session)
 
     // 5. Seed Product Variants, linking them to the newly created templates.
     // await this._seedProductVariants(models, session);
@@ -146,6 +148,7 @@ class TenantProvisioningService {
       PaymentMethod,
       NotificationTemplate,
       LabelTemplate,
+      Device,
     } = models
 
     // Seed simple lists
@@ -173,6 +176,8 @@ class TenantProvisioningService {
     //   }
     // }
 
+    await models.WarrantyPolicy.insertMany(warrantyPolicyList, { session })
+    await models.QcChecklistTemplate.insertMany(defaultQc, { session })
     await NotificationTemplate.insertMany(defaultNotificationTemplates, { session })
     await LabelTemplate.insertMany(defaultLabelTemplates, { session })
     await models.DocumentTemplate.insertMany(defaultTemplates, { session })
@@ -192,16 +197,18 @@ class TenantProvisioningService {
     await AttributeSet.insertMany(attributeSetDocs, { session })
 
     // Seed Product Templates
-    const [brands, categories, attributeSets, accounts] = await Promise.all([
+    const [brands, categories, attributeSets, accounts, devices] = await Promise.all([
       Brand.find({}).session(session),
       Category.find({}).session(session),
       AttributeSet.find({}).session(session),
       Account.find({}).session(session),
+      Device.find({}).session(session),
     ])
     const brandMap = new Map(brands.map((b) => [b.name, b._id]))
     const categoryMap = new Map(categories.map((c) => [c.name, c._id]))
     const attributeSetMap = new Map(attributeSets.map((a) => [a.name, a._id]))
     const accountMap = new Map(accounts.map((a) => [a.name, a._id]))
+    const deviceMap = new Map(devices.map((d) => [d.name, d._id]))
 
     console.log("PRODUCT_TEMPLATE_MASTER_LIST size ", PRODUCT_TEMPLATE_MASTER_LIST.length)
     const templateDocs = PRODUCT_TEMPLATE_MASTER_LIST.map((template) => {
@@ -209,6 +216,7 @@ class TenantProvisioningService {
       if (template.attributeSetName && !attrSetId) {
         console.warn(`⚠️ AttributeSet "${template.attributeSetName}" not found for:`, template.baseName)
       }
+      const deviceId = template.deviceName ? deviceMap.get(template.deviceName) : null
 
       return {
         ...template,
@@ -217,6 +225,7 @@ class TenantProvisioningService {
         attributeSetId: attrSetId, // could be undefined
         costPrice: 0,
         sellingPrice: 0,
+        deviceId: deviceId,
         assetAccountId: accountMap.get(template.assetAccountName),
         revenueAccountId: accountMap.get(template.revenueAccountName),
         cogsAccountId: accountMap.get(template.cogsAccountName),
@@ -235,7 +244,7 @@ class TenantProvisioningService {
 
     // 2. Loop through each newly created template.
     for (const template of createdTemplates) {
-      console.log("template ", template)
+      // console.log("template ", template)
 
       const attributeSet = template.attributeSetId
         ? await AttributeSet.findById(template.attributeSetId).populate("attributes").session(session)

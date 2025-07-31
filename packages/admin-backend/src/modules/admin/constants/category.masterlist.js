@@ -99,11 +99,7 @@ const CATEGORY_MASTER_LIST = [
       },
       {
         name: "Advanced Repairs (Micro-soldering)",
-        children: [
-          { name: "Motherboard/Logic Board Repair" },
-          { name: "Data Recovery" },
-          { name: "IC Replacement" },
-        ],
+        children: [{ name: "Motherboard/Logic Board Repair" }, { name: "Data Recovery" }, { name: "IC Replacement" }],
       },
       {
         name: "Software Services",
@@ -129,12 +125,8 @@ const CATEGORY_MASTER_LIST = [
   {
     name: "Miscellaneous",
     description: "For non-standard items and services.",
-    children: [
-      { name: "Gift Cards" },
-      { name: "Consumables (Cleaning Kits, etc.)" },
-      { name: "Trade-In Credits" },
-    ],
+    children: [{ name: "Gift Cards" }, { name: "Consumables (Cleaning Kits, etc.)" }, { name: "Trade-In Credits" }],
   },
-];
+]
 
-module.exports = CATEGORY_MASTER_LIST;
+module.exports = CATEGORY_MASTER_LIST

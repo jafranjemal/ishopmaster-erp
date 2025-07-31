@@ -7,42 +7,15 @@ const ATTRIBUTE_SET_MASTER_LIST = [
   // --- DEVICE SPECIFICATIONS ---
   {
     name: "Smartphone Specifications",
-    attributeKeys: [
-      "model",
-      "color",
-      "storage",
-      "ram",
-      "screen_size",
-      "processor",
-      "os",
-      "battery_capacity",
-      "connectivity",
-    ],
+    attributeKeys: ["model", "color", "storage", "ram", "screen_size", "processor", "os", "battery_capacity", "connectivity"],
   },
   {
     name: "Tablet Specifications",
-    attributeKeys: [
-      "model",
-      "color",
-      "storage",
-      "ram",
-      "screen_size",
-      "processor",
-      "os",
-      "connectivity",
-    ],
+    attributeKeys: ["model", "color", "storage", "ram", "screen_size", "processor", "os", "connectivity"],
   },
   {
     name: "Speaker Specifications",
-    attributeKeys: [
-      "color",
-      "connectivity",
-      "power_rating",
-      "battery_capacity",
-      "water_resistance",
-      "driver_size",
-      "warranty",
-    ],
+    attributeKeys: ["color", "connectivity", "power_rating", "battery_capacity", "water_resistance", "driver_size", "warranty"],
   },
   {
     name: "Audio Accessory Specs",
@@ -133,6 +106,10 @@ const ATTRIBUTE_SET_MASTER_LIST = [
     ],
   },
   {
+    name: "AirPods Specifications",
+    attributeKeys: ["model", "color", "connectivity", "noise_canceling", "quality_type", "warrantyPlan"],
+  },
+  {
     name: "Cable Specifications",
     attributeKeys: [
       "length", // e.g., 1m, 2m
@@ -140,6 +117,8 @@ const ATTRIBUTE_SET_MASTER_LIST = [
       "connector_type", // e.g., USB-C to USB-C, USB-A to Lightning
       "power_rating", // e.g., 60W, 100W
       "material", // e.g., braided, rubber
+      "quality_type",
+      "warrantyPlan",
     ],
   },
   {
@@ -168,17 +147,7 @@ const ATTRIBUTE_SET_MASTER_LIST = [
   },
   {
     name: "Laptop Specifications",
-    attributeKeys: [
-      "model",
-      "color",
-      "storage",
-      "ram",
-      "processor",
-      "screen_size",
-      "os",
-      "connectivity",
-      "battery_capacity",
-    ],
+    attributeKeys: ["model", "color", "storage", "ram", "processor", "screen_size", "os", "connectivity", "battery_capacity"],
   },
   {
     name: "Smartwatch Specifications",
@@ -196,7 +165,17 @@ const ATTRIBUTE_SET_MASTER_LIST = [
   },
   {
     name: "Charger & Adapter Specs",
-    attributeKeys: ["power_supply", "connectivity", "quality_type"],
+    attributeKeys: ["color", "power_rating", "connectivity", "quality_type"],
+  },
+  {
+    name: "Power Adapter Specifications",
+    attributeKeys: [
+      "power_rating",
+      "connectivity",
+      "color",
+      "quality_type", // e.g., Original, Copy, C/O
+      "warrantyPlan", // e.g., AppleCare+, Standard
+    ],
   },
   {
     name: "Cable Specs",
@@ -264,6 +243,6 @@ const ATTRIBUTE_SET_MASTER_LIST = [
     name: "Repair Service Specs",
     attributeKeys: ["service_type", "model", "os"],
   },
-];
+]
 
-module.exports = ATTRIBUTE_SET_MASTER_LIST;
+module.exports = ATTRIBUTE_SET_MASTER_LIST
