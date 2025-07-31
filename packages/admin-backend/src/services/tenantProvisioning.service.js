@@ -45,14 +45,14 @@ class TenantProvisioningService {
       linkedAccountId: accountMap.get(method.linkedAccountName),
       holdingAccountId: method.holdingAccountName ? accountMap.get(method.holdingAccountName) : null,
     }))
-    await PaymentMethod.insertMany(paymentMethodsToCreate, {
+    await models.PaymentMethod.insertMany(paymentMethodsToCreate, {
       session,
       ordered: true,
     })
 
     console.log("Seeding master data: Currencies and Exchange Rates...")
-    await Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true })
-    await ExchangeRate.insertMany(EXCHANGE_RATE_MASTER_LIST, {
+    await models.Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true })
+    await models.ExchangeRate.insertMany(EXCHANGE_RATE_MASTER_LIST, {
       session,
       ordered: true,
     })
