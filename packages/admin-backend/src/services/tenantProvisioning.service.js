@@ -342,11 +342,7 @@ class TenantProvisioningService {
     // }
 
     // Seed Payment Methods, linking them to the correct accounts
-    // const paymentMethodsToCreate = PAYMENT_METHOD_MASTER_LIST.map((method) => ({
-    //   ...method,
-    //   linkedAccountId: accountMap.get(method.linkedAccountName),
-    //   holdingAccountId: method.holdingAccountName ? accountMap.get(method.holdingAccountName) : null,
-    // }))
+
     // await PaymentMethod.insertMany(paymentMethodsToCreate, {
     //   session,
     //   ordered: true,
@@ -401,9 +397,11 @@ class TenantProvisioningService {
   async _seedPaymentMethods(models, session, accountMap) {
     const { PaymentMethod } = models
     const paymentMethodsToCreate = PAYMENT_METHOD_MASTER_LIST.map((method) => ({
-      /* ... */
+      ...method,
+      linkedAccountId: accountMap.get(method.linkedAccountName),
+      holdingAccountId: method.holdingAccountName ? accountMap.get(method.holdingAccountName) : null,
     }))
-    await PaymentMethod.insertMany(paymentMethodsToCreate, { session })
+    await PaymentMethod.insertMany(paymentMethodsToCreate, { session, ordered: true })
     console.log(" -> Payment Methods seeded.")
   }
 
@@ -412,8 +410,8 @@ class TenantProvisioningService {
    */
   async _seedCurrencies(models, session) {
     const { Currency, ExchangeRate } = models
-    await Currency.insertMany(CURRENCY_MASTER_LIST, { session })
-    await ExchangeRate.insertMany(EXCHANGE_RATE_MASTER_LIST, { session })
+    await Currency.insertMany(CURRENCY_MASTER_LIST, { session, ordered: true })
+    await ExchangeRate.insertMany(EXCHANGE_RATE_MASTER_LIST, { session, ordered: true })
     console.log(" -> Currencies seeded.")
   }
 
