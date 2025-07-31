@@ -704,7 +704,8 @@ class TenantProvisioningService {
       const templateBatch = templateDocs.slice(i, i + TEMPLATE_BATCH_SIZE)
 
       // Use isolated session per batch
-      const batchSession = await models.connection.startSession()
+      // const batchSession = await models.connection.startSession()
+      const batchSession = await models.dbConnection.startSession()
       try {
         await batchSession.withTransaction(async () => {
           // Insert templates
