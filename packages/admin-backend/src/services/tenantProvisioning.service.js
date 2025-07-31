@@ -217,10 +217,10 @@ class TenantProvisioningService {
         console.warn(`⚠️ AttributeSet "${template.attributeSetName}" not found for:`, template.baseName)
       }
       const deviceId = template.deviceName ? deviceMap.get(template.deviceName) : null
-
+      const brandName = template.brandName && template.brandName != "" ? template.brandName : "UNBRANDED"
       return {
         ...template,
-        brandId: brandMap.get(template.brandName),
+        brandId: brandMap.get(brandName),
         categoryId: categoryMap.get(template.categoryName),
         attributeSetId: attrSetId, // could be undefined
         costPrice: 0,
@@ -230,41 +230,71 @@ class TenantProvisioningService {
         revenueAccountId: accountMap.get(template.revenueAccountName),
         cogsAccountId: accountMap.get(template.cogsAccountName),
       }
-    }).filter((t) => t.brandId && t.assetAccountId)
+    }).filter((t) => t.assetAccountId)
 
-    console.log("templateDocs size ", templateDocs.length)
+    console.log("Total templates to process:", templateDocs.length)
 
-    let createdTemplates = []
-    if (templateDocs.length > 0) {
-      // 1. Create the templates and store the result
-      createdTemplates = await ProductTemplates.insertMany(templateDocs, { session })
+    // ======================================================================
+    // BATCH PROCESSING FOR TEMPLATES AND VARIANTS
+    // ======================================================================
+    const BATCH_SIZE = 50
+    const masterListMap = new Map(PRODUCT_TEMPLATE_MASTER_LIST.map((t) => [t.baseName, t]))
+
+    for (let i = 0; i < templateDocs.length; i += BATCH_SIZE) {
+      const batchDocs = templateDocs.slice(i, i + BATCH_SIZE)
+      console.log(`Processing batch ${i / BATCH_SIZE + 1}...`)
+
+      const createdTemplates = await ProductTemplates.insertMany(batchDocs, { session })
+
+      for (const createdTemplate of createdTemplates) {
+        const originalTemplate = masterListMap.get(createdTemplate.baseName)
+        if (!originalTemplate) continue
+
+        if (originalTemplate.variants && originalTemplate.variants.length > 0) {
+          const variantsToCreate = originalTemplate.variants.map((variant) => ({
+            templateId: createdTemplate._id,
+            sku: `${createdTemplate.skuPrefix || "SKU"}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+            attributes: variant.attributes,
+          }))
+          await ProductVariants.insertMany(variantsToCreate, { session })
+        } else {
+          await ProductVariants.createDefaultVariant(createdTemplate, session)
+        }
+      }
     }
 
-    console.log("createdTemplates size ", createdTemplates.length)
+    // let createdTemplates = []
+    // if (templateDocs.length > 0) {
+    //   // 1. Create the templates and store the result
+    //   createdTemplates = await ProductTemplates.insertMany(templateDocs, { session })
+    // }
 
-    // 2. Loop through each newly created template.
-    for (const template of createdTemplates) {
-      // console.log("template ", template)
+    // console.log("createdTemplates size ", createdTemplates.length)
 
-      const attributeSet = template.attributeSetId
-        ? await AttributeSet.findById(template.attributeSetId).populate("attributes").session(session)
-        : null
+    // // 2. Loop through each newly created template.
+    // for (const template of createdTemplates) {
+    //   // console.log("template ", template)
 
-      if (!attributeSet?.attributes) {
-        console.warn(`⚠️ Template "${template.baseName}" has no attributeSetId`)
-      }
-      if (!attributeSet || attributeSet.attributes.length === 0) {
-        await ProductVariants.createDefaultVariant(template, session)
-      } else {
-        await ProductVariants.createDefaultVariant(template, session)
-        // await ProductVariants.createVariantsFromAttributes(template, attributeSet, session);
-      }
+    //   const attributeSet = template.attributeSetId
+    //     ? await AttributeSet.findById(template.attributeSetId).populate("attributes").session(session)
+    //     : null
 
-      // const populatedTemplate = await ProductTemplates.findById(template._id).populate({
-      //   path: "attributeSetId",
-      //   populate: { path: "attributes" }, // populate the `attributes` inside attributeSet
-      // });
-    }
+    //   if (!attributeSet?.attributes) {
+    //     console.warn(`⚠️ Template "${template.baseName}" has no attributeSetId`)
+    //   }
+    //   if (!attributeSet || attributeSet.attributes.length === 0) {
+    //     await ProductVariants.createDefaultVariant(template, session)
+    //   } else {
+    //     await ProductVariants.createDefaultVariant(template, session)
+    //     // await ProductVariants.createVariantsFromAttributes(template, attributeSet, session);
+    //   }
+
+    //   // const populatedTemplate = await ProductTemplates.findById(template._id).populate({
+    //   //   path: "attributeSetId",
+    //   //   populate: { path: "attributes" }, // populate the `attributes` inside attributeSet
+    //   // });
+    // }
+
     // Seed Payment Methods, linking them to the correct accounts
     const paymentMethodsToCreate = PAYMENT_METHOD_MASTER_LIST.map((method) => ({
       ...method,
