@@ -1,4 +1,4 @@
-const accountingService = require("./accounting.service");
+const accountingService = require("./accounting.service")
 
 /**
  * The CustomerService handles all complex business logic related to customers,
@@ -13,9 +13,10 @@ class CustomerService {
    * @param {mongoose.ClientSession} session - The Mongoose session for the database transaction.
    * @returns {Promise<object>} The newly created customer document.
    */
-  async createCustomerWithLedger(models, customerData, session) {
+  async createCustomerWithLedger(models, customerData, session = null) {
     // 1. First, create the dedicated Accounts Receivable sub-account for this customer.
     // This call is delegated to the AccountingService, following our architecture rules.
+    const options = session ? { session } : {}
     const ledgerAccount = await accountingService.createAccount(
       models,
       {
@@ -25,27 +26,27 @@ class CustomerService {
         description: `Accounts Receivable ledger for customer: ${customerData.name}`,
         isSystemAccount: true, // Mark this as a system-generated account
       },
-      session
-    );
+      options
+    )
 
     // 2. Prepare the customer document, embedding the ID of the ledger account we just created.
     const customerToCreate = {
       ...customerData,
       ledgerAccountId: ledgerAccount._id,
-    };
+    }
 
     // 3. Create the customer document itself. Using create with a single-item array
     // is the required syntax when passing a session.
     const newCustomers = await models.Customer.create([customerToCreate], {
-      session,
-    });
+      options,
+    })
 
     // 4. Return the newly created customer document.
-    return newCustomers[0];
+    return newCustomers[0]
   }
 
   // In the future, other complex methods like `calculateCustomerLifetimeValue` could go here.
 }
 
 // Export a singleton instance to be used across the application.
-module.exports = new CustomerService();
+module.exports = new CustomerService()
