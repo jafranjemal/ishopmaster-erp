@@ -104,7 +104,7 @@ export const adminTenantService = {
   getAll: async (params) => {
     return api.get("/admin/tenants", { params });
   },
-
+  getById: (id) => api.get(`/admin/tenants/${id}`),
   /**
    * Updates a tenant's details (license, active status).
    * @param {string} id - The ID of the tenant to update.

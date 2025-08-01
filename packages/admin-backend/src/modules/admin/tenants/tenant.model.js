@@ -1,17 +1,8 @@
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 // A constant defining all possible modules in the system.
 // This acts as a single source of truth for validation.
-const AVAILABLE_MODULES = [
-  "pos",
-  "inventory",
-  "repairs",
-  "accounting",
-  "crm",
-  "hr",
-  "reports",
-  "settings",
-];
+const AVAILABLE_MODULES = ["pos", "inventory", "repairs", "accounting", "crm", "hr", "reports", "settings"]
 
 const tenantSchema = new mongoose.Schema(
   {
@@ -21,7 +12,7 @@ const tenantSchema = new mongoose.Schema(
         city: { type: String, trim: true },
         state: { type: String, trim: true },
         postalCode: { type: String, trim: true },
-        country: { type: String, trim: true },
+        country: { type: String, trim: true, default: "Sri Lanka" },
       },
       registrationNumber: { type: String, trim: true },
       phone: { type: String, trim: true },
@@ -87,12 +78,12 @@ const tenantSchema = new mongoose.Schema(
            * The primary currency for all financial reporting (e.g., 'USD', 'LKR', 'INR').
            * All ledger entries will be stored in this currency.
            */
-          baseCurrency: "USD",
+          baseCurrency: "LKR",
           /**
            * An array of currency codes the tenant operates in.
            * This will populate currency options in the POS.
            */
-          supportedCurrencies: ["USD"],
+          supportedCurrencies: ["LKR"],
           /**
            * The default language for the tenant's UI. (e.g., 'en', 'es', 'si')
            */
@@ -126,11 +117,11 @@ const tenantSchema = new mongoose.Schema(
     // --- NEW MODULARITY FIELDS END HERE ---
   },
   { timestamps: true }
-);
+)
 
 // Mongoose automatically handles creating the `settings` object with its defaults.
 // No additional pre-save hooks are needed for this logic.
 
-const Tenant = mongoose.model("Tenant", tenantSchema);
+const Tenant = mongoose.model("Tenant", tenantSchema)
 
-module.exports = Tenant;
+module.exports = Tenant

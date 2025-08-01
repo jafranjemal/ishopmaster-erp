@@ -148,6 +148,7 @@ exports.createTenant = asyncHandler(async (req, res, next) => {
     })
   }
 })
+
 exports.createTenant_old_2 = asyncHandler(async (req, res, next) => {
   const { tenantInfo, primaryBranch, owner } = req.body
 
@@ -383,7 +384,7 @@ exports.getAllTenants = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/tenants/:id
 // @access  Private
 exports.getTenantById = asyncHandler(async (req, res, next) => {
-  const tenant = await Tenant.findById(req.params.id)
+  const tenant = await Tenant.findById(req.params.id).lean()
 
   if (!tenant) {
     // This check is important for a user-friendly error message.
@@ -393,9 +394,16 @@ exports.getTenantById = asyncHandler(async (req, res, next) => {
     })
   }
 
+  const tenantDbConn = await getTenantConnection(tenant.dbName)
+  const { Branch, User } = getTenantModels(tenantDbConn)
+
+  // 2. Fetch branches and users from this tenant's DB
+  const branches = await Branch.find().lean()
+  const users = await User.find().lean()
+
   res.status(200).json({
     success: true,
-    data: tenant,
+    data: { ...tenant, branches, users },
   })
 })
 
