@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { Outlet } from 'react-router-dom';
 import { useCartCalculator } from '../hooks/useCartCalculator';
 import { tenantCustomerService } from '../services/api';
 import useAuth from './useAuth';
@@ -138,7 +139,12 @@ export const PosSessionProvider = ({ children }) => {
     loadExchangeData,
   };
 
-  return <PosSessionContext.Provider value={value}>{children}</PosSessionContext.Provider>;
+  return (
+    <PosSessionContext.Provider value={value}>
+      <Outlet />
+      {children}
+    </PosSessionContext.Provider>
+  );
 };
 
 export const usePosSession = () => {

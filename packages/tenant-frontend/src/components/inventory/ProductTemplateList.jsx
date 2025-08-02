@@ -1,8 +1,6 @@
-import React from 'react';
+import { FilePenLine, Library, ShieldCheck, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { FilePenLine, Trash2, Package, Library, ShieldCheck } from 'lucide-react';
-import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Badge } from 'ui-library';
-import { t } from 'i18next';
+import { Badge, Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'ui-library';
 
 const ProductTemplateList = ({ templates, onEdit, onDelete }) => {
   if (!templates || templates.length === 0) {
@@ -33,10 +31,7 @@ const ProductTemplateList = ({ templates, onEdit, onDelete }) => {
           <TableRow key={template._id}>
             <TableCell className='font-medium'>
               {/* The name links to the future detail page where we'll generate variants */}
-              <Link
-                to={`/inventory/products/templates/${template._id}`}
-                className='hover:text-indigo-300 hover:underline'
-              >
+              <Link to={`templates/${template._id}`} className='hover:text-indigo-300 hover:underline'>
                 {template.baseName}
               </Link>
             </TableCell>

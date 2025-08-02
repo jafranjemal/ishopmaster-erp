@@ -12,6 +12,314 @@ const ATTRIBUTE_SET_MASTER_LIST = require("../constants/attributeSet.masterlist"
 const ATTRIBUTE_MASTER_LIST = require("../constants/attribute.masterlist") // <-- 2. Import Categories
 const tenantProvisioningService = require("../../../services/tenantProvisioning.service")
 
+const PRODUCT_TEMPLATE_MASTER_LIST = require("../constants/productTemplate.masterlist")
+const DEVICE_MASTER_LIST = require("../constants/device.masterlist")
+const warrantyPolicyList = require("../constants/warrantyPolicy.masterlist")
+const defaultQc = require("../constants/qc.masterlist")
+
+function _chunkArray(array, size) {
+  const chunks = []
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size))
+  }
+  return chunks
+}
+
+const createVariantsFromAttributes = async function (models, template, attributeSet, barcode, session = null) {
+  if (!attributeSet || !attributeSet.attributes || attributeSet.attributes.length === 0) {
+    throw new Error("No attributes available to generate variants")
+  }
+  console.log(`Creating variant for ${template.type}: ${template.baseName}`)
+
+  // Prepare attribute options (array of arrays)
+  const attributeValueOptions = attributeSet.attributes.map((attr) => attr.values.map((value) => ({ key: attr.key, value })))
+
+  // Cartesian product helper
+  const cartesian = (arrays) => arrays.reduce((acc, curr) => acc.flatMap((accItem) => curr.map((currItem) => [...accItem, currItem])), [[]])
+
+  const combinations = cartesian(attributeValueOptions)
+
+  const variantsToCreate = combinations.map((combination) => {
+    const attributesMap = {}
+    combination.forEach(({ key, value }) => {
+      attributesMap[key] = value
+    })
+
+    return {
+      templateId: template._id,
+      variantName: Object.values(attributesMap).join(" / "),
+      sku: `${template.skuPrefix || "VAR"}-${Date.now()}`, // You might want to improve SKU uniqueness here
+      attributes: attributesMap,
+      costPrice: template.costPrice || 0,
+      sellingPrice: template.sellingPrice || 0,
+      barcode,
+    }
+  })
+
+  return models.ProductVariants.insertMany(variantsToCreate, { session })
+}
+
+/**
+ * @desc    Restore a specific master data list for a tenant to its default state
+ * @route   POST /api/v1/tenants/:id/master-data/restore
+ * @access  Private (Super Admin)
+ */
+exports.restoreMasterData = asyncHandler(async (req, res, next) => {
+  const { listName } = req.body
+  const tenant = await Tenant.findById(req.params.id)
+
+  if (!tenant) {
+    return next(new Error(`Tenant not found`, 404))
+  }
+
+  const tenantDbConnection = await getTenantConnection(tenant.dbName)
+  const models = getTenantModels(tenantDbConnection)
+
+  try {
+    let message = ""
+
+    switch (listName) {
+      case "brands":
+        await models.Brand.deleteMany({})
+        await models.Brand.insertMany(BRAND_MASTER_LIST)
+        message = "Brand list restored."
+        break
+      case "categories":
+        // Use dedicated session for categories
+        const categorySession = await tenantDbConnection.startSession()
+        try {
+          await categorySession.withTransaction(async () => {
+            await models.Category.deleteMany({}, { session: categorySession })
+            await tenantProvisioningService.seedCategoriesRecursively(CATEGORY_MASTER_LIST, null, models, categorySession)
+          })
+          message = "Category list restored."
+        } finally {
+          categorySession.endSession()
+        }
+        break
+      case "attributesAndSets":
+        await models.Attribute.deleteMany({})
+        await models.AttributeSet.deleteMany({})
+
+        const createdAttributes = await models.Attribute.insertMany(ATTRIBUTE_MASTER_LIST)
+        const attributeMap = new Map(createdAttributes.map((attr) => [attr.key, attr._id]))
+
+        const attributeSetDocs = ATTRIBUTE_SET_MASTER_LIST.map((set) => ({
+          name: set.name,
+          attributes: set.attributeKeys.map((attrKey) => attributeMap.get(attrKey)),
+        }))
+
+        await models.AttributeSet.insertMany(attributeSetDocs)
+        message = "Attributes and Sets restored."
+        break
+      case "devices":
+        await models.Device.deleteMany({})
+        await models.Device.insertMany(DEVICE_MASTER_LIST)
+        message = "Device list restored."
+        break
+      case "warrantyPolicies":
+        await models.WarrantyPolicy.deleteMany({})
+        await models.WarrantyPolicy.insertMany(warrantyPolicyList)
+        message = "Warranty Policy list restored."
+        break
+      case "qcChecklists":
+        await models.QcChecklistTemplate.deleteMany({})
+        await models.QcChecklistTemplate.insertMany(defaultQc)
+        message = "QC Checklist list restored."
+        break
+      case "productTemplatesAndVariants":
+        await _restoreProductsAndVariants(models)
+        message = "Product Templates and Variants restored."
+        break
+      default:
+        throw new Error(`Master list '${listName}' is not a valid restore target.`)
+    }
+
+    res.status(200).json({ success: true, message })
+  } catch (error) {
+    return next(new Error(`Failed to restore: ${error.message}`, 500))
+  }
+})
+
+async function _restoreProductsAndVariants(models) {
+  // 1. Reset collections first
+  await models.ProductVariants.deleteMany({})
+  await models.ProductTemplates.deleteMany({})
+  console.log("Cleared existing product templates and variants")
+
+  // Fetch prerequisite data
+  const [brands, categories, attributeSets, accounts, devices] = await Promise.all([
+    models.Brand.find().lean(),
+    models.Category.find().lean(),
+    models.AttributeSet.find().populate("attributes").lean(),
+    models.Account.find().lean(),
+    models.Device.find().lean(),
+  ])
+
+  // Create lookup maps
+  const brandMap = new Map(brands.map((b) => [b.name, b._id]))
+  const categoryMap = new Map(categories.map((c) => [c.name, c._id]))
+  const attributeSetMap = new Map(attributeSets.map((a) => [a.name, a._id]))
+  const accountMap = new Map(accounts.map((a) => [a.name, a._id]))
+  const deviceMap = new Map(devices.map((d) => [d.name, d._id]))
+
+  // Prepare template documents
+  const templateDocs = PRODUCT_TEMPLATE_MASTER_LIST.map((template) => {
+    const brandName = template.brandName && template.brandName !== "" ? template.brandName : "UNBRANDED"
+
+    return {
+      ...template,
+      brandId: brandMap.get(brandName),
+      categoryId: categoryMap.get(template.categoryName),
+      attributeSetId: attributeSetMap.get(template.attributeSetName),
+      deviceId: template.deviceName ? deviceMap.get(template.deviceName) : null,
+      costPrice: template.costPrice || 0,
+      sellingPrice: template.sellingPrice || 0,
+      assetAccountId: accountMap.get(template.assetAccountName),
+      revenueAccountId: accountMap.get(template.revenueAccountName),
+      cogsAccountId: accountMap.get(template.cogsAccountName),
+    }
+  }).filter((t) => t.assetAccountId) // Ensure required account exists
+
+  console.log(`Processing ${templateDocs.length} templates in batches...`)
+
+  // Batch processing parameters
+  const TEMPLATE_BATCH_SIZE = 50
+  const VARIANT_BATCH_SIZE = 100
+  const masterListMap = new Map(PRODUCT_TEMPLATE_MASTER_LIST.map((t) => [t.baseName, t]))
+
+  // Global uniqueness trackers
+  const globalSkuSet = new Set()
+  const globalBarcodeSet = new Set()
+
+  for (let i = 0; i < templateDocs.length; i += TEMPLATE_BATCH_SIZE) {
+    const batchNumber = Math.floor(i / TEMPLATE_BATCH_SIZE) + 1
+    console.log(`Processing template batch ${batchNumber}...`)
+
+    const templateBatch = templateDocs.slice(i, i + TEMPLATE_BATCH_SIZE)
+    const batchSession = await models.dbConnection.startSession()
+
+    try {
+      await batchSession.withTransaction(async () => {
+        // Insert templates
+        const createdTemplates = await models.ProductTemplates.insertMany(templateBatch, { session: batchSession })
+
+        // Prepare all variants
+        const allVariants = []
+
+        for (const template of createdTemplates) {
+          const originalTemplate = masterListMap.get(template.baseName)
+
+          if (originalTemplate?.variants?.length) {
+            for (const [variantIndex, variant] of originalTemplate.variants.entries()) {
+              // Convert attributes array to object
+              const attributesMap = {}
+              variant.attributes.forEach((attr) => {
+                attributesMap[attr.key] = attr.value
+              })
+
+              // Generate consistent variant name
+              const nameParts = [template.baseName]
+              const skuParts = [template.skuPrefix || "VAR"]
+
+              // Sort attributes alphabetically by key
+              Object.entries(attributesMap)
+                .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+                .forEach(([key, value]) => {
+                  nameParts.push(value)
+                  skuParts.push(
+                    value
+                      .replace(/[^A-Z0-9]/gi, "")
+                      .substring(0, 3)
+                      .toUpperCase()
+                  )
+                })
+
+              // Generate base SKU
+              let baseSku = skuParts.join("-")
+              let uniqueSku = baseSku
+              let suffix = 1
+
+              // Ensure GLOBAL SKU uniqueness
+              while (globalSkuSet.has(uniqueSku)) {
+                uniqueSku = `${baseSku}-${suffix}`
+                suffix++
+              }
+              globalSkuSet.add(uniqueSku)
+
+              // Handle barcode uniqueness
+              let finalBarcode = variant.barcode
+              if (finalBarcode) {
+                if (globalBarcodeSet.has(finalBarcode)) {
+                  console.warn(`Duplicate barcode ${finalBarcode} detected. Setting to null...`)
+                  finalBarcode = null
+                } else {
+                  globalBarcodeSet.add(finalBarcode)
+                }
+              }
+
+              const variantData = {
+                templateId: template._id,
+                variantName: nameParts.join(" - "),
+                sku: uniqueSku,
+                attributes: attributesMap,
+                costPrice: template.costPrice || 0,
+                sellingPrice: template.sellingPrice || 0,
+                isActive: true,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              }
+
+              if (finalBarcode) {
+                variantData.barcode = finalBarcode
+              }
+              allVariants.push(variantData)
+            }
+          } else {
+            // Generate unique default SKU
+            let defaultSku = `${template.skuPrefix || "SKU"}-DEFAULT`
+            let suffix = 1
+            while (globalSkuSet.has(defaultSku)) {
+              defaultSku = `${template.skuPrefix || "SKU"}-DEFAULT-${suffix}`
+              suffix++
+            }
+            globalSkuSet.add(defaultSku)
+
+            // Create default variant
+            allVariants.push({
+              templateId: template._id,
+              variantName: template.baseName,
+              sku: defaultSku,
+              attributes: {},
+              costPrice: template.costPrice || 0,
+              sellingPrice: template.sellingPrice || 0,
+
+              isActive: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            })
+          }
+        }
+
+        // Insert variants in batches
+        for (let v = 0; v < allVariants.length; v += VARIANT_BATCH_SIZE) {
+          const variantBatch = allVariants.slice(v, v + VARIANT_BATCH_SIZE)
+          await models.ProductVariants.insertMany(variantBatch, {
+            session: batchSession,
+          })
+        }
+      })
+    } catch (batchError) {
+      console.error(`Batch ${batchNumber} failed:`, batchError)
+      throw new Error(`Batch processing failed: ${batchError.message}`)
+    } finally {
+      await batchSession.endSession()
+    }
+  }
+
+  console.log("All template batches processed successfully.")
+}
+
 // @desc    Create a new tenant
 // @route   POST /api/v1/tenants
 // @access  Private (to be implemented)

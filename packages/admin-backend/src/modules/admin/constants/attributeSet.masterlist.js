@@ -165,7 +165,7 @@ const ATTRIBUTE_SET_MASTER_LIST = [
   },
   {
     name: "Charger & Adapter Specs",
-    attributeKeys: ["color", "power_rating", "connectivity", "quality_type"],
+    attributeKeys: ["color", "power_rating", "connectivity", "plug_type", "quality_type"],
   },
   {
     name: "Power Adapter Specifications",
@@ -173,6 +173,7 @@ const ATTRIBUTE_SET_MASTER_LIST = [
       "power_rating",
       "connectivity",
       "color",
+      "plug_type",
       "quality_type", // e.g., Original, Copy, C/O
       "warrantyPlan", // e.g., AppleCare+, Standard
     ],
@@ -235,7 +236,7 @@ const ATTRIBUTE_SET_MASTER_LIST = [
   },
   {
     name: "General Spare Part Specs",
-    attributeKeys: ["part_type", "model", "color", "quality_type", "material"],
+    attributeKeys: ["length", "part_type", "model", "color", "quality_type", "material"],
   },
 
   // --- SERVICE SPECIFICATIONS ---

@@ -1,8 +1,9 @@
-import React from 'react';
 import * as NavigationMenu from '@radix-ui/react-navigation-menu';
-import { Link } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import { cn } from 'ui-library';
+import tenantUrl from '../../../hooks/useTenantId';
 
 const ListItem = React.forwardRef(({ className, children, title, ...props }, ref) => (
   <li>
@@ -28,7 +29,7 @@ const ApplicationMenuBar = () => {
     <NavigationMenu.Root className='relative z-30 flex w-full justify-start bg-slate-900 border-b border-slate-700'>
       <NavigationMenu.List className='flex list-none p-1'>
         <NavigationMenu.Item>
-          <Link to='/dashboard' className='text-sm font-bold text-white px-3 py-2'>
+          <Link to={tenantUrl('/dashboard')} className='text-sm font-bold text-white px-3 py-2'>
             iShop
           </Link>
         </NavigationMenu.Item>

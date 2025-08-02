@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import useAuth from '../../context/useAuth';
-import { Button } from 'ui-library';
 import { Clock, History, LayoutGrid, LogOut, Maximize, Minimize } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, Outlet } from 'react-router-dom';
+import { Button } from 'ui-library';
+import useAuth from '../../context/useAuth';
+import tenantUrl from '../../hooks/useTenantId';
 import ClockInOutWidget from '../shared/ClockInOutWidget';
 import ApplicationMenuBar from './pos/ApplicationMenuBar';
 import PosHeader from './pos/PosHeader';
@@ -12,7 +13,7 @@ const PosTopBar = ({ onLayoutToggle, onToggleFullscreen, isFullscreen, onRecallS
   return (
     <header className='flex-shrink-0 bg-slate-800 border-b border-slate-700 px-4 h-16 flex items-center justify-between z-20'>
       <div className='flex items-center gap-4'>
-        <Link to='/dashboard' className='font-bold text-lg text-white'>
+        <Link to={tenantUrl('/dashboard')} className='font-bold text-lg text-white'>
           iShop
         </Link>
         <div className='h-8 w-px bg-slate-700'></div>
@@ -30,7 +31,7 @@ const PosTopBar = ({ onLayoutToggle, onToggleFullscreen, isFullscreen, onRecallS
             </Link>
           </Button>
 
-          <PosHeader onRecallSale={onRecallSale} />
+          <PosHeader />
         </nav>
       </div>
       <div className='flex items-center gap-4'>
@@ -67,7 +68,7 @@ const PosTopBar = ({ onLayoutToggle, onToggleFullscreen, isFullscreen, onRecallS
   );
 };
 
-const PosLayout = ({ children, onLayoutToggle, onRecallSale }) => {
+const PosLayout = ({ onLayoutToggle, onRecallSale }) => {
   const [isFullscreen, setIsFullscreen] = useState(!!document.fullscreenElement);
 
   const handleToggleFullscreen = useCallback(() => {
@@ -104,7 +105,10 @@ const PosLayout = ({ children, onLayoutToggle, onRecallSale }) => {
         onToggleFullscreen={handleToggleFullscreen}
         isFullscreen={isFullscreen}
       />
-      <main className='flex-1 p-4 lg:p-6 overflow-hidden'>{children}</main>
+      <main className='flex-1 p-4 lg:p-6 overflow-hidden'>
+        {' '}
+        <Outlet />
+      </main>
     </div>
   );
 };

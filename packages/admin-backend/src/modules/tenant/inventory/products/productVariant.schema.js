@@ -29,6 +29,7 @@ const productVariantSchema = new mongoose.Schema(
 
     // The unique Stock Keeping Unit for this specific variant.
     sku: { type: String, required: true, unique: true, sparse: true },
+    barcode: { type: String, unique: true, sparse: true },
 
     // Financials specific to this variant, which can override template defaults.
     costPrice: { type: Number, default: 0 },

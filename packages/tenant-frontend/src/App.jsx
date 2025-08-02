@@ -1,6 +1,6 @@
 import './App.css';
 
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import ChequeManagementPage from './pages/accounting/ChequeManagementPage';
 import InstallmentPlanDetailPage from './pages/accounting/InstallmentPlanDetailPage';
@@ -51,11 +51,9 @@ import UsersPage from './pages/UsersPage';
 //import RepairTicketIntakePage from './pages/service/RepairTicketIntakePage';
 //import ServiceKanbanPage from './pages/service/ServiceKanbanPage';
 //import RepairTicketDetailPage from './pages/service/Old_RepairTicketDetailPage';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PortalLayout from './components/layout/PortalLayout';
-import PosLayout from './components/layout/PosLayout';
 import { CustomerAuthProvider } from './context/CustomerAuthProvider';
-import { PosSessionProvider } from './context/PosSessionContext';
 import BankReconciliationPage from './pages/accounting/BankReconciliationPage';
 import BudgetingPage from './pages/accounting/BudgetingPage';
 import PayrollPage from './pages/accounting/PayrollPage';
@@ -92,7 +90,9 @@ import WarrantyPoliciesPage from './pages/settings/WarrantyPoliciesPage';
 
 import DesignStudioLayout from './components/layout/DesignStudioLayout';
 import LayoutWrapper from './components/layout/LayoutWrapper';
+import PosLayout from './components/layout/PosLayout';
 import TenantWrapper from './components/layout/TenantWrapper';
+import { PosSessionProvider } from './context/PosSessionContext';
 import RepairQuotePage from './pages/portal/RepairQuotePage';
 import SalesInvoiceDetailPage from './pages/sales/SalesInvoiceDetailPage';
 import SalesInvoiceListPage from './pages/sales/SalesInvoiceListPage';
@@ -105,10 +105,17 @@ import DocumentTemplatesPage from './pages/settings/DocumentTemplatesPage';
 import HardwareManagementPage from './pages/settings/HardwareManagementPage';
 import NotificationTemplatesPage from './pages/settings/NotificationTemplatesPage';
 import QcTemplatesPage from './pages/settings/QcTemplatesPage';
+import ensureTenantInPath from './utils/urlHelper';
 
 function App() {
   const [posLayout, setPosLayout] = useState('default');
   const togglePosLayout = () => setPosLayout((prev) => (prev === 'default' ? 'cartFocus' : 'default'));
+  const location = useLocation(); // Gets the current location object
+
+  useEffect(() => {
+    // Run the check once when the app loads
+    ensureTenantInPath(location.pathname);
+  }, [location.pathname]); // The empty dependency array ensures it only runs once
 
   return (
     <>
@@ -119,7 +126,6 @@ function App() {
           <Route path='/:tenantId/login' element={<LoginPage />} />
         </Route>
         {/* --- PUBLIC-FACING ROUTES (NO LOGIN REQUIRED INITIALLY) --- */}
-
         {/* --- THE DEFINITIVE FIX: DEDICATED PORTAL ROUTE GROUP --- */}
         <Route
           path='/portal/:tenantId/*'
@@ -141,30 +147,28 @@ function App() {
             </CustomerAuthProvider>
           }
         />
+        {/* <Route path='/:tenantId/pos/*' element={<ProtectedRoute></ProtectedRoute>}>
+          <Route element={<PosSessionProvider />}>
+            <Route element={<PosLayout />}>
+              <Route index element={<Navigate to='shifts' replace />} />
+              <Route path='shifts' element={<ShiftManagementPage />} />
+              <Route path='terminal' element={<PosPage layout={posLayout} />} />
+            </Route>
+          </Route>
+        </Route> */}
 
-        {/* All POS-related routes are now grouped and use the dedicated PosLayout */}
-        <Route
-          path='/:tenantId/pos/*'
-          element={
-            <ProtectedRoute>
-              <PosSessionProvider>
-                <PosLayout onLayoutToggle={togglePosLayout}>
-                  <Routes>
-                    {/* The main entry point is now the shifts page (the gatekeeper) */}
-                    <Route path='shifts' element={<ShiftManagementPage />} />
-                    {/* The actual sales terminal is on a nested route */}
-                    <Route path='terminal' element={<PosPage layout={posLayout} />} />
-                    {/* Add other POS-related routes like sales history here in the future */}
-                    {/* <Route path="sales-history" element={<SalesHistoryPage />} /> */}
+        <Route path='/:tenantId/pos'>
+          <Route element={<ProtectedRoute></ProtectedRoute>}>
+            <Route element={<PosSessionProvider></PosSessionProvider>}>
+              <Route element={<PosLayout onLayoutToggle={togglePosLayout}></PosLayout>}>
+                <Route path='terminal' element={<PosPage layout={posLayout} />} />
 
-                    {/* A fallback to redirect any old /pos links to the correct gatekeeper */}
-                    <Route path='*' element={<Navigate to='/pos/shifts' replace />} />
-                  </Routes>
-                </PosLayout>
-              </PosSessionProvider>
-            </ProtectedRoute>
-          }
-        />
+                <Route path='shifts' element={<ShiftManagementPage />} />
+                <Route path='*' element={<Navigate to='shifts' replace />} />
+              </Route>
+            </Route>
+          </Route>
+        </Route>
 
         {/* MAIN APPLICATION ROUTES (FIXED) */}
         <Route path='/:tenantId' element={<ProtectedRoute />}>
@@ -282,9 +286,7 @@ function App() {
             </Route>
           </Route>
         </Route>
-
         {/* Protected Routes */}
-
         {/* <Route path='/' element={<Navigate to='/login' replace />} /> */}
       </Routes>
     </>

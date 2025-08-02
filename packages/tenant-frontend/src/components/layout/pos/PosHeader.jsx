@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, Button } from 'ui-library';
 import { Box, Trash2 } from 'lucide-react';
-import { tenantSalesService } from '../../../services/api';
+import { useState } from 'react';
+import { Button, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from 'ui-library';
 import { usePosSession } from '../../../context/PosSessionContext';
+import { tenantSalesService } from '../../../services/api';
 
-const PosHeader = ({ onRecallSale }) => {
+const PosHeader = () => {
   const [heldSales, setHeldSales] = useState([]);
   const { handleRecallSale, handleDeleteHeldSale } = usePosSession(); // Get delete handler from context
 

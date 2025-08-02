@@ -37,6 +37,22 @@ api.interceptors.response.use(
   },
 );
 
+api.interceptors.request.use(
+  (config) => {
+    const tenantSub = localStorage.getItem('tenant_subdomain');
+    if (tenantSub) {
+      config.headers['X-Tenant-ID'] = tenantSub;
+    } else {
+      // If tenant ID is missing (not logged in), redirect to /login
+      // window.location.href = '/login';
+      // Optionally, prevent the request:
+      return Promise.reject(new Error('Missing tenant context'));
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
 export const setApiTenantHeader = (tenantId) => {
   if (tenantId) {
     api.defaults.headers.common['X-Tenant-ID'] = tenantId;

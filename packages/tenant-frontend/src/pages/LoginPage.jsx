@@ -55,13 +55,13 @@ const LoginPage = () => {
 
       // This code only runs if the promise was successful
       if (response.data.success && response.data.token) {
-        setApiTenantHeader(tenantId);
+        setApiTenantHeader(formData.subdomain);
         login(response.data.token); //save the token in context
         console.log('Login successful! Redirecting...');
         const dashboardRes = await tenantAuthService.getDefaultDashboard();
         const { defaultUrl } = dashboardRes.data.data;
         //navigate(defaultUrl, { replace: true });
-        navigate(tenantUrl(from), { replace: true });
+        navigate(from, { replace: true });
       }
     } catch (err) {
       // Set the error state with the message from the backend

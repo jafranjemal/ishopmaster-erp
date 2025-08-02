@@ -64,12 +64,13 @@
 
 // components/tenants/TenantList.js
 import { Eye, FilePenLine, Trash2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "ui-library";
 import { cn } from "ui-library/lib/utils";
 
 const TenantList = ({ tenants, onEdit, onDelete, onView }) => {
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
-
+  const navigate = useNavigate();
   const getExpiryStatus = (expiryDate) => {
     const now = new Date();
     const expiry = new Date(expiryDate);
@@ -129,7 +130,8 @@ const TenantList = ({ tenants, onEdit, onDelete, onView }) => {
                     size="icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onView(tenant);
+                      const url = `${tenant._id}`;
+                      navigate(url);
                     }}
                   >
                     <Eye className="h-4 w-4" />

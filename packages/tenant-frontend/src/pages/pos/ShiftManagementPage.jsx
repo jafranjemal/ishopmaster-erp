@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { toast } from "react-hot-toast";
-import { tenantShiftService } from "../../services/api";
-import { Button, Modal, Card, CardContent, CardHeader, CardTitle, CardDescription, Pagination } from "ui-library";
-import { Power, PowerOff, ShoppingCart } from "lucide-react";
-import ShiftOpenForm from "../../components/pos/ShiftOpenForm";
-import ShiftCloseForm from "../../components/pos/ShiftCloseForm";
-import useAuth from "../../context/useAuth";
-import { useNavigate } from "react-router-dom";
-import ShiftHistoryList from "../../components/pos/ShiftHistoryList";
+import { Power, PowerOff, ShoppingCart } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Modal, Pagination } from 'ui-library';
+import ShiftCloseForm from '../../components/pos/ShiftCloseForm';
+import ShiftHistoryList from '../../components/pos/ShiftHistoryList';
+import ShiftOpenForm from '../../components/pos/ShiftOpenForm';
 
+import useAuth from '../../context/useAuth';
+import tenantUrl from '../../hooks/useTenantId';
+import { tenantShiftService } from '../../services/api';
 const ShiftManagementPage = () => {
   const [activeShift, setActiveShift] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +32,7 @@ const ShiftManagementPage = () => {
       const currentActiveShift = activeRes.data.data;
       if (currentActiveShift) {
         // If a shift is active, we don't need to stay on this page.
-        navigate("/pos/terminal", { replace: true });
+        navigate(tenantUrl('/pos/terminal'), { replace: true });
         return;
       }
 
@@ -40,7 +41,7 @@ const ShiftManagementPage = () => {
       setPagination(historyRes.data.pagination);
     } catch (error) {
       console.log(error);
-      toast.error("Could not load shift data.");
+      toast.error('Could not load shift data.');
     } finally {
       setIsLoading(false);
     }
@@ -54,12 +55,12 @@ const ShiftManagementPage = () => {
     setIsSaving(true);
     try {
       await toast.promise(tenantShiftService.openShift(formData), {
-        loading: "Starting shift...",
-        success: "Shift started!",
-        error: (err) => err.response?.data?.error || "Failed.",
+        loading: 'Starting shift...',
+        success: 'Shift started!',
+        error: (err) => err.response?.data?.error || 'Failed.',
       });
       setIsModalOpen(false);
-      navigate("/pos/terminal");
+      navigate(tenantUrl('/pos/terminal'), { replace: true });
     } catch (err) {
       console.log(err);
     } finally {
@@ -73,7 +74,7 @@ const ShiftManagementPage = () => {
       await toast.promise(tenantShiftService.closeShift(activeShift._id, formData), {
         /* ... */
       });
-      navigate("/pos/terminal");
+      navigate('terminal');
       setIsModalOpen(false);
     } catch (err) {
       console.log(err);
@@ -88,7 +89,7 @@ const ShiftManagementPage = () => {
       // it means the user is already clocked in.
 
       // The gate is "open," so we immediately redirect them to the main terminal.
-      navigate("/pos/terminal", { replace: true });
+      navigate(tenantUrl('/pos/terminal'), { replace: true });
     } else {
       // If the API returns null, there is no active shift.
       // The gate is "closed." We stop the loading spinner and show the
@@ -97,40 +98,51 @@ const ShiftManagementPage = () => {
     }
   };
 
-  if (isLoading) return <div className="p-8 text-center">Checking shift status...</div>;
+  if (isLoading) return <div className='p-8 text-center'>Checking shift status...</div>;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Shift Management</h1>
-      <Card className="max-w-md mx-auto text-center">
+    <div className='space-y-6'>
+      <h1 className='text-3xl font-bold'>Shift Management</h1>
+      <Card className='max-w-md mx-auto text-center'>
         <CardHeader>
           <CardTitle>{activeShift ? `Shift In Progress` : `No Active Shift`}</CardTitle>
           <CardDescription>
-            {activeShift ? `Started on ${formatDate(activeShift.shift_start)}` : `Start a new shift to begin making sales.`}
+            {activeShift
+              ? `Started on ${formatDate(activeShift.shift_start)}`
+              : `Start a new shift to begin making sales.`}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {activeShift ? (
             <>
-              <Button variant="destructive" size="lg" onClick={() => setIsModalOpen(true)}>
-                <PowerOff className="mr-2 h-4 w-4" /> Close Shift
+              <Button variant='destructive' size='lg' onClick={() => setIsModalOpen(true)}>
+                <PowerOff className='mr-2 h-4 w-4' /> Close Shift
               </Button>
-              <Button variant="success" size="lg" onClick={() => navigateToPos()}>
-                <ShoppingCart className="mr-2 h-4 w-4" /> Open POS
+              <Button variant='success' size='lg' onClick={() => navigateToPos()}>
+                <ShoppingCart className='mr-2 h-4 w-4' /> Open POS
               </Button>
             </>
           ) : (
-            <Button variant="success" size="lg" onClick={() => setIsModalOpen(true)}>
-              <Power className="mr-2 h-4 w-4" /> Start New Shift
+            <Button variant='success' size='lg' onClick={() => setIsModalOpen(true)}>
+              <Power className='mr-2 h-4 w-4' /> Start New Shift
             </Button>
           )}
         </CardContent>
       </Card>
 
       {/* This single modal is used for both open and close forms */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={activeShift ? "Close Shift & Reconcile" : "Start New Shift"}>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={activeShift ? 'Close Shift & Reconcile' : 'Start New Shift'}
+      >
         {activeShift ? (
-          <ShiftCloseForm activeShift={activeShift} onSave={handleCloseShift} onCancel={() => setIsModalOpen(false)} isSaving={isSaving} />
+          <ShiftCloseForm
+            activeShift={activeShift}
+            onSave={handleCloseShift}
+            onCancel={() => setIsModalOpen(false)}
+            isSaving={isSaving}
+          />
         ) : (
           <ShiftOpenForm onSave={handleOpenShift} onCancel={() => setIsModalOpen(false)} isSaving={isSaving} />
         )}
@@ -141,7 +153,7 @@ const ShiftManagementPage = () => {
         <CardHeader>
           <CardTitle>Recent Shift History</CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent className='p-0'>
           <ShiftHistoryList shifts={shiftHistory} />
           {pagination && <Pagination paginationData={pagination} onPageChange={setCurrentPage} />}
         </CardContent>

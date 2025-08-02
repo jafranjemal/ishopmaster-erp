@@ -1,3 +1,4 @@
+const { writeFile } = require("fs")
 // seed/masterlists/productTemplate.masterlist.js
 
 const DEVICE_LIST = require("./device.masterlist")
@@ -234,44 +235,289 @@ const runMigrations = (rawData, attributeList) => {
   return Array.from(templates.values())
 }
 
-const runMigration = () => {
+// Enhanced model mapping including XS
+const extraModelMappings = {
+  XS: { key: "model", value: "iPhone XS" },
+  PRO: { key: "model", value: "iPhone Pro" },
+  MAX: { key: "model", value: "iPhone Max" },
+  PLUS: { key: "model", value: "iPhone Plus" },
+  "X/XS": {
+    key: "model",
+    value: ["iPhone X", "iPhone XS"],
+    split: true,
+  },
+  "12/12 PRO": {
+    key: "model",
+    value: ["iPhone 12", "iPhone 12 Pro"],
+    split: true,
+  },
+  "13/13 PRO": {
+    key: "model",
+    value: ["iPhone 13", "iPhone 13 Pro"],
+    split: true,
+  },
+  "14/14 PRO": {
+    key: "model",
+    value: ["iPhone 14", "iPhone 14 Pro"],
+    split: true,
+  },
+  "15/15 PRO": {
+    key: "model",
+    value: ["iPhone 15", "iPhone 15 Pro"],
+    split: true,
+  },
+}
+
+// Brand normalization mapping
+const brandMapping = {
+  APL: "Apple",
+  "APL CILICONE CASE": "Apple",
+  "APL SILICONE": "Apple",
+  APPL: "Apple",
+  APLLE: "Apple",
+  APLE: "Apple",
+  MACAPL: "Apple",
+  "IPHONE PARTS": "Apple",
+  VDENMENV: "Vdenmenv",
+  "G+OCA PRO": "G+OCA PRO",
+  CELEBRAT: "Celebrate",
+  ZAT: "ZAT",
+  SPIGEN: "Spigen",
+  Redington: "Redington",
+  Xmart: "Xmart",
+  "ATB KING KONG": "ATB King Kong",
+  "Crystal Case": "Crystal Case",
+  RECCI: "Recci",
+}
+
+const warrantyPlanMap = {
+  "APPLE CARE": "Apple Care",
+  "APPLE CARE+": "AppleCare+",
+  "SAMSUNG CARE": "Samsung Care",
+  "SAMSUNG CARE+": "Samsung Care+",
+  CARE: "Standard Warranty",
+}
+
+const qualityTypeMap = {
+  "C/O": "Copy",
+  COPY: "Copy",
+  CLONE: "Clone",
+  AAA: "AAA",
+  AA: "AA",
+  A: "A",
+  ORIGINAL: "Original",
+  "OEM PULLED": "OEM Pulled",
+  REFURBISHED: "Refurbished",
+}
+const plugTypeMap = {
+  "3-PIN": "3-pin",
+  "2-PIN": "2-pin",
+  "UK PLUG": "UK Plug",
+  "US PLUG": "US Plug",
+  "EU PLUG": "EU Plug",
+}
+
+const protectedTerms = new Set([
+  "ADAPTER",
+  "CHARGER",
+  "CABLE",
+  "LIGHTNING",
+  "POWER",
+  "CARRY",
+  "OVER",
+  "TO",
+  "CASE",
+  "BATTERY",
+  "GLASS",
+  "SCREEN",
+  "DISPLAY",
+  "HOUSING",
+  "ASSEMBLY",
+  "CELL",
+  "PACK",
+  "DOCK",
+  "EARBUDS",
+  "HEADPHONES",
+  "EARPHONES",
+  "HANDSFREE",
+  "STEREO",
+  "WIRELESS",
+  "PROTECTIVE",
+  "LEATHER",
+  "SILICONE",
+  "TEMPERED",
+  "PRIVACY",
+  "CLEAR",
+  "CHARGING",
+  "BANK",
+  "POWER BANK",
+  "PORTABLE",
+  "TOUCH",
+  "LENS",
+  "CAMERA",
+  "MAGS",
+  "MAGSAFE",
+  "USB",
+  "USB-C",
+  "TYPE-C",
+  "MICRO USB",
+  "LIGHTNING CABLE",
+  "POWER ADAPTER",
+  "CHARGING CABLE",
+  "FAST CHARGING",
+  "DATA CABLE",
+  "CARRY OVER",
+])
+
+const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+
+const runMigrationss = () => {
   const templates = new Map()
-  const attributeKeywords = new Map()
+
+  // Create attribute map with original values
+  const attributeMap = new Map()
+
+  // Populate from ATTRIBUTES
   ATTRIBUTES.forEach((attr) => {
-    attr.values.forEach((val) => attributeKeywords.set(val.toUpperCase(), attr.key))
+    attr.values.forEach((val) => {
+      const upperVal = val.toUpperCase()
+      attributeMap.set(upperVal, {
+        key: attr.key,
+        originalValue: val,
+      })
+    })
   })
 
-  const upperCaseBrands = BRANDS.map((b) => b.name.toUpperCase())
+  // Add special model mappings
+  Object.entries(extraModelMappings).forEach(([shortForm, mapping]) => {
+    attributeMap.set(shortForm.toUpperCase(), {
+      key: mapping.key,
+      originalValue: mapping.value,
+      split: mapping.split,
+    })
+  })
+
+  // Add warranty plans
+  Object.entries(warrantyPlanMap).forEach(([term, value]) => {
+    attributeMap.set(term.toUpperCase(), {
+      key: "warrantyPlan",
+      originalValue: value,
+    })
+  })
+
+  // Add quality types
+  Object.entries(qualityTypeMap).forEach(([term, value]) => {
+    attributeMap.set(term.toUpperCase(), {
+      key: "quality_type",
+      originalValue: value,
+    })
+  })
+
+  // Add plug types
+  Object.entries(plugTypeMap).forEach(([term, value]) => {
+    attributeMap.set(term.toUpperCase(), {
+      key: "plug_type",
+      originalValue: value,
+    })
+  })
+
+  // Get sorted values (longest first)
+  const sortedValues = Array.from(attributeMap.keys()).sort((a, b) => b.length - a.length)
+
+  // Get all brand names in uppercase
+  const brandNames = BRANDS.map((b) => b.name.toUpperCase())
 
   MIGRATED_RAW_DATA.forEach((item) => {
     let baseName = item.itemName.toUpperCase()
     const attributes = []
+    let brand = item.brand.toUpperCase()
 
-    attributeKeywords.forEach((key, value) => {
-      if (baseName.includes(value)) {
-        const originalValue = ATTRIBUTES.find((a) => a.key === key).values.find((v) => v.toUpperCase() === value)
-        attributes.push({ key, value: originalValue })
-        baseName = baseName.replace(value, "")
+    // Normalize brand
+    if (brandMapping[brand]) {
+      brand = brandMapping[brand].toUpperCase()
+    } else {
+      // Find best match
+      const matchedBrand = Object.entries(brandMapping).find(([key]) => brand.includes(key) || brand.includes("APPLE"))
+      if (matchedBrand) brand = matchedBrand[1].toUpperCase()
+    }
+
+    // Ensure brand is valid
+    if (!brandNames.includes(brand)) {
+      brand = "UNBRANDED"
+    } else {
+      // Get properly cased brand name
+      brand = BRANDS.find((b) => b.name.toUpperCase() === brand).name
+    }
+
+    // Process attribute removal with word boundaries
+    for (const value of sortedValues) {
+      const mapping = attributeMap.get(value)
+      const regex = new RegExp(`\\b${escapeRegExp(value)}\\b`, "g")
+
+      if (regex.test(baseName)) {
+        baseName = baseName.replace(regex, "")
+
+        if (mapping.split) {
+          // Handle split values (multiple models)
+          mapping.originalValue.forEach((val) => {
+            attributes.push({ key: mapping.key, value: val })
+          })
+        } else {
+          attributes.push({
+            key: mapping.key,
+            value: mapping.originalValue,
+          })
+        }
       }
-    })
+    }
 
-    baseName = baseName.replace(/-/g, " ").replace(/ +/g, " ").trim()
+    // Auto-set quality_type for Apple Care products
+    const hasAppleCare = attributes.some((a) => a.key === "warrantyPlan" && a.value.includes("Apple Care"))
 
-    if (!templates.has(baseName)) {
-      const allVariantKeys = new Set(attributes.map((a) => a.key))
-      templates.set(baseName, {
-        baseName: baseName,
-        type: item.serialized ? "serialized" : "non-serialized",
-        brandName: upperCaseBrands.includes(item.brand.toUpperCase()) ? item.brand.toUpperCase() : "UNBRANDED",
-        categoryName: item.category === "Spare Part" ? "Spare Parts" : "Accessories",
-        attributeSetName: assignAttributeSet(Array.from(allVariantKeys)),
-        variants: [],
-        _allVariantKeys: allVariantKeys,
+    if (hasAppleCare && !attributes.some((a) => a.key === "quality_type")) {
+      attributes.push({
+        key: "quality_type",
+        value: "Original",
       })
     }
 
-    const template = templates.get(baseName)
-    attributes.forEach((attr) => template._allVariantKeys.add(attr.key))
+    // Special handling for technical specifications
+    baseName = baseName
+      .replace(/\b(\d+\.\d+[A-Z]?)\b/g, " $1 ") // Preserve specs like 3.1A
+      .replace(/\b(\d+[A-Z]?)\s?W\b/gi, "$1W") // Preserve wattage
+      .replace(/\b(USB-[A-Z])\b/gi, "$1") // Preserve USB-C
+      .replace(/\s+/g, " ") // Collapse spaces
+      .replace(/\s*[\/.,]\s*/g, " ") // Handle separators
+      .replace(/\b(ADAPTER|CHARGER|CABLE)\b/gi, "") // Remove product type markers
+      .trim()
+
+    // Final cleanup of brand references
+    const brandRemovalRegex = new RegExp(`\\b(${Object.keys(brandMapping).join("|")})\\b`, "gi")
+    baseName = baseName.replace(brandRemovalRegex, "").trim()
+
+    // Create template key (brand + baseName)
+    const templateKey = `${brand}|${baseName}`
+
+    if (!templates.has(templateKey)) {
+      templates.set(templateKey, {
+        baseName: baseName,
+        type: item.serialized ? "serialized" : "non-serialized",
+        brandName: brand,
+        categoryName: item.category === "Spare Part" ? "Spare Parts" : "Accessories",
+        attributeSetName: "General Specifications", // Temporary
+        assetAccountName: "Inventory Asset",
+        revenueAccountName: "Sales Revenue",
+        cogsAccountName: "Cost of Goods Sold",
+        variants: [],
+        _allAttributeKeys: new Set(),
+      })
+    }
+
+    const template = templates.get(templateKey)
+    attributes.forEach((attr) => {
+      template._allAttributeKeys.add(attr.key)
+    })
+
     template.variants.push({
       originalItemName: item.itemName,
       barcode: item.barcode,
@@ -280,10 +526,254 @@ const runMigration = () => {
     })
   })
 
-  // Final pass to update attribute sets with all keys
-  Array.from(templates.values()).forEach((template) => {
-    template.attributeSetName = assignAttributeSet(Array.from(template._allVariantKeys))
-    delete template._allVariantKeys
+  // Assign attribute sets based on collected keys
+  templates.forEach((template) => {
+    const keys = Array.from(template._allAttributeKeys)
+    template.attributeSetName = assignAttributeSet(keys)
+    delete template._allAttributeKeys
+  })
+
+  return Array.from(templates.values())
+}
+
+const runMigration = () => {
+  const templates = new Map()
+  const attributeMap = new Map()
+
+  // Create attribute map with original values
+  ATTRIBUTES.forEach((attr) => {
+    attr.values.forEach((val) => {
+      const upperVal = val.toUpperCase()
+      attributeMap.set(upperVal, {
+        key: attr.key,
+        originalValue: val,
+      })
+    })
+  })
+
+  // Add special model mappings
+  Object.entries(extraModelMappings).forEach(([shortForm, mapping]) => {
+    attributeMap.set(shortForm.toUpperCase(), {
+      key: mapping.key,
+      originalValue: mapping.value,
+      split: mapping.split,
+    })
+  })
+
+  // Add warranty plans
+  Object.entries(warrantyPlanMap).forEach(([term, value]) => {
+    attributeMap.set(term.toUpperCase(), {
+      key: "warrantyPlan",
+      originalValue: value,
+    })
+  })
+
+  // Add quality types
+  Object.entries(qualityTypeMap).forEach(([term, value]) => {
+    attributeMap.set(term.toUpperCase(), {
+      key: "quality_type",
+      originalValue: value,
+    })
+  })
+
+  // Add plug types
+  Object.entries(plugTypeMap).forEach(([term, value]) => {
+    attributeMap.set(term.toUpperCase(), {
+      key: "plug_type",
+      originalValue: value,
+    })
+  })
+
+  // Get sorted values (longest first)
+  const sortedValues = Array.from(attributeMap.keys()).sort((a, b) => b.length - a.length)
+
+  // Get all brand names in uppercase
+  const brandNames = BRANDS.map((b) => b.name.toUpperCase())
+
+  // Critical product descriptors to preserve
+  const protectedTerms = new Set([
+    "ADAPTER",
+    "CHARGER",
+    "CABLE",
+    "LIGHTNING",
+    "POWER",
+    "CARRY",
+    "OVER",
+    "TO",
+    "CASE",
+    "BATTERY",
+    "GLASS",
+    "SCREEN",
+    "DISPLAY",
+    "HOUSING",
+    "ASSEMBLY",
+    "CELL",
+    "PACK",
+    "DOCK",
+    "EARBUDS",
+    "HEADPHONES",
+    "EARPHONES",
+    "HANDSFREE",
+    "STEREO",
+    "WIRELESS",
+    "PROTECTIVE",
+    "LEATHER",
+    "SILICONE",
+    "TEMPERED",
+    "PRIVACY",
+    "CLEAR",
+    "CHARGING",
+    "BANK",
+    "POWER BANK",
+    "PORTABLE",
+    "TOUCH",
+    "LENS",
+    "CAMERA",
+    "MAGS",
+    "MAGSAFE",
+    "USB",
+    "USB-C",
+    "TYPE-C",
+    "MICRO USB",
+    "LIGHTNING CABLE",
+    "POWER ADAPTER",
+    "CHARGING CABLE",
+    "FAST CHARGING",
+    "DATA CABLE",
+    "CARRY OVER",
+  ])
+
+  // Regex patterns to preserve technical specs
+  const specPattern = /(\d+\.\d+[A-Z]?|\d+[A-Z]?W|\d+[A-Z]?[mAh]|\d+m)/i
+
+  MIGRATED_RAW_DATA.forEach((item) => {
+    let baseName = item.itemName.toUpperCase()
+    const attributes = []
+    let brand = item.brand.toUpperCase()
+
+    // 1. Normalize brand
+    if (brandMapping[brand]) {
+      brand = brandMapping[brand]
+    } else {
+      // Find best match in brandMapping
+      const matchedBrand = Object.entries(brandMapping).find(([key]) => brand.includes(key.toUpperCase()))
+      brand = matchedBrand ? matchedBrand[1] : brand
+    }
+
+    // Ensure brand is valid
+    if (!brandNames.includes(brand.toUpperCase())) {
+      brand = "UNBRANDED"
+    } else {
+      // Get properly cased brand name
+      brand = BRANDS.find((b) => b.name.toUpperCase() === brand.toUpperCase()).name
+    }
+
+    // 2. Remove brand name from baseName to prevent duplication
+    const brandRegex = new RegExp(`\\b${escapeRegExp(brand.toUpperCase())}\\b`, "gi")
+    baseName = baseName.replace(brandRegex, "").trim()
+
+    // 3. Process attribute removal
+    for (const value of sortedValues) {
+      const mapping = attributeMap.get(value)
+      if (!mapping) continue
+
+      const regex = new RegExp(`\\b${escapeRegExp(value)}\\b`, "g")
+
+      if (regex.test(baseName)) {
+        // Check if term should be protected
+        const isProtected = protectedTerms.has(value) || specPattern.test(value) || /[A-Z]\d{3}/.test(value) // Product codes like A620
+
+        // Only remove non-protected terms
+        if (!isProtected) {
+          baseName = baseName.replace(regex, "")
+        }
+
+        // Always add to attributes
+        if (mapping.split) {
+          mapping.originalValue.forEach((val) => {
+            attributes.push({ key: mapping.key, value: val })
+          })
+        } else {
+          attributes.push({
+            key: mapping.key,
+            value: mapping.originalValue,
+          })
+        }
+      }
+    }
+
+    // 4. Reconstruct baseName
+    baseName = baseName
+      .replace(/\s{2,}/g, " ") // Collapse multiple spaces
+      .replace(/(^[-,]\s*)|(\s*[-,]$)/g, "") // Trim edge commas/dashes
+      .replace(/^-\s*/, "") // Remove leading dash
+      .trim()
+
+    // 5. Fallback if name is destroyed
+    if (!baseName || baseName.split(/\s+/).length < 2) {
+      const meaningfulPart = item.itemName
+        .replace(brandRegex, "")
+        .split(",")[0] // Use first segment
+        .replace(/(APPLE|SAMSUNG|GENERIC|REDINGTON)/i, "")
+        .trim()
+
+      baseName = meaningfulPart.length > 3 ? meaningfulPart.toUpperCase() : item.itemName.toUpperCase().replace(brandRegex, "").trim()
+    }
+
+    // 6. Ensure brand presence and proper formatting
+    let finalBaseName = `${brand.toUpperCase()} - ${baseName}`
+
+    // Fix double dash cases
+    finalBaseName = finalBaseName
+      .replace(/\s{2,}/g, " ")
+      .replace(/(\w)-\s-/g, "$1-") // Fix "APPLE - - POWER"
+      .replace(/\s-\s/g, "-") // Fix "APPLE - POWER"
+      .replace(/(\w)-(\w)/g, "$1 $2") // Restore space in compound terms
+
+    // 7. Handle special "TO" connector case
+    if (baseName === "TO" && item.itemName.includes(" to ")) {
+      const connectorParts = item.itemName.split(" to ")
+      if (connectorParts.length > 1) {
+        finalBaseName = `${brand.toUpperCase()} - ${connectorParts[0].toUpperCase()} TO ${connectorParts[1].toUpperCase()}`
+      }
+    }
+
+    // Create template key (brand + baseName)
+    const templateKey = `${brand}|${baseName}`
+
+    if (!templates.has(templateKey)) {
+      templates.set(templateKey, {
+        baseName: finalBaseName,
+        type: item.serialized ? "serialized" : "non-serialized",
+        brandName: brand,
+        categoryName: item.category === "Spare Part" ? "Spare Parts" : "Accessories",
+        attributeSetName: "General Specifications", // Temporary
+        assetAccountName: "Inventory Asset",
+        revenueAccountName: "Sales Revenue",
+        cogsAccountName: "Cost of Goods Sold",
+        variants: [],
+        _allAttributeKeys: new Set(),
+      })
+    }
+
+    const template = templates.get(templateKey)
+    attributes.forEach((attr) => {
+      template._allAttributeKeys.add(attr.key)
+    })
+
+    template.variants.push({
+      originalItemName: item.itemName,
+      barcode: item.barcode,
+      itemImage: item.itemImage,
+      attributes: attributes,
+    })
+  })
+
+  // Assign attribute sets based on collected keys
+  templates.forEach((template) => {
+    const keys = Array.from(template._allAttributeKeys)
+    template.attributeSetName = assignAttributeSet(keys)
+    delete template._allAttributeKeys
   })
 
   return Array.from(templates.values())
@@ -302,17 +792,53 @@ const runMigration = () => {
  * @param {string[]} extractedKeys - An array of attribute keys found for a template.
  * @returns {string} The name of the best-matching AttributeSet.
  */
+
+/**
+ * Finds the best-fitting AttributeSet for a given list of attribute keys.
+ * Enhanced with priority matching and minimum threshold requirements.
+ *
+ * @param {string[]} extractedKeys - Array of attribute keys found for a template
+ * @param {string} defaultSet - Default set name if no good match found
+ * @returns {string} Name of the best-matching AttributeSet
+ */
 const assignAttributeSet = (keys, defaultSet = "General Spare Part Specs") => {
+  if (!keys || keys.length === 0) return defaultSet
+
+  // Priority matching for special cases first
+  const priorityMatches = {
+    iPhone: ["model", "color", "storage", "quality_type"],
+    Charger: ["power_rating", "connector_type"],
+    Cable: ["length", "connector_type"],
+    Display: ["display_type", "screen_size"],
+    Battery: ["battery_capacity", "voltage"],
+  }
+
+  // Check priority matches
+  for (const [type, requiredKeys] of Object.entries(priorityMatches)) {
+    if (requiredKeys.every((k) => keys.includes(k))) {
+      if (type === "iPhone") return "iPhone Specifications"
+      if (type === "Charger") return "Charger & Adapter Specs"
+      if (type === "Cable") return "Cable Specifications"
+      if (type === "Display") return "Display Specifications"
+      if (type === "Battery") return "Battery Specifications"
+    }
+  }
+
+  // Find best match based on coverage score
   let bestMatch = { name: defaultSet, score: 0 }
-  if (!keys || keys.length === 0) return bestMatch.name
+  const MIN_SCORE_THRESHOLD = 40 // Minimum match percentage to accept
 
   ATTRIBUTE_SET_MASTER_LIST.forEach((set) => {
-    const matchCount = set.attributeKeys.filter((key) => keys.includes(key)).length
-    const completeness = (matchCount / keys.length) * 100
-    if (completeness > bestMatch.score) {
-      bestMatch = { name: set.name, score: completeness }
+    const matchingKeys = set.attributeKeys.filter((key) => keys.includes(key))
+    const coverageScore = (matchingKeys.length / set.attributeKeys.length) * 100
+    const relevanceScore = (matchingKeys.length / keys.length) * 100
+    const totalScore = (coverageScore + relevanceScore) / 2
+
+    if (totalScore > bestMatch.score && totalScore > MIN_SCORE_THRESHOLD) {
+      bestMatch = { name: set.name, score: totalScore }
     }
   })
+
   return bestMatch.name
 }
 
@@ -387,10 +913,23 @@ const generateServiceTemplatesa = () => {
 // ======================================================================
 // 4. FINAL ASSEMBLY
 // ======================================================================
-const MIGRATED_TEMPLATES = runMigration()
+//const MIGRATED_TEMPLATES = runMigration()
 const DEFAULT_DEVICES = generateDeviceTemplates()
 const DEFAULT_COMPONENTS = generateComponentTemplates()
 const DEFAULT_SERVICES = generateServiceTemplates()
+
+//console.log("MIGRATED_TEMPLATES ", MIGRATED_TEMPLATES)
+//const pretty = JSON.stringify(MIGRATED_TEMPLATES, null, 2)
+//const fs = require("fs")
+//const path = require("path")
+const MIGRATED_TEMPLATES = require("./MIGRATED_TEMPLATES")
+
+//const dest = path.resolve(__dirname, "MIGRATED_TEMPLATES.json")
+
+// fs.writeFile(dest, pretty, "utf8", (err) => {
+//   if (err) throw err
+//   console.log("Masterlist saved at:", dest)
+// })
 
 const PRODUCT_TEMPLATE_MASTER_LIST = [...MIGRATED_TEMPLATES, ...DEFAULT_DEVICES, ...DEFAULT_COMPONENTS, ...DEFAULT_SERVICES]
 module.exports = PRODUCT_TEMPLATE_MASTER_LIST

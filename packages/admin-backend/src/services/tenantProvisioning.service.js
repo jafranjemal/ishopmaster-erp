@@ -728,6 +728,7 @@ class TenantProvisioningService {
               attributes: v.attributes,
               costPrice: 0,
               sellingPrice: 0,
+              barcode: v.barcode,
             }))
 
             variantBatches.push(...this._chunkArray(variants, VARIANT_BATCH_SIZE))

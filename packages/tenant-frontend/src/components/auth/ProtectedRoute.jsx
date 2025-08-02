@@ -10,6 +10,8 @@ const ProtectedRoute = () => {
   const { isAuthenticated, isLoadingSession } = useAuth();
   const location = useLocation();
 
+  console.log({ isAuthenticated });
+
   // If the session is still being validated, show a loading spinner.
   if (isLoadingSession) {
     return (

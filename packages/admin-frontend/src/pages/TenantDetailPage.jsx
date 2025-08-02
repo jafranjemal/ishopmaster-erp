@@ -2,10 +2,13 @@
 
 import * as Tabs from "@radix-ui/react-tabs";
 import { Activity, AlertTriangle, ArrowLeft, Building2, CalendarDays, Database, Globe, MapPin, Settings, Users } from "lucide-react";
-
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
 import { Badge, Button, Card } from "ui-library";
-import api from "../../services/api";
+
+import { useGoBack } from "../hooks/useGoBack";
+import api, { adminTenantService } from "../services/api";
 
 const masterListsToRestore = [
   { key: "brands", name: "Brands", description: "Restores the 'Brand' collection to factory defaults." },
@@ -20,9 +23,29 @@ const masterListsToRestore = [
     description: "WARNING: Restores the entire product catalog, including all variants.",
   },
 ];
-const TenantDetail = ({ tenant, onClose }) => {
+const TenantDetailPage = () => {
+  const { id } = useParams();
   const [loadingList, setLoadingList] = useState(null);
-  if (!tenant) return null;
+  const [tenant, setTenant] = useState(null);
+  const [loading, setIsLoading] = useState(false);
+  const goBack = useGoBack(`/tenants`);
+  const fetchData = useCallback(async () => {
+    if (!id) return;
+    try {
+      setIsLoading(true);
+      const [tenantRes] = await Promise.all([adminTenantService.getById(id)]);
+      setTenant(tenantRes.data.data);
+    } catch (error) {
+      toast.error("Failed to load invoice details.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const formatDate = (d) =>
     new Date(d).toLocaleDateString(undefined, {
       year: "numeric",
@@ -33,9 +56,9 @@ const TenantDetail = ({ tenant, onClose }) => {
   const daysDiff = (expiry) => Math.ceil((new Date(expiry) - new Date()) / 86400000);
 
   const status =
-    daysDiff(tenant.licenseExpiry) < 0
+    daysDiff(tenant?.licenseExpiry) < 0
       ? { text: "Expired", variant: "destructive", icon: <Activity className="w-4 h-4" /> }
-      : daysDiff(tenant.licenseExpiry) <= 14
+      : daysDiff(tenant?.licenseExpiry) <= 14
         ? { text: "Expiring Soon", variant: "warning", icon: <Activity className="w-4 h-4" /> }
         : { text: "Active", variant: "success", icon: <Activity className="w-4 h-4" /> };
 
@@ -63,10 +86,12 @@ const TenantDetail = ({ tenant, onClose }) => {
     }
   };
 
+  if (loading) return <p className="p-8 text-center">Loading tenant Details...</p>;
+  if (!tenant) return <p className="p-8 text-center">tenant not found.</p>;
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onClose} className="flex items-center gap-2">
+        <Button variant="ghost" onClick={goBack} className="flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" /> Back to tenants
         </Button>
         <div className="flex items-center gap-3">
@@ -386,4 +411,4 @@ const TenantDetail = ({ tenant, onClose }) => {
   );
 };
 
-export default TenantDetail;
+export default TenantDetailPage;

@@ -596,8 +596,8 @@ const Sidebar = () => {
 
     // SALES
     {
-      name: t('sidebar.sales'),
-      icon: FileText,
+      name: t('sidebar.pos_parent'),
+      icon: ShoppingCart,
       permission: 'sales:pos:access',
       children: [
         {

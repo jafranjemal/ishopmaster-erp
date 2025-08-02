@@ -135,3 +135,5 @@ export const adminBackupService = {
     return api.post(`/admin/backups/${backupRecordId}/restore`);
   },
 };
+
+export default api;
